@@ -1,4 +1,4 @@
-Please analyze and fix the user story: $ARGUMENTS.
+Please analyse and refine the user story: $ARGUMENTS.
 
 Follow these steps:
 
