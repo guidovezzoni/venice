@@ -8,7 +8,14 @@
 ## Android Specific
 
 ### Architecture
-- **MVVM Architecture**: Use Model-View-ViewModel pattern
+- **MVI Architecture**: Use Model-View-Intent pattern. MVI enforces a strict **unidirectional data flow**:
+  1. The **View** observes a single immutable `UiState` and renders it.
+  2. User interactions are modelled as explicit `UiIntent` sealed classes and sent to the **ViewModel**.
+  3. The **ViewModel** processes each intent, calls the domain layer, and emits a new `UiState`.
+  4. Side-effects (navigation, toasts, etc.) are emitted as a separate `UiEffect` `Channel`/`SharedFlow` so they are consumed exactly once.
+
+  This makes data flow predictable, state easy to reason about, and business logic straightforward to unit-test.
+
 - **Clean Architecture**: Use a clean architecture approach, separating data, domain, and UI. Organise folder with this structure:
 ```
 app/src/main/java/<package-name>/
@@ -20,9 +27,15 @@ app/src/main/java/<package-name>/
 │   ├── viewmodel/              # ViewModels
 │   │   ├── Feature01ViewModel.kt
 │   │   └── Feature02ViewModel.kt
-│   ├── state/                  # UI State classes
+│   ├── state/                  # UI State classes (immutable data classes)
 │   │   ├── Feature01UiState.kt
 │   │   └── Feature02UiState.kt
+│   ├── intent/                 # UI Intent sealed classes (user actions)
+│   │   ├── Feature01UiIntent.kt
+│   │   └── Feature02UiIntent.kt
+│   ├── effect/                 # UI Effect sealed classes (one-shot side-effects)
+│   │   ├── Feature01UiEffect.kt
+│   │   └── Feature02UiEffect.kt
 │   ├── screens/
 │   │   ├── Feature01Screen.kt   
 │   │   └── Feature02Screen.kt
@@ -42,6 +55,51 @@ app/src/main/java/<package-name>/
     │   └── Repository002Impl.kt
     └── database/
 ```
+
+- **MVI Contract**: Each feature exposes a clear contract between View and ViewModel:
+  - `UiState`: a single immutable `data class` representing the full UI state. Default to a sensible initial state.
+  - `UiIntent`: a `sealed class` listing every user action the screen can trigger (e.g. `OnButtonClicked`, `OnTextChanged`).
+  - `UiEffect`: a `sealed class` for one-shot effects that should not survive recomposition (e.g. `NavigateTo`, `ShowSnackbar`).
+  - The ViewModel exposes `uiState: StateFlow<UiState>` and `uiEffect: SharedFlow<UiEffect>`, and receives intents via a `fun onIntent(intent: UiIntent)` function.
+
+  Example skeleton:
+```kotlin
+// UiState
+data class Feature01UiState(
+    val isLoading: Boolean = false,
+    val items: List<Item> = emptyList(),
+    val error: String? = null,
+)
+
+// UiIntent
+sealed class Feature01UiIntent {
+    data object LoadItems : Feature01UiIntent()
+    data class DeleteItem(val id: String) : Feature01UiIntent()
+}
+
+// UiEffect
+sealed class Feature01UiEffect {
+    data class ShowError(val message: String) : Feature01UiEffect()
+    data object NavigateBack : Feature01UiEffect()
+}
+
+// ViewModel
+class Feature01ViewModel(...) : ViewModel() {
+    private val _uiState = MutableStateFlow(Feature01UiState())
+    val uiState: StateFlow<Feature01UiState> = _uiState.asStateFlow()
+
+    private val _uiEffect = MutableSharedFlow<Feature01UiEffect>()
+    val uiEffect: SharedFlow<Feature01UiEffect> = _uiEffect.asSharedFlow()
+
+    fun onIntent(intent: Feature01UiIntent) {
+        when (intent) {
+            is Feature01UiIntent.LoadItems -> loadItems()
+            is Feature01UiIntent.DeleteItem -> deleteItem(intent.id)
+        }
+    }
+}
+```
+
 - **Dependency Injection**: Ask the user if Hilt should be used or manual di. Typically manual di should be replaced by Hilt when the project is growing.
 - **Async Operations**: Use Coroutines and Flow for asynchronous operations
 
@@ -114,6 +172,11 @@ private fun PreviewComponentName() {
 - **Variables**: camelCase, prefer descriptive names
 - **Constants**: UPPER_SNAKE_CASE for top-level constants
 - **Packages**: lowercase, reverse domain notation
+- **MVI artefacts**:
+  - State classes: `<Feature>UiState` (e.g., `HomeUiState`)
+  - Intent classes: `<Feature>UiIntent` (e.g., `HomeUiIntent`)
+  - Effect classes: `<Feature>UiEffect` (e.g., `HomeUiEffect`)
+  - Intent entries: verb + noun in PascalCase (e.g., `LoadItems`, `DeleteItem`, `OnSearchQueryChanged`)
 
 ### Error Handling
 - Use Kotlin's `Result` type for operations that can fail
@@ -169,6 +232,7 @@ Unit tests should follow these criteria:
 - extract in a variable the expected value before asserting
 - cover all reasonable cases, but keeps the coverage over 80%
 - Target 80%+ coverage
+- **MVI ViewModel tests**: Test by dispatching `UiIntent` values via `onIntent()` and asserting the resulting `uiState` and any emitted `uiEffect`. Never test internal ViewModel methods directly.
 
 
 ### Instrumentation Tests
