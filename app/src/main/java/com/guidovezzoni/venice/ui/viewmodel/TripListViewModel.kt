@@ -23,7 +23,7 @@ import javax.inject.Inject
 @HiltViewModel
 class TripListViewModel @Inject constructor(
     private val createTripUseCase: CreateTripUseCase,
-    private val tripRepository: TripRepository,
+    tripRepository: TripRepository,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(TripListUiState())
