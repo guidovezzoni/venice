@@ -31,7 +31,7 @@
 
 ## 5. UI Layer — MVI Contract
 
-- [x] 5.1 Create `TripListUiState` data class (trips list, `isCreateDialogVisible`, `isLoading`)
+- [x] 5.1 Create `TripListUiState` data class (trips list, `isCreateDialogVisible`, `isLoading`, `tripNameInput`)
 - [x] 5.2 Create `TripListUiIntent` sealed class (`OnCreateTripClicked`, `OnDismissCreateDialog`, `OnTripNameChanged`, `ConfirmCreateTrip`)
 - [x] 5.3 Create `TripListUiEffect` sealed class (`NavigateToTripDetail(tripId)`, `ShowError(message)`)
 - [x] 5.4 Create `TripListViewModel` with `uiState: StateFlow`, `uiEffect: SharedFlow`, and `onIntent()` — handles create trip flow, observes trips from repository

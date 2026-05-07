@@ -41,11 +41,13 @@ After a trip is successfully created, the system SHALL navigate the user to the 
 - **THEN** the Trip List screen shows the newly created trip in the list
 
 ### Requirement: New trip has empty route data
-A newly created trip SHALL have no stops, no legs, and zero total distance and duration.
+> **Deferred — intentionally out of scope for this change.** Stops, legs, route calculation, and map integration are non-goals per `design.md`. The `Trip` domain model does not include these fields yet; this requirement will be addressed in a future change.
 
-#### Scenario: New trip defaults
-- **WHEN** a trip is created
-- **THEN** its stops list is empty, legs list is empty, total distance is 0, and total duration is 0
+~~A newly created trip SHALL have no stops, no legs, and zero total distance and duration.~~
+
+#### ~~Scenario: New trip defaults~~
+- ~~**WHEN** a trip is created~~
+- ~~**THEN** its stops list is empty, legs list is empty, total distance is 0, and total duration is 0~~
 
 ### Requirement: TripListViewModel exposes MVI contract
 The `TripListViewModel` SHALL follow the MVI pattern:
