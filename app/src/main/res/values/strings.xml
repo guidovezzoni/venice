@@ -1,3 +1,12 @@
 <resources>
     <string name="app_name">Heading to the Alps!</string>
+    <string name="global_confirm">Confirm</string>
+    <string name="global_cancel">Cancel</string>
+    <string name="trip_list_fab_label">Create roadtrip</string>
+    <string name="trip_list_empty">No trips yet. Tap + to create your first roadtrip.</string>
+    <string name="create_trip_dialog_title">New Roadtrip</string>
+    <string name="create_trip_field_label">Trip name</string>
+    <string name="create_trip_field_placeholder">Enter trip name…</string>
+    <string name="create_trip_error_message">Could not create trip. Please try again.</string>
+    <string name="trip_detail_title">Trip Detail</string>
 </resources>
