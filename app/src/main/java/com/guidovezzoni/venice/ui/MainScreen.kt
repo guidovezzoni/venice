@@ -7,7 +7,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.res.stringResource
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.ViewModelStoreOwner
+import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -28,7 +30,10 @@ fun MainScreen() {
 
     NavHost(navController = navController, startDestination = ROUTE_TRIP_LIST) {
         composable(ROUTE_TRIP_LIST) {
-            val viewModel: TripListViewModel = hiltViewModel()
+            val viewModel: TripListViewModel =
+                hiltViewModel(checkNotNull<ViewModelStoreOwner>(LocalViewModelStoreOwner.current) {
+                    "No ViewModelStoreOwner was provided via LocalViewModelStoreOwner"
+                }, null)
             val uiState by viewModel.uiState.collectAsState()
             val snackbarHostState = remember { SnackbarHostState() }
             val errorMessage = stringResource(R.string.create_trip_error_message)
