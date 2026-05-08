@@ -13,7 +13,6 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -21,7 +20,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -37,6 +35,7 @@ fun TripListScreen(
     modifier: Modifier = Modifier,
     uiState: TripListUiState,
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
+    onTripClicked: (tripId: String) -> Unit = {},
     onCreateTripClicked: () -> Unit = {},
     onNameChange: (String) -> Unit = {},
     onConfirmCreateTrip: () -> Unit = {},
@@ -62,9 +61,8 @@ fun TripListScreen(
                 .padding(paddingValues),
         ) {
             if (uiState.trips.isEmpty()) {
-                Text(
-                    text = stringResource(R.string.trip_list_empty),
-                    modifier = Modifier.align(Alignment.Center),
+                TripEmptyState(
+                    onCreateTripClicked = onCreateTripClicked,
                 )
             } else {
                 LazyColumn(
@@ -73,9 +71,11 @@ fun TripListScreen(
                     verticalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
                     items(uiState.trips, key = { it.id }) { trip ->
-                        ListItem(
+                        TripListItem(
                             modifier = Modifier.fillMaxWidth(),
-                            headlineContent = { Text(trip.name) },
+                            tripName = trip.name,
+                            stopCount = trip.stopCount,
+                            onClick = { onTripClicked(trip.id) },
                         )
                     }
                 }

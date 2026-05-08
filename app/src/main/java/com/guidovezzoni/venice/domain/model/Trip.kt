@@ -5,4 +5,5 @@ data class Trip(
     val name: String,
     val createdAt: Long,
     val updatedAt: Long,
+    val stopCount: Int = 0,
 )

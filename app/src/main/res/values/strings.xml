@@ -3,7 +3,12 @@
     <string name="global_confirm">Confirm</string>
     <string name="global_cancel">Cancel</string>
     <string name="trip_list_fab_label">Create roadtrip</string>
-    <string name="trip_list_empty">No trips yet. Tap + to create your first roadtrip.</string>
+    <string name="trip_list_empty_title">No trips yet</string>
+    <string name="trip_list_empty_action">Create your first trip</string>
+    <plurals name="trip_list_stop_count">
+        <item quantity="one">%d stop</item>
+        <item quantity="other">%d stops</item>
+    </plurals>
     <string name="create_trip_dialog_title">New Roadtrip</string>
     <string name="create_trip_field_label">Trip name</string>
     <string name="create_trip_field_placeholder">Enter trip name…</string>

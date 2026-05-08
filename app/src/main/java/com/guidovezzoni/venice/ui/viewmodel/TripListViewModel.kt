@@ -50,6 +50,9 @@ class TripListViewModel @Inject constructor(
                 it.copy(tripNameInput = intent.name)
             }
             TripListUiIntent.ConfirmCreateTrip -> createTrip()
+            is TripListUiIntent.OnTripClicked -> viewModelScope.launch {
+                _uiEffect.emit(TripListUiEffect.NavigateToTripDetail(intent.tripId))
+            }
         }
     }
 
