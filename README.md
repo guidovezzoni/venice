@@ -1,6 +1,10 @@
 # Venice
 
-A road trip planning app for Android, built with a modern architecture stack and developed through a specification-driven process.
+A road trip planning app for Android, built with a modern architecture stack and developed through a specification-driven process (SDD).
+
+The app is built entirely in Kotlin with Jetpack Compose and Material 3, following Clean Architecture to separate domain logic, data access, and UI into independent layers. Each feature uses the MVI (Model-View-Intent) pattern, enforcing unidirectional data flow through immutable state, explicit user intents, and one-shot effects. Dependency injection is handled by Hilt, persistence by Room, and all asynchronous work runs on Kotlin Coroutines and Flow.
+
+Development is driven by a Specification-Driven Development (SDD) workflow powered by OpenSpec, where every change moves through a structured lifecycle: explore, propose, apply, verify, sync, and archive. Tasks within each change follow a BDD (Behaviour-Driven Development) structure with test-first ordering, so the test is always written before the production code that makes it pass. Custom Claude Code commands (`/refine_user_story`, `/create_branch`, `/opsx:*`) automate the repetitive steps, from refining user stories with acceptance criteria to creating feature branches and driving the full OpenSpec lifecycle.
 
 ## The App
 
