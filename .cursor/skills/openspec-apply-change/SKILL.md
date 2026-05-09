@@ -64,19 +64,53 @@ Implement tasks from an OpenSpec change.
    - Remaining tasks overview
    - Dynamic instruction from CLI
 
-6. **Implement tasks (loop until done or blocked)**
+6. **Implement tasks using BDD Red/Green cycle (loop until done or blocked)**
 
-   For each pending task:
-   - Show which task is being worked on
-   - Make the code changes required
-   - Keep changes minimal and focused
-   - Mark task complete in the tasks file: `- [ ]` → `- [x]`
-   - Continue to next task
+   For each pending task, determine its type and follow the appropriate procedure:
+
+   **A. Test task** (description starts with "Write test:" or "Add test:", or references a test class like `*Test`):
+
+   1. Write the test code
+   2. Run the specific test class: `./gradlew test --tests "*<TestClass>"` (derive class name from task description)
+   3. **Verify RED**: Confirm the test fails (compilation error or assertion failure both count as red)
+      - If the test unexpectedly passes: PAUSE — the test may be trivial, testing existing behaviour,
+        or incorrectly written. Report this to the user before continuing.
+      - If tests fail for unrelated reasons: PAUSE — report the pre-existing failure.
+   4. Mark task complete: `- [ ]` → `- [x]`
+   5. Show: `🔴 RED confirmed — test fails as expected`
+   6. Continue to next task (which should be the implementation)
+
+   **B. Implementation task following a test task** (the previous completed task was a test task in the same `## N.` section):
+
+   1. Write the implementation code (minimal — just enough to make the test pass)
+   2. Run the specific test class: `./gradlew test --tests "*<TestClass>"` (same class from the preceding test task)
+   3. **Verify GREEN**: Confirm the test now passes
+      - If this is an intermediate implementation task in the section and the test still fails: acceptable — note "Tests not yet green, continuing to next task in this section" and continue
+      - If this is the last implementation task in the section and the test still fails: iterate on the implementation until it passes, or PAUSE if stuck
+   4. Mark task complete: `- [ ]` → `- [x]`
+   5. Show: `🟢 GREEN confirmed — test passes`
+   6. Continue to next task
+
+   **C. Non-test task** (prerequisites, strings, DI, composables, wiring, verification):
+
+   1. Make the code changes required
+   2. Keep changes minimal and focused
+   3. Mark task complete: `- [ ]` → `- [x]`
+   4. Continue to next task
+
+   **Task type detection**:
+   - A task is a "test task" if its description contains: "Write test", "Add test",
+     or references a test class (e.g., `*Test`, `*Test.kt`)
+   - A task is an "implementation after test" if the immediately preceding completed task
+     in the same `## N.` section was a test task
+   - All other tasks are "non-test tasks"
 
    **Pause if:**
    - Task is unclear → ask for clarification
    - Implementation reveals a design issue → suggest updating artifacts
    - Error or blocker encountered → report and wait for guidance
+   - RED check unexpectedly passes → report before continuing
+   - GREEN check fails after reasonable iteration → report and wait for guidance
    - User interrupts
 
 7. **On completion or pause, show status**
@@ -92,12 +126,24 @@ Implement tasks from an OpenSpec change.
 ```
 ## Implementing: <change-name> (schema: <schema-name>)
 
-Working on task 3/7: <task description>
-[...implementation happening...]
+Working on task 2/12: Write test: GIVEN a trip id WHEN OnTripClicked...
+[...writing test...]
+Running ./gradlew test --tests "*TripListViewModelTest"...
+🔴 RED confirmed — test fails (OnTripClicked not found in TripListUiIntent)
 ✓ Task complete
 
-Working on task 4/7: <task description>
-[...implementation happening...]
+Working on task 3/12: Add OnTripClicked intent to TripListUiIntent
+[...implementing...]
+✓ Task complete
+
+Working on task 4/12: Handle OnTripClicked in TripListViewModel
+[...implementing...]
+Running ./gradlew test --tests "*TripListViewModelTest"...
+🟢 GREEN confirmed — all tests pass (including new OnTripClicked test)
+✓ Task complete
+
+Working on task 8/12: Update TripListScreen signature
+[...implementing...]
 ✓ Task complete
 ```
 

@@ -8,4 +8,5 @@ fun TripEntity.toDomain(): Trip = Trip(
     name = name,
     createdAt = createdAt,
     updatedAt = updatedAt,
+    stopCount = 0, // TODO 1.2.x — derive from stops table once it exists
 )

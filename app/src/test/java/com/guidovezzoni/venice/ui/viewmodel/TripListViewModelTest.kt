@@ -82,6 +82,26 @@ class TripListViewModelTest {
     }
 
     @Test
+    fun `GIVEN an empty trip list WHEN ViewModel is initialised THEN uiState trips is empty`() = runTest {
+        val expectedTrips = emptyList<Trip>()
+        assertEquals(expectedTrips, viewModel.uiState.value.trips)
+    }
+
+    @Test
+    fun `GIVEN a trip id WHEN OnTripClicked is dispatched THEN NavigateToTripDetail effect is emitted with that tripId`() = runTest(testDispatcher) {
+        val effects = mutableListOf<TripListUiEffect>()
+        val collectJob = launch {
+            viewModel.uiEffect.collect { effects.add(it) }
+        }
+
+        viewModel.onIntent(TripListUiIntent.OnTripClicked("trip-123"))
+
+        val expectedEffect = TripListUiEffect.NavigateToTripDetail("trip-123")
+        assertEquals(expectedEffect, effects.first())
+        collectJob.cancel()
+    }
+
+    @Test
     fun `GIVEN use case failure WHEN ConfirmCreateTrip intent is dispatched THEN ShowError effect is emitted`() = runTest(testDispatcher) {
         coEvery { createTripUseCase(any()) } returns Result.failure(RuntimeException("error"))
 
