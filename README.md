@@ -1,0 +1,89 @@
+# Venice
+
+A road trip planning app for Android, built with a modern architecture stack and developed through a specification-driven process.
+
+## The App
+
+Venice helps users plan multi-stop road trips. The current MVP supports creating trips, viewing them in a list, and navigating to trip details. The roadmap includes stop management, place search via geocoding, route calculation with Google Directions API, live GPS-based ETA, and Android Auto integration.
+
+### Architecture & Tech Stack
+
+| Layer | Technology |
+|-------|------------|
+| **UI** | Jetpack Compose, Material 3, Navigation Compose |
+| **Architecture** | MVI (Model-View-Intent), Clean Architecture |
+| **Dependency Injection** | Hilt |
+| **Database** | Room |
+| **Async** | Kotlin Coroutines, Flow |
+| **Testing** | JUnit 4, MockK, Compose UI Test |
+
+The codebase follows Clean Architecture with three layers:
+
+- **Domain** — models, repository interfaces, and use cases
+- **Data** — Room database, DAOs, entities, mappers, and repository implementations
+- **UI** — Compose screens, ViewModels, and MVI contracts (UiState / UiIntent / UiEffect)
+
+Each feature exposes a strict MVI contract: the View observes an immutable `UiState`, sends user actions as `UiIntent` values to the ViewModel, and consumes one-shot side effects via `UiEffect`. This enforces unidirectional data flow and makes state easy to test.
+
+```
+app/src/main/java/com/guidovezzoni/venice/
+├── di/                  # Hilt modules
+├── domain/              # Models, repository interfaces, use cases
+├── data/                # Room DB, DAOs, entities, repository impls
+└── ui/
+    ├── screens/         # Compose screens per feature
+    ├── viewmodel/       # MVI ViewModels
+    ├── state/           # UiState data classes
+    ├── intent/          # UiIntent sealed classes
+    ├── effect/          # UiEffect sealed classes
+    └── theme/           # Material 3 theme
+```
+
+## The Process
+
+Development follows a **Specification-Driven Development (SDD)** workflow powered by [OpenSpec](https://github.com/OpenSpec-ai/openspec), enhanced with custom commands for Claude / Cursor.
+
+### Workflow
+
+The process starts from user stories organised into epics and features (see `docs/userstories/`). Each piece of work then moves through the OpenSpec lifecycle:
+
+1. **Explore** — think through the problem, investigate constraints, and clarify requirements before committing to a solution
+2. **Propose** — generate a complete change proposal: design document, delta specs, and a BDD-structured task list
+3. **Apply** — implement the tasks, following test-first ordering (write the test, then the code that makes it pass)
+4. **Verify** — validate that the implementation matches the change artifacts
+5. **Sync** — merge delta specs into the main specification set
+6. **Archive** — finalise and archive the completed change
+
+Specifications live in `openspec/specs/` and evolve incrementally through delta specs attached to each change. Completed changes are archived in `openspec/changes/archive/` with their full proposal, design, tasks, and delta specs preserved.
+
+### Custom Commands
+
+The workflow is extended with custom Claude Code commands:
+
+| Command | Purpose |
+|---------|---------|
+| `/refine_user_story` | Analyse a user story and enhance it with full technical detail, acceptance criteria, and implementation guidance |
+| `/create_branch` | Create a correctly named feature branch from the user story reference |
+| `/opsx:*` | OpenSpec lifecycle commands (propose, apply, verify, sync, archive, explore, onboard) |
+
+### BDD Task Structure
+
+Tasks are structured with test-first ordering, configured via `openspec/config.yaml`:
+
+```
+## 1. Feature Name (BDD)
+- [ ] 1.1 Write test: GIVEN/WHEN/THEN description in TestClass
+- [ ] 1.2 Implement: what to build to make the test pass
+```
+
+Prerequisites (setup, models) come first, BDD pairs in the middle ordered by dependency, and integration tasks (DI wiring, navigation, composables) at the end.
+
+## Build & Run
+
+```bash
+./gradlew clean              # Clean state
+./gradlew assembleDebug      # Debug build
+./gradlew test               # Unit tests
+./gradlew check              # Full checks
+./gradlew build              # Complete verification
+```
