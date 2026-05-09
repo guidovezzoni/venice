@@ -1,0 +1,16 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="global_confirm">Confirmar</string>
+    <string name="global_cancel">Cancelar</string>
+    <string name="trip_list_fab_label">Crear viaje</string>
+    <string name="trip_list_empty_title">Aún no hay viajes</string>
+    <string name="trip_list_empty_action">Crea tu primer viaje</string>
+    <plurals name="trip_list_stop_count" tools:ignore="MissingQuantity">
+        <item quantity="one">%d parada</item>
+        <item quantity="other">%d paradas</item>
+    </plurals>
+    <string name="create_trip_dialog_title">Nuevo viaje</string>
+    <string name="create_trip_field_label">Nombre del viaje</string>
+    <string name="create_trip_field_placeholder">Introduce el nombre del viaje…</string>
+    <string name="create_trip_error_message">No se ha podido crear el viaje. Inténtalo de nuevo.</string>
+    <string name="trip_detail_title">Detalle del viaje</string>
+</resources>
