@@ -8,8 +8,8 @@ The core ability to create, organise, and manage roadtrips and their stops.
 
 | ID | User Story | Details |
 |----|------------|---------|
-| 1.1.1 | As a user, I want to create a new roadtrip | [1.1.1-create-roadtrip](1.1.1-create-roadtrip.md) |
-| 1.1.2 | As a user, I want to see a list of my roadtrips | [1.1.2-list-roadtrips](1.1.2-list-roadtrips.md) |
+| 1.1.1 | As a user, I want to create a new roadtrip | [1.1.1-create-roadtrip](1.1.1-create-roadtrip-DONE.md) |
+| 1.1.2 | As a user, I want to see a list of my roadtrips | [1.1.2-list-roadtrips](1.1.2-list-roadtrips-DONE.md) |
 
 ### Feature 1.2: Stop Management
 
