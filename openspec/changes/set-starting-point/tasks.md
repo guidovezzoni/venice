@@ -25,7 +25,9 @@
 - [x] 4.2 Write test: `GIVEN repository returns failure WHEN invoke is called THEN Result.failure is returned` in `SetStartingPointUseCaseTest`
 - [x] 4.3 Write test: `GIVEN a place name with leading and trailing spaces WHEN invoke is called THEN repository receives the trimmed name` in `SetStartingPointUseCaseTest`
 - [x] 4.4 Implement `SetStartingPointUseCase` in `domain/usecase/SetStartingPointUseCase.kt`
-- [x] 4.5 Implement `ObserveStopsUseCase` in `domain/usecase/ObserveStopsUseCase.kt`
+- [x] 4.5 Write test: `GIVEN repository emits stops WHEN invoke is called THEN the same stops are returned` in `ObserveStopsUseCaseTest`
+- [x] 4.6 Write test: `GIVEN repository emits empty list WHEN invoke is called THEN an empty list is returned` in `ObserveStopsUseCaseTest`
+- [x] 4.7 Implement `ObserveStopsUseCase` in `domain/usecase/ObserveStopsUseCase.kt`
 
 ## 5. TripDetailViewModel (BDD)
 
