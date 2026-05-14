@@ -27,4 +27,15 @@ Follow these steps:
    - Update any references to the old filename in `@docs/userstories/index.md` if it exists.
      Use `git mv` so the rename is tracked in version control.
 
-6. **Report the result.** Summarise what was verified and the new filename. Suggest a commit message with the prefix `[Suggested Commit Message]`.
+6. **Export verification report.** Write a verification report to `@docs/reports/`:
+   - The report filename must match the user story filename (without any `-WIP` or `-DONE` suffix), e.g. for user story `1.4.2-Create-leg-WIP.md` the report file is `docs/reports/1.4.2-Create-leg.md`.
+   - If the report file already exists (it may contain sections from other workflows), append to it — do **not** overwrite existing content.
+   - Add a `## Verification` section at the bottom of the file containing:
+     - Date of verification.
+     - OpenSpec verify result (pass/fail summary).
+     - TODO scan result (list of ACKNOWLEDGED TODOs, or "none found").
+     - Definition of Done checklist with each item's PASS/FAIL status and justification.
+     - Final outcome (PASSED / FAILED) and the renamed filename.
+   - Create the `docs/reports/` directory if it does not already exist.
+
+7. **Report the result.** Summarise what was verified and the new filename. Suggest a commit message with the prefix `[Suggested Commit Message]`.
