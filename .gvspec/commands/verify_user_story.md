@@ -6,16 +6,36 @@ Follow these steps:
 
 2. **Run OpenSpec verify.** Execute the OpenSpec verify command (`/opsx:verify`) to check that the implementation matches the change artefacts. If the verification reports any issues, stop here: present the issues clearly to the user and do **not** proceed to the next steps.
 
-3. **Verify the Definition of Done.** Read the user story file and identify the "Acceptance Criteria" or "Definition of Done" section. For each item listed:
+3. **Review unresolved TODOs.** Scan all source files under `app/src/` for TODO comments (`// TODO`, `/* TODO`, `# TODO`). For each TODO found:
+   - Determine if it is **related to the current story** (references the story number, touches a feature area modified by this story, or was introduced/should have been resolved by this story).
+   - Additionally, check whether the **precondition or blocker described in the TODO has been satisfied by this story's implementation** (e.g. a TODO that says "do X once table Y exists" becomes actionable if this story created table Y). A TODO whose precondition is now met should be classified as RESOLVE NOW regardless of which story number it references.
+   - Classify each as:
+      - **RESOLVE NOW** — directly related to this story, should have been implemented as part of this story, **or its stated precondition has been fulfilled by this story**. These block verification.
+      - **ACKNOWLEDGED** — genuinely unrelated to this story and its precondition is not yet met. These are listed for awareness but do not block.
+   - If any TODOs are classified as RESOLVE NOW, stop here: present them to the user and do **not** proceed to the next steps.
+   - If all TODOs are ACKNOWLEDGED (or none exist), proceed.
+
+4. **Verify the Definition of Done.** Read the user story file and identify the "Acceptance Criteria" or "Definition of Done" section. For each item listed:
    - Check the codebase (source files, tests, configuration) to confirm the criterion is met.
    - Report each item as PASS or FAIL with a brief justification.
-   If any item is marked FAIL, stop here: present a summary to the user and do **not** proceed to the rename step.
+     If any item is marked FAIL, stop here: present a summary to the user and do **not** proceed to the rename step.
 
-4. **Rename the user story file.** Once both verifications pass:
+5. **Rename the user story file.** Once all verifications pass:
    - If the filename contains `-WIP`, remove it.
    - Append `-DONE` before the `.md` extension.
    - For example: `1.4.2-Create-leg-WIP.md` → `1.4.2-Create-leg-DONE.md`, or `1.4.2-Create-leg.md` → `1.4.2-Create-leg-DONE.md`.
    - Update any references to the old filename in `@docs/userstories/index.md` if it exists.
-   Use `git mv` so the rename is tracked in version control.
+     Use `git mv` so the rename is tracked in version control.
 
-5. **Report the result.** Summarise what was verified and the new filename. Suggest a commit message with the prefix `[Suggested Commit Message]`.
+6. **Export verification report.** Write a verification report to `@docs/reports/`:
+   - The report filename must match the user story filename (without any `-WIP` or `-DONE` suffix), e.g. for user story `1.4.2-Create-leg-WIP.md` the report file is `docs/reports/1.4.2-Create-leg.md`.
+   - If the report file already exists (it may contain sections from other workflows), append to it — do **not** overwrite existing content.
+   - Add a `## Verification` section at the bottom of the file containing:
+     - Date of verification.
+     - OpenSpec verify result (pass/fail summary).
+     - TODO scan result (list of ACKNOWLEDGED TODOs, or "none found").
+     - Definition of Done checklist with each item's PASS/FAIL status and justification.
+     - Final outcome (PASSED / FAILED) and the renamed filename.
+   - Create the `docs/reports/` directory if it does not already exist.
+
+7. **Report the result.** Summarise what was verified and the new filename. Suggest a commit message with the prefix `[Suggested Commit Message]`.

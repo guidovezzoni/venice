@@ -1,12 +1,12 @@
 package com.guidovezzoni.venice.data.database.mapper
 
-import com.guidovezzoni.venice.data.database.entity.TripEntity
+import com.guidovezzoni.venice.data.database.entity.TripWithStopCount
 import com.guidovezzoni.venice.domain.model.Trip
 
-fun TripEntity.toDomain(): Trip = Trip(
-    id = id,
-    name = name,
-    createdAt = createdAt,
-    updatedAt = updatedAt,
-    stopCount = 0, // TODO 1.2.x — derive from stops table once it exists
+fun TripWithStopCount.toDomain(): Trip = Trip(
+    id = trip.id,
+    name = trip.name,
+    createdAt = trip.createdAt,
+    updatedAt = trip.updatedAt,
+    stopCount = stopCount,
 )

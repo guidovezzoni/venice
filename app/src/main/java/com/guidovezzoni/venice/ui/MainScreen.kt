@@ -14,10 +14,12 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.guidovezzoni.venice.R
+import com.guidovezzoni.venice.ui.effect.TripDetailUiEffect
 import com.guidovezzoni.venice.ui.effect.TripListUiEffect
 import com.guidovezzoni.venice.ui.intent.TripListUiIntent
 import com.guidovezzoni.venice.ui.screens.tripdetail.TripDetailScreen
 import com.guidovezzoni.venice.ui.screens.triplist.TripListScreen
+import com.guidovezzoni.venice.ui.viewmodel.TripDetailViewModel
 import com.guidovezzoni.venice.ui.viewmodel.TripListViewModel
 
 private const val ROUTE_TRIP_LIST = "tripList"
@@ -60,10 +62,25 @@ fun MainScreen() {
             )
         }
 
-        composable(ROUTE_TRIP_DETAIL) { backStackEntry ->
-            val tripId = backStackEntry.arguments?.getString(ARG_TRIP_ID).orEmpty()
+        composable(ROUTE_TRIP_DETAIL) {
+            val viewModel: TripDetailViewModel = hiltViewModel()
+            val uiState by viewModel.uiState.collectAsState()
+            val snackbarHostState = remember { SnackbarHostState() }
+            val errorMessage = stringResource(R.string.trip_detail_starting_point_error)
+
+            LaunchedEffect(Unit) {
+                viewModel.uiEffect.collect { effect ->
+                    when (effect) {
+                        is TripDetailUiEffect.ShowError ->
+                            snackbarHostState.showSnackbar(errorMessage)
+                    }
+                }
+            }
+
             TripDetailScreen(
-                tripId = tripId,
+                uiState = uiState,
+                snackbarHostState = snackbarHostState,
+                onIntent = viewModel::onIntent,
                 onNavigateBack = { navController.popBackStack() },
             )
         }

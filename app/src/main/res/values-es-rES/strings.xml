@@ -13,4 +13,16 @@
     <string name="create_trip_field_placeholder">Introduce el nombre del viaje…</string>
     <string name="create_trip_error_message">No se ha podido crear el viaje. Inténtalo de nuevo.</string>
     <string name="trip_detail_title">Detalle del viaje</string>
+    <string name="trip_detail_starting_point_label">Punto de partida</string>
+    <string name="trip_detail_set_starting_point">Establecer punto de partida</string>
+    <string name="trip_detail_change_starting_point">Cambiar punto de partida</string>
+    <string name="trip_detail_starting_point_dialog_title">Establecer punto de partida</string>
+    <string name="trip_detail_starting_point_place_name_hint">Nombre del lugar</string>
+    <string name="trip_detail_starting_point_latitude_hint">Latitud</string>
+    <string name="trip_detail_starting_point_longitude_hint">Longitud</string>
+    <string name="trip_detail_starting_point_error">No se ha podido establecer el punto de partida. Inténtalo de nuevo.</string>
+    <string name="trip_detail_starting_point_place_name_error">El nombre del lugar no puede estar vacío</string>
+    <string name="trip_detail_starting_point_latitude_error">La latitud debe estar entre -90 y 90</string>
+    <string name="trip_detail_starting_point_longitude_error">La longitud debe estar entre -180 y 180</string>
+    <string name="trip_detail_starting_point_start_label">Inicio</string>
 </resources>
