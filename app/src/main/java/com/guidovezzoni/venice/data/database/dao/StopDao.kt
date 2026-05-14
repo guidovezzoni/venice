@@ -20,4 +20,7 @@ interface StopDao {
 
     @Query("SELECT * FROM stops WHERE tripId = :tripId ORDER BY `order` ASC")
     fun observeByTripId(tripId: String): Flow<List<StopEntity>>
+
+    @Query("SELECT tripId, COUNT(*) as stopCount FROM stops GROUP BY tripId")
+    fun observeStopCounts(): Flow<List<TripStopCount>>
 }
