@@ -15,7 +15,7 @@ The core ability to create, organise, and manage roadtrips and their stops.
 
 | ID | User Story | Details |
 |----|------------|---------|
-| 1.2.1 | As a user, I want to set a starting point for my roadtrip | [1.2.1-set-starting-point](1.2.1-set-starting-point-WIP.md) |
+| 1.2.1 | As a user, I want to set a starting point for my roadtrip | [1.2.1-set-starting-point](1.2.1-set-starting-point-DONE.md) |
 | 1.2.2 | As a user, I want to set a destination for my roadtrip | [1.2.2-set-destination](1.2.2-set-destination.md) |
 | 1.2.3 | As a user, I want to add intermediate stops to my roadtrip | [1.2.3-add-intermediate-stops](1.2.3-add-intermediate-stops.md) |
 | 1.2.4 | As a user, I want to reorder stops in my roadtrip | [1.2.4-reorder-stops](1.2.4-reorder-stops.md) |
