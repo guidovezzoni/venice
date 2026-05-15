@@ -16,15 +16,19 @@ The commands below replace the standard flow with a user-story-centric pipeline.
 
 Opens a user story for development. Creates a feature branch from `main` (via `/create_branch`), renames the story file with a `-WIP` suffix, and enriches it with technical detail (via `/refine_user_story`).
 
-### 2. `/apply_changes`
+### 2. `/opsx:propose`
+
+Proposes the change based on the refined user story. Generates all OpenSpec artifacts (design, delta specs, and tasks) needed before implementation can begin.
+
+### 3. `/apply_changes`
 
 Runs `/opsx:apply` to implement the current OpenSpec change, then scans `app/src/` for TODO comments. TODOs whose preconditions are now met are resolved iteratively until none remain; unrelated TODOs are acknowledged.
 
-### 3. `/verify_user_story <story>`
+### 4. `/verify_user_story <story>`
 
 End-to-end verification gate. Runs `/opsx:verify`, scans for unresolved TODOs, checks every acceptance criterion in the story against the codebase, renames the story file to `-DONE`, and writes a verification report to `docs/reports/`.
 
-### 4. Archive
+### 5. Archive
 
 Use the standard OpenSpec archive command (`/opsx:archive`) to finalise and archive the completed change.
 
