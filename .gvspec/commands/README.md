@@ -34,3 +34,10 @@ These are called internally by the workflow commands above but can also be run s
 
 - **`/create_branch <story>`** — Creates a feature branch from an up-to-date `main`, named after the story's ticket number. Handles dirty-state and conflict scenarios interactively.
 - **`/refine_user_story <story>`** — Analyses a user story as a Product Manager / Business Analyst would, enriching it with endpoint details, field lists, file mappings, test strategy, and non-functional concerns (security, GDPR, performance). Updates the story file in place, preserving the original text.
+
+## Shared references
+
+Reusable procedure definitions live in `.gvspec/references/` and are loaded via `@` file references. This avoids skill invocations (which create turn boundaries) and keeps logic in a single place:
+
+- **`create-branch-procedure.md`** — Branch creation criteria (used by `/open_user_story` and `/create_branch`)
+- **`refine-user-story-procedure.md`** — User story refinement steps (used by `/open_user_story` and `/refine_user_story`)
