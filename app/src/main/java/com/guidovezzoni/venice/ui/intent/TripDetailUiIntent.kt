@@ -8,4 +8,11 @@ sealed class TripDetailUiIntent {
         val longitude: Double,
     ) : TripDetailUiIntent()
     data object OnDismissStartingPointDialog : TripDetailUiIntent()
+    data object OnSetDestinationClicked : TripDetailUiIntent()
+    data class OnDestinationConfirmed(
+        val placeName: String,
+        val latitude: Double,
+        val longitude: Double,
+    ) : TripDetailUiIntent()
+    data object OnDismissDestinationDialog : TripDetailUiIntent()
 }

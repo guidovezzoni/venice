@@ -12,6 +12,7 @@ import java.util.UUID
 import javax.inject.Inject
 
 private const val STARTING_POINT_ORDER = 0
+private const val DESTINATION_ORDER = 1
 
 class StopRepositoryImpl @Inject constructor(
     private val stopDao: StopDao,
@@ -23,7 +24,34 @@ class StopRepositoryImpl @Inject constructor(
         latitude: Double,
         longitude: Double,
     ): Result<Stop> = runCatching {
-        val existing = stopDao.getStartingPoint(tripId)
+        upsertStop(tripId, placeName, latitude, longitude, STARTING_POINT_ORDER) {
+            stopDao.getStartingPoint(tripId)
+        }
+    }
+
+    override suspend fun upsertDestination(
+        tripId: String,
+        placeName: String,
+        latitude: Double,
+        longitude: Double,
+    ): Result<Stop> = runCatching {
+        upsertStop(tripId, placeName, latitude, longitude, DESTINATION_ORDER) {
+            stopDao.getDestination(tripId)
+        }
+    }
+
+    override fun observeStopsForTrip(tripId: String): Flow<List<Stop>> =
+        stopDao.observeByTripId(tripId).map { entities -> entities.map { it.toDomain() } }
+
+    private suspend fun upsertStop(
+        tripId: String,
+        placeName: String,
+        latitude: Double,
+        longitude: Double,
+        order: Int,
+        findExisting: suspend () -> StopEntity?,
+    ): Stop {
+        val existing = findExisting()
         val entity = if (existing != null) {
             existing.copy(
                 placeName = placeName,
@@ -37,13 +65,10 @@ class StopRepositoryImpl @Inject constructor(
                 placeName = placeName,
                 latitude = latitude,
                 longitude = longitude,
-                order = STARTING_POINT_ORDER,
+                order = order,
                 status = StopStatus.PENDING.name,
             ).also { stopDao.insert(it) }
         }
-        entity.toDomain()
+        return entity.toDomain()
     }
-
-    override fun observeStopsForTrip(tripId: String): Flow<List<Stop>> =
-        stopDao.observeByTripId(tripId).map { entities -> entities.map { it.toDomain() } }
 }

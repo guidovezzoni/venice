@@ -86,10 +86,10 @@
 ### Requirement: TripDetailScreen integrates all components
 `TripDetailScreen` SHALL:
 - Accept `uiState` and `onIntent` parameters.
-- Render `StartingPointSection` below the trip title.
-- Render `DestinationSection` below the starting point section.
-- Show `SetStartingPointDialog` when `isSetStartingPointDialogVisible` is `true`.
-- Show `SetDestinationDialog` when `isSetDestinationDialogVisible` is `true`.
+- Render `StopSection` for the starting point (with `TripOrigin` icon) below the trip title.
+- Render `StopSection` for the destination (with `Place` icon) below the starting point section.
+- Show `SetStopDialog` for the starting point when `isSetStartingPointDialogVisible` is `true`.
+- Show `SetStopDialog` for the destination when `isSetDestinationDialogVisible` is `true`.
 - Consume `uiEffect` to show a snackbar on `ShowError`.
 
 #### Scenario: Screen renders starting point and destination sections

@@ -46,6 +46,14 @@ No new `UiEffect` subclass is needed.
 
 **Rationale:** The existing `ShowError(message: String)` effect in `TripDetailUiEffect` is generic enough to handle any error message, including destination-related ones. Adding a separate effect would be unnecessary duplication.
 
+### Decision 5: Consolidate stop UI composables and repository internals
+
+`StartingPointSection` and `DestinationSection` are merged into a single `StopSection` composable, parameterised by icon and string resource IDs. `SetStartingPointDialog` and `SetDestinationDialog` are merged into `SetStopDialog`, parameterised by string resource IDs. `StopRepositoryImpl` extracts a private `upsertStop` helper used by both public methods.
+
+**Rationale:** The two stop types use identical layout, validation, and upsert logic — only string resources, icon, and order value differ. Consolidating now prevents the duplication from growing when intermediate stops arrive in story 1.2.3.
+
+**Alternative considered:** Keep separate composables for each stop type. Rejected because the composables are structurally identical and differ only in parameterisable resources.
+
 ## Risks / Trade-offs
 
 - **[Risk] Order convention breaks with intermediate stops** → Mitigated by design note in user story: story 1.2.3 will introduce `StopType` and migrate. The convention is intentionally temporary.

@@ -26,4 +26,15 @@
     <string name="trip_detail_starting_point_latitude_error">Latitude must be between -90 and 90</string>
     <string name="trip_detail_starting_point_longitude_error">Longitude must be between -180 and 180</string>
     <string name="trip_detail_starting_point_start_label">Start</string>
+    <string name="trip_detail_destination_label">Destination</string>
+    <string name="trip_detail_set_destination">Set destination</string>
+    <string name="trip_detail_change_destination">Change destination</string>
+    <string name="trip_detail_destination_dialog_title">Set destination</string>
+    <string name="trip_detail_destination_place_name_hint">Place name</string>
+    <string name="trip_detail_destination_latitude_hint">Latitude</string>
+    <string name="trip_detail_destination_longitude_hint">Longitude</string>
+    <string name="trip_detail_destination_error">Failed to set destination. Please try again.</string>
+    <string name="trip_detail_destination_place_name_error">Place name must not be blank</string>
+    <string name="trip_detail_destination_latitude_error">Latitude must be between -90 and 90</string>
+    <string name="trip_detail_destination_longitude_error">Longitude must be between -180 and 180</string>
 </resources>

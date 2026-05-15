@@ -10,13 +10,16 @@ The domain layer SHALL define a `StopRepository` interface with:
 - **WHEN** a use case references `StopRepository`
 - **THEN** it depends only on the domain layer, not the data layer
 
-### Requirement: StopRepositoryImpl upserts the destination
-`StopRepositoryImpl` SHALL implement `upsertDestination`. The method SHALL:
-1. Query for an existing destination stop via `StopDao.getDestination(tripId)`.
+### Requirement: StopRepositoryImpl upserts stops via internal helper
+`StopRepositoryImpl` SHALL implement both `upsertStartingPoint` and `upsertDestination` by delegating to a private `upsertStop` helper that captures the shared upsert pattern:
+1. Query for an existing stop via a provided finder function.
 2. If found, update the existing stop's `placeName`, `latitude`, and `longitude` (preserving the same `id` and `order`).
-3. If not found, insert a new stop with a fresh UUID, `order = 1`, and `status = PENDING`.
+3. If not found, insert a new stop with a fresh UUID, the specified `order`, and `status = PENDING`.
 4. Return the resulting `Stop` wrapped in `Result.success`.
 5. If any DAO operation throws, return `Result.failure` with the exception.
+
+For `upsertStartingPoint`: finder is `StopDao.getStartingPoint(tripId)`, order is `0`.
+For `upsertDestination`: finder is `StopDao.getDestination(tripId)`, order is `1`.
 
 #### Scenario: No existing destination — insert
 - **WHEN** `upsertDestination` is called for a trip with no `order > 0` stop
@@ -29,3 +32,22 @@ The domain layer SHALL define a `StopRepository` interface with:
 #### Scenario: DAO throws exception
 - **WHEN** the DAO throws an exception during `upsertDestination`
 - **THEN** `Result.failure` with the exception is returned
+
+## ADDED Requirements
+
+### Requirement: SetDestinationUseCase validates and delegates
+`SetDestinationUseCase` SHALL trim the place name and delegate to `StopRepository.upsertDestination`.
+
+Note: `SetStartingPointUseCase` and `SetDestinationUseCase` are candidates for consolidation into a single `SetStopUseCase` when `StopType` is introduced in story 1.2.3.
+
+#### Scenario: Successful invocation
+- **WHEN** `invoke` is called with valid parameters
+- **THEN** the repository receives the trimmed place name and returns `Result.success(Stop)`
+
+#### Scenario: Repository returns failure
+- **WHEN** `invoke` is called and the repository returns `Result.failure`
+- **THEN** `Result.failure` is propagated to the caller
+
+#### Scenario: Place name is trimmed
+- **WHEN** `invoke` is called with `placeName = "  Barcelona  "`
+- **THEN** the repository receives `placeName = "Barcelona"`

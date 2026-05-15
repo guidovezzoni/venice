@@ -5,6 +5,8 @@ import com.guidovezzoni.venice.domain.model.Stop
 data class TripDetailUiState(
     val tripId: String = "",
     val startingPoint: Stop? = null,
+    val destination: Stop? = null,
     val isLoading: Boolean = false,
     val isSetStartingPointDialogVisible: Boolean = false,
+    val isSetDestinationDialogVisible: Boolean = false,
 )
