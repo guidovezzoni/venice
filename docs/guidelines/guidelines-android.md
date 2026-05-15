@@ -219,6 +219,8 @@ DisposableEffect(lifecycleOwner) {
 ## Testing Guidelines
 
 ### Unit Tests
+- **Test file required**: Every new source class (use cases, ViewModels, repositories) must have a corresponding unit test file created at the same time.
+
 Unit tests should follow these criteria:
 - Located in `app/src/test/`
 - Use JUnit 4

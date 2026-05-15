@@ -2,6 +2,7 @@ package com.guidovezzoni.venice.data.repository
 
 import com.guidovezzoni.venice.data.database.dao.TripDao
 import com.guidovezzoni.venice.data.database.entity.TripEntity
+import com.guidovezzoni.venice.data.database.entity.TripWithStopCount
 import com.guidovezzoni.venice.data.database.mapper.toDomain
 import com.guidovezzoni.venice.domain.model.Trip
 import com.guidovezzoni.venice.domain.repository.TripRepository
@@ -23,7 +24,7 @@ class TripRepositoryImpl @Inject constructor(
             updatedAt = now,
         )
         tripDao.insert(entity)
-        entity.toDomain()
+        TripWithStopCount(trip = entity, stopCount = 0).toDomain()
     }
 
     override fun observeTrips(): Flow<List<Trip>> =

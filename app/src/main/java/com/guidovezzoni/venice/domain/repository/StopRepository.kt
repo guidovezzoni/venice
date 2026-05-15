@@ -1,0 +1,15 @@
+package com.guidovezzoni.venice.domain.repository
+
+import com.guidovezzoni.venice.domain.model.Stop
+import kotlinx.coroutines.flow.Flow
+
+interface StopRepository {
+    suspend fun upsertStartingPoint(
+        tripId: String,
+        placeName: String,
+        latitude: Double,
+        longitude: Double,
+    ): Result<Stop>
+
+    fun observeStopsForTrip(tripId: String): Flow<List<Stop>>
+}

@@ -4,11 +4,13 @@ A road trip planning app for Android, built with a modern architecture stack and
 
 The app is built entirely in Kotlin with Jetpack Compose and Material 3, following Clean Architecture to separate domain logic, data access, and UI into independent layers. Each feature uses the MVI (Model-View-Intent) pattern, enforcing unidirectional data flow through immutable state, explicit user intents, and one-shot effects. Dependency injection is handled by Hilt, persistence by Room, and all asynchronous work runs on Kotlin Coroutines and Flow.
 
-Development is driven by a Specification-Driven Development (SDD) workflow powered by OpenSpec, where every change moves through a structured lifecycle: explore, propose, apply, verify, sync, and archive. Tasks within each change follow a BDD (Behaviour-Driven Development) structure with test-first ordering, so the test is always written before the production code that makes it pass. Custom Claude Code commands (`/refine_user_story`, `/create_branch`, `/opsx:*`) automate the repetitive steps, from refining user stories with acceptance criteria to creating feature branches and driving the full OpenSpec lifecycle.
+Development is driven by a Specification-Driven Development (SDD) workflow powered by OpenSpec, where every change moves through a structured lifecycle: explore, propose, apply, verify, sync, and archive. Tasks within each change follow a BDD (Behaviour-Driven Development) structure with test-first ordering, so the test is always written before the production code that makes it pass. Custom commands (`/open_user_story`, `/apply_changes`, `/verify_user_story`, `/opsx:*`) automate the repetitive steps, from opening and refining user stories to implementing changes, verifying acceptance criteria, and driving the full OpenSpec lifecycle.
+
+See [`.gvspec/commands/README.md`](.gvspec/commands/README.md) for full details on each command.
 
 ## The App
 
-Venice helps users plan multi-stop road trips. The current MVP supports creating trips, viewing them in a list, and navigating to trip details. The roadmap includes stop management, place search via geocoding, route calculation with Google Directions API, live GPS-based ETA, and Android Auto integration.
+Venice helps users plan multi-stop road trips. The current version supports creating trips, viewing them in a list, navigating to trip details, and setting a starting point for each trip. The roadmap includes full stop management (adding, editing, reordering stops), place search via geocoding, route calculation with Google Directions API, live GPS-based ETA, and Android Auto integration.
 
 ### Architecture & Tech Stack
 
@@ -62,13 +64,16 @@ Specifications live in `openspec/specs/` and evolve incrementally through delta 
 
 ### Custom Commands
 
-The workflow is extended with custom Claude Code commands:
+The workflow is extended with custom commands that wrap the OpenSpec lifecycle into a user-story-driven pipeline:
 
 | Command | Purpose |
 |---------|---------|
-| `/refine_user_story` | Analyse a user story and enhance it with full technical detail, acceptance criteria, and implementation guidance |
-| `/create_branch` | Create a correctly named feature branch from the user story reference |
+| `/open_user_story` | Open a story for development: creates a feature branch, renames the file to `-WIP`, and refines it with technical detail |
+| `/apply_changes` | Implement the current OpenSpec change and iteratively resolve any TODOs whose preconditions are now met |
+| `/verify_user_story` | End-to-end verification: runs OpenSpec verify, checks TODOs, validates acceptance criteria, renames the file to `-DONE`, and writes a report |
 | `/opsx:*` | OpenSpec lifecycle commands (propose, apply, verify, sync, archive, explore, onboard) |
+
+Helper commands (`/refine_user_story`, `/create_branch`) are called internally by `/open_user_story` but can also be run standalone. See [`.gvspec/commands/README.md`](.gvspec/commands/README.md) for full details on each command.
 
 ### BDD Task Structure
 

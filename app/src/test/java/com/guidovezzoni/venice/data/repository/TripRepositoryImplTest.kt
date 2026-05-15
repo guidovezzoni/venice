@@ -33,6 +33,7 @@ class TripRepositoryImplTest {
         assertTrue(result.isSuccess)
         val trip = result.getOrNull()!!
         assertEquals("Summer Drive", trip.name)
+        assertEquals(0, trip.stopCount)
         assertTrue(trip.id.isNotBlank())
         assertEquals(entitySlot.captured.id, trip.id)
         coVerify(exactly = 1) { tripDao.insert(any()) }
