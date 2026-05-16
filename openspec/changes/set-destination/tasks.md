@@ -59,3 +59,11 @@
 - [x] 9.6 Add TODO comments in `SetStartingPointUseCase` and `SetDestinationUseCase`
 - [x] 9.7 Run `./gradlew test` and confirm all tests pass
 - [x] 9.8 Run `./gradlew check` and confirm no lint or compile errors
+
+## 10. Pre-populate dialog with existing values
+
+- [x] 10.1 Add `initialPlaceName`, `initialLatitude`, `initialLongitude` parameters to `SetStopDialog`
+- [x] 10.2 Update `TripDetailScreen` to pass existing stop data to `SetStopDialog` when the stop is non-null
+- [x] 10.3 Add preview for pre-populated dialog state
+- [x] 10.4 Run `./gradlew test` and confirm all tests pass
+- [x] 10.5 Run `./gradlew check` and confirm no lint or compile errors

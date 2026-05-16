@@ -103,6 +103,9 @@ fun TripDetailScreen(
             latitudeErrorRes = R.string.trip_detail_starting_point_latitude_error,
             longitudeHintRes = R.string.trip_detail_starting_point_longitude_hint,
             longitudeErrorRes = R.string.trip_detail_starting_point_longitude_error,
+            initialPlaceName = uiState.startingPoint?.placeName ?: "",
+            initialLatitude = uiState.startingPoint?.latitude?.toString() ?: "",
+            initialLongitude = uiState.startingPoint?.longitude?.toString() ?: "",
             onConfirm = { placeName, latitude, longitude ->
                 onIntent(TripDetailUiIntent.OnStartingPointConfirmed(placeName, latitude, longitude))
             },
@@ -119,6 +122,9 @@ fun TripDetailScreen(
             latitudeErrorRes = R.string.trip_detail_destination_latitude_error,
             longitudeHintRes = R.string.trip_detail_destination_longitude_hint,
             longitudeErrorRes = R.string.trip_detail_destination_longitude_error,
+            initialPlaceName = uiState.destination?.placeName ?: "",
+            initialLatitude = uiState.destination?.latitude?.toString() ?: "",
+            initialLongitude = uiState.destination?.longitude?.toString() ?: "",
             onConfirm = { placeName, latitude, longitude ->
                 onIntent(TripDetailUiIntent.OnDestinationConfirmed(placeName, latitude, longitude))
             },

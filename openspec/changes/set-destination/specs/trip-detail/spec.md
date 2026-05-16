@@ -88,13 +88,21 @@
 - Accept `uiState` and `onIntent` parameters.
 - Render `StopSection` for the starting point (with `TripOrigin` icon) below the trip title.
 - Render `StopSection` for the destination (with `Place` icon) below the starting point section.
-- Show `SetStopDialog` for the starting point when `isSetStartingPointDialogVisible` is `true`.
-- Show `SetStopDialog` for the destination when `isSetDestinationDialogVisible` is `true`.
+- Show `SetStopDialog` for the starting point when `isSetStartingPointDialogVisible` is `true`. If `uiState.startingPoint` is non-null, pass its `placeName`, `latitude`, and `longitude` as initial values to the dialog.
+- Show `SetStopDialog` for the destination when `isSetDestinationDialogVisible` is `true`. If `uiState.destination` is non-null, pass its `placeName`, `latitude`, and `longitude` as initial values to the dialog.
 - Consume `uiEffect` to show a snackbar on `ShowError`.
 
 #### Scenario: Screen renders starting point and destination sections
 - **WHEN** the trip detail screen is displayed
 - **THEN** the starting point section is visible below the trip title and the destination section is visible below the starting point
+
+#### Scenario: Starting point dialog pre-populated when editing
+- **WHEN** the user taps an existing starting point and the dialog opens
+- **THEN** the dialog fields are pre-populated with the starting point's place name, latitude, and longitude
+
+#### Scenario: Destination dialog pre-populated when editing
+- **WHEN** the user taps an existing destination and the dialog opens
+- **THEN** the dialog fields are pre-populated with the destination's place name, latitude, and longitude
 
 #### Scenario: Snackbar shown on error
 - **WHEN** a `ShowError` effect is emitted

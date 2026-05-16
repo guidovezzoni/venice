@@ -34,11 +34,26 @@ The section SHALL include a `contentDescription` on the button/card for accessib
 ### Requirement: SetStopDialog composable (consolidated)
 `SetStopDialog` SHALL be a single parameterised composable that replaces the separate `SetStartingPointDialog` and `SetDestinationDialog`. It accepts 7 `@StringRes` parameters for: dialog title, place name hint, place name error, latitude hint, latitude error, longitude hint, longitude error.
 
+It SHALL also accept three optional initial-value parameters:
+- `initialPlaceName: String = ""` — pre-populates the place name field
+- `initialLatitude: String = ""` — pre-populates the latitude field
+- `initialLongitude: String = ""` — pre-populates the longitude field
+
+When initial values are provided, the corresponding fields SHALL be initialised with those values instead of empty strings.
+
 It SHALL display an `AlertDialog` with:
 - Title from the provided string resource
-- Three `OutlinedTextField` inputs with labels from the provided hint resources
+- Three `OutlinedTextField` inputs with labels from the provided hint resources, pre-populated with any provided initial values
 - Confirm and dismiss buttons
 - Input validation: place name must be non-blank; latitude in `[-90, 90]`; longitude in `[-180, 180]`. Inline error messages from the provided error resources shown on invalid input.
+
+#### Scenario: Dialog pre-populated when editing existing stop
+- **WHEN** the dialog is opened with `initialPlaceName = "Rome"`, `initialLatitude = "41.9028"`, `initialLongitude = "12.4964"`
+- **THEN** the place name field shows "Rome", latitude field shows "41.9028", and longitude field shows "12.4964"
+
+#### Scenario: Dialog empty when creating new stop
+- **WHEN** the dialog is opened with default (empty) initial values
+- **THEN** all fields are empty
 
 #### Scenario: Valid input enables confirmation
 - **WHEN** all fields contain valid values

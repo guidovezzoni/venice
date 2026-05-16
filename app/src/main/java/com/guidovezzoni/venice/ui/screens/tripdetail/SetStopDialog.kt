@@ -42,12 +42,15 @@ fun SetStopDialog(
     @StringRes latitudeErrorRes: Int,
     @StringRes longitudeHintRes: Int,
     @StringRes longitudeErrorRes: Int,
+    initialPlaceName: String = "",
+    initialLatitude: String = "",
+    initialLongitude: String = "",
     onConfirm: (placeName: String, latitude: Double, longitude: Double) -> Unit = { _, _, _ -> },
     onDismiss: () -> Unit = {},
 ) {
-    var placeName by rememberSaveable { mutableStateOf("") }
-    var latitudeText by rememberSaveable { mutableStateOf("") }
-    var longitudeText by rememberSaveable { mutableStateOf("") }
+    var placeName by rememberSaveable { mutableStateOf(initialPlaceName) }
+    var latitudeText by rememberSaveable { mutableStateOf(initialLatitude) }
+    var longitudeText by rememberSaveable { mutableStateOf(initialLongitude) }
     var hasAttemptedSubmit by rememberSaveable { mutableStateOf(false) }
 
     val placeNameError = hasAttemptedSubmit && placeName.isBlank()
@@ -247,6 +250,68 @@ private fun PreviewSetStopDialogDestinationEmpty() {
                 latitudeHintRes = R.string.trip_detail_destination_latitude_hint,
                 latitudeErrorRes = R.string.trip_detail_destination_latitude_error,
                 longitudeText = "",
+                onLongitudeChange = {},
+                longitudeError = false,
+                longitudeHintRes = R.string.trip_detail_destination_longitude_hint,
+                longitudeErrorRes = R.string.trip_detail_destination_longitude_error,
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PreviewSetStopDialogStartingPointPrePopulated() {
+    HeadingToTheAlpsTheme {
+        Column(modifier = Modifier.padding(PREVIEW_PADDING)) {
+            Text(
+                text = "Set starting point (pre-populated)",
+                style = MaterialTheme.typography.headlineSmall,
+            )
+            Spacer(modifier = Modifier.height(PREVIEW_PADDING))
+            StopForm(
+                placeName = "Rome, Italy",
+                onPlaceNameChange = {},
+                placeNameError = false,
+                placeNameHintRes = R.string.trip_detail_starting_point_place_name_hint,
+                placeNameErrorRes = R.string.trip_detail_starting_point_place_name_error,
+                latitudeText = "41.9028",
+                onLatitudeChange = {},
+                latitudeError = false,
+                latitudeHintRes = R.string.trip_detail_starting_point_latitude_hint,
+                latitudeErrorRes = R.string.trip_detail_starting_point_latitude_error,
+                longitudeText = "12.4964",
+                onLongitudeChange = {},
+                longitudeError = false,
+                longitudeHintRes = R.string.trip_detail_starting_point_longitude_hint,
+                longitudeErrorRes = R.string.trip_detail_starting_point_longitude_error,
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PreviewSetStopDialogDestinationPrePopulated() {
+    HeadingToTheAlpsTheme {
+        Column(modifier = Modifier.padding(PREVIEW_PADDING)) {
+            Text(
+                text = "Set destination (pre-populated)",
+                style = MaterialTheme.typography.headlineSmall,
+            )
+            Spacer(modifier = Modifier.height(PREVIEW_PADDING))
+            StopForm(
+                placeName = "Barcelona, Spain",
+                onPlaceNameChange = {},
+                placeNameError = false,
+                placeNameHintRes = R.string.trip_detail_destination_place_name_hint,
+                placeNameErrorRes = R.string.trip_detail_destination_place_name_error,
+                latitudeText = "41.3851",
+                onLatitudeChange = {},
+                latitudeError = false,
+                latitudeHintRes = R.string.trip_detail_destination_latitude_hint,
+                latitudeErrorRes = R.string.trip_detail_destination_latitude_error,
+                longitudeText = "2.1734",
                 onLongitudeChange = {},
                 longitudeError = false,
                 longitudeHintRes = R.string.trip_detail_destination_longitude_hint,
