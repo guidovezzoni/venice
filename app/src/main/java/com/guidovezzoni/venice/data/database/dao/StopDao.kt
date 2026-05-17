@@ -18,6 +18,9 @@ interface StopDao {
     @Update
     suspend fun update(stop: StopEntity)
 
+    @Query("SELECT * FROM stops WHERE tripId = :tripId AND `order` > 0 ORDER BY `order` DESC LIMIT 1")
+    suspend fun getDestination(tripId: String): StopEntity?
+
     @Query("SELECT * FROM stops WHERE tripId = :tripId ORDER BY `order` ASC")
     fun observeByTripId(tripId: String): Flow<List<StopEntity>>
 }

@@ -1,5 +1,6 @@
 package com.guidovezzoni.venice.ui.screens.tripdetail
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.TripOrigin
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
@@ -19,6 +21,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -35,35 +38,49 @@ private val ICON_SPACING = 12.dp
 private val VERTICAL_SPACING = 4.dp
 
 @Composable
-fun StartingPointSection(
+fun StopSection(
     modifier: Modifier = Modifier,
-    startingPoint: Stop? = null,
-    onSetStartingPointClicked: () -> Unit = {},
+    stop: Stop? = null,
+    onSetStopClicked: () -> Unit = {},
+    icon: ImageVector,
+    @StringRes titleRes: Int,
+    @StringRes setButtonTextRes: Int,
+    @StringRes changeDescriptionRes: Int,
+    @StringRes filledLabelRes: Int,
 ) {
     Column(modifier = modifier.fillMaxWidth().padding(horizontal = SECTION_PADDING)) {
         Text(
-            text = stringResource(R.string.trip_detail_starting_point_label),
+            text = stringResource(titleRes),
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.padding(bottom = VERTICAL_SPACING),
         )
 
-        if (startingPoint != null) {
-            FilledStartingPoint(
-                startingPoint = startingPoint,
-                onClick = onSetStartingPointClicked,
+        if (stop != null) {
+            FilledStop(
+                stop = stop,
+                onClick = onSetStopClicked,
+                icon = icon,
+                changeDescriptionRes = changeDescriptionRes,
+                filledLabelRes = filledLabelRes,
             )
         } else {
-            EmptyStartingPoint(onClick = onSetStartingPointClicked)
+            EmptyStop(
+                onClick = onSetStopClicked,
+                setButtonTextRes = setButtonTextRes,
+            )
         }
     }
 }
 
 @Composable
-private fun FilledStartingPoint(
-    startingPoint: Stop,
+private fun FilledStop(
+    stop: Stop,
     onClick: () -> Unit,
+    icon: ImageVector,
+    @StringRes changeDescriptionRes: Int,
+    @StringRes filledLabelRes: Int,
 ) {
-    val changeDescription = stringResource(R.string.trip_detail_change_starting_point)
+    val changeDescription = stringResource(changeDescriptionRes)
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -75,7 +92,7 @@ private fun FilledStartingPoint(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(
-                imageVector = Icons.Filled.TripOrigin,
+                imageVector = icon,
                 contentDescription = null,
                 modifier = Modifier.size(ICON_SIZE),
                 tint = MaterialTheme.colorScheme.primary,
@@ -83,16 +100,16 @@ private fun FilledStartingPoint(
             Spacer(modifier = Modifier.width(ICON_SPACING))
             Column {
                 Text(
-                    text = stringResource(R.string.trip_detail_starting_point_start_label),
+                    text = stringResource(filledLabelRes),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.primary,
                 )
                 Text(
-                    text = startingPoint.placeName,
+                    text = stop.placeName,
                     style = MaterialTheme.typography.bodyLarge,
                 )
                 Text(
-                    text = "${startingPoint.latitude}, ${startingPoint.longitude}",
+                    text = "${stop.latitude}, ${stop.longitude}",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -102,8 +119,11 @@ private fun FilledStartingPoint(
 }
 
 @Composable
-private fun EmptyStartingPoint(onClick: () -> Unit) {
-    val buttonDescription = stringResource(R.string.trip_detail_set_starting_point)
+private fun EmptyStop(
+    onClick: () -> Unit,
+    @StringRes setButtonTextRes: Int,
+) {
+    val buttonDescription = stringResource(setButtonTextRes)
     OutlinedButton(
         onClick = onClick,
         modifier = Modifier
@@ -116,24 +136,30 @@ private fun EmptyStartingPoint(onClick: () -> Unit) {
             modifier = Modifier.size(ICON_SIZE),
         )
         Spacer(modifier = Modifier.width(ICON_SPACING))
-        Text(text = stringResource(R.string.trip_detail_set_starting_point))
+        Text(text = stringResource(setButtonTextRes))
     }
 }
 
 @Preview(showBackground = true)
 @Composable
-private fun PreviewStartingPointSectionEmpty() {
+private fun PreviewStopSectionStartingPointEmpty() {
     HeadingToTheAlpsTheme {
-        StartingPointSection()
+        StopSection(
+            icon = Icons.Filled.TripOrigin,
+            titleRes = R.string.trip_detail_starting_point_label,
+            setButtonTextRes = R.string.trip_detail_set_starting_point,
+            changeDescriptionRes = R.string.trip_detail_change_starting_point,
+            filledLabelRes = R.string.trip_detail_starting_point_start_label,
+        )
     }
 }
 
 @Preview(showBackground = true)
 @Composable
-private fun PreviewStartingPointSectionFilled() {
+private fun PreviewStopSectionStartingPointFilled() {
     HeadingToTheAlpsTheme {
-        StartingPointSection(
-            startingPoint = Stop(
+        StopSection(
+            stop = Stop(
                 id = "1",
                 tripId = "trip-1",
                 placeName = "Rome, Italy",
@@ -142,6 +168,48 @@ private fun PreviewStartingPointSectionFilled() {
                 order = 0,
                 status = StopStatus.PENDING,
             ),
+            icon = Icons.Filled.TripOrigin,
+            titleRes = R.string.trip_detail_starting_point_label,
+            setButtonTextRes = R.string.trip_detail_set_starting_point,
+            changeDescriptionRes = R.string.trip_detail_change_starting_point,
+            filledLabelRes = R.string.trip_detail_starting_point_start_label,
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PreviewStopSectionDestinationEmpty() {
+    HeadingToTheAlpsTheme {
+        StopSection(
+            icon = Icons.Filled.Place,
+            titleRes = R.string.trip_detail_destination_label,
+            setButtonTextRes = R.string.trip_detail_set_destination,
+            changeDescriptionRes = R.string.trip_detail_change_destination,
+            filledLabelRes = R.string.trip_detail_destination_label,
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PreviewStopSectionDestinationFilled() {
+    HeadingToTheAlpsTheme {
+        StopSection(
+            stop = Stop(
+                id = "2",
+                tripId = "trip-1",
+                placeName = "Barcelona, Spain",
+                latitude = 41.3851,
+                longitude = 2.1734,
+                order = 1,
+                status = StopStatus.PENDING,
+            ),
+            icon = Icons.Filled.Place,
+            titleRes = R.string.trip_detail_destination_label,
+            setButtonTextRes = R.string.trip_detail_set_destination,
+            changeDescriptionRes = R.string.trip_detail_change_destination,
+            filledLabelRes = R.string.trip_detail_destination_label,
         )
     }
 }

@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import com.guidovezzoni.venice.domain.model.Stop
 import com.guidovezzoni.venice.domain.model.StopStatus
 import com.guidovezzoni.venice.domain.usecase.ObserveStopsUseCase
+import com.guidovezzoni.venice.domain.usecase.SetDestinationUseCase
 import com.guidovezzoni.venice.domain.usecase.SetStartingPointUseCase
 import com.guidovezzoni.venice.ui.effect.TripDetailUiEffect
 import com.guidovezzoni.venice.ui.intent.TripDetailUiIntent
@@ -37,6 +38,7 @@ class TripDetailViewModelTest {
     private val testDispatcher = UnconfinedTestDispatcher()
 
     private lateinit var setStartingPointUseCase: SetStartingPointUseCase
+    private lateinit var setDestinationUseCase: SetDestinationUseCase
     private lateinit var observeStopsUseCase: ObserveStopsUseCase
     private lateinit var savedStateHandle: SavedStateHandle
 
@@ -45,6 +47,7 @@ class TripDetailViewModelTest {
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
         setStartingPointUseCase = mockk()
+        setDestinationUseCase = mockk()
         observeStopsUseCase = mockk()
         savedStateHandle = SavedStateHandle(mapOf("tripId" to TRIP_ID))
     }
@@ -57,7 +60,7 @@ class TripDetailViewModelTest {
 
     private fun createViewModel(): TripDetailViewModel {
         every { observeStopsUseCase(TRIP_ID) } returns flowOf(emptyList())
-        return TripDetailViewModel(setStartingPointUseCase, observeStopsUseCase, savedStateHandle)
+        return TripDetailViewModel(setStartingPointUseCase, setDestinationUseCase, observeStopsUseCase, savedStateHandle)
     }
 
     @Test
@@ -93,7 +96,7 @@ class TripDetailViewModelTest {
         every { observeStopsUseCase(TRIP_ID) } returns flowOf(listOf(stop))
         coEvery { setStartingPointUseCase(TRIP_ID, PLACE_NAME, LATITUDE, LONGITUDE) } returns Result.success(stop)
 
-        val viewModel = TripDetailViewModel(setStartingPointUseCase, observeStopsUseCase, savedStateHandle)
+        val viewModel = TripDetailViewModel(setStartingPointUseCase, setDestinationUseCase, observeStopsUseCase, savedStateHandle)
         viewModel.onIntent(TripDetailUiIntent.OnSetStartingPointClicked)
         viewModel.onIntent(TripDetailUiIntent.OnStartingPointConfirmed(PLACE_NAME, LATITUDE, LONGITUDE))
 
@@ -129,7 +132,7 @@ class TripDetailViewModelTest {
         )
         every { observeStopsUseCase(TRIP_ID) } returns flowOf(listOf(expectedStop))
 
-        val viewModel = TripDetailViewModel(setStartingPointUseCase, observeStopsUseCase, savedStateHandle)
+        val viewModel = TripDetailViewModel(setStartingPointUseCase, setDestinationUseCase, observeStopsUseCase, savedStateHandle)
 
         assertEquals(expectedStop, viewModel.uiState.value.startingPoint)
     }
@@ -139,5 +142,97 @@ class TripDetailViewModelTest {
         val viewModel = createViewModel()
 
         assertNull(viewModel.uiState.value.startingPoint)
+    }
+
+    @Test
+    fun `GIVEN initial state WHEN OnSetDestinationClicked is dispatched THEN isSetDestinationDialogVisible becomes true`() = runTest {
+        val viewModel = createViewModel()
+
+        viewModel.onIntent(TripDetailUiIntent.OnSetDestinationClicked)
+
+        assertTrue(viewModel.uiState.value.isSetDestinationDialogVisible)
+    }
+
+    @Test
+    fun `GIVEN dialog is visible WHEN OnDismissDestinationDialog is dispatched THEN isSetDestinationDialogVisible becomes false`() = runTest {
+        val viewModel = createViewModel()
+
+        viewModel.onIntent(TripDetailUiIntent.OnSetDestinationClicked)
+        viewModel.onIntent(TripDetailUiIntent.OnDismissDestinationDialog)
+
+        assertFalse(viewModel.uiState.value.isSetDestinationDialogVisible)
+    }
+
+    @Test
+    fun `GIVEN valid input WHEN OnDestinationConfirmed is dispatched and use case succeeds THEN destination is updated and dialog is dismissed`() = runTest {
+        val destinationStop = Stop(
+            id = "stop-dest",
+            tripId = TRIP_ID,
+            placeName = PLACE_NAME,
+            latitude = LATITUDE,
+            longitude = LONGITUDE,
+            order = 1,
+            status = StopStatus.PENDING,
+        )
+        every { observeStopsUseCase(TRIP_ID) } returns flowOf(listOf(destinationStop))
+        coEvery { setDestinationUseCase(TRIP_ID, PLACE_NAME, LATITUDE, LONGITUDE) } returns Result.success(destinationStop)
+
+        val viewModel = TripDetailViewModel(setStartingPointUseCase, setDestinationUseCase, observeStopsUseCase, savedStateHandle)
+        viewModel.onIntent(TripDetailUiIntent.OnSetDestinationClicked)
+        viewModel.onIntent(TripDetailUiIntent.OnDestinationConfirmed(PLACE_NAME, LATITUDE, LONGITUDE))
+
+        assertFalse(viewModel.uiState.value.isSetDestinationDialogVisible)
+    }
+
+    @Test
+    fun `GIVEN valid input WHEN OnDestinationConfirmed is dispatched and use case fails THEN ShowError effect is emitted`() = runTest(testDispatcher) {
+        val viewModel = createViewModel()
+        coEvery { setDestinationUseCase(TRIP_ID, PLACE_NAME, LATITUDE, LONGITUDE) } returns Result.failure(RuntimeException("error"))
+
+        val effects = mutableListOf<TripDetailUiEffect>()
+        val collectJob = launch {
+            viewModel.uiEffect.collect { effects.add(it) }
+        }
+
+        viewModel.onIntent(TripDetailUiIntent.OnDestinationConfirmed(PLACE_NAME, LATITUDE, LONGITUDE))
+
+        assertTrue(effects.any { it is TripDetailUiEffect.ShowError })
+        collectJob.cancel()
+    }
+
+    @Test
+    fun `GIVEN a stop with order=1 in the stream WHEN ViewModel initialises THEN destination reflects that stop`() = runTest {
+        val expectedDestination = Stop(
+            id = "stop-dest",
+            tripId = TRIP_ID,
+            placeName = PLACE_NAME,
+            latitude = LATITUDE,
+            longitude = LONGITUDE,
+            order = 1,
+            status = StopStatus.PENDING,
+        )
+        every { observeStopsUseCase(TRIP_ID) } returns flowOf(listOf(expectedDestination))
+
+        val viewModel = TripDetailViewModel(setStartingPointUseCase, setDestinationUseCase, observeStopsUseCase, savedStateHandle)
+
+        assertEquals(expectedDestination, viewModel.uiState.value.destination)
+    }
+
+    @Test
+    fun `GIVEN only a stop with order=0 in the stream WHEN ViewModel initialises THEN destination is null`() = runTest {
+        val startingPoint = Stop(
+            id = "stop-start",
+            tripId = TRIP_ID,
+            placeName = PLACE_NAME,
+            latitude = LATITUDE,
+            longitude = LONGITUDE,
+            order = 0,
+            status = StopStatus.PENDING,
+        )
+        every { observeStopsUseCase(TRIP_ID) } returns flowOf(listOf(startingPoint))
+
+        val viewModel = TripDetailViewModel(setStartingPointUseCase, setDestinationUseCase, observeStopsUseCase, savedStateHandle)
+
+        assertNull(viewModel.uiState.value.destination)
     }
 }

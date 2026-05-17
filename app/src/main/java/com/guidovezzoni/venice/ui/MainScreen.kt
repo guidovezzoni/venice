@@ -66,13 +66,20 @@ fun MainScreen() {
             val viewModel: TripDetailViewModel = hiltViewModel()
             val uiState by viewModel.uiState.collectAsState()
             val snackbarHostState = remember { SnackbarHostState() }
-            val errorMessage = stringResource(R.string.trip_detail_starting_point_error)
+            val startingPointErrorMessage = stringResource(R.string.trip_detail_starting_point_error)
+            val destinationErrorMessage = stringResource(R.string.trip_detail_destination_error)
 
             LaunchedEffect(Unit) {
                 viewModel.uiEffect.collect { effect ->
                     when (effect) {
-                        is TripDetailUiEffect.ShowError ->
-                            snackbarHostState.showSnackbar(errorMessage)
+                        is TripDetailUiEffect.ShowError -> {
+                            val message = if (uiState.isSetDestinationDialogVisible) {
+                                destinationErrorMessage
+                            } else {
+                                startingPointErrorMessage
+                            }
+                            snackbarHostState.showSnackbar(message)
+                        }
                     }
                 }
             }

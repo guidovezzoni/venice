@@ -11,5 +11,12 @@ interface StopRepository {
         longitude: Double,
     ): Result<Stop>
 
+    suspend fun upsertDestination(
+        tripId: String,
+        placeName: String,
+        latitude: Double,
+        longitude: Double,
+    ): Result<Stop>
+
     fun observeStopsForTrip(tripId: String): Flow<List<Stop>>
 }
