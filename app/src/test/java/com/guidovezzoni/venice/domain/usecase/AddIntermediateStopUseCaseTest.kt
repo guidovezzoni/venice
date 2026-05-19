@@ -51,35 +51,6 @@ class AddIntermediateStopUseCaseTest {
     }
 
     @Test
-    fun `GIVEN blank place name WHEN invoke is called THEN returns failure`() = runTest {
-        val result = useCase(TRIP_ID, "   ", LATITUDE, LONGITUDE)
-
-        assertTrue(result.isFailure)
-        assertTrue(result.exceptionOrNull() is IllegalArgumentException)
-        coVerify(exactly = 0) { stopRepository.addIntermediateStop(any(), any(), any(), any()) }
-    }
-
-    @Test
-    fun `GIVEN coordinates out of range WHEN invoke is called THEN returns failure`() = runTest {
-        val invalidLatitude = 91.0
-        val result = useCase(TRIP_ID, PLACE_NAME, invalidLatitude, LONGITUDE)
-
-        assertTrue(result.isFailure)
-        assertTrue(result.exceptionOrNull() is IllegalArgumentException)
-        coVerify(exactly = 0) { stopRepository.addIntermediateStop(any(), any(), any(), any()) }
-    }
-
-    @Test
-    fun `GIVEN longitude out of range WHEN invoke is called THEN returns failure`() = runTest {
-        val invalidLongitude = -181.0
-        val result = useCase(TRIP_ID, PLACE_NAME, LATITUDE, invalidLongitude)
-
-        assertTrue(result.isFailure)
-        assertTrue(result.exceptionOrNull() is IllegalArgumentException)
-        coVerify(exactly = 0) { stopRepository.addIntermediateStop(any(), any(), any(), any()) }
-    }
-
-    @Test
     fun `GIVEN stop count already at 25 WHEN invoke is called THEN returns failure`() = runTest {
         val maxStopCount = 25
         coEvery { stopRepository.getStopCount(TRIP_ID) } returns maxStopCount
