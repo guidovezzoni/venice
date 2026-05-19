@@ -4,7 +4,7 @@ import com.guidovezzoni.venice.domain.model.Stop
 import com.guidovezzoni.venice.domain.repository.StopRepository
 import javax.inject.Inject
 
-// TODO: Consolidate with SetStartingPointUseCase into a single SetStopUseCase when StopType is introduced (story 1.2.3)
+// TODO: Consolidate with SetStartingPointUseCase into a single SetStopUseCase when StopType is introduced (story 1.2.3.1)
 class SetDestinationUseCase @Inject constructor(
     private val stopRepository: StopRepository,
 ) {
