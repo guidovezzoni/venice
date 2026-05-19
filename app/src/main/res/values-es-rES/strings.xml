@@ -36,4 +36,15 @@
     <string name="trip_detail_destination_place_name_error">El nombre del lugar no puede estar vacío</string>
     <string name="trip_detail_destination_latitude_error">La latitud debe estar entre -90 y 90</string>
     <string name="trip_detail_destination_longitude_error">La longitud debe estar entre -180 y 180</string>
+    <string name="trip_detail_add_stop">Añadir parada</string>
+    <string name="trip_detail_add_stop_dialog_title">Añadir parada intermedia</string>
+    <string name="trip_detail_add_stop_place_name_hint">Nombre del lugar</string>
+    <string name="trip_detail_add_stop_place_name_error">El nombre del lugar no puede estar vacío</string>
+    <string name="trip_detail_add_stop_latitude_hint">Latitud</string>
+    <string name="trip_detail_add_stop_latitude_error">La latitud debe estar entre -90 y 90</string>
+    <string name="trip_detail_add_stop_longitude_hint">Longitud</string>
+    <string name="trip_detail_add_stop_longitude_error">La longitud debe estar entre -180 y 180</string>
+    <string name="trip_detail_intermediate_stop_label">Parada</string>
+    <string name="trip_detail_change_intermediate_stop">Cambiar parada</string>
+    <string name="error_max_stops_reached">Número máximo de paradas alcanzado</string>
 </resources>

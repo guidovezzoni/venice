@@ -15,4 +15,11 @@ sealed class TripDetailUiIntent {
         val longitude: Double,
     ) : TripDetailUiIntent()
     data object OnDismissDestinationDialog : TripDetailUiIntent()
+    data object OnAddStopClicked : TripDetailUiIntent()
+    data class OnAddStopConfirmed(
+        val placeName: String,
+        val latitude: Double,
+        val longitude: Double,
+    ) : TripDetailUiIntent()
+    data object OnDismissAddStopDialog : TripDetailUiIntent()
 }

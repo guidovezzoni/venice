@@ -3,6 +3,7 @@ package com.guidovezzoni.venice.ui.viewmodel
 import androidx.lifecycle.SavedStateHandle
 import com.guidovezzoni.venice.domain.model.Stop
 import com.guidovezzoni.venice.domain.model.StopStatus
+import com.guidovezzoni.venice.domain.usecase.AddIntermediateStopUseCase
 import com.guidovezzoni.venice.domain.usecase.ObserveStopsUseCase
 import com.guidovezzoni.venice.domain.usecase.SetDestinationUseCase
 import com.guidovezzoni.venice.domain.usecase.SetStartingPointUseCase
@@ -39,6 +40,7 @@ class TripDetailViewModelTest {
 
     private lateinit var setStartingPointUseCase: SetStartingPointUseCase
     private lateinit var setDestinationUseCase: SetDestinationUseCase
+    private lateinit var addIntermediateStopUseCase: AddIntermediateStopUseCase
     private lateinit var observeStopsUseCase: ObserveStopsUseCase
     private lateinit var savedStateHandle: SavedStateHandle
 
@@ -48,6 +50,7 @@ class TripDetailViewModelTest {
         Dispatchers.setMain(testDispatcher)
         setStartingPointUseCase = mockk()
         setDestinationUseCase = mockk()
+        addIntermediateStopUseCase = mockk()
         observeStopsUseCase = mockk()
         savedStateHandle = SavedStateHandle(mapOf("tripId" to TRIP_ID))
     }
@@ -60,7 +63,7 @@ class TripDetailViewModelTest {
 
     private fun createViewModel(): TripDetailViewModel {
         every { observeStopsUseCase(TRIP_ID) } returns flowOf(emptyList())
-        return TripDetailViewModel(setStartingPointUseCase, setDestinationUseCase, observeStopsUseCase, savedStateHandle)
+        return TripDetailViewModel(setStartingPointUseCase, setDestinationUseCase, addIntermediateStopUseCase, observeStopsUseCase, savedStateHandle)
     }
 
     @Test
@@ -96,7 +99,7 @@ class TripDetailViewModelTest {
         every { observeStopsUseCase(TRIP_ID) } returns flowOf(listOf(stop))
         coEvery { setStartingPointUseCase(TRIP_ID, PLACE_NAME, LATITUDE, LONGITUDE) } returns Result.success(stop)
 
-        val viewModel = TripDetailViewModel(setStartingPointUseCase, setDestinationUseCase, observeStopsUseCase, savedStateHandle)
+        val viewModel = TripDetailViewModel(setStartingPointUseCase, setDestinationUseCase, addIntermediateStopUseCase, observeStopsUseCase, savedStateHandle)
         viewModel.onIntent(TripDetailUiIntent.OnSetStartingPointClicked)
         viewModel.onIntent(TripDetailUiIntent.OnStartingPointConfirmed(PLACE_NAME, LATITUDE, LONGITUDE))
 
@@ -132,7 +135,7 @@ class TripDetailViewModelTest {
         )
         every { observeStopsUseCase(TRIP_ID) } returns flowOf(listOf(expectedStop))
 
-        val viewModel = TripDetailViewModel(setStartingPointUseCase, setDestinationUseCase, observeStopsUseCase, savedStateHandle)
+        val viewModel = TripDetailViewModel(setStartingPointUseCase, setDestinationUseCase, addIntermediateStopUseCase, observeStopsUseCase, savedStateHandle)
 
         assertEquals(expectedStop, viewModel.uiState.value.startingPoint)
     }
@@ -177,7 +180,7 @@ class TripDetailViewModelTest {
         every { observeStopsUseCase(TRIP_ID) } returns flowOf(listOf(destinationStop))
         coEvery { setDestinationUseCase(TRIP_ID, PLACE_NAME, LATITUDE, LONGITUDE) } returns Result.success(destinationStop)
 
-        val viewModel = TripDetailViewModel(setStartingPointUseCase, setDestinationUseCase, observeStopsUseCase, savedStateHandle)
+        val viewModel = TripDetailViewModel(setStartingPointUseCase, setDestinationUseCase, addIntermediateStopUseCase, observeStopsUseCase, savedStateHandle)
         viewModel.onIntent(TripDetailUiIntent.OnSetDestinationClicked)
         viewModel.onIntent(TripDetailUiIntent.OnDestinationConfirmed(PLACE_NAME, LATITUDE, LONGITUDE))
 
@@ -213,7 +216,7 @@ class TripDetailViewModelTest {
         )
         every { observeStopsUseCase(TRIP_ID) } returns flowOf(listOf(expectedDestination))
 
-        val viewModel = TripDetailViewModel(setStartingPointUseCase, setDestinationUseCase, observeStopsUseCase, savedStateHandle)
+        val viewModel = TripDetailViewModel(setStartingPointUseCase, setDestinationUseCase, addIntermediateStopUseCase, observeStopsUseCase, savedStateHandle)
 
         assertEquals(expectedDestination, viewModel.uiState.value.destination)
     }
@@ -231,8 +234,83 @@ class TripDetailViewModelTest {
         )
         every { observeStopsUseCase(TRIP_ID) } returns flowOf(listOf(startingPoint))
 
-        val viewModel = TripDetailViewModel(setStartingPointUseCase, setDestinationUseCase, observeStopsUseCase, savedStateHandle)
+        val viewModel = TripDetailViewModel(setStartingPointUseCase, setDestinationUseCase, addIntermediateStopUseCase, observeStopsUseCase, savedStateHandle)
 
         assertNull(viewModel.uiState.value.destination)
+    }
+
+    @Test
+    fun `GIVEN stops exist WHEN observed THEN intermediateStops contains only stops with order between start and destination`() = runTest {
+        val startingPoint = Stop("s0", TRIP_ID, "Start", 0.0, 0.0, 0, StopStatus.PENDING)
+        val intermediate1 = Stop("s1", TRIP_ID, "Stop A", 1.0, 1.0, 1, StopStatus.PENDING)
+        val intermediate2 = Stop("s2", TRIP_ID, "Stop B", 2.0, 2.0, 2, StopStatus.PENDING)
+        val destination = Stop("s3", TRIP_ID, "End", 3.0, 3.0, 3, StopStatus.PENDING)
+        every { observeStopsUseCase(TRIP_ID) } returns flowOf(listOf(startingPoint, intermediate1, intermediate2, destination))
+
+        val viewModel = TripDetailViewModel(setStartingPointUseCase, setDestinationUseCase, addIntermediateStopUseCase, observeStopsUseCase, savedStateHandle)
+
+        val expectedIntermediateStops = listOf(intermediate1, intermediate2)
+        assertEquals(expectedIntermediateStops, viewModel.uiState.value.intermediateStops)
+        assertEquals(startingPoint, viewModel.uiState.value.startingPoint)
+        assertEquals(destination, viewModel.uiState.value.destination)
+    }
+
+    @Test
+    fun `GIVEN OnAddStopClicked intent WHEN dispatched THEN isAddStopDialogVisible becomes true`() = runTest {
+        val viewModel = createViewModel()
+
+        viewModel.onIntent(TripDetailUiIntent.OnAddStopClicked)
+
+        assertTrue(viewModel.uiState.value.isAddStopDialogVisible)
+    }
+
+    @Test
+    fun `GIVEN OnDismissAddStopDialog intent WHEN dispatched THEN isAddStopDialogVisible becomes false`() = runTest {
+        val viewModel = createViewModel()
+
+        viewModel.onIntent(TripDetailUiIntent.OnAddStopClicked)
+        viewModel.onIntent(TripDetailUiIntent.OnDismissAddStopDialog)
+
+        assertFalse(viewModel.uiState.value.isAddStopDialogVisible)
+    }
+
+    @Test
+    fun `GIVEN OnAddStopConfirmed intent WHEN dispatched and use case succeeds THEN dialog is dismissed`() = runTest {
+        val stop = Stop("s1", TRIP_ID, PLACE_NAME, LATITUDE, LONGITUDE, 1, StopStatus.PENDING)
+        coEvery { addIntermediateStopUseCase(TRIP_ID, PLACE_NAME, LATITUDE, LONGITUDE) } returns Result.success(stop)
+        val viewModel = createViewModel()
+
+        viewModel.onIntent(TripDetailUiIntent.OnAddStopClicked)
+        viewModel.onIntent(TripDetailUiIntent.OnAddStopConfirmed(PLACE_NAME, LATITUDE, LONGITUDE))
+
+        assertFalse(viewModel.uiState.value.isAddStopDialogVisible)
+    }
+
+    @Test
+    fun `GIVEN OnAddStopConfirmed intent WHEN dispatched and use case fails THEN ShowError effect is emitted`() = runTest(testDispatcher) {
+        coEvery { addIntermediateStopUseCase(TRIP_ID, PLACE_NAME, LATITUDE, LONGITUDE) } returns Result.failure(RuntimeException("error"))
+        val viewModel = createViewModel()
+
+        val effects = mutableListOf<TripDetailUiEffect>()
+        val collectJob = launch {
+            viewModel.uiEffect.collect { effects.add(it) }
+        }
+
+        viewModel.onIntent(TripDetailUiIntent.OnAddStopConfirmed(PLACE_NAME, LATITUDE, LONGITUDE))
+
+        assertTrue(effects.any { it is TripDetailUiEffect.ShowError })
+        collectJob.cancel()
+    }
+
+    @Test
+    fun `GIVEN 25 stops exist WHEN observed THEN canAddMoreStops is false`() = runTest {
+        val stops = (0 until 25).map { i ->
+            Stop("s$i", TRIP_ID, "Stop $i", i.toDouble(), i.toDouble(), i, StopStatus.PENDING)
+        }
+        every { observeStopsUseCase(TRIP_ID) } returns flowOf(stops)
+
+        val viewModel = TripDetailViewModel(setStartingPointUseCase, setDestinationUseCase, addIntermediateStopUseCase, observeStopsUseCase, savedStateHandle)
+
+        assertFalse(viewModel.uiState.value.canAddMoreStops)
     }
 }
