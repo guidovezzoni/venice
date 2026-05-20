@@ -3,10 +3,9 @@ package com.guidovezzoni.venice.ui.viewmodel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.guidovezzoni.venice.domain.usecase.AddIntermediateStopUseCase
+import com.guidovezzoni.venice.domain.model.StopType
 import com.guidovezzoni.venice.domain.usecase.ObserveStopsUseCase
-import com.guidovezzoni.venice.domain.usecase.SetDestinationUseCase
-import com.guidovezzoni.venice.domain.usecase.SetStartingPointUseCase
+import com.guidovezzoni.venice.domain.usecase.SetStopUseCase
 import com.guidovezzoni.venice.ui.effect.TripDetailUiEffect
 import com.guidovezzoni.venice.ui.intent.TripDetailUiIntent
 import com.guidovezzoni.venice.ui.state.TripDetailUiState
@@ -30,9 +29,7 @@ private const val UNKNOWN_ERROR = "Unknown error"
 
 @HiltViewModel
 class TripDetailViewModel @Inject constructor(
-    private val setStartingPointUseCase: SetStartingPointUseCase,
-    private val setDestinationUseCase: SetDestinationUseCase,
-    private val addIntermediateStopUseCase: AddIntermediateStopUseCase,
+    private val setStopUseCase: SetStopUseCase,
     observeStopsUseCase: ObserveStopsUseCase,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
@@ -79,7 +76,9 @@ class TripDetailViewModel @Inject constructor(
                 _uiState.update { it.copy(isSetStartingPointDialogVisible = false) }
 
             is TripDetailUiIntent.OnStartingPointConfirmed ->
-                setStartingPoint(intent.placeName, intent.latitude, intent.longitude)
+                setStop(intent.placeName, intent.latitude, intent.longitude, StopType.STARTING_POINT) {
+                    it.copy(isSetStartingPointDialogVisible = false)
+                }
 
             TripDetailUiIntent.OnSetDestinationClicked ->
                 _uiState.update { it.copy(isSetDestinationDialogVisible = true) }
@@ -88,7 +87,9 @@ class TripDetailViewModel @Inject constructor(
                 _uiState.update { it.copy(isSetDestinationDialogVisible = false) }
 
             is TripDetailUiIntent.OnDestinationConfirmed ->
-                setDestination(intent.placeName, intent.latitude, intent.longitude)
+                setStop(intent.placeName, intent.latitude, intent.longitude, StopType.DESTINATION) {
+                    it.copy(isSetDestinationDialogVisible = false)
+                }
 
             TripDetailUiIntent.OnAddStopClicked ->
                 _uiState.update { it.copy(isAddStopDialogVisible = true) }
@@ -97,44 +98,24 @@ class TripDetailViewModel @Inject constructor(
                 _uiState.update { it.copy(isAddStopDialogVisible = false) }
 
             is TripDetailUiIntent.OnAddStopConfirmed ->
-                addIntermediateStop(intent.placeName, intent.latitude, intent.longitude)
-        }
-    }
-
-    private fun setStartingPoint(placeName: String, latitude: Double, longitude: Double) {
-        viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) }
-            setStartingPointUseCase(tripId, placeName, latitude, longitude)
-                .onSuccess {
-                    _uiState.update { it.copy(isLoading = false, isSetStartingPointDialogVisible = false) }
-                }
-                .onFailure { error ->
-                    _uiState.update { it.copy(isLoading = false) }
-                    _uiEffect.emit(TripDetailUiEffect.ShowError(error.message ?: UNKNOWN_ERROR))
+                setStop(intent.placeName, intent.latitude, intent.longitude, StopType.INTERMEDIATE) {
+                    it.copy(isAddStopDialogVisible = false)
                 }
         }
     }
 
-    private fun setDestination(placeName: String, latitude: Double, longitude: Double) {
+    private fun setStop(
+        placeName: String,
+        latitude: Double,
+        longitude: Double,
+        stopType: StopType,
+        dismissDialog: (TripDetailUiState) -> TripDetailUiState,
+    ) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
-            setDestinationUseCase(tripId, placeName, latitude, longitude)
+            setStopUseCase(tripId, placeName, latitude, longitude, stopType)
                 .onSuccess {
-                    _uiState.update { it.copy(isLoading = false, isSetDestinationDialogVisible = false) }
-                }
-                .onFailure { error ->
-                    _uiState.update { it.copy(isLoading = false) }
-                    _uiEffect.emit(TripDetailUiEffect.ShowError(error.message ?: UNKNOWN_ERROR))
-                }
-        }
-    }
-
-    private fun addIntermediateStop(placeName: String, latitude: Double, longitude: Double) {
-        viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) }
-            addIntermediateStopUseCase(tripId, placeName, latitude, longitude)
-                .onSuccess {
-                    _uiState.update { it.copy(isLoading = false, isAddStopDialogVisible = false) }
+                    _uiState.update { dismissDialog(it).copy(isLoading = false) }
                 }
                 .onFailure { error ->
                     _uiState.update { it.copy(isLoading = false) }

@@ -58,13 +58,13 @@ Defines the requirements for the trip detail screen, covering the MVI contract (
   - `canAddMoreStops` as `true` when the total stop count is less than 25, `false` otherwise.
 - On `OnSetStartingPointClicked`: set `isSetStartingPointDialogVisible = true`.
 - On `OnDismissStartingPointDialog`: set `isSetStartingPointDialogVisible = false`.
-- On `OnStartingPointConfirmed`: call `SetStartingPointUseCase`; on success dismiss the dialog; on failure emit `ShowError`.
+- On `OnStartingPointConfirmed`: call `SetStopUseCase` with `StopType.STARTING_POINT`; on success dismiss the dialog; on failure emit `ShowError`.
 - On `OnSetDestinationClicked`: set `isSetDestinationDialogVisible = true`.
 - On `OnDismissDestinationDialog`: set `isSetDestinationDialogVisible = false`.
-- On `OnDestinationConfirmed`: call `SetDestinationUseCase`; on success dismiss the dialog; on failure emit `ShowError`.
+- On `OnDestinationConfirmed`: call `SetStopUseCase` with `StopType.DESTINATION`; on success dismiss the dialog; on failure emit `ShowError`.
 - On `OnAddStopClicked`: set `isAddStopDialogVisible = true`.
 - On `OnDismissAddStopDialog`: set `isAddStopDialogVisible = false`.
-- On `OnAddStopConfirmed`: call `AddIntermediateStopUseCase`; on success dismiss the dialog; on failure emit `ShowError`.
+- On `OnAddStopConfirmed`: call `SetStopUseCase` with `StopType.INTERMEDIATE`; on success dismiss the dialog; on failure emit `ShowError`.
 
 #### Scenario: Opening starting point dialog
 - **WHEN** `OnSetStartingPointClicked` is dispatched
@@ -75,11 +75,11 @@ Defines the requirements for the trip detail screen, covering the MVI contract (
 - **THEN** `isSetStartingPointDialogVisible` becomes `false`
 
 #### Scenario: Confirming starting point — success
-- **WHEN** `OnStartingPointConfirmed` is dispatched and the use case succeeds
+- **WHEN** `OnStartingPointConfirmed` is dispatched and `SetStopUseCase` with `StopType.STARTING_POINT` succeeds
 - **THEN** `startingPoint` is updated and the dialog is dismissed
 
 #### Scenario: Confirming starting point — failure
-- **WHEN** `OnStartingPointConfirmed` is dispatched and the use case fails
+- **WHEN** `OnStartingPointConfirmed` is dispatched and `SetStopUseCase` with `StopType.STARTING_POINT` fails
 - **THEN** a `ShowError` effect is emitted
 
 #### Scenario: Opening destination dialog
@@ -91,11 +91,11 @@ Defines the requirements for the trip detail screen, covering the MVI contract (
 - **THEN** `isSetDestinationDialogVisible` becomes `false`
 
 #### Scenario: Confirming destination — success
-- **WHEN** `OnDestinationConfirmed` is dispatched and the use case succeeds
+- **WHEN** `OnDestinationConfirmed` is dispatched and `SetStopUseCase` with `StopType.DESTINATION` succeeds
 - **THEN** `destination` is updated and the dialog is dismissed
 
 #### Scenario: Confirming destination — failure
-- **WHEN** `OnDestinationConfirmed` is dispatched and the use case fails
+- **WHEN** `OnDestinationConfirmed` is dispatched and `SetStopUseCase` with `StopType.DESTINATION` fails
 - **THEN** a `ShowError` effect is emitted
 
 #### Scenario: Opening add stop dialog
@@ -107,11 +107,11 @@ Defines the requirements for the trip detail screen, covering the MVI contract (
 - **THEN** `isAddStopDialogVisible` becomes `false`
 
 #### Scenario: Confirming add stop — success
-- **WHEN** `OnAddStopConfirmed` is dispatched and the use case succeeds
+- **WHEN** `OnAddStopConfirmed` is dispatched and `SetStopUseCase` with `StopType.INTERMEDIATE` succeeds
 - **THEN** the dialog is dismissed and the new stop appears in `intermediateStops`
 
 #### Scenario: Confirming add stop — failure
-- **WHEN** `OnAddStopConfirmed` is dispatched and the use case fails
+- **WHEN** `OnAddStopConfirmed` is dispatched and `SetStopUseCase` with `StopType.INTERMEDIATE` fails
 - **THEN** a `ShowError` effect is emitted
 
 #### Scenario: Initialisation with existing starting point and destination

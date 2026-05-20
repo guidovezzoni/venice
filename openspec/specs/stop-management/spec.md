@@ -98,37 +98,62 @@ For `upsertDestination`: finder is `StopDao.getDestination(tripId)`, order is `1
 - **WHEN** a collector is active on `observeStopsForTrip` and a stop is inserted
 - **THEN** the collector receives an updated list containing the new stop as a domain `Stop`
 
-### Requirement: SetStartingPointUseCase validates and delegates
-`SetStartingPointUseCase` SHALL trim the place name and delegate to `StopRepository.upsertStartingPoint`.
+### Requirement: StopType enum
+The domain layer SHALL define a `StopType` enum in `com.guidovezzoni.venice.domain.model` with values `STARTING_POINT`, `DESTINATION`, `INTERMEDIATE`.
 
-#### Scenario: Successful invocation
-- **WHEN** `invoke` is called with valid parameters
-- **THEN** the repository receives the trimmed place name and returns `Result.success(Stop)`
+#### Scenario: StopType values
+- **WHEN** `StopType.values()` is called
+- **THEN** it returns exactly `[STARTING_POINT, DESTINATION, INTERMEDIATE]`
 
-#### Scenario: Repository returns failure
-- **WHEN** `invoke` is called and the repository returns `Result.failure`
-- **THEN** `Result.failure` is propagated to the caller
+### Requirement: SetStopUseCase validates and delegates by StopType
+`SetStopUseCase` SHALL accept `tripId: String`, `placeName: String`, `latitude: Double`, `longitude: Double`, `stopType: StopType` and:
+1. Trim the place name.
+2. When `stopType` is `INTERMEDIATE`: query `StopRepository.getStopCount(tripId)` and return `Result.failure(IllegalStateException("Maximum of 25 stops reached"))` if count >= 25.
+3. Delegate to the correct repository method based on `stopType`:
+   - `STARTING_POINT` → `StopRepository.upsertStartingPoint(tripId, trimmedName, latitude, longitude)`
+   - `DESTINATION` → `StopRepository.upsertDestination(tripId, trimmedName, latitude, longitude)`
+   - `INTERMEDIATE` → `StopRepository.addIntermediateStop(tripId, trimmedName, latitude, longitude)`
+4. Return the repository result.
 
-#### Scenario: Place name is trimmed
-- **WHEN** `invoke` is called with `placeName = "  Rome  "`
+#### Scenario: Starting point — successful invocation
+- **WHEN** `invoke` is called with `stopType = STARTING_POINT` and valid parameters
+- **THEN** `StopRepository.upsertStartingPoint` is called with the trimmed place name and `Result.success(Stop)` is returned
+
+#### Scenario: Destination — successful invocation
+- **WHEN** `invoke` is called with `stopType = DESTINATION` and valid parameters
+- **THEN** `StopRepository.upsertDestination` is called with the trimmed place name and `Result.success(Stop)` is returned
+
+#### Scenario: Intermediate — successful invocation below limit
+- **WHEN** `invoke` is called with `stopType = INTERMEDIATE` and the trip has fewer than 25 stops
+- **THEN** `StopRepository.addIntermediateStop` is called with the trimmed place name and `Result.success(Stop)` is returned
+
+#### Scenario: Intermediate — stop count at limit rejected
+- **WHEN** `invoke` is called with `stopType = INTERMEDIATE` and `StopRepository.getStopCount(tripId)` returns 25
+- **THEN** `Result.failure` is returned with an `IllegalStateException` and `addIntermediateStop` is not called
+
+#### Scenario: Starting point — place name is trimmed
+- **WHEN** `invoke` is called with `stopType = STARTING_POINT` and `placeName = "  Rome  "`
 - **THEN** the repository receives `placeName = "Rome"`
 
-### Requirement: SetDestinationUseCase validates and delegates
-`SetDestinationUseCase` SHALL trim the place name and delegate to `StopRepository.upsertDestination`.
+#### Scenario: Destination — place name is trimmed
+- **WHEN** `invoke` is called with `stopType = DESTINATION` and `placeName = "  Barcelona  "`
+- **THEN** the repository receives `placeName = "Barcelona"`
 
-Note: `SetStartingPointUseCase` and `SetDestinationUseCase` are candidates for consolidation into a single `SetStopUseCase` when `StopType` is introduced in story 1.2.3.
+#### Scenario: Intermediate — place name is trimmed
+- **WHEN** `invoke` is called with `stopType = INTERMEDIATE` and `placeName = "  Florence  "`
+- **THEN** the repository receives `placeName = "Florence"`
 
-#### Scenario: Successful invocation
-- **WHEN** `invoke` is called with valid parameters
-- **THEN** the repository receives the trimmed place name and returns `Result.success(Stop)`
-
-#### Scenario: Repository returns failure
-- **WHEN** `invoke` is called and the repository returns `Result.failure`
+#### Scenario: Starting point — repository failure propagated
+- **WHEN** `invoke` is called with `stopType = STARTING_POINT` and the repository returns `Result.failure`
 - **THEN** `Result.failure` is propagated to the caller
 
-#### Scenario: Place name is trimmed
-- **WHEN** `invoke` is called with `placeName = "  Barcelona  "`
-- **THEN** the repository receives `placeName = "Barcelona"`
+#### Scenario: Destination — repository failure propagated
+- **WHEN** `invoke` is called with `stopType = DESTINATION` and the repository returns `Result.failure`
+- **THEN** `Result.failure` is propagated to the caller
+
+#### Scenario: Intermediate — repository failure propagated
+- **WHEN** `invoke` is called with `stopType = INTERMEDIATE` and the repository returns `Result.failure`
+- **THEN** `Result.failure` is propagated to the caller
 
 ### Requirement: ObserveStopsUseCase wraps repository observation
 `ObserveStopsUseCase` SHALL expose `operator fun invoke(tripId: String): Flow<List<Stop>>` that delegates to `StopRepository.observeStopsForTrip`.

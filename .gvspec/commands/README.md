@@ -45,3 +45,8 @@ Reusable procedure definitions live in `.gvspec/references/` and are loaded via 
 
 - **`create-branch-procedure.md`** — Branch creation criteria (used by `/open_user_story` and `/create_branch`)
 - **`refine-user-story-procedure.md`** — User story refinement steps (used by `/open_user_story` and `/refine_user_story`)
+
+## TODO
+
+- add a prefix
+- open_user_story should switch to main and fetch update as a first task
