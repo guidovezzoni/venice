@@ -23,4 +23,10 @@ interface StopDao {
 
     @Query("SELECT * FROM stops WHERE tripId = :tripId ORDER BY `order` ASC")
     fun observeByTripId(tripId: String): Flow<List<StopEntity>>
+
+    @Query("UPDATE stops SET `order` = `order` + 1 WHERE tripId = :tripId AND `order` >= :fromOrder")
+    suspend fun incrementOrderFrom(tripId: String, fromOrder: Int)
+
+    @Query("SELECT COUNT(*) FROM stops WHERE tripId = :tripId")
+    suspend fun getStopCount(tripId: String): Int
 }

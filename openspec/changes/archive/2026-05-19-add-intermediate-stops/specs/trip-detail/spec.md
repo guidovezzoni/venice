@@ -1,10 +1,4 @@
-# Trip Detail
-
-## Purpose
-
-Defines the requirements for the trip detail screen, covering the MVI contract (state, intents, effects), ViewModel behaviour, UI composables, and navigation wiring.
-
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: TripDetailUiState represents the screen state
 `TripDetailUiState` SHALL be a data class with:
@@ -37,14 +31,6 @@ Defines the requirements for the trip detail screen, covering the MVI contract (
 #### Scenario: All intents are representable
 - **WHEN** a user action occurs on the trip detail screen
 - **THEN** it maps to exactly one `TripDetailUiIntent` subclass
-
-### Requirement: TripDetailUiEffect models one-shot side effects
-`TripDetailUiEffect` SHALL be a sealed class with:
-- `ShowError(message: String)` — displayed as a snackbar
-
-#### Scenario: Error effect carries message
-- **WHEN** `ShowError("Failed")` is created
-- **THEN** its `message` property is `"Failed"`
 
 ### Requirement: TripDetailViewModel drives the screen
 `TripDetailViewModel` SHALL:
@@ -134,20 +120,6 @@ Defines the requirements for the trip detail screen, covering the MVI contract (
 - **WHEN** the ViewModel observes 25 stops for the trip
 - **THEN** `canAddMoreStops` is `false`
 
-### Requirement: Stop sections use consolidated StopSection composable
-The trip detail screen SHALL use `StopSection` (defined in destination-ui spec) for both the starting point and destination sections, parameterised with the appropriate icon, labels, and string resources for each.
-
-#### Scenario: Starting point section uses StopSection
-- **WHEN** the starting point section is rendered
-- **THEN** it uses `StopSection` with `TripOrigin` icon and starting point string resources
-
-#### Scenario: Destination section uses StopSection
-- **WHEN** the destination section is rendered
-- **THEN** it uses `StopSection` with `Place` icon and destination string resources
-
-### Requirement: Stop dialogs use consolidated SetStopDialog composable
-The trip detail screen SHALL use `SetStopDialog` (defined in destination-ui spec) for both the starting point and destination dialogs, parameterised with the appropriate title, hint, and error string resources for each.
-
 ### Requirement: TripDetailScreen integrates all components
 `TripDetailScreen` SHALL:
 - Accept `uiState` and `onIntent` parameters.
@@ -188,10 +160,3 @@ The trip detail screen SHALL use `SetStopDialog` (defined in destination-ui spec
 #### Scenario: Snackbar shown on error
 - **WHEN** a `ShowError` effect is emitted
 - **THEN** a snackbar with the error message is displayed
-
-### Requirement: TripDetailScreen wired in navigation
-`MainScreen` SHALL wire `TripDetailViewModel` via `hiltViewModel()` in the `ROUTE_TRIP_DETAIL` composable destination, passing `uiState` and `onIntent` to `TripDetailScreen`.
-
-#### Scenario: Navigation to trip detail creates ViewModel
-- **WHEN** the user navigates to a trip's detail screen
-- **THEN** `TripDetailViewModel` is created with the trip's ID from the route arguments

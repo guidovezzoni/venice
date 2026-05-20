@@ -146,4 +146,70 @@ class StopRepositoryImplTest {
         assertTrue(result.isFailure)
         assertEquals(exception, result.exceptionOrNull())
     }
+
+    @Test
+    fun `GIVEN existing stops WHEN addIntermediateStop is called THEN orders are shifted and new stop is inserted at the correct position`() = runTest {
+        val destinationEntity = StopEntity(
+            id = "dest-id",
+            tripId = TRIP_ID,
+            placeName = "Barcelona",
+            latitude = 41.3851,
+            longitude = 2.1734,
+            order = 1,
+            status = "PENDING",
+        )
+        coEvery { stopDao.getDestination(TRIP_ID) } returns destinationEntity
+        coEvery { stopDao.incrementOrderFrom(TRIP_ID, 1) } returns Unit
+        val entitySlot = slot<StopEntity>()
+        coEvery { stopDao.insert(capture(entitySlot)) } returns Unit
+
+        val result = repository.addIntermediateStop(TRIP_ID, PLACE_NAME, LATITUDE, LONGITUDE)
+
+        assertTrue(result.isSuccess)
+        val stop = result.getOrThrow()
+        val expectedOrder = 1
+        assertEquals(expectedOrder, stop.order)
+        assertEquals(StopStatus.PENDING, stop.status)
+        assertEquals(PLACE_NAME, stop.placeName)
+        coVerify(exactly = 1) { stopDao.incrementOrderFrom(TRIP_ID, 1) }
+        coVerify(exactly = 1) { stopDao.insert(any()) }
+    }
+
+    @Test
+    fun `GIVEN no destination exists WHEN addIntermediateStop is called THEN new stop is inserted at order 1`() = runTest {
+        coEvery { stopDao.getDestination(TRIP_ID) } returns null
+        val entitySlot = slot<StopEntity>()
+        coEvery { stopDao.insert(capture(entitySlot)) } returns Unit
+
+        val result = repository.addIntermediateStop(TRIP_ID, PLACE_NAME, LATITUDE, LONGITUDE)
+
+        assertTrue(result.isSuccess)
+        val stop = result.getOrThrow()
+        val expectedOrder = 1
+        assertEquals(expectedOrder, stop.order)
+        assertEquals(StopStatus.PENDING, stop.status)
+        coVerify(exactly = 0) { stopDao.incrementOrderFrom(any(), any()) }
+        coVerify(exactly = 1) { stopDao.insert(any()) }
+    }
+
+    @Test
+    fun `GIVEN DAO throws exception WHEN addIntermediateStop is called THEN Result failure is returned`() = runTest {
+        val exception = RuntimeException("DB error")
+        coEvery { stopDao.getDestination(TRIP_ID) } throws exception
+
+        val result = repository.addIntermediateStop(TRIP_ID, PLACE_NAME, LATITUDE, LONGITUDE)
+
+        assertTrue(result.isFailure)
+        assertEquals(exception, result.exceptionOrNull())
+    }
+
+    @Test
+    fun `GIVEN a trip WHEN getStopCount is called THEN correct count is returned`() = runTest {
+        val expectedCount = 3
+        coEvery { stopDao.getStopCount(TRIP_ID) } returns expectedCount
+
+        val count = repository.getStopCount(TRIP_ID)
+
+        assertEquals(expectedCount, count)
+    }
 }

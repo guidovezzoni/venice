@@ -37,4 +37,15 @@
     <string name="trip_detail_destination_place_name_error">Place name must not be blank</string>
     <string name="trip_detail_destination_latitude_error">Latitude must be between -90 and 90</string>
     <string name="trip_detail_destination_longitude_error">Longitude must be between -180 and 180</string>
+    <string name="trip_detail_add_stop">Add stop</string>
+    <string name="trip_detail_add_stop_dialog_title">Add intermediate stop</string>
+    <string name="trip_detail_add_stop_place_name_hint">Place name</string>
+    <string name="trip_detail_add_stop_place_name_error">Place name must not be blank</string>
+    <string name="trip_detail_add_stop_latitude_hint">Latitude</string>
+    <string name="trip_detail_add_stop_latitude_error">Latitude must be between -90 and 90</string>
+    <string name="trip_detail_add_stop_longitude_hint">Longitude</string>
+    <string name="trip_detail_add_stop_longitude_error">Longitude must be between -180 and 180</string>
+    <string name="trip_detail_intermediate_stop_label">Stop</string>
+    <string name="trip_detail_change_intermediate_stop">Change stop</string>
+    <string name="error_max_stops_reached">Maximum number of stops reached</string>
 </resources>

@@ -3,6 +3,7 @@ package com.guidovezzoni.venice.ui.viewmodel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.guidovezzoni.venice.domain.usecase.AddIntermediateStopUseCase
 import com.guidovezzoni.venice.domain.usecase.ObserveStopsUseCase
 import com.guidovezzoni.venice.domain.usecase.SetDestinationUseCase
 import com.guidovezzoni.venice.domain.usecase.SetStartingPointUseCase
@@ -24,12 +25,14 @@ import javax.inject.Inject
 
 private const val ARG_TRIP_ID = "tripId"
 private const val STARTING_POINT_ORDER = 0
+private const val MAX_STOP_COUNT = 25
 private const val UNKNOWN_ERROR = "Unknown error"
 
 @HiltViewModel
 class TripDetailViewModel @Inject constructor(
     private val setStartingPointUseCase: SetStartingPointUseCase,
     private val setDestinationUseCase: SetDestinationUseCase,
+    private val addIntermediateStopUseCase: AddIntermediateStopUseCase,
     observeStopsUseCase: ObserveStopsUseCase,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
@@ -48,7 +51,21 @@ class TripDetailViewModel @Inject constructor(
                 val startingPoint = stops.firstOrNull { it.order == STARTING_POINT_ORDER }
                 val destination = stops.filter { it.order > STARTING_POINT_ORDER }
                     .maxByOrNull { it.order }
-                _uiState.update { it.copy(startingPoint = startingPoint, destination = destination) }
+                val intermediateStops = if (destination != null) {
+                    stops.filter { it.order > STARTING_POINT_ORDER && it.order < destination.order }
+                        .sortedBy { it.order }
+                } else {
+                    emptyList()
+                }
+                val canAddMoreStops = stops.size < MAX_STOP_COUNT
+                _uiState.update {
+                    it.copy(
+                        startingPoint = startingPoint,
+                        destination = destination,
+                        intermediateStops = intermediateStops,
+                        canAddMoreStops = canAddMoreStops,
+                    )
+                }
             }
             .launchIn(viewModelScope)
     }
@@ -72,6 +89,15 @@ class TripDetailViewModel @Inject constructor(
 
             is TripDetailUiIntent.OnDestinationConfirmed ->
                 setDestination(intent.placeName, intent.latitude, intent.longitude)
+
+            TripDetailUiIntent.OnAddStopClicked ->
+                _uiState.update { it.copy(isAddStopDialogVisible = true) }
+
+            TripDetailUiIntent.OnDismissAddStopDialog ->
+                _uiState.update { it.copy(isAddStopDialogVisible = false) }
+
+            is TripDetailUiIntent.OnAddStopConfirmed ->
+                addIntermediateStop(intent.placeName, intent.latitude, intent.longitude)
         }
     }
 
@@ -95,6 +121,20 @@ class TripDetailViewModel @Inject constructor(
             setDestinationUseCase(tripId, placeName, latitude, longitude)
                 .onSuccess {
                     _uiState.update { it.copy(isLoading = false, isSetDestinationDialogVisible = false) }
+                }
+                .onFailure { error ->
+                    _uiState.update { it.copy(isLoading = false) }
+                    _uiEffect.emit(TripDetailUiEffect.ShowError(error.message ?: UNKNOWN_ERROR))
+                }
+        }
+    }
+
+    private fun addIntermediateStop(placeName: String, latitude: Double, longitude: Double) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            addIntermediateStopUseCase(tripId, placeName, latitude, longitude)
+                .onSuccess {
+                    _uiState.update { it.copy(isLoading = false, isAddStopDialogVisible = false) }
                 }
                 .onFailure { error ->
                     _uiState.update { it.copy(isLoading = false) }

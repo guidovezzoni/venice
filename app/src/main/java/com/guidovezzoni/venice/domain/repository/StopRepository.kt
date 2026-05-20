@@ -19,4 +19,13 @@ interface StopRepository {
     ): Result<Stop>
 
     fun observeStopsForTrip(tripId: String): Flow<List<Stop>>
+
+    suspend fun addIntermediateStop(
+        tripId: String,
+        placeName: String,
+        latitude: Double,
+        longitude: Double,
+    ): Result<Stop>
+
+    suspend fun getStopCount(tripId: String): Int
 }
