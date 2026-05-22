@@ -76,12 +76,7 @@ class StopRepositoryImpl @Inject constructor(
         fromOrder: Int,
         toOrder: Int,
     ): Result<Unit> = runCatching {
-        val fromStop = stopDao.getStopByTripIdAndOrder(tripId, fromOrder)
-            ?: throw IllegalStateException("No stop found at order $fromOrder")
-        val toStop = stopDao.getStopByTripIdAndOrder(tripId, toOrder)
-            ?: throw IllegalStateException("No stop found at order $toOrder")
-        stopDao.updateStopOrder(fromStop.id, toOrder)
-        stopDao.updateStopOrder(toStop.id, fromOrder)
+        stopDao.swapStopOrders(tripId, fromOrder, toOrder)
     }
 
     private suspend fun upsertStop(
