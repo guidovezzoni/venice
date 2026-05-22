@@ -46,4 +46,4 @@
 ## 8. Verification
 
 - [x] 8.1 Run `./gradlew check` and confirm all tests pass with no lint errors
-- [ ] 8.2 Manual verification: build debug APK, launch on emulator, add 3+ intermediate stops, confirm move-up/move-down buttons work correctly
+- [x] 8.2 Manual verification: build debug APK, launch on emulator, add 3+ intermediate stops, confirm move-up/move-down buttons work correctly

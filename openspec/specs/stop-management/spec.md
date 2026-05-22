@@ -27,6 +27,7 @@ The domain layer SHALL define a `StopRepository` interface with:
 - `fun observeStopsForTrip(tripId: String): Flow<List<Stop>>`
 - `suspend fun addIntermediateStop(tripId: String, placeName: String, latitude: Double, longitude: Double): Result<Stop>`
 - `suspend fun getStopCount(tripId: String): Int`
+- `suspend fun swapStopOrder(tripId: String, fromOrder: Int, toOrder: Int): Result<Unit>`
 
 #### Scenario: Repository interface is accessible from domain layer
 - **WHEN** a use case references `StopRepository`
@@ -46,6 +47,7 @@ For `upsertDestination`: finder is `StopDao.getDestination(tripId)`, order is `1
 `StopRepositoryImpl` SHALL additionally implement:
 - `addIntermediateStop(tripId, placeName, latitude, longitude)`: Queries the destination's current order via `StopDao.getDestination(tripId)`, calls `StopDao.incrementOrderFrom(tripId, destinationOrder)` to shift the destination up, inserts a new stop with `order = destinationOrder`, `status = PENDING`, and a fresh UUID, all within a `@Transaction`. Returns `Result.success(Stop)` on success or `Result.failure` on exception. If no destination exists, the new stop is inserted with `order = 1`.
 - `getStopCount(tripId)`: Delegates to `StopDao.getStopCount(tripId)` and returns the count.
+- `swapStopOrder(tripId, fromOrder, toOrder)`: Queries both stops via `StopDao.getStopByTripIdAndOrder`, then calls `StopDao.updateStopOrder` for each stop with the other's order, all within a `@Transaction`. Returns `Result.success(Unit)` on success or `Result.failure` on exception. If either stop is not found, returns `Result.failure` with an `IllegalStateException`.
 
 #### Scenario: No existing starting point — insert
 - **WHEN** `upsertStartingPoint` is called for a trip with no `order = 0` stop
@@ -90,6 +92,22 @@ For `upsertDestination`: finder is `StopDao.getDestination(tripId)`, order is `1
 #### Scenario: getStopCount returns correct count
 - **WHEN** `getStopCount` is called for a trip with 3 stops
 - **THEN** `3` is returned
+
+#### Scenario: Swapping two adjacent intermediate stops
+- **WHEN** `swapStopOrder` is called with `fromOrder = 1` and `toOrder = 2` for a trip with stops at orders `[0, 1, 2, 3]`
+- **THEN** the stop previously at order 1 is now at order 2 and vice versa, and `Result.success(Unit)` is returned
+
+#### Scenario: Swap fails when source stop not found
+- **WHEN** `swapStopOrder` is called with `fromOrder = 5` and no stop exists at that order
+- **THEN** `Result.failure` with an `IllegalStateException` is returned
+
+#### Scenario: Swap fails when target stop not found
+- **WHEN** `swapStopOrder` is called with `toOrder = 5` and no stop exists at that order
+- **THEN** `Result.failure` with an `IllegalStateException` is returned
+
+#### Scenario: DAO throws exception during swapStopOrder
+- **WHEN** the DAO throws an exception during the swap
+- **THEN** `Result.failure` with the exception is returned and no partial changes are persisted
 
 ### Requirement: StopRepositoryImpl observes stops for a trip
 `StopRepositoryImpl.observeStopsForTrip` SHALL return a `Flow<List<Stop>>` by observing the DAO's `observeByTripId` and mapping each `StopEntity` to the domain `Stop` model.
@@ -153,6 +171,24 @@ The domain layer SHALL define a `StopType` enum in `com.guidovezzoni.venice.doma
 
 #### Scenario: Intermediate — repository failure propagated
 - **WHEN** `invoke` is called with `stopType = INTERMEDIATE` and the repository returns `Result.failure`
+- **THEN** `Result.failure` is propagated to the caller
+
+### Requirement: MoveStopUseCase validates and performs stop reorder
+`MoveStopUseCase` SHALL accept `tripId: String`, `fromOrder: Int`, and `toOrder: Int`, and:
+1. Delegate to `StopRepository.swapStopOrder(tripId, fromOrder, toOrder)`.
+2. Return `Result.success(Unit)` on success.
+3. Return `Result.failure` if the repository operation fails.
+
+#### Scenario: Moving an intermediate stop up — happy path
+- **WHEN** `invoke` is called with `fromOrder = 2` and `toOrder = 1` for a trip with stops at orders `[0, 1, 2, 3]`
+- **THEN** `StopRepository.swapStopOrder` is called with `(tripId, 2, 1)` and `Result.success(Unit)` is returned
+
+#### Scenario: Moving an intermediate stop down — happy path
+- **WHEN** `invoke` is called with `fromOrder = 1` and `toOrder = 2` for a trip with stops at orders `[0, 1, 2, 3]`
+- **THEN** `StopRepository.swapStopOrder` is called with `(tripId, 1, 2)` and `Result.success(Unit)` is returned
+
+#### Scenario: Repository failure is propagated
+- **WHEN** `invoke` is called and `StopRepository.swapStopOrder` returns `Result.failure`
 - **THEN** `Result.failure` is propagated to the caller
 
 ### Requirement: ObserveStopsUseCase wraps repository observation
