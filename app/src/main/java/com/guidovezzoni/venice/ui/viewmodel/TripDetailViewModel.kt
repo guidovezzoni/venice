@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.guidovezzoni.venice.domain.model.StopType
+import com.guidovezzoni.venice.domain.usecase.MoveStopUseCase
 import com.guidovezzoni.venice.domain.usecase.ObserveStopsUseCase
 import com.guidovezzoni.venice.domain.usecase.SetStopUseCase
 import com.guidovezzoni.venice.ui.effect.TripDetailUiEffect
@@ -30,6 +31,7 @@ private const val UNKNOWN_ERROR = "Unknown error"
 @HiltViewModel
 class TripDetailViewModel @Inject constructor(
     private val setStopUseCase: SetStopUseCase,
+    private val moveStopUseCase: MoveStopUseCase,
     observeStopsUseCase: ObserveStopsUseCase,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
@@ -100,6 +102,21 @@ class TripDetailViewModel @Inject constructor(
             is TripDetailUiIntent.OnAddStopConfirmed ->
                 setStop(intent.placeName, intent.latitude, intent.longitude, StopType.INTERMEDIATE) {
                     it.copy(isAddStopDialogVisible = false)
+                }
+
+            is TripDetailUiIntent.OnMoveStopUp ->
+                moveStop(intent.currentOrder, intent.currentOrder - 1)
+
+            is TripDetailUiIntent.OnMoveStopDown ->
+                moveStop(intent.currentOrder, intent.currentOrder + 1)
+        }
+    }
+
+    private fun moveStop(fromOrder: Int, toOrder: Int) {
+        viewModelScope.launch {
+            moveStopUseCase(tripId, fromOrder, toOrder)
+                .onFailure { error ->
+                    _uiEffect.emit(TripDetailUiEffect.ShowError(error.message ?: UNKNOWN_ERROR))
                 }
         }
     }

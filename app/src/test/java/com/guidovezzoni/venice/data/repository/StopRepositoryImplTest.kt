@@ -212,4 +212,73 @@ class StopRepositoryImplTest {
 
         assertEquals(expectedCount, count)
     }
+
+    @Test
+    fun `GIVEN two stops at adjacent orders WHEN swapStopOrder is called THEN both orders are updated`() = runTest {
+        val stopAtOrder1 = StopEntity(
+            id = "stop-1",
+            tripId = TRIP_ID,
+            placeName = "Florence",
+            latitude = 43.7696,
+            longitude = 11.2558,
+            order = 1,
+            status = "PENDING",
+        )
+        val stopAtOrder2 = StopEntity(
+            id = "stop-2",
+            tripId = TRIP_ID,
+            placeName = "Nice",
+            latitude = 43.7102,
+            longitude = 7.2620,
+            order = 2,
+            status = "PENDING",
+        )
+        coEvery { stopDao.getStopByTripIdAndOrder(TRIP_ID, 1) } returns stopAtOrder1
+        coEvery { stopDao.getStopByTripIdAndOrder(TRIP_ID, 2) } returns stopAtOrder2
+        coEvery { stopDao.updateStopOrder(any(), any()) } returns Unit
+
+        val result = repository.swapStopOrder(TRIP_ID, 1, 2)
+
+        assertTrue(result.isSuccess)
+        coVerify(exactly = 1) { stopDao.updateStopOrder("stop-1", 2) }
+        coVerify(exactly = 1) { stopDao.updateStopOrder("stop-2", 1) }
+    }
+
+    @Test
+    fun `GIVEN a non-existent source order WHEN swapStopOrder is called THEN result is failure`() = runTest {
+        coEvery { stopDao.getStopByTripIdAndOrder(TRIP_ID, 5) } returns null
+        coEvery { stopDao.getStopByTripIdAndOrder(TRIP_ID, 2) } returns StopEntity(
+            id = "stop-2",
+            tripId = TRIP_ID,
+            placeName = "Nice",
+            latitude = 43.7102,
+            longitude = 7.2620,
+            order = 2,
+            status = "PENDING",
+        )
+
+        val result = repository.swapStopOrder(TRIP_ID, 5, 2)
+
+        assertTrue(result.isFailure)
+        assertTrue(result.exceptionOrNull() is IllegalStateException)
+    }
+
+    @Test
+    fun `GIVEN a non-existent target order WHEN swapStopOrder is called THEN result is failure`() = runTest {
+        coEvery { stopDao.getStopByTripIdAndOrder(TRIP_ID, 1) } returns StopEntity(
+            id = "stop-1",
+            tripId = TRIP_ID,
+            placeName = "Florence",
+            latitude = 43.7696,
+            longitude = 11.2558,
+            order = 1,
+            status = "PENDING",
+        )
+        coEvery { stopDao.getStopByTripIdAndOrder(TRIP_ID, 5) } returns null
+
+        val result = repository.swapStopOrder(TRIP_ID, 1, 5)
+
+        assertTrue(result.isFailure)
+        assertTrue(result.exceptionOrNull() is IllegalStateException)
+    }
 }

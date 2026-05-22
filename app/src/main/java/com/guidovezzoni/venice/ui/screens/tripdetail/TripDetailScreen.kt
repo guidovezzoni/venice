@@ -43,6 +43,7 @@ private val CONTENT_SPACING = 16.dp
 private val BUTTON_PADDING = 16.dp
 private val ICON_SIZE = 18.dp
 private val ICON_SPACING = 8.dp
+private const val MIN_REORDERABLE_STOPS = 2
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -90,14 +91,26 @@ fun TripDetailScreen(
                 )
             }
             items(uiState.intermediateStops.size) { index ->
+                val stop = uiState.intermediateStops[index]
+                val showReorderButtons = uiState.intermediateStops.size >= MIN_REORDERABLE_STOPS
                 Spacer(modifier = Modifier.height(CONTENT_SPACING))
                 StopSection(
-                    stop = uiState.intermediateStops[index],
+                    stop = stop,
                     icon = Icons.Filled.LocationOn,
                     titleRes = R.string.trip_detail_intermediate_stop_label,
                     setButtonTextRes = R.string.trip_detail_add_stop,
                     changeDescriptionRes = R.string.trip_detail_change_intermediate_stop,
                     filledLabelRes = R.string.trip_detail_intermediate_stop_label,
+                    onMoveUp = if (showReorderButtons && index > 0) {
+                        { onIntent(TripDetailUiIntent.OnMoveStopUp(stop.id, stop.order)) }
+                    } else {
+                        null
+                    },
+                    onMoveDown = if (showReorderButtons && index < uiState.intermediateStops.size - 1) {
+                        { onIntent(TripDetailUiIntent.OnMoveStopDown(stop.id, stop.order)) }
+                    } else {
+                        null
+                    },
                 )
             }
             if (uiState.canAddMoreStops) {
