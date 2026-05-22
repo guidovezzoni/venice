@@ -8,6 +8,10 @@
 4. **Testing**: Run `./gradlew test` for unit tests, `./gradlew connectedAndroidTest` for UI tests
 5. **Final Build**: Use `./gradlew build` for complete verification
 
+## BDD Implementation Discipline
+- After reaching GREEN in a BDD cycle, **re-read the task description and spec** for requirements that mocked unit tests cannot verify — e.g. `@Transaction` annotations, threading constraints, runtime guarantees, database constraints, concurrency behaviour.
+- "Tests pass" is necessary but not sufficient. The spec is the source of truth, not the test suite.
+
 ## git related
 - CRITICAL: never ever commit directly, always ask confirmation if committing is deemed important
 - After implementing a plan, always suggest a commit message summarising the operations performed in such plan. Prepend that suggestion with [Suggested Commit Message]
