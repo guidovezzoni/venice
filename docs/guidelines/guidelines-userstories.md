@@ -55,6 +55,10 @@ Rename the file by replacing the `-WIP` suffix with `-DONE` before the `.md` ext
 1.2.5-edit-stop-WIP.md  -->  1.2.5-edit-stop-DONE.md
 ```
 
+### Renaming
+
+File renames must use `git mv` so the change is tracked in version control.
+
 ### Index Update
 
 After any state transition, update the link in `docs/userstories/index.md` to point to the new filename.
