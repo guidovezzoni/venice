@@ -3,6 +3,7 @@ package com.guidovezzoni.venice.data.database.dao
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.Transaction
 import androidx.room.Update
 import com.guidovezzoni.venice.data.database.entity.StopEntity
 import kotlinx.coroutines.flow.Flow
@@ -29,4 +30,35 @@ interface StopDao {
 
     @Query("SELECT COUNT(*) FROM stops WHERE tripId = :tripId")
     suspend fun getStopCount(tripId: String): Int
+
+    @Query("SELECT * FROM stops WHERE tripId = :tripId AND `order` = :order LIMIT 1")
+    suspend fun getStopByTripIdAndOrder(tripId: String, order: Int): StopEntity?
+
+    @Query("UPDATE stops SET `order` = :newOrder WHERE id = :stopId")
+    suspend fun updateStopOrder(stopId: String, newOrder: Int)
+
+    @Transaction
+    suspend fun shiftAndInsertStop(tripId: String, stop: StopEntity): Int {
+        val destination = getDestination(tripId)
+        val insertOrder = destination?.order ?: 1
+        if (destination != null) {
+            incrementOrderFrom(tripId, insertOrder)
+        }
+        insert(stop.copy(order = insertOrder))
+        return insertOrder
+    }
+
+    @Transaction
+    suspend fun swapStopOrders(
+        tripId: String,
+        fromOrder: Int,
+        toOrder: Int,
+    ) {
+        val fromStop = getStopByTripIdAndOrder(tripId, fromOrder)
+            ?: throw IllegalStateException("No stop found at order $fromOrder")
+        val toStop = getStopByTripIdAndOrder(tripId, toOrder)
+            ?: throw IllegalStateException("No stop found at order $toOrder")
+        updateStopOrder(fromStop.id, toOrder)
+        updateStopOrder(toStop.id, fromOrder)
+    }
 }

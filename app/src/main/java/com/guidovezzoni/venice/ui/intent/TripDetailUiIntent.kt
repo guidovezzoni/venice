@@ -22,4 +22,6 @@ sealed class TripDetailUiIntent {
         val longitude: Double,
     ) : TripDetailUiIntent()
     data object OnDismissAddStopDialog : TripDetailUiIntent()
+    data class OnMoveStopUp(val stopId: String, val currentOrder: Int) : TripDetailUiIntent()
+    data class OnMoveStopDown(val stopId: String, val currentOrder: Int) : TripDetailUiIntent()
 }

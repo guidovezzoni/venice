@@ -47,4 +47,6 @@
     <string name="trip_detail_intermediate_stop_label">Parada</string>
     <string name="trip_detail_change_intermediate_stop">Cambiar parada</string>
     <string name="error_max_stops_reached">Número máximo de paradas alcanzado</string>
+    <string name="trip_detail_move_stop_up">Mover arriba</string>
+    <string name="trip_detail_move_stop_down">Mover abajo</string>
 </resources>

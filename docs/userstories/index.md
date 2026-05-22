@@ -19,7 +19,7 @@ The core ability to create, organise, and manage roadtrips and their stops.
 | 1.2.2 | As a user, I want to set a destination for my roadtrip | [1.2.2-set-destination](1.2.2-set-destination-DONE.md) |
 | 1.2.3 | As a user, I want to add intermediate stops to my roadtrip | [1.2.3-add-intermediate-stops](1.2.3-add-intermediate-stops-DONE.md) |
 | 1.2.3.1 | As a developer, I want the stop use cases consolidated into a single SetStopUseCase | [1.2.3.1-consolidate-stop-usecases](1.2.3.1-consolidate-stop-usecases-DONE.md) |
-| 1.2.4 | As a user, I want to reorder stops in my roadtrip | [1.2.4-reorder-stops](1.2.4-reorder-stops.md) |
+| 1.2.4 | As a user, I want to reorder stops in my roadtrip | [1.2.4-reorder-stops](1.2.4-reorder-stops-DONE.md) |
 | 1.2.5 | As a user, I want to edit a stop in my roadtrip | [1.2.5-edit-stop](1.2.5-edit-stop.md) |
 | 1.2.6 | As a user, I want to remove a stop from my roadtrip | [1.2.6-remove-stop](1.2.6-remove-stop.md) |
 

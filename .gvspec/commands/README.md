@@ -50,3 +50,6 @@ Reusable procedure definitions live in `.gvspec/references/` and are loaded via 
 
 - add a prefix
 - open_user_story should switch to main and fetch update as a first task
+- rework each stage with a custom command
+- for each stage add result to the report
+- suggest a more specific commit message

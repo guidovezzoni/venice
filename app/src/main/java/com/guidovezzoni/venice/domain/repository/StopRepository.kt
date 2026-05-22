@@ -28,4 +28,6 @@ interface StopRepository {
     ): Result<Stop>
 
     suspend fun getStopCount(tripId: String): Int
+
+    suspend fun swapStopOrder(tripId: String, fromOrder: Int, toOrder: Int): Result<Unit>
 }

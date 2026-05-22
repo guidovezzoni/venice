@@ -47,4 +47,6 @@
     <string name="trip_detail_intermediate_stop_label">Tappa</string>
     <string name="trip_detail_change_intermediate_stop">Cambia tappa</string>
     <string name="error_max_stops_reached">Numero massimo di tappe raggiunto</string>
+    <string name="trip_detail_move_stop_up">Sposta su</string>
+    <string name="trip_detail_move_stop_down">Sposta giù</string>
 </resources>

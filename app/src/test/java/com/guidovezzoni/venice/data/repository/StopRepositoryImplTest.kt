@@ -149,53 +149,37 @@ class StopRepositoryImplTest {
 
     @Test
     fun `GIVEN existing stops WHEN addIntermediateStop is called THEN orders are shifted and new stop is inserted at the correct position`() = runTest {
-        val destinationEntity = StopEntity(
-            id = "dest-id",
-            tripId = TRIP_ID,
-            placeName = "Barcelona",
-            latitude = 41.3851,
-            longitude = 2.1734,
-            order = 1,
-            status = "PENDING",
-        )
-        coEvery { stopDao.getDestination(TRIP_ID) } returns destinationEntity
-        coEvery { stopDao.incrementOrderFrom(TRIP_ID, 1) } returns Unit
-        val entitySlot = slot<StopEntity>()
-        coEvery { stopDao.insert(capture(entitySlot)) } returns Unit
+        val expectedOrder = 1
+        coEvery { stopDao.shiftAndInsertStop(TRIP_ID, any()) } returns expectedOrder
 
         val result = repository.addIntermediateStop(TRIP_ID, PLACE_NAME, LATITUDE, LONGITUDE)
 
         assertTrue(result.isSuccess)
         val stop = result.getOrThrow()
-        val expectedOrder = 1
         assertEquals(expectedOrder, stop.order)
         assertEquals(StopStatus.PENDING, stop.status)
         assertEquals(PLACE_NAME, stop.placeName)
-        coVerify(exactly = 1) { stopDao.incrementOrderFrom(TRIP_ID, 1) }
-        coVerify(exactly = 1) { stopDao.insert(any()) }
+        coVerify(exactly = 1) { stopDao.shiftAndInsertStop(TRIP_ID, any()) }
     }
 
     @Test
     fun `GIVEN no destination exists WHEN addIntermediateStop is called THEN new stop is inserted at order 1`() = runTest {
-        coEvery { stopDao.getDestination(TRIP_ID) } returns null
-        val entitySlot = slot<StopEntity>()
-        coEvery { stopDao.insert(capture(entitySlot)) } returns Unit
+        val expectedOrder = 1
+        coEvery { stopDao.shiftAndInsertStop(TRIP_ID, any()) } returns expectedOrder
 
         val result = repository.addIntermediateStop(TRIP_ID, PLACE_NAME, LATITUDE, LONGITUDE)
 
         assertTrue(result.isSuccess)
         val stop = result.getOrThrow()
-        val expectedOrder = 1
         assertEquals(expectedOrder, stop.order)
         assertEquals(StopStatus.PENDING, stop.status)
-        coVerify(exactly = 0) { stopDao.incrementOrderFrom(any(), any()) }
-        coVerify(exactly = 1) { stopDao.insert(any()) }
+        coVerify(exactly = 1) { stopDao.shiftAndInsertStop(TRIP_ID, any()) }
     }
 
     @Test
     fun `GIVEN DAO throws exception WHEN addIntermediateStop is called THEN Result failure is returned`() = runTest {
         val exception = RuntimeException("DB error")
-        coEvery { stopDao.getDestination(TRIP_ID) } throws exception
+        coEvery { stopDao.shiftAndInsertStop(TRIP_ID, any()) } throws exception
 
         val result = repository.addIntermediateStop(TRIP_ID, PLACE_NAME, LATITUDE, LONGITUDE)
 
@@ -211,5 +195,35 @@ class StopRepositoryImplTest {
         val count = repository.getStopCount(TRIP_ID)
 
         assertEquals(expectedCount, count)
+    }
+
+    @Test
+    fun `GIVEN two stops at adjacent orders WHEN swapStopOrder is called THEN both orders are updated`() = runTest {
+        coEvery { stopDao.swapStopOrders(TRIP_ID, 1, 2) } returns Unit
+
+        val result = repository.swapStopOrder(TRIP_ID, 1, 2)
+
+        assertTrue(result.isSuccess)
+        coVerify(exactly = 1) { stopDao.swapStopOrders(TRIP_ID, 1, 2) }
+    }
+
+    @Test
+    fun `GIVEN a non-existent source order WHEN swapStopOrder is called THEN result is failure`() = runTest {
+        coEvery { stopDao.swapStopOrders(TRIP_ID, 5, 2) } throws IllegalStateException("No stop found at order 5")
+
+        val result = repository.swapStopOrder(TRIP_ID, 5, 2)
+
+        assertTrue(result.isFailure)
+        assertTrue(result.exceptionOrNull() is IllegalStateException)
+    }
+
+    @Test
+    fun `GIVEN a non-existent target order WHEN swapStopOrder is called THEN result is failure`() = runTest {
+        coEvery { stopDao.swapStopOrders(TRIP_ID, 1, 5) } throws IllegalStateException("No stop found at order 5")
+
+        val result = repository.swapStopOrder(TRIP_ID, 1, 5)
+
+        assertTrue(result.isFailure)
+        assertTrue(result.exceptionOrNull() is IllegalStateException)
     }
 }

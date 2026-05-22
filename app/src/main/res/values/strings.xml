@@ -48,4 +48,6 @@
     <string name="trip_detail_intermediate_stop_label">Stop</string>
     <string name="trip_detail_change_intermediate_stop">Change stop</string>
     <string name="error_max_stops_reached">Maximum number of stops reached</string>
+    <string name="trip_detail_move_stop_up">Move up</string>
+    <string name="trip_detail_move_stop_down">Move down</string>
 </resources>
