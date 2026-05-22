@@ -13,7 +13,6 @@ import javax.inject.Inject
 
 private const val STARTING_POINT_ORDER = 0
 private const val DESTINATION_ORDER = 1
-private const val DEFAULT_INTERMEDIATE_ORDER = 1
 
 class StopRepositoryImpl @Inject constructor(
     private val stopDao: StopDao,
@@ -50,22 +49,17 @@ class StopRepositoryImpl @Inject constructor(
         latitude: Double,
         longitude: Double,
     ): Result<Stop> = runCatching {
-        val destination = stopDao.getDestination(tripId)
-        val insertOrder = destination?.order ?: DEFAULT_INTERMEDIATE_ORDER
-        if (destination != null) {
-            stopDao.incrementOrderFrom(tripId, insertOrder)
-        }
         val entity = StopEntity(
             id = UUID.randomUUID().toString(),
             tripId = tripId,
             placeName = placeName,
             latitude = latitude,
             longitude = longitude,
-            order = insertOrder,
+            order = 0,
             status = StopStatus.PENDING.name,
         )
-        stopDao.insert(entity)
-        entity.toDomain()
+        val insertOrder = stopDao.shiftAndInsertStop(tripId, entity)
+        entity.copy(order = insertOrder).toDomain()
     }
 
     override suspend fun getStopCount(tripId: String): Int =

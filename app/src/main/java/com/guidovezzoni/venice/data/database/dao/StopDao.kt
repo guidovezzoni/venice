@@ -38,6 +38,17 @@ interface StopDao {
     suspend fun updateStopOrder(stopId: String, newOrder: Int)
 
     @Transaction
+    suspend fun shiftAndInsertStop(tripId: String, stop: StopEntity): Int {
+        val destination = getDestination(tripId)
+        val insertOrder = destination?.order ?: 1
+        if (destination != null) {
+            incrementOrderFrom(tripId, insertOrder)
+        }
+        insert(stop.copy(order = insertOrder))
+        return insertOrder
+    }
+
+    @Transaction
     suspend fun swapStopOrders(
         tripId: String,
         fromOrder: Int,
