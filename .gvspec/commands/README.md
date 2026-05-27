@@ -12,23 +12,23 @@ propose -> apply -> verify -> archive
 
 The commands below replace the standard flow with a user-story-centric pipeline. Run them in order for a typical feature lifecycle:
 
-### 1. `/open_user_story <story>`
+### 1. Open user story: `/sdlc_open_story <story>`
 
-Opens a user story for development. Creates a feature branch from `main` (via `/create_branch`), renames the story file with a `-WIP` suffix, and enriches it with technical detail (via `/refine_user_story`).
+Opens a user story for development. Creates a feature branch from `main` (via `/create_branch`), renames the story file with a `-WIP` suffix, enriches it with technical detail (via `/refine_user_story`), and creates the initial report.
 
-### 2. `/opsx:propose`
+### 2. Propose change: `/opsx:propose`
 
 Proposes the change based on the refined user story. Generates all OpenSpec artifacts (design, delta specs, and tasks) needed before implementation can begin.
 
-### 3. `/apply_changes`
+### 3. Apply change: `/sdlc_apply_changes`
 
 Runs `/opsx:apply` to implement the current OpenSpec change, then scans `app/src/` for TODO comments. TODOs whose preconditions are now met are resolved iteratively until none remain; unrelated TODOs are acknowledged.
 
-### 4. `/verify_user_story <story>`
+### 4. Verify User Story: `/sdlc_verify_story <story>`
 
-End-to-end verification gate. Runs `/opsx:verify`, scans for unresolved TODOs, checks every acceptance criterion in the story against the codebase, renames the story file to `-DONE`, and writes a verification report to `docs/reports/`.
+End-to-end verification gate. Runs `/opsx:verify`, scans for unresolved TODOs, checks every acceptance criterion in the story against the codebase, renames the story file to `-DONE`, and appends a verification section to the report.
 
-### 5. Archive
+### 5. Archive: `/opsx:archive`
 
 Use the standard OpenSpec archive command (`/opsx:archive`) to finalise and archive the completed change.
 
@@ -49,7 +49,5 @@ Reusable procedure definitions live in `.gvspec/references/` and are loaded via 
 ## TODO
 
 - add a prefix
-- open_user_story should switch to main and fetch update as a first task
 - rework each stage with a custom command
 - for each stage add result to the report
-- suggest a more specific commit message

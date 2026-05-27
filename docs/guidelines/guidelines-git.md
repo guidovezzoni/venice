@@ -8,6 +8,9 @@
 1. **First line**: simple and concise summary of the change, prefixed with the issue reference number if available (check the branch name as it often starts with one)
 2. **Body** (optional): extra detail if required, max 20 words
 
+## File Operations
+- Always use `git mv` instead of plain `mv` when renaming or moving tracked files, so git tracks the change
+
 ## Branch Strategy
 - `main` for stable releases
 - Feature branches for new development

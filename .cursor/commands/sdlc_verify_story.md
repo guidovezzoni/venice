@@ -1,0 +1,1 @@
+../../.gvspec/commands/sdlc_verify_story.md

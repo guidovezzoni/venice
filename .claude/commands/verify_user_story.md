@@ -1,1 +1,0 @@
-/home/guido/dev/personal/venice/.gvspec/commands/verify_user_story.md
