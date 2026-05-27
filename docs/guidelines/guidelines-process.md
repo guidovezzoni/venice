@@ -18,13 +18,3 @@
 - Do not rename a user story to `-DONE` or write a "PASSED" outcome in a report until the user has confirmed all manual checks.
 - "All automated tests pass" is necessary but not sufficient. The full checklist — automated and manual — is the gate.
 
-## git related
-- CRITICAL: never ever commit directly, always ask confirmation if committing is deemed important
-- After implementing a plan, always suggest a commit message summarising the operations performed in such plan. Prepend that suggestion with [Suggested Commit Message]
-- Be descriptive but concise
-- Reference relevant issue number if available, you can check the branch name as it oftens starts with an issue number
-
-## Branch Strategy
-- `main` for stable releases
-- Feature branches for new development
-- Use descriptive branch names

@@ -17,6 +17,10 @@ Instructions:
 
 For Native Android code style and best practices: @docs/guidelines/guidelines-android.md
 
+### Git Guidelines
+
+For git operations and commit conventions: @docs/guidelines/guidelines-git.md
+
 ### General Guidelines
 
 Read the following file immediately as it's relevant to all workflows: @docs/guidelines/guidelines-process.md
