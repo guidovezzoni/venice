@@ -41,7 +41,7 @@ These are called internally by the workflow commands above but can also be run s
 
 ## Shared references
 
-Reusable procedure definitions live in `.gvspec/references/` and are loaded via `@` file references. This avoids skill invocations (which create turn boundaries) and keeps logic in a single place:
+Reusable procedure definitions live in `docs/sdlc/references/` and are loaded via `@` file references. This avoids skill invocations (which create turn boundaries) and keeps logic in a single place:
 
 - **`create-branch-procedure.md`** — Branch creation criteria (used by `/open_user_story` and `/create_branch`)
 - **`refine-user-story-procedure.md`** — User story refinement steps (used by `/open_user_story` and `/refine_user_story`)

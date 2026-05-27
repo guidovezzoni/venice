@@ -8,11 +8,11 @@ Follow these steps:
 
 3. **Locate the user story.** Match the argument against the user story files by number or partial name. If no match is found, ask the user which user story to open. Validate the **preconditions for Opening** as defined in @docs/guidelines/guidelines-userstories.md. If they are not met, inform the user and stop.
 
-4. **Create a feature branch.** Follow the procedure in @.gvspec/references/create-branch-procedure.md using the resolved user story reference.
+4. **Create a feature branch.** Follow the procedure in @docs/sdlc/references/create-branch-procedure.md using the resolved user story reference.
 
 5. **Open the user story.** Perform the **Opening** operation as defined in @docs/guidelines/guidelines-userstories.md.
 
-6. **Refine the user story.** Follow the procedure in @.gvspec/references/refine-user-story-procedure.md using the resolved user story reference.
+6. **Refine the user story.** Follow the procedure in @docs/sdlc/references/refine-user-story-procedure.md using the resolved user story reference.
 
 7. **Add a report.** Create or update the report for this user story following @docs/guidelines/guidelines-reports.md. The section should summarise: the user story name, the branch created, and a brief summary of the story refinement.
 
