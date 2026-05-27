@@ -17,8 +17,8 @@ Follow these steps:
    3. **Re-apply the changes.** Execute the OpenSpec apply command (`/opsx:apply`) again to implement the updated tasks.
    4. **Re-check TODOs.** Repeat from step 2 to verify that no RESOLVE NOW TODOs remain. Continue this loop until all TODOs are either resolved or classified as ACKNOWLEDGED.
 
-4. **Report the result.** Once no RESOLVE NOW TODOs remain, summarise:
-   - What was applied.
-   - How many iteration cycles were needed.
-   - Any ACKNOWLEDGED TODOs that remain for future stories.
-   - Suggest a commit message following @docs/guidelines/guidelines-git.md.
+4. **Add a report.** Once no RESOLVE NOW TODOs remain, append a section to the report for this user story following @docs/guidelines/guidelines-reports.md. The section should summarise: what was applied, how many iteration cycles were needed, and any ACKNOWLEDGED TODOs that remain for future stories.
+
+5. **Display the summary.** Output the same summary on screen so the user can see what was done.
+
+6. **Suggest a commit message.** Suggest a commit message following @docs/guidelines/guidelines-git.md.

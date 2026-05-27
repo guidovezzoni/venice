@@ -22,11 +22,8 @@ Follow these steps:
 
 5. **Close the user story.** Once all verifications pass, perform the **Closing** operation as defined in @docs/guidelines/guidelines-userstories.md.
 
-6. **Export verification report.** Append a verification section to the report for this user story following @docs/guidelines/guidelines-reports.md. The section should contain:
-   - Date of verification.
-   - OpenSpec verify result (pass/fail summary).
-   - TODO scan result (list of ACKNOWLEDGED TODOs, or "none found").
-   - Definition of Done checklist with each item's PASS/FAIL status and justification.
-   - Final outcome (PASSED / FAILED) and the renamed filename.
+6. **Add a report.** Append a verification section to the report for this user story following @docs/guidelines/guidelines-reports.md. The section should summarise: date of verification, OpenSpec verify result (pass/fail summary), TODO scan result (list of ACKNOWLEDGED TODOs, or "none found"), Definition of Done checklist with each item's PASS/FAIL status and justification, and final outcome (PASSED / FAILED) with the renamed filename.
 
-7. **Report the result.** Summarise what was verified and the new filename. Suggest a commit message following @docs/guidelines/guidelines-git.md.
+7. **Display the summary.** Output the same summary on screen so the user can see what was verified.
+
+8. **Suggest a commit message.** Suggest a commit message following @docs/guidelines/guidelines-git.md.
