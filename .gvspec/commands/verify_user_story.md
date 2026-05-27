@@ -22,15 +22,11 @@ Follow these steps:
 
 5. **Close the user story.** Once all verifications pass, perform the **Closing** operation as defined in @docs/guidelines/guidelines-userstories.md.
 
-6. **Export verification report.** Write a verification report to `@docs/reports/`:
-   - The report filename must match the user story filename (without any `-WIP` or `-DONE` suffix), e.g. for user story `1.4.2-Create-leg-WIP.md` the report file is `docs/reports/1.4.2-Create-leg.md`.
-   - If the report file already exists (it may contain sections from other workflows), append to it — do **not** overwrite existing content.
-   - Add a `## Verification` section at the bottom of the file containing:
-     - Date of verification.
-     - OpenSpec verify result (pass/fail summary).
-     - TODO scan result (list of ACKNOWLEDGED TODOs, or "none found").
-     - Definition of Done checklist with each item's PASS/FAIL status and justification.
-     - Final outcome (PASSED / FAILED) and the renamed filename.
-   - Create the `docs/reports/` directory if it does not already exist.
+6. **Export verification report.** Append a verification section to the report for this user story following @docs/guidelines/guidelines-reports.md. The section should contain:
+   - Date of verification.
+   - OpenSpec verify result (pass/fail summary).
+   - TODO scan result (list of ACKNOWLEDGED TODOs, or "none found").
+   - Definition of Done checklist with each item's PASS/FAIL status and justification.
+   - Final outcome (PASSED / FAILED) and the renamed filename.
 
-7. **Report the result.** Summarise what was verified and the new filename. Suggest a commit message with the prefix `[Suggested Commit Message]`.
+7. **Report the result.** Summarise what was verified and the new filename. Suggest a commit message following @docs/guidelines/guidelines-git.md.

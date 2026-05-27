@@ -14,4 +14,6 @@ Follow these steps:
 
 6. **Refine the user story.** Follow the procedure in @.gvspec/references/refine-user-story-procedure.md using the resolved user story reference.
 
-7. **Report the result.** Summarise what was done (branch created, file renamed, story refined) and the new filename. Suggest a commit message with the prefix `[Suggested Commit Message]`.
+7. **Add a report.** Create or update the report for this user story following @docs/guidelines/guidelines-reports.md. The section should list: the user story name, the branch created, and a brief summary of the story refinement.
+
+8. **Report the result.** Summarise what was done (branch created, file renamed, story refined) and the new filename. Suggest a commit message following @docs/guidelines/guidelines-git.md.

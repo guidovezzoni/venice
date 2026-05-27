@@ -21,4 +21,4 @@ Follow these steps:
    - What was applied.
    - How many iteration cycles were needed.
    - Any ACKNOWLEDGED TODOs that remain for future stories.
-   - Suggest a commit message with the prefix `[Suggested Commit Message]`.
+   - Suggest a commit message following @docs/guidelines/guidelines-git.md.
