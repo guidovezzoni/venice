@@ -6,7 +6,7 @@ The app is built entirely in Kotlin with Jetpack Compose and Material 3, followi
 
 Development is driven by a Specification-Driven Development (SDD) workflow powered by OpenSpec, where every change moves through a structured lifecycle: explore, propose, apply, verify, sync, and archive. Tasks within each change follow a BDD (Behaviour-Driven Development) structure with test-first ordering, so the test is always written before the production code that makes it pass. Custom commands (`/open_user_story`, `/apply_changes`, `/verify_user_story`, `/opsx:*`) automate the repetitive steps, from opening and refining user stories to implementing changes, verifying acceptance criteria, and driving the full OpenSpec lifecycle.
 
-See [`.gvspec/commands/README.md`](.gvspec/commands/README.md) for full details on each command.
+See [`.gvspec/commands/README.md`](docs/sdlc/commands/SDLC-README.md) for full details on each command.
 
 ## The App
 
@@ -73,7 +73,7 @@ The workflow is extended with custom commands that wrap the OpenSpec lifecycle i
 | `/verify_user_story` | End-to-end verification: runs OpenSpec verify, checks TODOs, validates acceptance criteria, renames the file to `-DONE`, and writes a report |
 | `/opsx:*` | OpenSpec lifecycle commands (propose, apply, verify, sync, archive, explore, onboard) |
 
-Helper commands (`/refine_user_story`, `/create_branch`) are called internally by `/open_user_story` but can also be run standalone. See [`.gvspec/commands/README.md`](.gvspec/commands/README.md) for full details on each command.
+Helper commands (`/refine_user_story`, `/create_branch`) are called internally by `/open_user_story` but can also be run standalone. See [`.gvspec/commands/README.md`](docs/sdlc/commands/SDLC-README.md) for full details on each command.
 
 ### BDD Task Structure
 
