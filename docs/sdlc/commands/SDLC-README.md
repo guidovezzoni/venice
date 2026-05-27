@@ -28,9 +28,9 @@ Runs `/opsx:apply` to implement the current OpenSpec change, then scans `app/src
 
 End-to-end verification gate. Runs `/opsx:verify`, scans for unresolved TODOs, checks every acceptance criterion in the story against the codebase, renames the story file to `-DONE`, and appends a verification section to the report.
 
-### 5. Archive: `/opsx:archive`
+### 5. Archive: `/sdlc_archive`
 
-Use the standard OpenSpec archive command (`/opsx:archive`) to finalise and archive the completed change.
+Runs `/opsx:archive` to finalise and archive the completed change, then checks whether `README.md` and `AGENTS.md` need updating to reflect the delivered work. Appends an archive section to the report.
 
 ## Helper commands
 

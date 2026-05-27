@@ -1,1 +1,1 @@
-../../.gvspec/commands/sdlc_apply_changes.md
+../../docs/sdlc/commands/sdlc_apply_changes.md
