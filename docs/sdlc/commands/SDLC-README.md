@@ -32,6 +32,15 @@ End-to-end verification gate. Runs `/opsx:verify`, scans for unresolved TODOs, c
 
 Runs `/opsx:archive` to finalise and archive the completed change, then checks whether `README.md` and `AGENTS.md` need updating to reflect the delivered work. Appends an archive section to the report.
 
+## Setup
+
+Run once after cloning, or after adding a new command to `docs/sdlc/commands/`:
+
+- **Linux / macOS**: `./docs/sdlc/sdlc_init.sh`
+- **Windows** (PowerShell, Developer Mode or elevated): `.\docs\sdlc\sdlc_init.ps1`
+
+These scripts create symlinks in `.claude/commands/sdlc/` and `.cursor/commands/` for every SDLC command.
+
 ## Helper commands
 
 These are called internally by the workflow commands above but can also be run standalone:

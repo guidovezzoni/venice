@@ -1,1 +1,0 @@
-../../docs/sdlc/commands/sdlc_verify_story.md
