@@ -2,7 +2,7 @@ Please verify the user story: $ARGUMENTS.
 
 Follow these steps:
 
-1. **Locate the user story** in `@docs/userstories/`. Match `$ARGUMENTS` against the file names (by number or partial name). If no match is found, ask the user which user story to verify. If the file already has the `-DONE` suffix, inform the user and stop.
+1. **Locate the user story.** Match `$ARGUMENTS` against the user story files by number or partial name. If no match is found, ask the user which user story to verify. Validate the **preconditions for Closing** as defined in @docs/guidelines/guidelines-userstories.md. If they are not met, inform the user and stop.
 
 2. **Run OpenSpec verify.** Execute the OpenSpec verify command (`/opsx:verify`) to check that the implementation matches the change artefacts. If the verification reports any issues, stop here: present the issues clearly to the user and do **not** proceed to the next steps.
 
@@ -20,22 +20,10 @@ Follow these steps:
    - Report each item as PASS or FAIL with a brief justification.
      If any item is marked FAIL, stop here: present a summary to the user and do **not** proceed to the rename step.
 
-5. **Rename the user story file.** Once all verifications pass:
-   - If the filename contains `-WIP`, remove it.
-   - Append `-DONE` before the `.md` extension.
-   - For example: `1.4.2-Create-leg-WIP.md` → `1.4.2-Create-leg-DONE.md`, or `1.4.2-Create-leg.md` → `1.4.2-Create-leg-DONE.md`.
-   - Update any references to the old filename in `@docs/userstories/index.md` if it exists.
-     Use `git mv` so the rename is tracked in version control.
+5. **Close the user story.** Once all verifications pass, perform the **Closing** operation as defined in @docs/guidelines/guidelines-userstories.md.
 
-6. **Export verification report.** Write a verification report to `@docs/reports/`:
-   - The report filename must match the user story filename (without any `-WIP` or `-DONE` suffix), e.g. for user story `1.4.2-Create-leg-WIP.md` the report file is `docs/reports/1.4.2-Create-leg.md`.
-   - If the report file already exists (it may contain sections from other workflows), append to it — do **not** overwrite existing content.
-   - Add a `## Verification` section at the bottom of the file containing:
-     - Date of verification.
-     - OpenSpec verify result (pass/fail summary).
-     - TODO scan result (list of ACKNOWLEDGED TODOs, or "none found").
-     - Definition of Done checklist with each item's PASS/FAIL status and justification.
-     - Final outcome (PASSED / FAILED) and the renamed filename.
-   - Create the `docs/reports/` directory if it does not already exist.
+6. **Add a report.** Append a verification section to the report for this user story following @docs/guidelines/guidelines-reports.md. The section should summarise: date of verification, OpenSpec verify result (pass/fail summary), TODO scan result (list of ACKNOWLEDGED TODOs, or "none found"), Definition of Done checklist with each item's PASS/FAIL status and justification, and final outcome (PASSED / FAILED) with the renamed filename.
 
-7. **Report the result.** Summarise what was verified and the new filename. Suggest a commit message with the prefix `[Suggested Commit Message]`.
+7. **Display the summary.** Output the same summary on screen so the user can see what was verified.
+
+8. **Suggest a commit message.** Suggest a commit message following @docs/guidelines/guidelines-git.md.

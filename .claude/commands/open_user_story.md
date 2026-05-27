@@ -1,1 +1,0 @@
-/home/guido/dev/personal/venice/.gvspec/commands/open_user_story.md

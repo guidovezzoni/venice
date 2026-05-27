@@ -1,1 +1,0 @@
-/home/guido/dev/personal/venice/.cursor/commands/refine_user_story.md
