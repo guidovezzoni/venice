@@ -51,3 +51,4 @@ Reusable procedure definitions live in `docs/sdlc/references/` and are loaded vi
 - add a prefix
 - rework each stage with a custom command
 - for each stage add result to the report
+- BDD should be taken out of opsx into sdlc

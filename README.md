@@ -4,7 +4,7 @@ A road trip planning app for Android, built with a modern architecture stack and
 
 The app is built entirely in Kotlin with Jetpack Compose and Material 3, following Clean Architecture to separate domain logic, data access, and UI into independent layers. Each feature uses the MVI (Model-View-Intent) pattern, enforcing unidirectional data flow through immutable state, explicit user intents, and one-shot effects. Dependency injection is handled by Hilt, persistence by Room, and all asynchronous work runs on Kotlin Coroutines and Flow.
 
-Development is driven by a Specification-Driven Development (SDD) workflow powered by OpenSpec, where every change moves through a structured lifecycle: explore, propose, apply, verify, sync, and archive. Tasks within each change follow a BDD (Behaviour-Driven Development) structure with test-first ordering, so the test is always written before the production code that makes it pass. Custom commands (`/open_user_story`, `/apply_changes`, `/verify_user_story`, `/opsx:*`) automate the repetitive steps, from opening and refining user stories to implementing changes, verifying acceptance criteria, and driving the full OpenSpec lifecycle.
+Development is driven by a Specification-Driven Development (SDD) workflow powered by OpenSpec, where every change moves through a structured lifecycle: explore, propose, apply, verify, sync, and archive. Tasks within each change follow a BDD (Behaviour-Driven Development) structure with test-first ordering, so the test is always written before the production code that makes it pass. Custom commands (`/sdlc_open_story`, `/sdlc_apply_changes`, `/sdlc_verify_story`, `/sdlc_archive`, `/opsx:*`) automate the repetitive steps, from opening and refining user stories to implementing changes, verifying acceptance criteria, and driving the full OpenSpec lifecycle.
 
 See [`docs/sdlc/commands/SDLC-README.md`](docs/sdlc/commands/SDLC-README.md) for full details on each command.
 
@@ -68,12 +68,13 @@ The workflow is extended with custom commands that wrap the OpenSpec lifecycle i
 
 | Command | Purpose |
 |---------|---------|
-| `/open_user_story` | Open a story for development: creates a feature branch, renames the file to `-WIP`, and refines it with technical detail |
-| `/apply_changes` | Implement the current OpenSpec change and iteratively resolve any TODOs whose preconditions are now met |
-| `/verify_user_story` | End-to-end verification: runs OpenSpec verify, checks TODOs, validates acceptance criteria, renames the file to `-DONE`, and writes a report |
+| `/sdlc_open_story` | Open a story for development: creates a feature branch, renames the file to `-WIP`, and refines it with technical detail |
+| `/sdlc_apply_changes` | Implement the current OpenSpec change and iteratively resolve any TODOs whose preconditions are now met |
+| `/sdlc_verify_story` | End-to-end verification: runs OpenSpec verify, checks TODOs, validates acceptance criteria, renames the file to `-DONE`, and writes a report |
+| `/sdlc_archive` | Archive the completed change, update project docs (README, AGENTS) if needed, and append an archive section to the report |
 | `/opsx:*` | OpenSpec lifecycle commands (propose, apply, verify, sync, archive, explore, onboard) |
 
-Helper commands (`/refine_user_story`, `/create_branch`) are called internally by `/open_user_story` but can also be run standalone. See [`docs/sdlc/commands/SDLC-README.md`](docs/sdlc/commands/SDLC-README.md) for full details on each command.
+Helper commands (`/refine_user_story`, `/create_branch`) are called internally by `/sdlc_open_story` but can also be run standalone. See [`docs/sdlc/commands/SDLC-README.md`](docs/sdlc/commands/SDLC-README.md) for full details on each command.
 
 ### BDD Task Structure
 
