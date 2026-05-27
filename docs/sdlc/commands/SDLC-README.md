@@ -16,9 +16,9 @@ The commands below replace the standard flow with a user-story-centric pipeline.
 
 Opens a user story for development. Creates a feature branch from `main` (via `/create_branch`), renames the story file with a `-WIP` suffix, enriches it with technical detail (via `/refine_user_story`), and creates the initial report.
 
-### 2. Propose change: `/opsx:propose`
+### 2. Propose change: `/sdlc_propose <story>`
 
-Proposes the change based on the refined user story. Generates all OpenSpec artifacts (design, delta specs, and tasks) needed before implementation can begin.
+Explores the user story via `/opsx:explore`, asks clarifying questions until all doubts are resolved, then runs `/opsx:propose` to generate all SDD artefacts (proposal, design, delta specs, and tasks) needed before implementation can begin.
 
 ### 3. Apply change: `/sdlc_apply_changes`
 
@@ -48,7 +48,4 @@ Reusable procedure definitions live in `docs/sdlc/references/` and are loaded vi
 
 ## TODO
 
-- add a prefix
-- rework each stage with a custom command
-- for each stage add result to the report
 - BDD should be taken out of opsx into sdlc
