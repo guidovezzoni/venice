@@ -96,6 +96,9 @@ fun TripDetailScreen(
                 Spacer(modifier = Modifier.height(CONTENT_SPACING))
                 StopSection(
                     stop = stop,
+                    onSetStopClicked = {
+                        onIntent(TripDetailUiIntent.OnEditStopClicked(stop))
+                    },
                     icon = Icons.Filled.LocationOn,
                     titleRes = R.string.trip_detail_intermediate_stop_label,
                     setButtonTextRes = R.string.trip_detail_add_stop,
@@ -183,6 +186,28 @@ fun TripDetailScreen(
                 onIntent(TripDetailUiIntent.OnAddStopConfirmed(placeName, latitude, longitude))
             },
             onDismiss = { onIntent(TripDetailUiIntent.OnDismissAddStopDialog) },
+        )
+    }
+
+    if (uiState.isEditStopDialogVisible) {
+        val editingStop = uiState.editingStop
+        SetStopDialog(
+            dialogTitleRes = R.string.trip_detail_edit_stop_dialog_title,
+            placeNameHintRes = R.string.trip_detail_add_stop_place_name_hint,
+            placeNameErrorRes = R.string.trip_detail_add_stop_place_name_error,
+            latitudeHintRes = R.string.trip_detail_add_stop_latitude_hint,
+            latitudeErrorRes = R.string.trip_detail_add_stop_latitude_error,
+            longitudeHintRes = R.string.trip_detail_add_stop_longitude_hint,
+            longitudeErrorRes = R.string.trip_detail_add_stop_longitude_error,
+            initialPlaceName = editingStop?.placeName ?: "",
+            initialLatitude = editingStop?.latitude?.toString() ?: "",
+            initialLongitude = editingStop?.longitude?.toString() ?: "",
+            onConfirm = { placeName, latitude, longitude ->
+                editingStop?.let {
+                    onIntent(TripDetailUiIntent.OnEditStopConfirmed(it.id, placeName, latitude, longitude))
+                }
+            },
+            onDismiss = { onIntent(TripDetailUiIntent.OnDismissEditStopDialog) },
         )
     }
 

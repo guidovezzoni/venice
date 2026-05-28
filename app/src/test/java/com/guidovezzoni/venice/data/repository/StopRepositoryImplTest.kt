@@ -218,6 +218,50 @@ class StopRepositoryImplTest {
     }
 
     @Test
+    fun `GIVEN a stop exists WHEN updateStop is called THEN placeName latitude longitude are updated and id tripId order status are preserved`() = runTest {
+        val existingEntity = StopEntity(
+            id = "stop-abc",
+            tripId = TRIP_ID,
+            placeName = "Milan",
+            latitude = 45.4642,
+            longitude = 9.1900,
+            order = 2,
+            status = "PENDING",
+        )
+        coEvery { stopDao.getStopById("stop-abc") } returns existingEntity
+        coEvery { stopDao.update(any()) } returns Unit
+
+        val result = repository.updateStop("stop-abc", "Florence", 43.7696, 11.2558)
+
+        assertTrue(result.isSuccess)
+        val stop = result.getOrThrow()
+        val expectedId = "stop-abc"
+        val expectedTripId = TRIP_ID
+        val expectedOrder = 2
+        val expectedPlaceName = "Florence"
+        val expectedLatitude = 43.7696
+        val expectedLongitude = 11.2558
+        assertEquals(expectedId, stop.id)
+        assertEquals(expectedTripId, stop.tripId)
+        assertEquals(expectedOrder, stop.order)
+        assertEquals(StopStatus.PENDING, stop.status)
+        assertEquals(expectedPlaceName, stop.placeName)
+        assertEquals(expectedLatitude, stop.latitude, 0.0)
+        assertEquals(expectedLongitude, stop.longitude, 0.0)
+        coVerify(exactly = 1) { stopDao.update(any()) }
+    }
+
+    @Test
+    fun `GIVEN a stop does not exist WHEN updateStop is called THEN Result failure with IllegalStateException is returned`() = runTest {
+        coEvery { stopDao.getStopById("nonexistent") } returns null
+
+        val result = repository.updateStop("nonexistent", "Florence", 43.7696, 11.2558)
+
+        assertTrue(result.isFailure)
+        assertTrue(result.exceptionOrNull() is IllegalStateException)
+    }
+
+    @Test
     fun `GIVEN a non-existent target order WHEN swapStopOrder is called THEN result is failure`() = runTest {
         coEvery { stopDao.swapStopOrders(TRIP_ID, 1, 5) } throws IllegalStateException("No stop found at order 5")
 

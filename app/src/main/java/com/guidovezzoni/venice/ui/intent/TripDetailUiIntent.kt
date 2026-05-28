@@ -1,5 +1,7 @@
 package com.guidovezzoni.venice.ui.intent
 
+import com.guidovezzoni.venice.domain.model.Stop
+
 sealed class TripDetailUiIntent {
     data object OnSetStartingPointClicked : TripDetailUiIntent()
     data class OnStartingPointConfirmed(
@@ -24,4 +26,12 @@ sealed class TripDetailUiIntent {
     data object OnDismissAddStopDialog : TripDetailUiIntent()
     data class OnMoveStopUp(val stopId: String, val currentOrder: Int) : TripDetailUiIntent()
     data class OnMoveStopDown(val stopId: String, val currentOrder: Int) : TripDetailUiIntent()
+    data class OnEditStopClicked(val stop: Stop) : TripDetailUiIntent()
+    data class OnEditStopConfirmed(
+        val stopId: String,
+        val placeName: String,
+        val latitude: Double,
+        val longitude: Double,
+    ) : TripDetailUiIntent()
+    data object OnDismissEditStopDialog : TripDetailUiIntent()
 }

@@ -148,6 +148,62 @@
       <li><strong>Leg invalidation</strong>: TODO marker in <code>EditStopUseCase</code> for Epic 3.</li>
     </ul>
   </section>
+  <section class="report-section" data-source="apply_changes" data-timestamp="2026-05-28T14:00:00Z">
+    <header>
+      <h2>Changes Applied</h2>
+      <time datetime="2026-05-28T14:00:00Z">28 May 2026</time>
+    </header>
+    <p class="section-source">Source: apply_changes</p>
+
+    <h3>Summary</h3>
+    <p>Implemented all 22 tasks across 6 sections in a single iteration cycle. BDD Red/Green cycles completed successfully for repository, use case, and ViewModel layers.</p>
+
+    <h3>Implementation Details</h3>
+    <table>
+      <tr><th>Section</th><th>Tasks</th><th>Status</th></tr>
+      <tr><td>1. Prerequisites</td><td>4</td><td><span class="badge badge-pass">DONE</span></td></tr>
+      <tr><td>2. StopRepositoryImpl updateStop (BDD)</td><td>3</td><td><span class="badge badge-pass">DONE</span></td></tr>
+      <tr><td>3. EditStopUseCase (BDD)</td><td>4</td><td><span class="badge badge-pass">DONE</span></td></tr>
+      <tr><td>4. TripDetailViewModel edit handling (BDD)</td><td>5</td><td><span class="badge badge-pass">DONE</span></td></tr>
+      <tr><td>5. UI Integration</td><td>3</td><td><span class="badge badge-pass">DONE</span></td></tr>
+      <tr><td>6. Verification</td><td>3</td><td><span class="badge badge-warn">2/3 &mdash; manual test pending</span></td></tr>
+    </table>
+
+    <h3>Files Created</h3>
+    <ul>
+      <li><code>app/src/main/java/.../domain/usecase/EditStopUseCase.kt</code></li>
+      <li><code>app/src/test/java/.../domain/usecase/EditStopUseCaseTest.kt</code></li>
+    </ul>
+
+    <h3>Files Modified</h3>
+    <ul>
+      <li><code>StopDao.kt</code> &mdash; added <code>getStopById</code> query</li>
+      <li><code>StopRepository.kt</code> &mdash; added <code>updateStop</code> interface method</li>
+      <li><code>StopRepositoryImpl.kt</code> &mdash; implemented <code>updateStop</code></li>
+      <li><code>TripDetailUiState.kt</code> &mdash; added <code>editingStop</code> and <code>isEditStopDialogVisible</code></li>
+      <li><code>TripDetailUiIntent.kt</code> &mdash; added <code>OnEditStopClicked</code>, <code>OnEditStopConfirmed</code>, <code>OnDismissEditStopDialog</code></li>
+      <li><code>TripDetailViewModel.kt</code> &mdash; injected <code>EditStopUseCase</code>, handled edit intents</li>
+      <li><code>TripDetailScreen.kt</code> &mdash; wired intermediate stop tap and edit dialog</li>
+      <li><code>StopRepositoryImplTest.kt</code> &mdash; added 2 updateStop tests</li>
+      <li><code>TripDetailViewModelTest.kt</code> &mdash; added 4 edit stop tests</li>
+      <li><code>values/strings.xml</code>, <code>values-it/strings.xml</code>, <code>values-es-rES/strings.xml</code> &mdash; added edit stop dialog title</li>
+    </ul>
+
+    <h3>BDD Cycles</h3>
+    <ul>
+      <li><strong>StopRepositoryImpl:</strong> RED (compilation &mdash; <code>updateStop</code> not yet implemented) &rarr; GREEN (all 14 tests pass)</li>
+      <li><strong>EditStopUseCase:</strong> RED (class doesn&rsquo;t exist) &rarr; GREEN (3 tests pass)</li>
+      <li><strong>TripDetailViewModel:</strong> RED (constructor signature mismatch) &rarr; GREEN (all 24 tests pass)</li>
+    </ul>
+
+    <h3>Iteration Cycles</h3>
+    <p>1 cycle &mdash; no RESOLVE NOW TODOs found.</p>
+
+    <h3>Acknowledged TODOs</h3>
+    <ul>
+      <li><code>EditStopUseCase.kt:10</code> &mdash; <em>invalidate affected legs once leg tracking is implemented (Epic 3)</em>. Intentional placeholder for future work, not a blocker.</li>
+    </ul>
+  </section>
   </main>
 
 </body>

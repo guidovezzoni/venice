@@ -44,6 +44,7 @@
     <string name="trip_detail_add_stop_latitude_error">La latitudine deve essere compresa tra -90 e 90</string>
     <string name="trip_detail_add_stop_longitude_hint">Longitudine</string>
     <string name="trip_detail_add_stop_longitude_error">La longitudine deve essere compresa tra -180 e 180</string>
+    <string name="trip_detail_edit_stop_dialog_title">Modifica tappa</string>
     <string name="trip_detail_intermediate_stop_label">Tappa</string>
     <string name="trip_detail_change_intermediate_stop">Cambia tappa</string>
     <string name="error_max_stops_reached">Numero massimo di tappe raggiunto</string>
