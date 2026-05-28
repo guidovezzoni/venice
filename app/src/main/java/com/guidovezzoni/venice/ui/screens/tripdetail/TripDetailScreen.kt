@@ -382,3 +382,155 @@ private fun PreviewTripDetailScreenAtStopLimit() {
         )
     }
 }
+
+@Preview(showBackground = true)
+@Composable
+private fun PreviewTripDetailScreenLoading() {
+    HeadingToTheAlpsTheme {
+        TripDetailScreen(
+            uiState = TripDetailUiState(
+                tripId = "trip-1",
+                isLoading = true,
+            ),
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PreviewTripDetailScreenStartingPointDialog() {
+    HeadingToTheAlpsTheme {
+        TripDetailScreen(
+            uiState = TripDetailUiState(
+                tripId = "trip-1",
+                startingPoint = Stop(
+                    id = "1",
+                    tripId = "trip-1",
+                    placeName = "Rome, Italy",
+                    latitude = 41.9028,
+                    longitude = 12.4964,
+                    order = 0,
+                    status = StopStatus.PENDING,
+                ),
+                isSetStartingPointDialogVisible = true,
+                canAddMoreStops = true,
+            ),
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PreviewTripDetailScreenDestinationDialog() {
+    HeadingToTheAlpsTheme {
+        TripDetailScreen(
+            uiState = TripDetailUiState(
+                tripId = "trip-1",
+                startingPoint = Stop(
+                    id = "1",
+                    tripId = "trip-1",
+                    placeName = "Rome, Italy",
+                    latitude = 41.9028,
+                    longitude = 12.4964,
+                    order = 0,
+                    status = StopStatus.PENDING,
+                ),
+                destination = Stop(
+                    id = "2",
+                    tripId = "trip-1",
+                    placeName = "Barcelona, Spain",
+                    latitude = 41.3851,
+                    longitude = 2.1734,
+                    order = 1,
+                    status = StopStatus.PENDING,
+                ),
+                isSetDestinationDialogVisible = true,
+                canAddMoreStops = true,
+            ),
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PreviewTripDetailScreenAddStopDialog() {
+    HeadingToTheAlpsTheme {
+        TripDetailScreen(
+            uiState = TripDetailUiState(
+                tripId = "trip-1",
+                startingPoint = Stop(
+                    id = "1",
+                    tripId = "trip-1",
+                    placeName = "Rome, Italy",
+                    latitude = 41.9028,
+                    longitude = 12.4964,
+                    order = 0,
+                    status = StopStatus.PENDING,
+                ),
+                destination = Stop(
+                    id = "2",
+                    tripId = "trip-1",
+                    placeName = "Barcelona, Spain",
+                    latitude = 41.3851,
+                    longitude = 2.1734,
+                    order = 1,
+                    status = StopStatus.PENDING,
+                ),
+                isAddStopDialogVisible = true,
+                canAddMoreStops = true,
+            ),
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PreviewTripDetailScreenEditStopDialog() {
+    HeadingToTheAlpsTheme {
+        TripDetailScreen(
+            uiState = TripDetailUiState(
+                tripId = "trip-1",
+                startingPoint = Stop(
+                    id = "1",
+                    tripId = "trip-1",
+                    placeName = "Rome, Italy",
+                    latitude = 41.9028,
+                    longitude = 12.4964,
+                    order = 0,
+                    status = StopStatus.PENDING,
+                ),
+                intermediateStops = listOf(
+                    Stop(
+                        id = "2",
+                        tripId = "trip-1",
+                        placeName = "Florence, Italy",
+                        latitude = 43.7696,
+                        longitude = 11.2558,
+                        order = 1,
+                        status = StopStatus.PENDING,
+                    ),
+                ),
+                destination = Stop(
+                    id = "3",
+                    tripId = "trip-1",
+                    placeName = "Barcelona, Spain",
+                    latitude = 41.3851,
+                    longitude = 2.1734,
+                    order = 2,
+                    status = StopStatus.PENDING,
+                ),
+                isEditStopDialogVisible = true,
+                editingStop = Stop(
+                    id = "2",
+                    tripId = "trip-1",
+                    placeName = "Florence, Italy",
+                    latitude = 43.7696,
+                    longitude = 11.2558,
+                    order = 1,
+                    status = StopStatus.PENDING,
+                ),
+                canAddMoreStops = true,
+            ),
+        )
+    }
+}

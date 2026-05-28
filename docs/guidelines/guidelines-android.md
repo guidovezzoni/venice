@@ -135,6 +135,7 @@ private fun PreviewComponentName() {
     }
 }
 ```
+- **UiState Preview Coverage**: Every field of the screen's `UiState` must appear in a non-default value in at least one preview. Two fields may share a preview when it makes sense (e.g. `editingStop` + `isEditStopDialogVisible`), but no field should be left without visual coverage.
 - **State Hoisting**: Keep composables stateless, hoist state to caller or ViewModel
 - Use `mutableStateOf` only for state that needs to trigger recomposition
 - Use `rememberSaveable` for state that should survive configuration changes

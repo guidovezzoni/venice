@@ -118,6 +118,14 @@ private fun PreviewTripListScreenWithTrips() {
 
 @Preview(showBackground = true)
 @Composable
+private fun PreviewTripListScreenLoading() {
+    HeadingToTheAlpsTheme {
+        TripListScreen(uiState = TripListUiState(isLoading = true))
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
 private fun PreviewTripListScreenWithDialog() {
     HeadingToTheAlpsTheme {
         TripListScreen(
