@@ -204,6 +204,58 @@
       <li><code>EditStopUseCase.kt:10</code> &mdash; <em>invalidate affected legs once leg tracking is implemented (Epic 3)</em>. Intentional placeholder for future work, not a blocker.</li>
     </ul>
   </section>
+  <section class="report-section" data-source="verify_user_story" data-timestamp="2026-05-28T16:00:00Z">
+    <header>
+      <h2>Verification</h2>
+      <time datetime="2026-05-28T16:00:00Z">28 May 2026</time>
+    </header>
+    <p class="section-source">Source: verify_user_story</p>
+
+    <h3>OpenSpec Verify</h3>
+    <p>Change <code>edit-intermediate-stop</code> &mdash; schema: <code>spec-driven</code>. All 4 artefacts (proposal, design, specs, tasks) status: <span class="badge badge-pass">DONE</span>.</p>
+    <p>Tasks: 22/22 complete (including manual verification confirmed by user).</p>
+    <p>Delta specs verified against implementation &mdash; all requirements and scenarios matched.</p>
+
+    <h3>Build &amp; Tests</h3>
+    <p><code>./gradlew clean test assembleDebug</code> &mdash; <span class="badge badge-pass">PASS</span>. BUILD SUCCESSFUL (51 tasks executed).</p>
+
+    <h3>TODO Scan</h3>
+    <table>
+      <tr><th>File</th><th>TODO</th><th>Classification</th></tr>
+      <tr><td><code>EditStopUseCase.kt:10</code></td><td>Invalidate affected legs once leg tracking is implemented (Epic 3)</td><td><span class="badge badge-info">ACKNOWLEDGED</span></td></tr>
+      <tr><td><code>data_extraction_rules.xml:8-10</code></td><td>Android backup config boilerplate</td><td><span class="badge badge-info">ACKNOWLEDGED</span></td></tr>
+    </table>
+    <p>No RESOLVE NOW TODOs found.</p>
+
+    <h3>Acceptance Criteria</h3>
+    <table>
+      <tr><th>#</th><th>Criterion</th><th>Status</th><th>Justification</th></tr>
+      <tr><td>1</td><td>User can tap an existing stop to edit it</td><td><span class="badge badge-pass">PASS</span></td><td><code>TripDetailScreen.kt:99-100</code> dispatches <code>OnEditStopClicked(stop)</code>; starting point/destination already worked</td></tr>
+      <tr><td>2</td><td>Dialog pre-populated with current values</td><td><span class="badge badge-pass">PASS</span></td><td><code>TripDetailScreen.kt:202-204</code> passes <code>editingStop</code> fields as initial values</td></tr>
+      <tr><td>3</td><td>Stop name, lat, lng updated on confirm</td><td><span class="badge badge-pass">PASS</span></td><td><code>EditStopUseCase</code> &rarr; <code>StopRepositoryImpl.updateStop()</code>; covered by unit tests</td></tr>
+      <tr><td>4</td><td>Stop order remains unchanged</td><td><span class="badge badge-pass">PASS</span></td><td><code>StopRepositoryImpl.kt:84-88</code> copies only mutable fields; test confirms identity preservation</td></tr>
+      <tr><td>5</td><td>Leg invalidation (no-op)</td><td><span class="badge badge-pass">PASS</span></td><td>TODO at <code>EditStopUseCase.kt:10</code> documents deferral to Epic 3</td></tr>
+    </table>
+
+    <h3>Completion Checklist</h3>
+    <table>
+      <tr><th>Item</th><th>Status</th></tr>
+      <tr><td><code>StopDao.getStopById()</code> added and tested</td><td><span class="badge badge-pass">PASS</span></td></tr>
+      <tr><td><code>StopRepository.updateStop()</code> interface method</td><td><span class="badge badge-pass">PASS</span></td></tr>
+      <tr><td><code>StopRepositoryImpl.updateStop()</code> implemented and tested</td><td><span class="badge badge-pass">PASS</span></td></tr>
+      <tr><td><code>EditStopUseCase</code> created and tested</td><td><span class="badge badge-pass">PASS</span></td></tr>
+      <tr><td><code>TripDetailUiState</code> extended</td><td><span class="badge badge-pass">PASS</span></td></tr>
+      <tr><td><code>TripDetailUiIntent</code> extended</td><td><span class="badge badge-pass">PASS</span></td></tr>
+      <tr><td><code>TripDetailViewModel</code> handles edit intents (tested)</td><td><span class="badge badge-pass">PASS</span></td></tr>
+      <tr><td><code>TripDetailScreen</code> wires click to edit dialog</td><td><span class="badge badge-pass">PASS</span></td></tr>
+      <tr><td>String resources added and translated (EN/IT/ES)</td><td><span class="badge badge-pass">PASS</span></td></tr>
+      <tr><td>All unit tests pass</td><td><span class="badge badge-pass">PASS</span></td></tr>
+      <tr><td>Build succeeds</td><td><span class="badge badge-pass">PASS</span></td></tr>
+      <tr><td>Manual verification on device/emulator</td><td><span class="badge badge-pass">PASS</span></td></tr>
+    </table>
+
+    <div class="outcome outcome-passed">PASSED &mdash; Story renamed to <code>1.2.5-edit-stop-DONE.md</code></div>
+  </section>
   </main>
 
 </body>
