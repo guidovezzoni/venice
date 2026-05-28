@@ -107,6 +107,47 @@
       <li>Leg invalidation (acceptance criterion 5) is a documented no-op &mdash; leg calculation is not yet implemented (Epic 3).</li>
     </ul>
   </section>
+  <section class="report-section" data-source="sdlc_propose" data-timestamp="2026-05-28T12:00:00Z">
+    <header>
+      <h2>Change Proposed</h2>
+      <time datetime="2026-05-28T12:00:00Z">28 May 2026</time>
+    </header>
+    <p class="section-source">Source: sdlc_propose</p>
+
+    <h3>Exploration Findings</h3>
+    <ul>
+      <li>Starting point and destination edit flows work end-to-end via <code>SetStopUseCase</code> &rarr; <code>upsertStartingPoint</code>/<code>upsertDestination</code> &rarr; <code>StopDao.update()</code>.</li>
+      <li>Intermediate stop <code>StopSection</code> in <code>TripDetailScreen</code> does not pass an <code>onSetStopClicked</code> callback &mdash; tapping is a no-op.</li>
+      <li>The existing <code>addIntermediateStop</code> path only handles insertion, not updates.</li>
+      <li><code>SetStopDialog</code> already supports pre-population via <code>initialPlaceName</code>, <code>initialLatitude</code>, <code>initialLongitude</code> params &mdash; fully reusable for editing.</li>
+    </ul>
+
+    <h3>Questions &amp; Answers</h3>
+    <table>
+      <tr><th>Question</th><th>Answer</th></tr>
+      <tr><td>Reuse <code>SetStopDialog</code> composable for the edit dialog?</td><td>Yes &mdash; new usage of existing dialog, not a new composable.</td></tr>
+      <tr><td>Reuse add-stop hint/error strings for edit dialog?</td><td>OK &mdash; only dialog title gets a new string resource.</td></tr>
+      <tr><td>Leg invalidation (AC5) handling?</td><td>Leave a TODO for tracking &mdash; no-op until Epic 3.</td></tr>
+    </table>
+
+    <h3>Artefacts Created</h3>
+    <table>
+      <tr><th>Artefact</th><th>Path</th><th>Description</th></tr>
+      <tr><td>Proposal</td><td><code>openspec/changes/edit-intermediate-stop/proposal.md</code></td><td>Motivation and scope: enable intermediate stop editing</td></tr>
+      <tr><td>Design</td><td><code>openspec/changes/edit-intermediate-stop/design.md</code></td><td>Architecture decisions: dedicated <code>EditStopUseCase</code>, ID-based repository update, <code>SetStopDialog</code> reuse</td></tr>
+      <tr><td>Delta Spec (stop-management)</td><td><code>openspec/changes/edit-intermediate-stop/specs/stop-management/spec.md</code></td><td>New <code>getStopById</code> DAO query, <code>updateStop</code> repository method, <code>EditStopUseCase</code></td></tr>
+      <tr><td>Delta Spec (trip-detail)</td><td><code>openspec/changes/edit-intermediate-stop/specs/trip-detail/spec.md</code></td><td>New edit intents, state fields, ViewModel handling, screen wiring</td></tr>
+      <tr><td>Tasks</td><td><code>openspec/changes/edit-intermediate-stop/tasks.md</code></td><td>19 tasks in 6 groups: prerequisites, repository BDD, use case BDD, ViewModel BDD, UI integration, verification</td></tr>
+    </table>
+
+    <h3>Key Design Decisions</h3>
+    <ul>
+      <li><strong>New <code>EditStopUseCase</code></strong> rather than extending <code>SetStopUseCase</code> &mdash; clean separation between "add new" and "edit existing".</li>
+      <li><strong>ID-based repository update</strong>: <code>updateStop(stopId, &hellip;)</code> fetches by primary key, preserving identity fields.</li>
+      <li><strong>Reuse <code>SetStopDialog</code></strong>: same composable, different title string, pre-populated initial values.</li>
+      <li><strong>Leg invalidation</strong>: TODO marker in <code>EditStopUseCase</code> for Epic 3.</li>
+    </ul>
+  </section>
   </main>
 
 </body>
