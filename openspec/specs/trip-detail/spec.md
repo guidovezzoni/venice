@@ -16,11 +16,13 @@ Defines the requirements for the trip detail screen, covering the MVI contract (
 - `isSetStartingPointDialogVisible: Boolean` (default `false`)
 - `isSetDestinationDialogVisible: Boolean` (default `false`)
 - `isAddStopDialogVisible: Boolean` (default `false`)
+- `isEditStopDialogVisible: Boolean` (default `false`)
+- `editingStop: Stop?` (default `null`)
 - `canAddMoreStops: Boolean` (default `false`)
 
 #### Scenario: Default initial state
 - **WHEN** `TripDetailUiState()` is created with defaults
-- **THEN** `tripId` is `""`, `startingPoint` is `null`, `destination` is `null`, `intermediateStops` is empty, `isLoading` is `false`, `isSetStartingPointDialogVisible` is `false`, `isSetDestinationDialogVisible` is `false`, `isAddStopDialogVisible` is `false`, `canAddMoreStops` is `false`
+- **THEN** `tripId` is `""`, `startingPoint` is `null`, `destination` is `null`, `intermediateStops` is empty, `isLoading` is `false`, `isSetStartingPointDialogVisible` is `false`, `isSetDestinationDialogVisible` is `false`, `isAddStopDialogVisible` is `false`, `isEditStopDialogVisible` is `false`, `editingStop` is `null`, `canAddMoreStops` is `false`
 
 ### Requirement: TripDetailUiIntent models user actions
 `TripDetailUiIntent` SHALL be a sealed class with:
@@ -35,6 +37,9 @@ Defines the requirements for the trip detail screen, covering the MVI contract (
 - `OnDismissAddStopDialog` — user dismisses the add stop dialog
 - `OnMoveStopUp(stopId: String, currentOrder: Int)` — user taps the move-up button on an intermediate stop
 - `OnMoveStopDown(stopId: String, currentOrder: Int)` — user taps the move-down button on an intermediate stop
+- `OnEditStopClicked(stop: Stop)` — user taps an intermediate stop card to edit it
+- `OnEditStopConfirmed(stopId: String, placeName: String, latitude: Double, longitude: Double)` — user confirms the edit stop dialog
+- `OnDismissEditStopDialog` — user dismisses the edit stop dialog
 
 #### Scenario: All intents are representable
 - **WHEN** a user action occurs on the trip detail screen
@@ -69,6 +74,9 @@ Defines the requirements for the trip detail screen, covering the MVI contract (
 - On `OnAddStopConfirmed`: call `SetStopUseCase` with `StopType.INTERMEDIATE`; on success dismiss the dialog; on failure emit `ShowError`.
 - On `OnMoveStopUp`: call `MoveStopUseCase` with `(tripId, currentOrder, currentOrder - 1)`; on failure emit `ShowError`.
 - On `OnMoveStopDown`: call `MoveStopUseCase` with `(tripId, currentOrder, currentOrder + 1)`; on failure emit `ShowError`.
+- On `OnEditStopClicked`: set `editingStop` to the provided stop and `isEditStopDialogVisible = true`.
+- On `OnDismissEditStopDialog`: set `editingStop = null` and `isEditStopDialogVisible = false`.
+- On `OnEditStopConfirmed`: call `EditStopUseCase` with the provided `stopId`, `placeName`, `latitude`, `longitude`; on success set `editingStop = null` and `isEditStopDialogVisible = false`; on failure emit `ShowError`.
 
 #### Scenario: Opening starting point dialog
 - **WHEN** `OnSetStartingPointClicked` is dispatched
@@ -130,6 +138,22 @@ Defines the requirements for the trip detail screen, covering the MVI contract (
 - **WHEN** `OnMoveStopUp` or `OnMoveStopDown` is dispatched and `MoveStopUseCase` returns failure
 - **THEN** a `ShowError` effect is emitted
 
+#### Scenario: Opening edit stop dialog
+- **WHEN** `OnEditStopClicked` is dispatched with a stop
+- **THEN** `editingStop` is set to the provided stop and `isEditStopDialogVisible` becomes `true`
+
+#### Scenario: Dismissing edit stop dialog
+- **WHEN** `OnDismissEditStopDialog` is dispatched
+- **THEN** `editingStop` is set to `null` and `isEditStopDialogVisible` becomes `false`
+
+#### Scenario: Confirming edit stop — success
+- **WHEN** `OnEditStopConfirmed` is dispatched and `EditStopUseCase` succeeds
+- **THEN** `editingStop` is set to `null`, `isEditStopDialogVisible` becomes `false`, and the updated stop is reflected via Flow observation
+
+#### Scenario: Confirming edit stop — failure
+- **WHEN** `OnEditStopConfirmed` is dispatched and `EditStopUseCase` fails
+- **THEN** a `ShowError` effect is emitted
+
 #### Scenario: Initialisation with existing starting point and destination
 - **WHEN** the ViewModel initialises and stops with `order = 0` and `order = 1` exist
 - **THEN** `startingPoint` reflects the `order = 0` stop, `destination` reflects the `order = 1` stop, `intermediateStops` is empty, and `canAddMoreStops` is `true`
@@ -168,18 +192,31 @@ The trip detail screen SHALL use `SetStopDialog` (defined in destination-ui spec
 `TripDetailScreen` SHALL:
 - Accept `uiState` and `onIntent` parameters.
 - Render `StopSection` for the starting point (with `TripOrigin` icon) below the trip title.
-- Render intermediate stops between the starting point and destination sections. Each intermediate stop SHALL be rendered using `StopSection` with `LocationOn` icon.
+- Render intermediate stops between the starting point and destination sections. Each intermediate stop SHALL be rendered using `StopSection` with `LocationOn` icon. Tapping an intermediate stop card SHALL dispatch `OnEditStopClicked(stop)`.
 - Render an "Add Stop" button (e.g., `OutlinedButton` or `IconButton` with `Icons.Default.AddLocation`) between the last intermediate stop and the destination section. The button SHALL be visible only when `canAddMoreStops` is `true`. Tapping it SHALL dispatch `OnAddStopClicked`.
 - Render `StopSection` for the destination (with `Place` icon) below the intermediate stops and add-stop button.
 - Show `SetStopDialog` for the starting point when `isSetStartingPointDialogVisible` is `true`. If `uiState.startingPoint` is non-null, pass its `placeName`, `latitude`, and `longitude` as initial values to the dialog.
 - Show `SetStopDialog` for the destination when `isSetDestinationDialogVisible` is `true`. If `uiState.destination` is non-null, pass its `placeName`, `latitude`, and `longitude` as initial values to the dialog.
 - Show `SetStopDialog` for adding an intermediate stop when `isAddStopDialogVisible` is `true`, with empty initial values.
+- Show `SetStopDialog` for editing an intermediate stop when `isEditStopDialogVisible` is `true`, with `editingStop`'s `placeName`, `latitude`, and `longitude` as initial values and the edit stop dialog title string resource. On confirm, dispatch `OnEditStopConfirmed` with the `editingStop`'s `id` and the entered values.
 - Consume `uiEffect` to show a snackbar on `ShowError`.
 - The "Add Stop" button SHALL have a `contentDescription` for accessibility.
 
 #### Scenario: Screen renders starting point, intermediate stops, and destination sections
 - **WHEN** the trip detail screen is displayed with a starting point, two intermediate stops, and a destination
 - **THEN** the starting point section is visible, followed by the two intermediate stops in order, followed by the "Add Stop" button, followed by the destination section
+
+#### Scenario: Tapping intermediate stop opens edit dialog
+- **WHEN** the user taps an existing intermediate stop card
+- **THEN** the edit stop dialog opens pre-populated with the stop's place name, latitude, and longitude
+
+#### Scenario: Edit dialog uses edit-specific title
+- **WHEN** the edit stop dialog is visible
+- **THEN** the dialog title is "Edit stop" (from `trip_detail_edit_stop_dialog_title` string resource)
+
+#### Scenario: Edit dialog confirm dispatches OnEditStopConfirmed
+- **WHEN** the user confirms the edit stop dialog with valid values
+- **THEN** `OnEditStopConfirmed` is dispatched with the editing stop's ID and the entered place name, latitude, and longitude
 
 #### Scenario: Add stop button visible when under limit
 - **WHEN** the trip has fewer than 25 stops

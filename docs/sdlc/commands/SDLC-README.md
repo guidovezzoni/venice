@@ -59,3 +59,7 @@ Reusable procedure definitions live in `docs/sdlc/references/` and are loaded vi
 
 - BDD should be taken out of opsx into sdlc
 - Add UI test!!!
+- archive should also sync
+- add security review
+- add PR review
+- use git mv during verification

@@ -36,4 +36,4 @@
 
 - [x] 6.1 Run `./gradlew clean` and `./gradlew test` — all unit tests pass
 - [x] 6.2 Run `./gradlew assembleDebug` — build succeeds
-- [ ] 6.3 Manual verification: tap intermediate stop → dialog pre-populated → edit → stop updated, order unchanged
+- [x] 6.3 Manual verification: tap intermediate stop → dialog pre-populated → edit → stop updated, order unchanged
