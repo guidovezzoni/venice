@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.guidovezzoni.venice.domain.model.StopType
+import com.guidovezzoni.venice.domain.usecase.EditStopUseCase
 import com.guidovezzoni.venice.domain.usecase.MoveStopUseCase
 import com.guidovezzoni.venice.domain.usecase.ObserveStopsUseCase
 import com.guidovezzoni.venice.domain.usecase.SetStopUseCase
@@ -32,6 +33,7 @@ private const val UNKNOWN_ERROR = "Unknown error"
 class TripDetailViewModel @Inject constructor(
     private val setStopUseCase: SetStopUseCase,
     private val moveStopUseCase: MoveStopUseCase,
+    private val editStopUseCase: EditStopUseCase,
     observeStopsUseCase: ObserveStopsUseCase,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
@@ -109,12 +111,33 @@ class TripDetailViewModel @Inject constructor(
 
             is TripDetailUiIntent.OnMoveStopDown ->
                 moveStop(intent.currentOrder, intent.currentOrder + 1)
+
+            is TripDetailUiIntent.OnEditStopClicked ->
+                _uiState.update { it.copy(editingStop = intent.stop, isEditStopDialogVisible = true) }
+
+            TripDetailUiIntent.OnDismissEditStopDialog ->
+                _uiState.update { it.copy(editingStop = null, isEditStopDialogVisible = false) }
+
+            is TripDetailUiIntent.OnEditStopConfirmed ->
+                editStop(intent.stopId, intent.placeName, intent.latitude, intent.longitude)
         }
     }
 
     private fun moveStop(fromOrder: Int, toOrder: Int) {
         viewModelScope.launch {
             moveStopUseCase(tripId, fromOrder, toOrder)
+                .onFailure { error ->
+                    _uiEffect.emit(TripDetailUiEffect.ShowError(error.message ?: UNKNOWN_ERROR))
+                }
+        }
+    }
+
+    private fun editStop(stopId: String, placeName: String, latitude: Double, longitude: Double) {
+        viewModelScope.launch {
+            editStopUseCase(stopId, placeName, latitude, longitude)
+                .onSuccess {
+                    _uiState.update { it.copy(editingStop = null, isEditStopDialogVisible = false) }
+                }
                 .onFailure { error ->
                     _uiEffect.emit(TripDetailUiEffect.ShowError(error.message ?: UNKNOWN_ERROR))
                 }

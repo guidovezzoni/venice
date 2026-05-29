@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Report: 1.2.5 — Edit a Stop</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.6;
+      color: #1a1a1a;
+      background: #fafafa;
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+
+    .report-header {
+      border-bottom: 3px solid #2563eb;
+      padding-bottom: 1rem;
+      margin-bottom: 2rem;
+    }
+    .report-header h1 { font-size: 1.75rem; color: #1e293b; }
+    .report-meta {
+      display: flex; gap: 2rem; flex-wrap: wrap;
+      margin-top: 0.5rem; font-size: 0.875rem; color: #64748b;
+    }
+    .report-meta span { display: inline-flex; align-items: center; gap: 0.25rem; }
+
+    .report-section {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .report-section header {
+      display: flex; justify-content: space-between; align-items: baseline;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 0.75rem; margin-bottom: 1rem;
+    }
+    .report-section header h2 { font-size: 1.25rem; color: #1e293b; }
+    .report-section header time { font-size: 0.8rem; color: #94a3b8; white-space: nowrap; }
+    .section-source { font-size: 0.75rem; color: #94a3b8; font-style: italic; margin-bottom: 0.75rem; }
+
+    h3 { font-size: 1.05rem; color: #334155; margin: 1rem 0 0.5rem; }
+    p { margin-bottom: 0.75rem; }
+    ul, ol { margin: 0.5rem 0 0.75rem 1.5rem; }
+    li { margin-bottom: 0.25rem; }
+    code {
+      background: #f1f5f9; padding: 0.15rem 0.35rem; border-radius: 3px;
+      font-size: 0.875em;
+      font-family: "SF Mono", "Fira Code", Menlo, Consolas, monospace;
+    }
+
+    table { width: 100%; border-collapse: collapse; margin: 0.75rem 0; font-size: 0.9rem; }
+    th, td { text-align: left; padding: 0.5rem 0.75rem; border: 1px solid #e2e8f0; }
+    th { background: #f8fafc; font-weight: 600; color: #475569; }
+
+    .badge {
+      display: inline-block; padding: 0.15rem 0.5rem;
+      border-radius: 4px; font-size: 0.8rem; font-weight: 600;
+    }
+    .badge-pass { background: #dcfce7; color: #166534; }
+    .badge-fail { background: #fee2e2; color: #991b1b; }
+    .badge-warn { background: #fef9c3; color: #854d0e; }
+    .badge-info { background: #dbeafe; color: #1e40af; }
+
+    .outcome { margin-top: 1rem; padding: 0.75rem 1rem; border-radius: 6px; font-weight: 600; }
+    .outcome-passed { background: #dcfce7; color: #166534; border-left: 4px solid #22c55e; }
+    .outcome-failed { background: #fee2e2; color: #991b1b; border-left: 4px solid #ef4444; }
+  </style>
+</head>
+<body>
+
+  <div class="report-header">
+    <h1>1.2.5 — Edit a Stop</h1>
+    <div class="report-meta">
+      <span><strong>Story:</strong> 1.2.5</span>
+      <span><strong>Branch:</strong> feature/1.2.5-edit-stop</span>
+      <span><strong>Created:</strong> 2026-05-28</span>
+    </div>
+  </div>
+
+  <main id="report-sections">
+  <section class="report-section" data-source="open_user_story" data-timestamp="2026-05-28T00:00:00Z">
+    <header>
+      <h2>Story Opened</h2>
+      <time datetime="2026-05-28T00:00:00Z">28 May 2026</time>
+    </header>
+    <p class="section-source">Source: open_user_story</p>
+
+    <h3>User Story</h3>
+    <p><strong>1.2.5 — Edit a Stop</strong>: As a user, I want to edit a stop in my roadtrip so that I can correct or change a location.</p>
+
+    <h3>Branch</h3>
+    <p>Created branch <code>feature/1.2.5-edit-stop</code> from <code>main</code>.</p>
+
+    <h3>Refinement Summary</h3>
+    <ul>
+      <li>Starting point and destination editing already works via the existing upsert flow &mdash; no changes needed for those stop types.</li>
+      <li>The gap is <strong>intermediate stops</strong>: tapping a filled intermediate stop card currently has no effect.</li>
+      <li>New <code>EditStopUseCase</code> and <code>StopRepository.updateStop()</code> method needed to update an intermediate stop by ID without changing its order.</li>
+      <li>UI changes: new edit intents, state fields (<code>editingStop</code>, <code>isEditStopDialogVisible</code>), and a dialog block in <code>TripDetailScreen</code> reusing <code>SetStopDialog</code>.</li>
+      <li>Leg invalidation (acceptance criterion 5) is a documented no-op &mdash; leg calculation is not yet implemented (Epic 3).</li>
+    </ul>
+  </section>
+  <section class="report-section" data-source="sdlc_propose" data-timestamp="2026-05-28T12:00:00Z">
+    <header>
+      <h2>Change Proposed</h2>
+      <time datetime="2026-05-28T12:00:00Z">28 May 2026</time>
+    </header>
+    <p class="section-source">Source: sdlc_propose</p>
+
+    <h3>Exploration Findings</h3>
+    <ul>
+      <li>Starting point and destination edit flows work end-to-end via <code>SetStopUseCase</code> &rarr; <code>upsertStartingPoint</code>/<code>upsertDestination</code> &rarr; <code>StopDao.update()</code>.</li>
+      <li>Intermediate stop <code>StopSection</code> in <code>TripDetailScreen</code> does not pass an <code>onSetStopClicked</code> callback &mdash; tapping is a no-op.</li>
+      <li>The existing <code>addIntermediateStop</code> path only handles insertion, not updates.</li>
+      <li><code>SetStopDialog</code> already supports pre-population via <code>initialPlaceName</code>, <code>initialLatitude</code>, <code>initialLongitude</code> params &mdash; fully reusable for editing.</li>
+    </ul>
+
+    <h3>Questions &amp; Answers</h3>
+    <table>
+      <tr><th>Question</th><th>Answer</th></tr>
+      <tr><td>Reuse <code>SetStopDialog</code> composable for the edit dialog?</td><td>Yes &mdash; new usage of existing dialog, not a new composable.</td></tr>
+      <tr><td>Reuse add-stop hint/error strings for edit dialog?</td><td>OK &mdash; only dialog title gets a new string resource.</td></tr>
+      <tr><td>Leg invalidation (AC5) handling?</td><td>Leave a TODO for tracking &mdash; no-op until Epic 3.</td></tr>
+    </table>
+
+    <h3>Artefacts Created</h3>
+    <table>
+      <tr><th>Artefact</th><th>Path</th><th>Description</th></tr>
+      <tr><td>Proposal</td><td><code>openspec/changes/edit-intermediate-stop/proposal.md</code></td><td>Motivation and scope: enable intermediate stop editing</td></tr>
+      <tr><td>Design</td><td><code>openspec/changes/edit-intermediate-stop/design.md</code></td><td>Architecture decisions: dedicated <code>EditStopUseCase</code>, ID-based repository update, <code>SetStopDialog</code> reuse</td></tr>
+      <tr><td>Delta Spec (stop-management)</td><td><code>openspec/changes/edit-intermediate-stop/specs/stop-management/spec.md</code></td><td>New <code>getStopById</code> DAO query, <code>updateStop</code> repository method, <code>EditStopUseCase</code></td></tr>
+      <tr><td>Delta Spec (trip-detail)</td><td><code>openspec/changes/edit-intermediate-stop/specs/trip-detail/spec.md</code></td><td>New edit intents, state fields, ViewModel handling, screen wiring</td></tr>
+      <tr><td>Tasks</td><td><code>openspec/changes/edit-intermediate-stop/tasks.md</code></td><td>19 tasks in 6 groups: prerequisites, repository BDD, use case BDD, ViewModel BDD, UI integration, verification</td></tr>
+    </table>
+
+    <h3>Key Design Decisions</h3>
+    <ul>
+      <li><strong>New <code>EditStopUseCase</code></strong> rather than extending <code>SetStopUseCase</code> &mdash; clean separation between "add new" and "edit existing".</li>
+      <li><strong>ID-based repository update</strong>: <code>updateStop(stopId, &hellip;)</code> fetches by primary key, preserving identity fields.</li>
+      <li><strong>Reuse <code>SetStopDialog</code></strong>: same composable, different title string, pre-populated initial values.</li>
+      <li><strong>Leg invalidation</strong>: TODO marker in <code>EditStopUseCase</code> for Epic 3.</li>
+    </ul>
+  </section>
+  <section class="report-section" data-source="apply_changes" data-timestamp="2026-05-28T14:00:00Z">
+    <header>
+      <h2>Changes Applied</h2>
+      <time datetime="2026-05-28T14:00:00Z">28 May 2026</time>
+    </header>
+    <p class="section-source">Source: apply_changes</p>
+
+    <h3>Summary</h3>
+    <p>Implemented all 22 tasks across 6 sections in a single iteration cycle. BDD Red/Green cycles completed successfully for repository, use case, and ViewModel layers.</p>
+
+    <h3>Implementation Details</h3>
+    <table>
+      <tr><th>Section</th><th>Tasks</th><th>Status</th></tr>
+      <tr><td>1. Prerequisites</td><td>4</td><td><span class="badge badge-pass">DONE</span></td></tr>
+      <tr><td>2. StopRepositoryImpl updateStop (BDD)</td><td>3</td><td><span class="badge badge-pass">DONE</span></td></tr>
+      <tr><td>3. EditStopUseCase (BDD)</td><td>4</td><td><span class="badge badge-pass">DONE</span></td></tr>
+      <tr><td>4. TripDetailViewModel edit handling (BDD)</td><td>5</td><td><span class="badge badge-pass">DONE</span></td></tr>
+      <tr><td>5. UI Integration</td><td>3</td><td><span class="badge badge-pass">DONE</span></td></tr>
+      <tr><td>6. Verification</td><td>3</td><td><span class="badge badge-warn">2/3 &mdash; manual test pending</span></td></tr>
+    </table>
+
+    <h3>Files Created</h3>
+    <ul>
+      <li><code>app/src/main/java/.../domain/usecase/EditStopUseCase.kt</code></li>
+      <li><code>app/src/test/java/.../domain/usecase/EditStopUseCaseTest.kt</code></li>
+    </ul>
+
+    <h3>Files Modified</h3>
+    <ul>
+      <li><code>StopDao.kt</code> &mdash; added <code>getStopById</code> query</li>
+      <li><code>StopRepository.kt</code> &mdash; added <code>updateStop</code> interface method</li>
+      <li><code>StopRepositoryImpl.kt</code> &mdash; implemented <code>updateStop</code></li>
+      <li><code>TripDetailUiState.kt</code> &mdash; added <code>editingStop</code> and <code>isEditStopDialogVisible</code></li>
+      <li><code>TripDetailUiIntent.kt</code> &mdash; added <code>OnEditStopClicked</code>, <code>OnEditStopConfirmed</code>, <code>OnDismissEditStopDialog</code></li>
+      <li><code>TripDetailViewModel.kt</code> &mdash; injected <code>EditStopUseCase</code>, handled edit intents</li>
+      <li><code>TripDetailScreen.kt</code> &mdash; wired intermediate stop tap and edit dialog</li>
+      <li><code>StopRepositoryImplTest.kt</code> &mdash; added 2 updateStop tests</li>
+      <li><code>TripDetailViewModelTest.kt</code> &mdash; added 4 edit stop tests</li>
+      <li><code>values/strings.xml</code>, <code>values-it/strings.xml</code>, <code>values-es-rES/strings.xml</code> &mdash; added edit stop dialog title</li>
+    </ul>
+
+    <h3>BDD Cycles</h3>
+    <ul>
+      <li><strong>StopRepositoryImpl:</strong> RED (compilation &mdash; <code>updateStop</code> not yet implemented) &rarr; GREEN (all 14 tests pass)</li>
+      <li><strong>EditStopUseCase:</strong> RED (class doesn&rsquo;t exist) &rarr; GREEN (3 tests pass)</li>
+      <li><strong>TripDetailViewModel:</strong> RED (constructor signature mismatch) &rarr; GREEN (all 24 tests pass)</li>
+    </ul>
+
+    <h3>Iteration Cycles</h3>
+    <p>1 cycle &mdash; no RESOLVE NOW TODOs found.</p>
+
+    <h3>Acknowledged TODOs</h3>
+    <ul>
+      <li><code>EditStopUseCase.kt:10</code> &mdash; <em>invalidate affected legs once leg tracking is implemented (Epic 3)</em>. Intentional placeholder for future work, not a blocker.</li>
+    </ul>
+  </section>
+  <section class="report-section" data-source="verify_user_story" data-timestamp="2026-05-28T16:00:00Z">
+    <header>
+      <h2>Verification</h2>
+      <time datetime="2026-05-28T16:00:00Z">28 May 2026</time>
+    </header>
+    <p class="section-source">Source: verify_user_story</p>
+
+    <h3>OpenSpec Verify</h3>
+    <p>Change <code>edit-intermediate-stop</code> &mdash; schema: <code>spec-driven</code>. All 4 artefacts (proposal, design, specs, tasks) status: <span class="badge badge-pass">DONE</span>.</p>
+    <p>Tasks: 22/22 complete (including manual verification confirmed by user).</p>
+    <p>Delta specs verified against implementation &mdash; all requirements and scenarios matched.</p>
+
+    <h3>Build &amp; Tests</h3>
+    <p><code>./gradlew clean test assembleDebug</code> &mdash; <span class="badge badge-pass">PASS</span>. BUILD SUCCESSFUL (51 tasks executed).</p>
+
+    <h3>TODO Scan</h3>
+    <table>
+      <tr><th>File</th><th>TODO</th><th>Classification</th></tr>
+      <tr><td><code>EditStopUseCase.kt:10</code></td><td>Invalidate affected legs once leg tracking is implemented (Epic 3)</td><td><span class="badge badge-info">ACKNOWLEDGED</span></td></tr>
+      <tr><td><code>data_extraction_rules.xml:8-10</code></td><td>Android backup config boilerplate</td><td><span class="badge badge-info">ACKNOWLEDGED</span></td></tr>
+    </table>
+    <p>No RESOLVE NOW TODOs found.</p>
+
+    <h3>Acceptance Criteria</h3>
+    <table>
+      <tr><th>#</th><th>Criterion</th><th>Status</th><th>Justification</th></tr>
+      <tr><td>1</td><td>User can tap an existing stop to edit it</td><td><span class="badge badge-pass">PASS</span></td><td><code>TripDetailScreen.kt:99-100</code> dispatches <code>OnEditStopClicked(stop)</code>; starting point/destination already worked</td></tr>
+      <tr><td>2</td><td>Dialog pre-populated with current values</td><td><span class="badge badge-pass">PASS</span></td><td><code>TripDetailScreen.kt:202-204</code> passes <code>editingStop</code> fields as initial values</td></tr>
+      <tr><td>3</td><td>Stop name, lat, lng updated on confirm</td><td><span class="badge badge-pass">PASS</span></td><td><code>EditStopUseCase</code> &rarr; <code>StopRepositoryImpl.updateStop()</code>; covered by unit tests</td></tr>
+      <tr><td>4</td><td>Stop order remains unchanged</td><td><span class="badge badge-pass">PASS</span></td><td><code>StopRepositoryImpl.kt:84-88</code> copies only mutable fields; test confirms identity preservation</td></tr>
+      <tr><td>5</td><td>Leg invalidation (no-op)</td><td><span class="badge badge-pass">PASS</span></td><td>TODO at <code>EditStopUseCase.kt:10</code> documents deferral to Epic 3</td></tr>
+    </table>
+
+    <h3>Completion Checklist</h3>
+    <table>
+      <tr><th>Item</th><th>Status</th></tr>
+      <tr><td><code>StopDao.getStopById()</code> added and tested</td><td><span class="badge badge-pass">PASS</span></td></tr>
+      <tr><td><code>StopRepository.updateStop()</code> interface method</td><td><span class="badge badge-pass">PASS</span></td></tr>
+      <tr><td><code>StopRepositoryImpl.updateStop()</code> implemented and tested</td><td><span class="badge badge-pass">PASS</span></td></tr>
+      <tr><td><code>EditStopUseCase</code> created and tested</td><td><span class="badge badge-pass">PASS</span></td></tr>
+      <tr><td><code>TripDetailUiState</code> extended</td><td><span class="badge badge-pass">PASS</span></td></tr>
+      <tr><td><code>TripDetailUiIntent</code> extended</td><td><span class="badge badge-pass">PASS</span></td></tr>
+      <tr><td><code>TripDetailViewModel</code> handles edit intents (tested)</td><td><span class="badge badge-pass">PASS</span></td></tr>
+      <tr><td><code>TripDetailScreen</code> wires click to edit dialog</td><td><span class="badge badge-pass">PASS</span></td></tr>
+      <tr><td>String resources added and translated (EN/IT/ES)</td><td><span class="badge badge-pass">PASS</span></td></tr>
+      <tr><td>All unit tests pass</td><td><span class="badge badge-pass">PASS</span></td></tr>
+      <tr><td>Build succeeds</td><td><span class="badge badge-pass">PASS</span></td></tr>
+      <tr><td>Manual verification on device/emulator</td><td><span class="badge badge-pass">PASS</span></td></tr>
+    </table>
+
+    <div class="outcome outcome-passed">PASSED &mdash; Story renamed to <code>1.2.5-edit-stop-DONE.md</code></div>
+  </section>
+  <section class="report-section" data-source="opsx:archive" data-timestamp="2026-05-28T17:00:00Z">
+    <header>
+      <h2>Change Archived</h2>
+      <time datetime="2026-05-28T17:00:00Z">28 May 2026</time>
+    </header>
+    <p class="section-source">Source: opsx:archive</p>
+
+    <h3>Archive Details</h3>
+    <table>
+      <tr><th>Field</th><th>Value</th></tr>
+      <tr><td>Change name</td><td><code>edit-intermediate-stop</code></td></tr>
+      <tr><td>Schema</td><td><code>spec-driven</code></td></tr>
+      <tr><td>Archive location</td><td><code>openspec/changes/archive/2026-05-28-edit-intermediate-stop/</code></td></tr>
+      <tr><td>Spec sync</td><td><span class="badge badge-pass">Synced</span> &mdash; delta specs merged into main specs (<code>stop-management</code>, <code>trip-detail</code>)</td></tr>
+    </table>
+
+    <h3>Documentation Updates</h3>
+    <ul>
+      <li><strong>README.md</strong> &mdash; Updated app description to include full stop management capabilities (add, reorder, edit)</li>
+      <li><strong>AGENTS.md</strong> &mdash; Updated Current Status: added &ldquo;edit stop&rdquo; to completed stories, updated &ldquo;Next up&rdquo; line</li>
+    </ul>
+
+    <h3>Warnings</h3>
+    <p>None &mdash; all artefacts complete, all 22/22 tasks done.</p>
+
+    <div class="outcome outcome-passed">ARCHIVED &mdash; Change finalised and moved to archive</div>
+  </section>
+  </main>
+
+</body>
+</html>

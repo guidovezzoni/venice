@@ -55,6 +55,6 @@ Development follows a Specification-Driven Development (SDD) workflow powered by
 
 Completed stories (see `docs/userstories/index.md` for full backlog):
 - Epic 1 / Feature 1.1: Trip CRUD (create, list)
-- Epic 1 / Feature 1.2: Stop management (set starting point, set destination, add intermediate stops, consolidate use cases, reorder stops)
+- Epic 1 / Feature 1.2: Stop management (set starting point, set destination, add intermediate stops, consolidate use cases, reorder stops, edit stop)
 
-Next up: edit stop (1.2.5), remove stop (1.2.6), then stop progress tracking (1.3.x).
+Next up: remove stop (1.2.6), then UI feedback (1.4.x) and stop progress tracking (1.3.x).

@@ -1,10 +1,4 @@
-# Trip Detail
-
-## Purpose
-
-Defines the requirements for the trip detail screen, covering the MVI contract (state, intents, effects), ViewModel behaviour, UI composables, and navigation wiring.
-
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: TripDetailUiState represents the screen state
 `TripDetailUiState` SHALL be a data class with:
@@ -44,14 +38,6 @@ Defines the requirements for the trip detail screen, covering the MVI contract (
 #### Scenario: All intents are representable
 - **WHEN** a user action occurs on the trip detail screen
 - **THEN** it maps to exactly one `TripDetailUiIntent` subclass
-
-### Requirement: TripDetailUiEffect models one-shot side effects
-`TripDetailUiEffect` SHALL be a sealed class with:
-- `ShowError(message: String)` — displayed as a snackbar
-
-#### Scenario: Error effect carries message
-- **WHEN** `ShowError("Failed")` is created
-- **THEN** its `message` property is `"Failed"`
 
 ### Requirement: TripDetailViewModel drives the screen
 `TripDetailViewModel` SHALL:
@@ -174,20 +160,6 @@ Defines the requirements for the trip detail screen, covering the MVI contract (
 - **WHEN** the ViewModel observes 25 stops for the trip
 - **THEN** `canAddMoreStops` is `false`
 
-### Requirement: Stop sections use consolidated StopSection composable
-The trip detail screen SHALL use `StopSection` (defined in destination-ui spec) for both the starting point and destination sections, parameterised with the appropriate icon, labels, and string resources for each.
-
-#### Scenario: Starting point section uses StopSection
-- **WHEN** the starting point section is rendered
-- **THEN** it uses `StopSection` with `TripOrigin` icon and starting point string resources
-
-#### Scenario: Destination section uses StopSection
-- **WHEN** the destination section is rendered
-- **THEN** it uses `StopSection` with `Place` icon and destination string resources
-
-### Requirement: Stop dialogs use consolidated SetStopDialog composable
-The trip detail screen SHALL use `SetStopDialog` (defined in destination-ui spec) for both the starting point and destination dialogs, parameterised with the appropriate title, hint, and error string resources for each.
-
 ### Requirement: TripDetailScreen integrates all components
 `TripDetailScreen` SHALL:
 - Accept `uiState` and `onIntent` parameters.
@@ -241,53 +213,3 @@ The trip detail screen SHALL use `SetStopDialog` (defined in destination-ui spec
 #### Scenario: Snackbar shown on error
 - **WHEN** a `ShowError` effect is emitted
 - **THEN** a snackbar with the error message is displayed
-
-### Requirement: Stop sections render reorder buttons for intermediate stops
-`StopSection` SHALL accept optional `onMoveUp: (() -> Unit)?` and `onMoveDown: (() -> Unit)?` lambda parameters (defaulting to `null`). When `onMoveUp` is non-null, an `IconButton` with `Icons.Filled.KeyboardArrowUp` SHALL be rendered with content description `trip_detail_move_stop_up`. When `onMoveDown` is non-null, an `IconButton` with `Icons.Filled.KeyboardArrowDown` SHALL be rendered with content description `trip_detail_move_stop_down`.
-
-#### Scenario: Move-up button shown when lambda provided
-- **WHEN** `StopSection` is rendered with a non-null `onMoveUp` lambda
-- **THEN** an up-arrow `IconButton` is visible with content description "Move up"
-
-#### Scenario: Move-down button shown when lambda provided
-- **WHEN** `StopSection` is rendered with a non-null `onMoveDown` lambda
-- **THEN** a down-arrow `IconButton` is visible with content description "Move down"
-
-#### Scenario: No buttons when lambdas are null
-- **WHEN** `StopSection` is rendered with `onMoveUp = null` and `onMoveDown = null`
-- **THEN** no reorder buttons are visible
-
-### Requirement: TripDetailScreen passes reorder lambdas for intermediate stops
-`TripDetailScreen` SHALL pass `onMoveUp` and `onMoveDown` lambdas to `StopSection` for each intermediate stop based on its position:
-- The first intermediate stop (lowest order among intermediates) SHALL receive `onMoveUp = null` and `onMoveDown` dispatching `OnMoveStopDown`.
-- The last intermediate stop (highest order among intermediates) SHALL receive `onMoveUp` dispatching `OnMoveStopUp` and `onMoveDown = null`.
-- Middle intermediate stops SHALL receive both `onMoveUp` and `onMoveDown` lambdas.
-- When there are fewer than 2 intermediate stops, no reorder lambdas SHALL be passed.
-- Starting point and destination sections SHALL never receive reorder lambdas.
-
-#### Scenario: Single intermediate stop — no reorder buttons
-- **WHEN** there is exactly 1 intermediate stop
-- **THEN** `StopSection` for that stop receives `onMoveUp = null` and `onMoveDown = null`
-
-#### Scenario: Two intermediate stops — limited buttons
-- **WHEN** there are 2 intermediate stops
-- **THEN** the first intermediate receives only `onMoveDown` and the second receives only `onMoveUp`
-
-#### Scenario: Three intermediate stops — full buttons for middle
-- **WHEN** there are 3 intermediate stops
-- **THEN** the first receives only `onMoveDown`, the middle receives both `onMoveUp` and `onMoveDown`, and the last receives only `onMoveUp`
-
-#### Scenario: Starting point never has reorder buttons
-- **WHEN** the trip detail screen is rendered
-- **THEN** the starting point `StopSection` receives `onMoveUp = null` and `onMoveDown = null`
-
-#### Scenario: Destination never has reorder buttons
-- **WHEN** the trip detail screen is rendered
-- **THEN** the destination `StopSection` receives `onMoveUp = null` and `onMoveDown = null`
-
-### Requirement: TripDetailScreen wired in navigation
-`MainScreen` SHALL wire `TripDetailViewModel` via `hiltViewModel()` in the `ROUTE_TRIP_DETAIL` composable destination, passing `uiState` and `onIntent` to `TripDetailScreen`.
-
-#### Scenario: Navigation to trip detail creates ViewModel
-- **WHEN** the user navigates to a trip's detail screen
-- **THEN** `TripDetailViewModel` is created with the trip's ID from the route arguments

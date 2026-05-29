@@ -44,6 +44,7 @@
     <string name="trip_detail_add_stop_latitude_error">La latitud debe estar entre -90 y 90</string>
     <string name="trip_detail_add_stop_longitude_hint">Longitud</string>
     <string name="trip_detail_add_stop_longitude_error">La longitud debe estar entre -180 y 180</string>
+    <string name="trip_detail_edit_stop_dialog_title">Editar parada</string>
     <string name="trip_detail_intermediate_stop_label">Parada</string>
     <string name="trip_detail_change_intermediate_stop">Cambiar parada</string>
     <string name="error_max_stops_reached">Número máximo de paradas alcanzado</string>

@@ -73,6 +73,23 @@ class StopRepositoryImpl @Inject constructor(
         stopDao.swapStopOrders(tripId, fromOrder, toOrder)
     }
 
+    override suspend fun updateStop(
+        stopId: String,
+        placeName: String,
+        latitude: Double,
+        longitude: Double,
+    ): Result<Stop> = runCatching {
+        val existing = stopDao.getStopById(stopId)
+            ?: throw IllegalStateException("Stop not found: $stopId")
+        val updated = existing.copy(
+            placeName = placeName,
+            latitude = latitude,
+            longitude = longitude,
+        )
+        stopDao.update(updated)
+        updated.toDomain()
+    }
+
     private suspend fun upsertStop(
         tripId: String,
         placeName: String,

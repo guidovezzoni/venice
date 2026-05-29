@@ -10,7 +10,7 @@ See [`docs/sdlc/commands/SDLC-README.md`](docs/sdlc/commands/SDLC-README.md) for
 
 ## The App
 
-Venice helps users plan multi-stop road trips. The current version supports creating trips, viewing them in a list, navigating to trip details, and setting a starting point for each trip. The roadmap includes full stop management (adding, editing, reordering stops), place search via geocoding, route calculation with Google Directions API, live GPS-based ETA, and Android Auto integration.
+Venice helps users plan multi-stop road trips. The current version supports creating trips, viewing them in a list, navigating to trip details, and managing stops: setting a starting point and destination, adding up to 25 intermediate stops, reordering stops, and editing any stop's location. The roadmap includes place search via geocoding, route calculation with Google Directions API, live GPS-based ETA, and Android Auto integration.
 
 ### Architecture & Tech Stack
 
