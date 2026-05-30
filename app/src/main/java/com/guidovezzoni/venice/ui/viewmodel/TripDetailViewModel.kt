@@ -7,6 +7,7 @@ import com.guidovezzoni.venice.domain.model.StopType
 import com.guidovezzoni.venice.domain.usecase.EditStopUseCase
 import com.guidovezzoni.venice.domain.usecase.MoveStopUseCase
 import com.guidovezzoni.venice.domain.usecase.ObserveStopsUseCase
+import com.guidovezzoni.venice.domain.usecase.RemoveStopUseCase
 import com.guidovezzoni.venice.domain.usecase.SetStopUseCase
 import com.guidovezzoni.venice.ui.effect.TripDetailUiEffect
 import com.guidovezzoni.venice.ui.intent.TripDetailUiIntent
@@ -34,6 +35,7 @@ class TripDetailViewModel @Inject constructor(
     private val setStopUseCase: SetStopUseCase,
     private val moveStopUseCase: MoveStopUseCase,
     private val editStopUseCase: EditStopUseCase,
+    private val removeStopUseCase: RemoveStopUseCase,
     observeStopsUseCase: ObserveStopsUseCase,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
@@ -120,6 +122,15 @@ class TripDetailViewModel @Inject constructor(
 
             is TripDetailUiIntent.OnEditStopConfirmed ->
                 editStop(intent.stopId, intent.placeName, intent.latitude, intent.longitude)
+
+            is TripDetailUiIntent.OnRemoveStopClicked ->
+                _uiState.update { it.copy(stopToRemove = intent.stop, isRemoveStopDialogVisible = true) }
+
+            TripDetailUiIntent.OnRemoveStopConfirmed ->
+                removeStop()
+
+            TripDetailUiIntent.OnDismissRemoveStopDialog ->
+                _uiState.update { it.copy(stopToRemove = null, isRemoveStopDialogVisible = false) }
         }
     }
 
@@ -137,6 +148,19 @@ class TripDetailViewModel @Inject constructor(
             editStopUseCase(stopId, placeName, latitude, longitude)
                 .onSuccess {
                     _uiState.update { it.copy(editingStop = null, isEditStopDialogVisible = false) }
+                }
+                .onFailure { error ->
+                    _uiEffect.emit(TripDetailUiEffect.ShowError(error.message ?: UNKNOWN_ERROR))
+                }
+        }
+    }
+
+    private fun removeStop() {
+        val stop = _uiState.value.stopToRemove ?: return
+        viewModelScope.launch {
+            removeStopUseCase(tripId, stop.id)
+                .onSuccess {
+                    _uiState.update { it.copy(stopToRemove = null, isRemoveStopDialogVisible = false) }
                 }
                 .onFailure { error ->
                     _uiEffect.emit(TripDetailUiEffect.ShowError(error.message ?: UNKNOWN_ERROR))

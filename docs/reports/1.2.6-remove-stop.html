@@ -146,6 +146,63 @@
       <tr><td><code>tasks.md</code></td><td>9 groups, 24 tasks — BDD test-first ordering with prerequisites, BDD pairs, UI integration, strings, and verification</td></tr>
     </table>
   </section>
+  <section class="report-section" data-source="apply_changes" data-timestamp="2026-05-30T14:30:00Z">
+    <header>
+      <h2>Changes Applied</h2>
+      <time datetime="2026-05-30T14:30:00Z">30 May 2026</time>
+    </header>
+    <p class="section-source">Source: apply_changes</p>
+
+    <h3>Summary</h3>
+    <p>Implemented all 26 of 27 tasks (task 9.2 is manual verification, deferred to the verify step). BDD Red/Green cycle followed for all test-driven sections.</p>
+
+    <h3>Implementation Details</h3>
+    <table>
+      <tr><th>Section</th><th>Tasks</th><th>Status</th></tr>
+      <tr><td>1. Prerequisites</td><td>DAO queries, MVI intents, UI state fields</td><td><span class="badge badge-pass">Done</span></td></tr>
+      <tr><td>2. StopDao deleteAndReorder</td><td>BDD test + implementation</td><td><span class="badge badge-pass">Done</span></td></tr>
+      <tr><td>3. StopRepository deleteStop</td><td>BDD tests + interface + implementation</td><td><span class="badge badge-pass">Done</span></td></tr>
+      <tr><td>4. RemoveStopUseCase</td><td>BDD tests + use case creation</td><td><span class="badge badge-pass">Done</span></td></tr>
+      <tr><td>5. TripDetailViewModel</td><td>BDD tests + intent handling</td><td><span class="badge badge-pass">Done</span></td></tr>
+      <tr><td>6. StopSection delete button</td><td>onDelete parameter + previews</td><td><span class="badge badge-pass">Done</span></td></tr>
+      <tr><td>7. TripDetailScreen wiring</td><td>Delete lambdas + AlertDialog + previews</td><td><span class="badge badge-pass">Done</span></td></tr>
+      <tr><td>8. String resources</td><td>EN, IT, ES strings</td><td><span class="badge badge-pass">Done</span></td></tr>
+      <tr><td>9. Verification</td><td><code>./gradlew check</code> passed</td><td><span class="badge badge-pass">Done</span></td></tr>
+    </table>
+
+    <h3>Iteration Cycles</h3>
+    <p>1 cycle — all tasks completed on the first pass with no blockers.</p>
+
+    <h3>Files Created</h3>
+    <ul>
+      <li><code>RemoveStopUseCase.kt</code> — domain use case delegating to repository</li>
+      <li><code>RemoveStopUseCaseTest.kt</code> — 2 tests (success + failure propagation)</li>
+      <li><code>StopDaoTest.kt</code> — 2 tests (delete-and-reorder + stop-not-found)</li>
+    </ul>
+
+    <h3>Files Modified</h3>
+    <ul>
+      <li><code>StopDao.kt</code> — added <code>deleteById</code>, <code>decrementOrderAbove</code>, <code>deleteAndReorder</code></li>
+      <li><code>StopRepository.kt</code> — added <code>deleteStop</code> to interface</li>
+      <li><code>StopRepositoryImpl.kt</code> — implemented <code>deleteStop</code></li>
+      <li><code>TripDetailUiIntent.kt</code> — added 3 remove intents</li>
+      <li><code>TripDetailUiState.kt</code> — added <code>isRemoveStopDialogVisible</code>, <code>stopToRemove</code></li>
+      <li><code>TripDetailViewModel.kt</code> — added <code>RemoveStopUseCase</code> dependency and intent handling</li>
+      <li><code>StopSection.kt</code> — added <code>onDelete</code> parameter with delete <code>IconButton</code></li>
+      <li><code>TripDetailScreen.kt</code> — wired delete lambdas + confirmation <code>AlertDialog</code></li>
+      <li><code>StopRepositoryImplTest.kt</code> — added 2 tests for <code>deleteStop</code></li>
+      <li><code>TripDetailViewModelTest.kt</code> — added 4 tests for remove stop intents</li>
+      <li><code>values/strings.xml</code>, <code>values-it/strings.xml</code>, <code>values-es-rES/strings.xml</code> — 5 new strings each</li>
+    </ul>
+
+    <h3>Acknowledged TODOs</h3>
+    <ul>
+      <li><code>RemoveStopUseCase.kt:9</code> — invalidate affected legs (deferred to Epic 3)</li>
+      <li><code>EditStopUseCase.kt:10</code> — invalidate affected legs (deferred to Epic 3, pre-existing)</li>
+    </ul>
+
+    <div class="outcome outcome-passed">All tests pass. <code>./gradlew check</code> succeeded. Ready for manual verification.</div>
+  </section>
   </main>
 
 </body>

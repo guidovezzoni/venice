@@ -7,6 +7,7 @@ import com.guidovezzoni.venice.domain.model.StopType
 import com.guidovezzoni.venice.domain.usecase.EditStopUseCase
 import com.guidovezzoni.venice.domain.usecase.MoveStopUseCase
 import com.guidovezzoni.venice.domain.usecase.ObserveStopsUseCase
+import com.guidovezzoni.venice.domain.usecase.RemoveStopUseCase
 import com.guidovezzoni.venice.domain.usecase.SetStopUseCase
 import com.guidovezzoni.venice.ui.effect.TripDetailUiEffect
 import com.guidovezzoni.venice.ui.intent.TripDetailUiIntent
@@ -43,6 +44,7 @@ class TripDetailViewModelTest {
     private lateinit var setStopUseCase: SetStopUseCase
     private lateinit var moveStopUseCase: MoveStopUseCase
     private lateinit var editStopUseCase: EditStopUseCase
+    private lateinit var removeStopUseCase: RemoveStopUseCase
     private lateinit var observeStopsUseCase: ObserveStopsUseCase
     private lateinit var savedStateHandle: SavedStateHandle
 
@@ -53,6 +55,7 @@ class TripDetailViewModelTest {
         setStopUseCase = mockk()
         moveStopUseCase = mockk()
         editStopUseCase = mockk()
+        removeStopUseCase = mockk()
         observeStopsUseCase = mockk()
         savedStateHandle = SavedStateHandle(mapOf("tripId" to TRIP_ID))
     }
@@ -65,7 +68,7 @@ class TripDetailViewModelTest {
 
     private fun createViewModel(): TripDetailViewModel {
         every { observeStopsUseCase(TRIP_ID) } returns flowOf(emptyList())
-        return TripDetailViewModel(setStopUseCase, moveStopUseCase, editStopUseCase, observeStopsUseCase, savedStateHandle)
+        return TripDetailViewModel(setStopUseCase, moveStopUseCase, editStopUseCase, removeStopUseCase, observeStopsUseCase, savedStateHandle)
     }
 
     @Test
@@ -101,7 +104,7 @@ class TripDetailViewModelTest {
         every { observeStopsUseCase(TRIP_ID) } returns flowOf(listOf(stop))
         coEvery { setStopUseCase(TRIP_ID, PLACE_NAME, LATITUDE, LONGITUDE, StopType.STARTING_POINT) } returns Result.success(stop)
 
-        val viewModel = TripDetailViewModel(setStopUseCase, moveStopUseCase, editStopUseCase, observeStopsUseCase, savedStateHandle)
+        val viewModel = TripDetailViewModel(setStopUseCase, moveStopUseCase, editStopUseCase, removeStopUseCase, observeStopsUseCase, savedStateHandle)
         viewModel.onIntent(TripDetailUiIntent.OnSetStartingPointClicked)
         viewModel.onIntent(TripDetailUiIntent.OnStartingPointConfirmed(PLACE_NAME, LATITUDE, LONGITUDE))
 
@@ -137,7 +140,7 @@ class TripDetailViewModelTest {
         )
         every { observeStopsUseCase(TRIP_ID) } returns flowOf(listOf(expectedStop))
 
-        val viewModel = TripDetailViewModel(setStopUseCase, moveStopUseCase, editStopUseCase, observeStopsUseCase, savedStateHandle)
+        val viewModel = TripDetailViewModel(setStopUseCase, moveStopUseCase, editStopUseCase, removeStopUseCase, observeStopsUseCase, savedStateHandle)
 
         assertEquals(expectedStop, viewModel.uiState.value.startingPoint)
     }
@@ -182,7 +185,7 @@ class TripDetailViewModelTest {
         every { observeStopsUseCase(TRIP_ID) } returns flowOf(listOf(destinationStop))
         coEvery { setStopUseCase(TRIP_ID, PLACE_NAME, LATITUDE, LONGITUDE, StopType.DESTINATION) } returns Result.success(destinationStop)
 
-        val viewModel = TripDetailViewModel(setStopUseCase, moveStopUseCase, editStopUseCase, observeStopsUseCase, savedStateHandle)
+        val viewModel = TripDetailViewModel(setStopUseCase, moveStopUseCase, editStopUseCase, removeStopUseCase, observeStopsUseCase, savedStateHandle)
         viewModel.onIntent(TripDetailUiIntent.OnSetDestinationClicked)
         viewModel.onIntent(TripDetailUiIntent.OnDestinationConfirmed(PLACE_NAME, LATITUDE, LONGITUDE))
 
@@ -218,7 +221,7 @@ class TripDetailViewModelTest {
         )
         every { observeStopsUseCase(TRIP_ID) } returns flowOf(listOf(expectedDestination))
 
-        val viewModel = TripDetailViewModel(setStopUseCase, moveStopUseCase, editStopUseCase, observeStopsUseCase, savedStateHandle)
+        val viewModel = TripDetailViewModel(setStopUseCase, moveStopUseCase, editStopUseCase, removeStopUseCase, observeStopsUseCase, savedStateHandle)
 
         assertEquals(expectedDestination, viewModel.uiState.value.destination)
     }
@@ -236,7 +239,7 @@ class TripDetailViewModelTest {
         )
         every { observeStopsUseCase(TRIP_ID) } returns flowOf(listOf(startingPoint))
 
-        val viewModel = TripDetailViewModel(setStopUseCase, moveStopUseCase, editStopUseCase, observeStopsUseCase, savedStateHandle)
+        val viewModel = TripDetailViewModel(setStopUseCase, moveStopUseCase, editStopUseCase, removeStopUseCase, observeStopsUseCase, savedStateHandle)
 
         assertNull(viewModel.uiState.value.destination)
     }
@@ -249,7 +252,7 @@ class TripDetailViewModelTest {
         val destination = Stop("s3", TRIP_ID, "End", 3.0, 3.0, 3, StopStatus.PENDING)
         every { observeStopsUseCase(TRIP_ID) } returns flowOf(listOf(startingPoint, intermediate1, intermediate2, destination))
 
-        val viewModel = TripDetailViewModel(setStopUseCase, moveStopUseCase, editStopUseCase, observeStopsUseCase, savedStateHandle)
+        val viewModel = TripDetailViewModel(setStopUseCase, moveStopUseCase, editStopUseCase, removeStopUseCase, observeStopsUseCase, savedStateHandle)
 
         val expectedIntermediateStops = listOf(intermediate1, intermediate2)
         assertEquals(expectedIntermediateStops, viewModel.uiState.value.intermediateStops)
@@ -311,7 +314,7 @@ class TripDetailViewModelTest {
         }
         every { observeStopsUseCase(TRIP_ID) } returns flowOf(stops)
 
-        val viewModel = TripDetailViewModel(setStopUseCase, moveStopUseCase, editStopUseCase, observeStopsUseCase, savedStateHandle)
+        val viewModel = TripDetailViewModel(setStopUseCase, moveStopUseCase, editStopUseCase, removeStopUseCase, observeStopsUseCase, savedStateHandle)
 
         assertFalse(viewModel.uiState.value.canAddMoreStops)
     }
@@ -327,7 +330,7 @@ class TripDetailViewModelTest {
         every { observeStopsUseCase(TRIP_ID) } returns flowOf(stops)
         coEvery { moveStopUseCase(TRIP_ID, 2, 1) } returns Result.success(Unit)
 
-        val viewModel = TripDetailViewModel(setStopUseCase, moveStopUseCase, editStopUseCase, observeStopsUseCase, savedStateHandle)
+        val viewModel = TripDetailViewModel(setStopUseCase, moveStopUseCase, editStopUseCase, removeStopUseCase, observeStopsUseCase, savedStateHandle)
         viewModel.onIntent(TripDetailUiIntent.OnMoveStopUp("s2", 2))
 
         coVerify(exactly = 1) { moveStopUseCase(TRIP_ID, 2, 1) }
@@ -344,7 +347,7 @@ class TripDetailViewModelTest {
         every { observeStopsUseCase(TRIP_ID) } returns flowOf(stops)
         coEvery { moveStopUseCase(TRIP_ID, 1, 2) } returns Result.success(Unit)
 
-        val viewModel = TripDetailViewModel(setStopUseCase, moveStopUseCase, editStopUseCase, observeStopsUseCase, savedStateHandle)
+        val viewModel = TripDetailViewModel(setStopUseCase, moveStopUseCase, editStopUseCase, removeStopUseCase, observeStopsUseCase, savedStateHandle)
         viewModel.onIntent(TripDetailUiIntent.OnMoveStopDown("s1", 1))
 
         coVerify(exactly = 1) { moveStopUseCase(TRIP_ID, 1, 2) }
@@ -415,6 +418,60 @@ class TripDetailViewModelTest {
 
         viewModel.onIntent(TripDetailUiIntent.OnEditStopClicked(stop))
         viewModel.onIntent(TripDetailUiIntent.OnEditStopConfirmed("s1", PLACE_NAME, LATITUDE, LONGITUDE))
+
+        assertTrue(effects.any { it is TripDetailUiEffect.ShowError })
+        collectJob.cancel()
+    }
+
+    @Test
+    fun `GIVEN the screen is displayed WHEN OnRemoveStopClicked is dispatched THEN stopToRemove is set and isRemoveStopDialogVisible becomes true`() = runTest {
+        val stop = Stop("s1", TRIP_ID, PLACE_NAME, LATITUDE, LONGITUDE, 1, StopStatus.PENDING)
+        val viewModel = createViewModel()
+
+        viewModel.onIntent(TripDetailUiIntent.OnRemoveStopClicked(stop))
+
+        assertEquals(stop, viewModel.uiState.value.stopToRemove)
+        assertTrue(viewModel.uiState.value.isRemoveStopDialogVisible)
+    }
+
+    @Test
+    fun `GIVEN remove dialog is visible WHEN OnDismissRemoveStopDialog is dispatched THEN stopToRemove is null and isRemoveStopDialogVisible becomes false`() = runTest {
+        val stop = Stop("s1", TRIP_ID, PLACE_NAME, LATITUDE, LONGITUDE, 1, StopStatus.PENDING)
+        val viewModel = createViewModel()
+
+        viewModel.onIntent(TripDetailUiIntent.OnRemoveStopClicked(stop))
+        viewModel.onIntent(TripDetailUiIntent.OnDismissRemoveStopDialog)
+
+        assertNull(viewModel.uiState.value.stopToRemove)
+        assertFalse(viewModel.uiState.value.isRemoveStopDialogVisible)
+    }
+
+    @Test
+    fun `GIVEN remove dialog is visible WHEN OnRemoveStopConfirmed is dispatched and RemoveStopUseCase succeeds THEN stopToRemove is null and isRemoveStopDialogVisible becomes false`() = runTest {
+        val stop = Stop("s1", TRIP_ID, PLACE_NAME, LATITUDE, LONGITUDE, 1, StopStatus.PENDING)
+        coEvery { removeStopUseCase(TRIP_ID, "s1") } returns Result.success(Unit)
+        val viewModel = createViewModel()
+
+        viewModel.onIntent(TripDetailUiIntent.OnRemoveStopClicked(stop))
+        viewModel.onIntent(TripDetailUiIntent.OnRemoveStopConfirmed)
+
+        assertNull(viewModel.uiState.value.stopToRemove)
+        assertFalse(viewModel.uiState.value.isRemoveStopDialogVisible)
+    }
+
+    @Test
+    fun `GIVEN remove dialog is visible WHEN OnRemoveStopConfirmed is dispatched and RemoveStopUseCase fails THEN ShowError effect is emitted`() = runTest(testDispatcher) {
+        val stop = Stop("s1", TRIP_ID, PLACE_NAME, LATITUDE, LONGITUDE, 1, StopStatus.PENDING)
+        coEvery { removeStopUseCase(TRIP_ID, "s1") } returns Result.failure(RuntimeException("error"))
+        val viewModel = createViewModel()
+
+        val effects = mutableListOf<TripDetailUiEffect>()
+        val collectJob = launch {
+            viewModel.uiEffect.collect { effects.add(it) }
+        }
+
+        viewModel.onIntent(TripDetailUiIntent.OnRemoveStopClicked(stop))
+        viewModel.onIntent(TripDetailUiIntent.OnRemoveStopConfirmed)
 
         assertTrue(effects.any { it is TripDetailUiEffect.ShowError })
         collectJob.cancel()

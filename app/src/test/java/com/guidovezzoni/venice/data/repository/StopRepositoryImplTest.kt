@@ -262,6 +262,27 @@ class StopRepositoryImplTest {
     }
 
     @Test
+    fun `GIVEN a valid tripId and stopId WHEN deleteStop is called THEN StopDao deleteAndReorder is called and Result success Unit is returned`() = runTest {
+        coEvery { stopDao.deleteAndReorder(TRIP_ID, "stop-2") } returns Unit
+
+        val result = repository.deleteStop(TRIP_ID, "stop-2")
+
+        assertTrue(result.isSuccess)
+        coVerify(exactly = 1) { stopDao.deleteAndReorder(TRIP_ID, "stop-2") }
+    }
+
+    @Test
+    fun `GIVEN StopDao deleteAndReorder throws exception WHEN deleteStop is called THEN Result failure with the exception is returned`() = runTest {
+        val exception = IllegalStateException("Stop not found")
+        coEvery { stopDao.deleteAndReorder(TRIP_ID, "stop-2") } throws exception
+
+        val result = repository.deleteStop(TRIP_ID, "stop-2")
+
+        assertTrue(result.isFailure)
+        assertEquals(exception, result.exceptionOrNull())
+    }
+
+    @Test
     fun `GIVEN a non-existent target order WHEN swapStopOrder is called THEN result is failure`() = runTest {
         coEvery { stopDao.swapStopOrders(TRIP_ID, 1, 5) } throws IllegalStateException("No stop found at order 5")
 

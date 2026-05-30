@@ -50,4 +50,9 @@
     <string name="error_max_stops_reached">Número máximo de paradas alcanzado</string>
     <string name="trip_detail_move_stop_up">Mover arriba</string>
     <string name="trip_detail_move_stop_down">Mover abajo</string>
+    <string name="trip_detail_remove_stop">Eliminar parada</string>
+    <string name="trip_detail_remove_stop_dialog_title">¿Eliminar parada?</string>
+    <string name="trip_detail_remove_stop_dialog_message">¿Estas seguro de que quieres eliminar \"%s\"?</string>
+    <string name="trip_detail_remove_stop_error">No se pudo eliminar la parada. Inténtalo de nuevo.</string>
+    <string name="global_remove">Eliminar</string>
 </resources>

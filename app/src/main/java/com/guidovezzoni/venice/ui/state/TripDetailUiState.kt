@@ -14,4 +14,6 @@ data class TripDetailUiState(
     val isEditStopDialogVisible: Boolean = false,
     val editingStop: Stop? = null,
     val canAddMoreStops: Boolean = false,
+    val isRemoveStopDialogVisible: Boolean = false,
+    val stopToRemove: Stop? = null,
 )

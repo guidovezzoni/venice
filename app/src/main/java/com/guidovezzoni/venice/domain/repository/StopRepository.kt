@@ -37,4 +37,6 @@ interface StopRepository {
         latitude: Double,
         longitude: Double,
     ): Result<Stop>
+
+    suspend fun deleteStop(tripId: String, stopId: String): Result<Unit>
 }

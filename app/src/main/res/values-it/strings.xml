@@ -50,4 +50,9 @@
     <string name="error_max_stops_reached">Numero massimo di tappe raggiunto</string>
     <string name="trip_detail_move_stop_up">Sposta su</string>
     <string name="trip_detail_move_stop_down">Sposta giù</string>
+    <string name="trip_detail_remove_stop">Rimuovi tappa</string>
+    <string name="trip_detail_remove_stop_dialog_title">Rimuovere la tappa?</string>
+    <string name="trip_detail_remove_stop_dialog_message">Vuoi davvero rimuovere \"%s\"?</string>
+    <string name="trip_detail_remove_stop_error">Impossibile rimuovere la tappa. Riprova.</string>
+    <string name="global_remove">Rimuovi</string>
 </resources>
