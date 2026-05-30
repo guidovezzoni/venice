@@ -50,4 +50,4 @@
 ## 9. Verification
 
 - [x] 9.1 Run `./gradlew check` and confirm all tests pass
-- [ ] 9.2 Manual verification: remove intermediate stop, remove starting point, remove destination, cancel dialog, remove last stop from trip
+- [x] 9.2 Manual verification: remove intermediate stop, remove starting point, remove destination, cancel dialog, remove last stop from trip

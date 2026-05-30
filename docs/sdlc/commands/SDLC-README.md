@@ -44,7 +44,6 @@ These scripts create symlinks in `.claude/commands/sdlc/` and `.cursor/commands/
 ## TODO
 
 - BDD should be taken out of opsx into sdlc
-- Add UI test!!!
 - add PR review
 - use git mv during verification
 - archive should also sync

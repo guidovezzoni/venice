@@ -203,6 +203,59 @@
 
     <div class="outcome outcome-passed">All tests pass. <code>./gradlew check</code> succeeded. Ready for manual verification.</div>
   </section>
+  <section class="report-section" data-source="verify_user_story" data-timestamp="2026-05-30T18:10:00Z">
+    <header>
+      <h2>Story Verified</h2>
+      <time datetime="2026-05-30T18:10:00Z">30 May 2026</time>
+    </header>
+    <p class="section-source">Source: verify_user_story</p>
+
+    <h3>OpenSpec Verify</h3>
+    <p>All 3 dimensions passed:</p>
+    <table>
+      <tr><th>Dimension</th><th>Result</th></tr>
+      <tr><td>Completeness</td><td><span class="badge badge-pass">27/27 tasks</span> — all requirements implemented</td></tr>
+      <tr><td>Correctness</td><td><span class="badge badge-pass">Pass</span> — all requirements covered, all scenarios have tests</td></tr>
+      <tr><td>Coherence</td><td><span class="badge badge-pass">Pass</span> — design decisions followed, patterns consistent</td></tr>
+    </table>
+
+    <h3>TODO Scan</h3>
+    <p>2 TODOs found, both <span class="badge badge-info">ACKNOWLEDGED</span>:</p>
+    <ul>
+      <li><code>EditStopUseCase.kt:10</code> — leg invalidation (Epic 3, pre-existing)</li>
+      <li><code>RemoveStopUseCase.kt:9</code> — leg invalidation (Epic 3, expected by spec)</li>
+    </ul>
+
+    <h3>Definition of Done</h3>
+    <table>
+      <tr><th>#</th><th>Criterion</th><th>Status</th><th>Justification</th></tr>
+      <tr><td>1</td><td>Remove any intermediate stop via delete button</td><td><span class="badge badge-pass">PASS</span></td><td>On-device test: Florence removed via delete IconButton</td></tr>
+      <tr><td>2</td><td>Remove starting point or destination via delete button</td><td><span class="badge badge-pass">PASS</span></td><td>On-device test: Rome (start) and Barcelona (dest) removed</td></tr>
+      <tr><td>3</td><td>Confirmation dialog with stop place name</td><td><span class="badge badge-pass">PASS</span></td><td>Screenshot confirms &ldquo;Are you sure you want to remove &quot;Rome&quot;?&rdquo;</td></tr>
+      <tr><td>4</td><td>Orders contiguous after intermediate removal</td><td><span class="badge badge-pass">PASS</span></td><td><code>decrementOrderAbove</code> in DAO + verified via UI after Florence removal</td></tr>
+      <tr><td>5</td><td>Starting point removed &rarr; next stop promoted to order 0</td><td><span class="badge badge-pass">PASS</span></td><td>On-device test: Nice promoted to starting point after Rome removed</td></tr>
+      <tr><td>6</td><td>Destination removed &rarr; previous stop becomes destination</td><td><span class="badge badge-pass">PASS</span></td><td>On-device test: Barcelona removed, Nice remained</td></tr>
+      <tr><td>7</td><td>Trip can have zero stops</td><td><span class="badge badge-pass">PASS</span></td><td>On-device test: empty trip shows &ldquo;Set starting point&rdquo; / &ldquo;Set destination&rdquo;</td></tr>
+      <tr><td>8</td><td>Delete within database transaction</td><td><span class="badge badge-pass">PASS</span></td><td><code>deleteAndReorder</code> is <code>@Transaction</code> in <code>StopDao.kt:49</code></td></tr>
+      <tr><td>9</td><td>On failure, snackbar error, no changes persisted</td><td><span class="badge badge-pass">PASS</span></td><td>ViewModel test confirms <code>ShowError</code> emitted on failure; <code>runCatching</code> ensures atomicity</td></tr>
+    </table>
+
+    <h3>Manual Verification (Task 9.2)</h3>
+    <p>Automated on-device test via adb on Pixel 6a (Android 16). Database seeded with 4 stops (Rome, Florence, Nice, Barcelona), then 5 test scenarios executed:</p>
+    <table>
+      <tr><th>Test</th><th>Result</th></tr>
+      <tr><td>Cancel remove dialog &mdash; all stops intact after dismissal</td><td><span class="badge badge-pass">PASS</span></td></tr>
+      <tr><td>Remove intermediate stop (Florence) &mdash; others remain</td><td><span class="badge badge-pass">PASS</span></td></tr>
+      <tr><td>Remove starting point (Rome) &mdash; Nice promoted</td><td><span class="badge badge-pass">PASS</span></td></tr>
+      <tr><td>Remove destination (Barcelona) &mdash; Nice remains</td><td><span class="badge badge-pass">PASS</span></td></tr>
+      <tr><td>Remove last stop (Nice) &mdash; empty trip, no delete buttons</td><td><span class="badge badge-pass">PASS</span></td></tr>
+    </table>
+
+    <h3>Renamed</h3>
+    <p><code>1.2.6-remove-stop-WIP.md</code> &rarr; <code>1.2.6-remove-stop-DONE.md</code></p>
+
+    <div class="outcome outcome-passed">PASSED &mdash; all acceptance criteria met, all tests pass, manual verification complete.</div>
+  </section>
   </main>
 
 </body>
