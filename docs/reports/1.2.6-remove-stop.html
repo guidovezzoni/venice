@@ -109,6 +109,43 @@
     </ul>
     <p>Promotion rules for starting point/destination removal are handled by the reorder logic: after deleting any stop and decrementing orders above it, the stop at order 0 naturally becomes the starting point and the highest-order stop becomes the destination.</p>
   </section>
+  <section class="report-section" data-source="sdlc_propose" data-timestamp="2026-05-30T10:00:00Z">
+    <header>
+      <h2>Change Proposed</h2>
+      <time datetime="2026-05-30T10:00:00Z">30 May 2026</time>
+    </header>
+    <p class="section-source">Source: sdlc_propose</p>
+
+    <h3>Exploration</h3>
+    <p>Investigated the existing codebase across all architecture layers to confirm the feature maps cleanly onto established patterns:</p>
+    <ul>
+      <li><strong>DAO:</strong> Existing <code>@Transaction</code> methods (<code>shiftAndInsertStop</code>, <code>swapStopOrders</code>) provide the template for <code>deleteAndReorder</code>. Existing <code>getStopById</code> and <code>incrementOrderFrom</code> queries confirm the order-manipulation pattern.</li>
+      <li><strong>Repository:</strong> All mutations use <code>runCatching</code> for the <code>Result</code> pattern. <code>deleteStop</code> follows suit.</li>
+      <li><strong>Use case:</strong> <code>MoveStopUseCase</code> (pass-through to repository) is the direct template. <code>EditStopUseCase</code> shows the TODO pattern for leg invalidation.</li>
+      <li><strong>MVI:</strong> The three-intent dialog pattern (Clicked/Confirmed/Dismissed) is repeated for starting point, destination, add stop, and edit stop. Remove follows identically.</li>
+      <li><strong>UI:</strong> <code>StopSection</code> already accepts optional action lambdas (<code>onMoveUp</code>, <code>onMoveDown</code>). Adding <code>onDelete</code> follows the same pattern.</li>
+    </ul>
+
+    <h3>Questions &amp; Answers</h3>
+    <table>
+      <tr><th>Question</th><th>Answer</th></tr>
+      <tr>
+        <td>Where should the delete button appear on starting point and destination cards?</td>
+        <td>On all filled stop cards, next to the move buttons — same row layout as existing action buttons.</td>
+      </tr>
+    </table>
+
+    <h3>Artifacts Created</h3>
+    <table>
+      <tr><th>Artifact</th><th>Description</th></tr>
+      <tr><td><code>proposal.md</code></td><td>Motivation, scope, and capability mapping (1 new: <code>stop-removal</code>; 2 modified: <code>stop-management</code>, <code>trip-detail</code>)</td></tr>
+      <tr><td><code>design.md</code></td><td>5 key design decisions: atomic DAO transaction, bulk UPDATE for reorder, implicit promotion, simple AlertDialog, delete on all filled cards</td></tr>
+      <tr><td><code>specs/stop-removal/spec.md</code></td><td>New capability: DAO queries, transaction, and <code>RemoveStopUseCase</code> (4 requirements, 8 scenarios)</td></tr>
+      <tr><td><code>specs/stop-management/spec.md</code></td><td>Modified: <code>StopRepository</code> interface adds <code>deleteStop</code>; added <code>StopRepositoryImpl.deleteStop</code> (2 requirements, 3 scenarios)</td></tr>
+      <tr><td><code>specs/trip-detail/spec.md</code></td><td>Modified: state, intents, ViewModel handling, delete button, confirmation dialog, string resources (6 requirements, 25 scenarios)</td></tr>
+      <tr><td><code>tasks.md</code></td><td>9 groups, 24 tasks — BDD test-first ordering with prerequisites, BDD pairs, UI integration, strings, and verification</td></tr>
+    </table>
+  </section>
   </main>
 
 </body>

@@ -1,0 +1,253 @@
+## MODIFIED Requirements
+
+### Requirement: TripDetailUiState represents the screen state
+`TripDetailUiState` SHALL be a data class with:
+- `tripId: String` (default `""`)
+- `startingPoint: Stop?` (default `null`)
+- `destination: Stop?` (default `null`)
+- `intermediateStops: List<Stop>` (default `emptyList()`)
+- `isLoading: Boolean` (default `false`)
+- `isSetStartingPointDialogVisible: Boolean` (default `false`)
+- `isSetDestinationDialogVisible: Boolean` (default `false`)
+- `isAddStopDialogVisible: Boolean` (default `false`)
+- `isEditStopDialogVisible: Boolean` (default `false`)
+- `editingStop: Stop?` (default `null`)
+- `canAddMoreStops: Boolean` (default `false`)
+- `isRemoveStopDialogVisible: Boolean` (default `false`)
+- `stopToRemove: Stop?` (default `null`)
+
+#### Scenario: Default initial state
+- **WHEN** `TripDetailUiState()` is created with defaults
+- **THEN** `tripId` is `""`, `startingPoint` is `null`, `destination` is `null`, `intermediateStops` is empty, `isLoading` is `false`, `isSetStartingPointDialogVisible` is `false`, `isSetDestinationDialogVisible` is `false`, `isAddStopDialogVisible` is `false`, `isEditStopDialogVisible` is `false`, `editingStop` is `null`, `canAddMoreStops` is `false`, `isRemoveStopDialogVisible` is `false`, `stopToRemove` is `null`
+
+### Requirement: TripDetailUiIntent models user actions
+`TripDetailUiIntent` SHALL be a sealed class with:
+- `OnSetStartingPointClicked` — user taps the set/change starting point button
+- `OnStartingPointConfirmed(placeName: String, latitude: Double, longitude: Double)` — user confirms the starting point stub dialog
+- `OnDismissStartingPointDialog` — user dismisses the starting point dialog
+- `OnSetDestinationClicked` — user taps the set/change destination button
+- `OnDestinationConfirmed(placeName: String, latitude: Double, longitude: Double)` — user confirms the destination stub dialog
+- `OnDismissDestinationDialog` — user dismisses the destination dialog
+- `OnAddStopClicked` — user taps the "Add Stop" button
+- `OnAddStopConfirmed(placeName: String, latitude: Double, longitude: Double)` — user confirms the add stop dialog
+- `OnDismissAddStopDialog` — user dismisses the add stop dialog
+- `OnMoveStopUp(stopId: String, currentOrder: Int)` — user taps the move-up button on an intermediate stop
+- `OnMoveStopDown(stopId: String, currentOrder: Int)` — user taps the move-down button on an intermediate stop
+- `OnEditStopClicked(stop: Stop)` — user taps an intermediate stop card to edit it
+- `OnEditStopConfirmed(stopId: String, placeName: String, latitude: Double, longitude: Double)` — user confirms the edit stop dialog
+- `OnDismissEditStopDialog` — user dismisses the edit stop dialog
+- `OnRemoveStopClicked(stop: Stop)` — user taps the delete button on any stop card
+- `OnRemoveStopConfirmed` — user confirms the removal dialog
+- `OnDismissRemoveStopDialog` — user dismisses the removal dialog
+
+#### Scenario: All intents are representable
+- **WHEN** a user action occurs on the trip detail screen
+- **THEN** it maps to exactly one `TripDetailUiIntent` subclass
+
+### Requirement: TripDetailViewModel drives the screen
+`TripDetailViewModel` SHALL:
+- Accept `tripId` from `SavedStateHandle`.
+- Expose `uiState: StateFlow<TripDetailUiState>` and `uiEffect: SharedFlow<TripDetailUiEffect>`.
+- Provide `fun onIntent(intent: TripDetailUiIntent)`.
+- On initialisation, collect `ObserveStopsUseCase(tripId)` and update:
+  - `startingPoint` with the stop where `order = 0` (or `null` if absent).
+  - `destination` with the stop having the highest `order` where `order > 0` (or `null` if absent).
+  - `intermediateStops` with all stops where `order > 0` and `order < destination.order`, sorted by `order` ascending.
+  - `canAddMoreStops` as `true` when the total stop count is less than 25, `false` otherwise.
+- On `OnSetStartingPointClicked`: set `isSetStartingPointDialogVisible = true`.
+- On `OnDismissStartingPointDialog`: set `isSetStartingPointDialogVisible = false`.
+- On `OnStartingPointConfirmed`: call `SetStopUseCase` with `StopType.STARTING_POINT`; on success dismiss the dialog; on failure emit `ShowError`.
+- On `OnSetDestinationClicked`: set `isSetDestinationDialogVisible = true`.
+- On `OnDismissDestinationDialog`: set `isSetDestinationDialogVisible = false`.
+- On `OnDestinationConfirmed`: call `SetStopUseCase` with `StopType.DESTINATION`; on success dismiss the dialog; on failure emit `ShowError`.
+- On `OnAddStopClicked`: set `isAddStopDialogVisible = true`.
+- On `OnDismissAddStopDialog`: set `isAddStopDialogVisible = false`.
+- On `OnAddStopConfirmed`: call `SetStopUseCase` with `StopType.INTERMEDIATE`; on success dismiss the dialog; on failure emit `ShowError`.
+- On `OnMoveStopUp`: call `MoveStopUseCase` with `(tripId, currentOrder, currentOrder - 1)`; on failure emit `ShowError`.
+- On `OnMoveStopDown`: call `MoveStopUseCase` with `(tripId, currentOrder, currentOrder + 1)`; on failure emit `ShowError`.
+- On `OnEditStopClicked`: set `editingStop` to the provided stop and `isEditStopDialogVisible = true`.
+- On `OnDismissEditStopDialog`: set `editingStop = null` and `isEditStopDialogVisible = false`.
+- On `OnEditStopConfirmed`: call `EditStopUseCase` with the provided `stopId`, `placeName`, `latitude`, `longitude`; on success set `editingStop = null` and `isEditStopDialogVisible = false`; on failure emit `ShowError`.
+- On `OnRemoveStopClicked`: set `stopToRemove` to the provided stop and `isRemoveStopDialogVisible = true`.
+- On `OnDismissRemoveStopDialog`: set `stopToRemove = null` and `isRemoveStopDialogVisible = false`.
+- On `OnRemoveStopConfirmed`: call `RemoveStopUseCase(tripId, stopToRemove!!.id)`; on success set `stopToRemove = null` and `isRemoveStopDialogVisible = false`; on failure emit `ShowError`.
+
+#### Scenario: Opening starting point dialog
+- **WHEN** `OnSetStartingPointClicked` is dispatched
+- **THEN** `isSetStartingPointDialogVisible` becomes `true`
+
+#### Scenario: Dismissing starting point dialog
+- **WHEN** `OnDismissStartingPointDialog` is dispatched while dialog is visible
+- **THEN** `isSetStartingPointDialogVisible` becomes `false`
+
+#### Scenario: Confirming starting point — success
+- **WHEN** `OnStartingPointConfirmed` is dispatched and `SetStopUseCase` with `StopType.STARTING_POINT` succeeds
+- **THEN** `startingPoint` is updated and the dialog is dismissed
+
+#### Scenario: Confirming starting point — failure
+- **WHEN** `OnStartingPointConfirmed` is dispatched and `SetStopUseCase` with `StopType.STARTING_POINT` fails
+- **THEN** a `ShowError` effect is emitted
+
+#### Scenario: Opening destination dialog
+- **WHEN** `OnSetDestinationClicked` is dispatched
+- **THEN** `isSetDestinationDialogVisible` becomes `true`
+
+#### Scenario: Dismissing destination dialog
+- **WHEN** `OnDismissDestinationDialog` is dispatched while dialog is visible
+- **THEN** `isSetDestinationDialogVisible` becomes `false`
+
+#### Scenario: Confirming destination — success
+- **WHEN** `OnDestinationConfirmed` is dispatched and `SetStopUseCase` with `StopType.DESTINATION` succeeds
+- **THEN** `destination` is updated and the dialog is dismissed
+
+#### Scenario: Confirming destination — failure
+- **WHEN** `OnDestinationConfirmed` is dispatched and `SetStopUseCase` with `StopType.DESTINATION` fails
+- **THEN** a `ShowError` effect is emitted
+
+#### Scenario: Opening add stop dialog
+- **WHEN** `OnAddStopClicked` is dispatched
+- **THEN** `isAddStopDialogVisible` becomes `true`
+
+#### Scenario: Dismissing add stop dialog
+- **WHEN** `OnDismissAddStopDialog` is dispatched while dialog is visible
+- **THEN** `isAddStopDialogVisible` becomes `false`
+
+#### Scenario: Confirming add stop — success
+- **WHEN** `OnAddStopConfirmed` is dispatched and `SetStopUseCase` with `StopType.INTERMEDIATE` succeeds
+- **THEN** the dialog is dismissed and the new stop appears in `intermediateStops`
+
+#### Scenario: Confirming add stop — failure
+- **WHEN** `OnAddStopConfirmed` is dispatched and `SetStopUseCase` with `StopType.INTERMEDIATE` fails
+- **THEN** a `ShowError` effect is emitted
+
+#### Scenario: Move stop up — success
+- **WHEN** `OnMoveStopUp` is dispatched with `currentOrder = 2` for a trip with stops at orders `[0, 1, 2, 3]`
+- **THEN** `MoveStopUseCase` is called with `(tripId, 2, 1)` and the stop list updates via the existing Flow observation
+
+#### Scenario: Move stop down — success
+- **WHEN** `OnMoveStopDown` is dispatched with `currentOrder = 1` for a trip with stops at orders `[0, 1, 2, 3]`
+- **THEN** `MoveStopUseCase` is called with `(tripId, 1, 2)` and the stop list updates via the existing Flow observation
+
+#### Scenario: Move stop — failure
+- **WHEN** `OnMoveStopUp` or `OnMoveStopDown` is dispatched and `MoveStopUseCase` returns failure
+- **THEN** a `ShowError` effect is emitted
+
+#### Scenario: Opening edit stop dialog
+- **WHEN** `OnEditStopClicked` is dispatched with a stop
+- **THEN** `editingStop` is set to the provided stop and `isEditStopDialogVisible` becomes `true`
+
+#### Scenario: Dismissing edit stop dialog
+- **WHEN** `OnDismissEditStopDialog` is dispatched
+- **THEN** `editingStop` is set to `null` and `isEditStopDialogVisible` becomes `false`
+
+#### Scenario: Confirming edit stop — success
+- **WHEN** `OnEditStopConfirmed` is dispatched and `EditStopUseCase` succeeds
+- **THEN** `editingStop` is set to `null`, `isEditStopDialogVisible` becomes `false`, and the updated stop is reflected via Flow observation
+
+#### Scenario: Confirming edit stop — failure
+- **WHEN** `OnEditStopConfirmed` is dispatched and `EditStopUseCase` fails
+- **THEN** a `ShowError` effect is emitted
+
+#### Scenario: Opening remove stop dialog
+- **WHEN** `OnRemoveStopClicked` is dispatched with a stop
+- **THEN** `stopToRemove` is set to the provided stop and `isRemoveStopDialogVisible` becomes `true`
+
+#### Scenario: Dismissing remove stop dialog
+- **WHEN** `OnDismissRemoveStopDialog` is dispatched
+- **THEN** `stopToRemove` is set to `null` and `isRemoveStopDialogVisible` becomes `false`
+
+#### Scenario: Confirming remove stop — success
+- **WHEN** `OnRemoveStopConfirmed` is dispatched and `RemoveStopUseCase` succeeds
+- **THEN** `stopToRemove` is set to `null`, `isRemoveStopDialogVisible` becomes `false`, and the stop is removed from the list via Flow observation
+
+#### Scenario: Confirming remove stop — failure
+- **WHEN** `OnRemoveStopConfirmed` is dispatched and `RemoveStopUseCase` fails
+- **THEN** a `ShowError` effect is emitted and the dialog remains visible
+
+#### Scenario: Initialisation with existing starting point and destination
+- **WHEN** the ViewModel initialises and stops with `order = 0` and `order = 1` exist
+- **THEN** `startingPoint` reflects the `order = 0` stop, `destination` reflects the `order = 1` stop, `intermediateStops` is empty, and `canAddMoreStops` is `true`
+
+#### Scenario: Initialisation with no stops
+- **WHEN** the ViewModel initialises and no stops exist
+- **THEN** `startingPoint` is `null`, `destination` is `null`, `intermediateStops` is empty, and `canAddMoreStops` is `false`
+
+#### Scenario: Initialisation with only starting point
+- **WHEN** the ViewModel initialises and only a stop with `order = 0` exists
+- **THEN** `startingPoint` reflects that stop, `destination` is `null`, `intermediateStops` is empty, and `canAddMoreStops` is `true`
+
+#### Scenario: Initialisation with intermediate stops
+- **WHEN** the ViewModel initialises and stops with orders `[0, 1, 2, 3]` exist
+- **THEN** `startingPoint` is the stop with `order = 0`, `destination` is the stop with `order = 3`, and `intermediateStops` contains stops with `order = 1` and `order = 2` in ascending order
+
+#### Scenario: canAddMoreStops is false at limit
+- **WHEN** the ViewModel observes 25 stops for the trip
+- **THEN** `canAddMoreStops` is `false`
+
+### Requirement: Stop sections render delete button for filled stops
+`StopSection` SHALL accept an optional `onDelete: (() -> Unit)?` lambda parameter (defaulting to `null`). When `onDelete` is non-null and the stop is filled (non-null), an `IconButton` with `Icons.Outlined.Delete` SHALL be rendered with content description from string resource `trip_detail_remove_stop`.
+
+#### Scenario: Delete button shown when lambda provided and stop is filled
+- **WHEN** `StopSection` is rendered with a non-null `onDelete` lambda and a non-null stop
+- **THEN** a delete `IconButton` is visible with content description "Remove stop"
+
+#### Scenario: No delete button when lambda is null
+- **WHEN** `StopSection` is rendered with `onDelete = null`
+- **THEN** no delete button is visible
+
+#### Scenario: No delete button when stop is empty
+- **WHEN** `StopSection` is rendered with `onDelete` non-null but `stop = null`
+- **THEN** no delete button is visible (the empty-state button is shown instead)
+
+### Requirement: TripDetailScreen passes delete lambdas and shows confirmation dialog
+`TripDetailScreen` SHALL:
+- Pass `onDelete` lambda to all `StopSection` instances (starting point, intermediates, destination) that dispatches `OnRemoveStopClicked(stop)` for the corresponding stop.
+- Show a confirmation `AlertDialog` when `isRemoveStopDialogVisible` is `true`, displaying:
+  - Title from string resource `trip_detail_remove_stop_dialog_title`
+  - Message from string resource `trip_detail_remove_stop_dialog_message` formatted with `stopToRemove?.placeName`
+  - Confirm button with text from string resource `global_remove` that dispatches `OnRemoveStopConfirmed`
+  - Dismiss button with text from string resource `global_cancel` that dispatches `OnDismissRemoveStopDialog`
+
+#### Scenario: Delete button on starting point dispatches OnRemoveStopClicked
+- **WHEN** the user taps the delete button on the starting point stop card
+- **THEN** `OnRemoveStopClicked` is dispatched with the starting point stop
+
+#### Scenario: Delete button on intermediate stop dispatches OnRemoveStopClicked
+- **WHEN** the user taps the delete button on an intermediate stop card
+- **THEN** `OnRemoveStopClicked` is dispatched with that intermediate stop
+
+#### Scenario: Delete button on destination dispatches OnRemoveStopClicked
+- **WHEN** the user taps the delete button on the destination stop card
+- **THEN** `OnRemoveStopClicked` is dispatched with the destination stop
+
+#### Scenario: Confirmation dialog displays stop name
+- **WHEN** `isRemoveStopDialogVisible` is `true` and `stopToRemove` has `placeName = "Florence, Italy"`
+- **THEN** the confirmation dialog message includes "Florence, Italy"
+
+#### Scenario: Confirming deletion dismisses dialog
+- **WHEN** the user taps the confirm button on the removal dialog
+- **THEN** `OnRemoveStopConfirmed` is dispatched
+
+#### Scenario: Cancelling deletion dismisses dialog
+- **WHEN** the user taps the cancel button on the removal dialog
+- **THEN** `OnDismissRemoveStopDialog` is dispatched
+
+### Requirement: Remove stop string resources
+The app SHALL include the following string resources in EN, IT, and ES:
+- `trip_detail_remove_stop`: "Remove stop" / "Rimuovi tappa" / "Eliminar parada"
+- `trip_detail_remove_stop_dialog_title`: "Remove stop?" / "Rimuovere la tappa?" / "Eliminar parada?"
+- `trip_detail_remove_stop_dialog_message`: "Are you sure you want to remove \"%s\"?" / "Vuoi davvero rimuovere \"%s\"?" / "Estas seguro de que quieres eliminar \"%s\"?"
+- `trip_detail_remove_stop_error`: "Failed to remove stop. Please try again." / "Impossibile rimuovere la tappa. Riprova." / "No se pudo eliminar la parada. Intentalo de nuevo."
+- `global_remove`: "Remove" / "Rimuovi" / "Eliminar"
+
+#### Scenario: English strings present
+- **WHEN** the app locale is English
+- **THEN** all five remove-related string resources resolve to their English values
+
+#### Scenario: Italian strings present
+- **WHEN** the app locale is Italian
+- **THEN** all five remove-related string resources resolve to their Italian values
+
+#### Scenario: Spanish strings present
+- **WHEN** the app locale is Spanish
+- **THEN** all five remove-related string resources resolve to their Spanish values
