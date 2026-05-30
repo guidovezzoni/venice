@@ -22,15 +22,15 @@ Explores the user story via `/opsx:explore`, asks clarifying questions until all
 
 ### 3. Apply change: `/sdlc_apply_changes`
 
-Runs `/opsx:apply` to implement the current OpenSpec change, then scans `app/src/` for TODO comments. TODOs whose preconditions are now met are resolved iteratively until none remain; unrelated TODOs are acknowledged.
+Runs `/opsx:apply` to implement the current OpenSpec change, then scans `app/src/` for TODO comments. TODOs whose preconditions are now met are resolved iteratively until none remain; unrelated TODOs are acknowledged. Runs `/security-review` and iteratively fixes any findings until the review is clean. Updates `README.md` and `AGENTS.md` if affected by the delivered changes.
 
 ### 4. Verify User Story: `/sdlc_verify_story <story>`
 
-End-to-end verification gate. Runs `/opsx:verify`, scans for unresolved TODOs, checks every acceptance criterion in the story against the codebase, renames the story file to `-DONE`, and appends a verification section to the report.
+End-to-end verification gate. Runs `/opsx:verify`, scans for unresolved TODOs, runs `/security-review` on pending changes, checks every acceptance criterion in the story against the codebase, renames the story file to `-DONE`, and appends a verification section to the report.
 
 ### 5. Archive: `/sdlc_archive`
 
-Runs `/opsx:archive` to finalise and archive the completed change, then checks whether `README.md` and `AGENTS.md` need updating to reflect the delivered work. Appends an archive section to the report.
+Runs `/opsx:archive` to finalise and archive the completed change, then verifies that `README.md` and `AGENTS.md` are in sync with the codebase and specs. Appends an archive section to the report.
 
 ## Setup
 
@@ -45,7 +45,6 @@ These scripts create symlinks in `.claude/commands/sdlc/` and `.cursor/commands/
 
 - BDD should be taken out of opsx into sdlc
 - Add UI test!!!
-- add security review
 - add PR review
 - use git mv during verification
 - archive should also sync

@@ -17,8 +17,18 @@ Follow these steps:
    3. **Re-apply the changes.** Execute the OpenSpec apply command (`/opsx:apply`) again to implement the updated tasks.
    4. **Re-check TODOs.** Repeat from step 2 to verify that no RESOLVE NOW TODOs remain. Continue this loop until all TODOs are either resolved or classified as ACKNOWLEDGED.
 
-4. **Add a report.** Once no RESOLVE NOW TODOs remain, append a section to the report for this user story following @docs/guidelines/guidelines-reports.md. The section should summarise: what was applied, how many iteration cycles were needed, and any ACKNOWLEDGED TODOs that remain for future stories.
+4. **Run security review.** Once no RESOLVE NOW TODOs remain, execute the `/security-review` command to review pending changes on the current branch for security issues. If the review reports any findings:
+   1. Present the findings to the user for awareness.
+   2. Fix all reported issues in the codebase.
+   3. Re-run `/security-review` to confirm the fixes are effective.
+   4. Repeat this cycle until the security review comes back clean.
 
-5. **Display the summary.** Output the same summary on screen so the user can see what was done.
+5. **Update README.md if required.** Read `README.md` and check whether the changes delivered by this story affect any section of the file (e.g. feature list, architecture table, tech stack, build instructions). If any section is now outdated or incomplete, update it to reflect the current state of the project. If everything is already accurate, skip this step.
 
-6. **Suggest a commit message.** Suggest a commit message following @docs/guidelines/guidelines-git.md.
+6. **Update AGENTS.md if required.** Read `AGENTS.md` and check whether the changes delivered by this story affect any section of the file (e.g. project overview, folder structure, workflow descriptions). If any section is now outdated or incomplete, update it to reflect the current state of the project. If everything is already accurate, skip this step.
+
+7. **Add a report.** Once the security review is clean, append a section to the report for this user story following @docs/guidelines/guidelines-reports.md. The section should summarise: what was applied, how many iteration cycles were needed, any ACKNOWLEDGED TODOs that remain for future stories, security review result (pass/fail with number of fix cycles needed and summary of findings, if any), and whether README.md and AGENTS.md were updated.
+
+8. **Display the summary.** Output the same summary on screen so the user can see what was done.
+
+9. **Suggest a commit message.** Suggest a commit message following @docs/guidelines/guidelines-git.md.
