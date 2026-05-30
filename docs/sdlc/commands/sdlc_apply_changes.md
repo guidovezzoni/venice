@@ -17,18 +17,28 @@ Follow these steps:
    3. **Re-apply the changes.** Execute the OpenSpec apply command (`/opsx:apply`) again to implement the updated tasks.
    4. **Re-check TODOs.** Repeat from step 2 to verify that no RESOLVE NOW TODOs remain. Continue this loop until all TODOs are either resolved or classified as ACKNOWLEDGED.
 
-4. **Run security review.** Once no RESOLVE NOW TODOs remain, execute the `/security-review` command to review pending changes on the current branch for security issues. If the review reports any findings:
+4. **Run Compose UI tests on a physical device.** Once no RESOLVE NOW TODOs remain, check for a connected physical device by running `adb devices`. If no device is listed (or only emulators are listed), **stop and ask the user to connect a physical device via USB with USB debugging enabled** — do not attempt to use an emulator (blocked by a Wayland compatibility issue). Once a device is connected, run the instrumented tests:
+   ```
+   ./gradlew connectedDebugAndroidTest
+   ```
+   If any tests fail:
+   1. Present the failures to the user for awareness.
+   2. Fix the failing tests or the production code as appropriate.
+   3. Re-run the tests to confirm the fixes.
+   4. Repeat until all tests pass.
+
+5. **Run security review.** Once all tests pass, execute the `/security-review` command to review pending changes on the current branch for security issues. If the review reports any findings:
    1. Present the findings to the user for awareness.
    2. Fix all reported issues in the codebase.
    3. Re-run `/security-review` to confirm the fixes are effective.
    4. Repeat this cycle until the security review comes back clean.
 
-5. **Update README.md if required.** Read `README.md` and check whether the changes delivered by this story affect any section of the file (e.g. feature list, architecture table, tech stack, build instructions). If any section is now outdated or incomplete, update it to reflect the current state of the project. If everything is already accurate, skip this step.
+6. **Update README.md if required.** Read `README.md` and check whether the changes delivered by this story affect any section of the file (e.g. feature list, architecture table, tech stack, build instructions). If any section is now outdated or incomplete, update it to reflect the current state of the project. If everything is already accurate, skip this step.
 
-6. **Update AGENTS.md if required.** Read `AGENTS.md` and check whether the changes delivered by this story affect any section of the file (e.g. project overview, folder structure, workflow descriptions). If any section is now outdated or incomplete, update it to reflect the current state of the project. If everything is already accurate, skip this step.
+7. **Update AGENTS.md if required.** Read `AGENTS.md` and check whether the changes delivered by this story affect any section of the file (e.g. project overview, folder structure, workflow descriptions). If any section is now outdated or incomplete, update it to reflect the current state of the project. If everything is already accurate, skip this step.
 
-7. **Add a report.** Once the security review is clean, append a section to the report for this user story following @docs/guidelines/guidelines-reports.md. The section should summarise: what was applied, how many iteration cycles were needed, any ACKNOWLEDGED TODOs that remain for future stories, security review result (pass/fail with number of fix cycles needed and summary of findings, if any), and whether README.md and AGENTS.md were updated.
+8. **Add a report.** Once the security review is clean, append a section to the report for this user story following @docs/guidelines/guidelines-reports.md. The section should summarise: what was applied, how many iteration cycles were needed, any ACKNOWLEDGED TODOs that remain for future stories, security review result (pass/fail with number of fix cycles needed and summary of findings, if any), and whether README.md and AGENTS.md were updated.
 
-8. **Display the summary.** Output the same summary on screen so the user can see what was done.
+9. **Display the summary.** Output the same summary on screen so the user can see what was done.
 
-9. **Suggest a commit message.** Suggest a commit message following @docs/guidelines/guidelines-git.md.
+10. **Suggest a commit message.** Suggest a commit message following @docs/guidelines/guidelines-git.md.

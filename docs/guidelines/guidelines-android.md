@@ -238,7 +238,14 @@ Unit tests should follow these criteria:
 - **MVI ViewModel tests**: Test by dispatching `UiIntent` values via `onIntent()` and asserting the resulting `uiState` and any emitted `uiEffect`. Never test internal ViewModel methods directly.
 
 
-### Instrumentation Tests
+### Compose UI Tests
+- **Test file required**: Every screen composable must have a corresponding Compose UI test file.
 - Located in `app/src/androidTest/`
-- Use AndroidX Test and Espresso
-- Test UI interactions and integration scenarios
+- Use `createComposeRule()` from `compose-ui-test-junit4`
+- **Test the composable in isolation**: pass `uiState` directly and capture intents via the `onIntent` lambda — no ViewModel mocking needed.
+- Assert UI elements are displayed using `onNodeWithText`, `onNodeWithContentDescription`, etc.
+- Assert user interactions fire the correct `UiIntent` by collecting intents in a `mutableListOf` passed to `onIntent`.
+- When a text string appears in multiple nodes (e.g. a button label and a dialog title), use `onAllNodesWithText(...)[index]` instead of `onNodeWithText`.
+- Wrap the composable in the app theme (`HeadingToTheAlpsTheme`) for accurate rendering.
+- Cover at minimum: empty/default state, populated state, visibility toggles for dialogs, button click intents, and dismiss intents.
+- **Execution**: tests run on a physical device via `./gradlew connectedDebugAndroidTest`. Emulator support is currently blocked by a Wayland compatibility issue.
