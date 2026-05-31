@@ -108,6 +108,46 @@
     <h3>Branch</h3>
     <p><code>feature/1.3.1-mark-stop-visited</code> created from <code>main</code> at commit <code>7cce4d2</code>.</p>
   </section>
+  <section class="report-section" data-source="sdlc_propose" data-timestamp="2026-05-31T12:00:00Z">
+    <header>
+      <h2>Change Proposed</h2>
+      <time datetime="2026-05-31T12:00:00Z">31 May 2026</time>
+    </header>
+    <p class="section-source">Source: sdlc_propose</p>
+
+    <h3>Exploration Findings</h3>
+    <ul>
+      <li><code>StopStatus.PENDING</code>/<code>VISITED</code> already exists — maps directly to the story's "upcoming"/"departed" concepts with no schema migration.</li>
+      <li>Reactive observation pipeline (<code>StopDao.observeByTripId</code> → Flow → ViewModel → Compose) is already wired — status updates propagate automatically.</li>
+      <li>"Current" stop is derived (first PENDING by order), avoiding data-consistency issues.</li>
+      <li><code>StopSection</code> composable currently has no status-based visual differentiation — all stops look identical regardless of status.</li>
+      <li>Existing use case pattern (<code>RemoveStopUseCase</code>, <code>EditStopUseCase</code>) provides a clear template for the new use cases.</li>
+    </ul>
+
+    <h3>Questions &amp; Answers</h3>
+    <table>
+      <tr><th>Question</th><th>Answer</th></tr>
+      <tr><td>Should <code>MarkStopDepartedUseCase</code> only accept the current stop, or also handle already-departed stops?</td><td>Only the current stop — reject all others.</td></tr>
+      <tr><td>When all stops are departed, should the UI show a "trip completed" indicator?</td><td>No special treatment — all stops show departed styling.</td></tr>
+      <tr><td>Should departed stops be locked from edit/reorder/remove?</td><td>No restrictions — all operations remain available regardless of status.</td></tr>
+    </table>
+
+    <h3>Artefacts Created</h3>
+    <ul>
+      <li><span class="badge badge-info">proposal</span> <code>openspec/changes/mark-stop-departed/proposal.md</code> — motivation, capabilities, and impact</li>
+      <li><span class="badge badge-info">design</span> <code>openspec/changes/mark-stop-departed/design.md</code> — technical decisions (targeted DAO query, use case validation, UI styling approach)</li>
+      <li><span class="badge badge-info">specs</span> 3 spec files:
+        <ul>
+          <li><code>specs/stop-progress/spec.md</code> — new: domain logic for mark/undo</li>
+          <li><code>specs/stop-persistence/spec.md</code> — delta: adds <code>updateStopStatus</code> to DAO and repository</li>
+          <li><code>specs/trip-detail/spec.md</code> — delta: new intents, ViewModel handling, UI visual differentiation</li>
+        </ul>
+      </li>
+      <li><span class="badge badge-info">tasks</span> <code>openspec/changes/mark-stop-departed/tasks.md</code> — 26 tasks in BDD structure across 8 sections</li>
+    </ul>
+
+    <div class="outcome outcome-passed">Proposal complete — ready for implementation via <code>/sdlc_apply_changes</code></div>
+  </section>
   </main>
 
 </body>
