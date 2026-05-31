@@ -19,10 +19,12 @@ Defines the requirements for the trip detail screen, covering the MVI contract (
 - `isEditStopDialogVisible: Boolean` (default `false`)
 - `editingStop: Stop?` (default `null`)
 - `canAddMoreStops: Boolean` (default `false`)
+- `isRemoveStopDialogVisible: Boolean` (default `false`)
+- `stopToRemove: Stop?` (default `null`)
 
 #### Scenario: Default initial state
 - **WHEN** `TripDetailUiState()` is created with defaults
-- **THEN** `tripId` is `""`, `startingPoint` is `null`, `destination` is `null`, `intermediateStops` is empty, `isLoading` is `false`, `isSetStartingPointDialogVisible` is `false`, `isSetDestinationDialogVisible` is `false`, `isAddStopDialogVisible` is `false`, `isEditStopDialogVisible` is `false`, `editingStop` is `null`, `canAddMoreStops` is `false`
+- **THEN** `tripId` is `""`, `startingPoint` is `null`, `destination` is `null`, `intermediateStops` is empty, `isLoading` is `false`, `isSetStartingPointDialogVisible` is `false`, `isSetDestinationDialogVisible` is `false`, `isAddStopDialogVisible` is `false`, `isEditStopDialogVisible` is `false`, `editingStop` is `null`, `canAddMoreStops` is `false`, `isRemoveStopDialogVisible` is `false`, `stopToRemove` is `null`
 
 ### Requirement: TripDetailUiIntent models user actions
 `TripDetailUiIntent` SHALL be a sealed class with:
@@ -40,6 +42,9 @@ Defines the requirements for the trip detail screen, covering the MVI contract (
 - `OnEditStopClicked(stop: Stop)` — user taps an intermediate stop card to edit it
 - `OnEditStopConfirmed(stopId: String, placeName: String, latitude: Double, longitude: Double)` — user confirms the edit stop dialog
 - `OnDismissEditStopDialog` — user dismisses the edit stop dialog
+- `OnRemoveStopClicked(stop: Stop)` — user taps the delete button on any stop card
+- `OnRemoveStopConfirmed` — user confirms the removal dialog
+- `OnDismissRemoveStopDialog` — user dismisses the removal dialog
 
 #### Scenario: All intents are representable
 - **WHEN** a user action occurs on the trip detail screen
@@ -77,6 +82,9 @@ Defines the requirements for the trip detail screen, covering the MVI contract (
 - On `OnEditStopClicked`: set `editingStop` to the provided stop and `isEditStopDialogVisible = true`.
 - On `OnDismissEditStopDialog`: set `editingStop = null` and `isEditStopDialogVisible = false`.
 - On `OnEditStopConfirmed`: call `EditStopUseCase` with the provided `stopId`, `placeName`, `latitude`, `longitude`; on success set `editingStop = null` and `isEditStopDialogVisible = false`; on failure emit `ShowError`.
+- On `OnRemoveStopClicked`: set `stopToRemove` to the provided stop and `isRemoveStopDialogVisible = true`.
+- On `OnDismissRemoveStopDialog`: set `stopToRemove = null` and `isRemoveStopDialogVisible = false`.
+- On `OnRemoveStopConfirmed`: call `RemoveStopUseCase(tripId, stopToRemove!!.id)`; on success set `stopToRemove = null` and `isRemoveStopDialogVisible = false`; on failure emit `ShowError`.
 
 #### Scenario: Opening starting point dialog
 - **WHEN** `OnSetStartingPointClicked` is dispatched
@@ -153,6 +161,22 @@ Defines the requirements for the trip detail screen, covering the MVI contract (
 #### Scenario: Confirming edit stop — failure
 - **WHEN** `OnEditStopConfirmed` is dispatched and `EditStopUseCase` fails
 - **THEN** a `ShowError` effect is emitted
+
+#### Scenario: Opening remove stop dialog
+- **WHEN** `OnRemoveStopClicked` is dispatched with a stop
+- **THEN** `stopToRemove` is set to the provided stop and `isRemoveStopDialogVisible` becomes `true`
+
+#### Scenario: Dismissing remove stop dialog
+- **WHEN** `OnDismissRemoveStopDialog` is dispatched
+- **THEN** `stopToRemove` is set to `null` and `isRemoveStopDialogVisible` becomes `false`
+
+#### Scenario: Confirming remove stop — success
+- **WHEN** `OnRemoveStopConfirmed` is dispatched and `RemoveStopUseCase` succeeds
+- **THEN** `stopToRemove` is set to `null`, `isRemoveStopDialogVisible` becomes `false`, and the stop is removed from the list via Flow observation
+
+#### Scenario: Confirming remove stop — failure
+- **WHEN** `OnRemoveStopConfirmed` is dispatched and `RemoveStopUseCase` fails
+- **THEN** a `ShowError` effect is emitted and the dialog remains visible
 
 #### Scenario: Initialisation with existing starting point and destination
 - **WHEN** the ViewModel initialises and stops with `order = 0` and `order = 1` exist
@@ -284,6 +308,74 @@ The trip detail screen SHALL use `SetStopDialog` (defined in destination-ui spec
 #### Scenario: Destination never has reorder buttons
 - **WHEN** the trip detail screen is rendered
 - **THEN** the destination `StopSection` receives `onMoveUp = null` and `onMoveDown = null`
+
+### Requirement: Stop sections render delete button for filled stops
+`StopSection` SHALL accept an optional `onDelete: (() -> Unit)?` lambda parameter (defaulting to `null`). When `onDelete` is non-null and the stop is filled (non-null), an `IconButton` with `Icons.Outlined.Delete` SHALL be rendered with content description from string resource `trip_detail_remove_stop`.
+
+#### Scenario: Delete button shown when lambda provided and stop is filled
+- **WHEN** `StopSection` is rendered with a non-null `onDelete` lambda and a non-null stop
+- **THEN** a delete `IconButton` is visible with content description "Remove stop"
+
+#### Scenario: No delete button when lambda is null
+- **WHEN** `StopSection` is rendered with `onDelete = null`
+- **THEN** no delete button is visible
+
+#### Scenario: No delete button when stop is empty
+- **WHEN** `StopSection` is rendered with `onDelete` non-null but `stop = null`
+- **THEN** no delete button is visible (the empty-state button is shown instead)
+
+### Requirement: TripDetailScreen passes delete lambdas and shows confirmation dialog
+`TripDetailScreen` SHALL:
+- Pass `onDelete` lambda to all `StopSection` instances (starting point, intermediates, destination) that dispatches `OnRemoveStopClicked(stop)` for the corresponding stop.
+- Show a confirmation `AlertDialog` when `isRemoveStopDialogVisible` is `true`, displaying:
+  - Title from string resource `trip_detail_remove_stop_dialog_title`
+  - Message from string resource `trip_detail_remove_stop_dialog_message` formatted with `stopToRemove?.placeName`
+  - Confirm button with text from string resource `global_remove` that dispatches `OnRemoveStopConfirmed`
+  - Dismiss button with text from string resource `global_cancel` that dispatches `OnDismissRemoveStopDialog`
+
+#### Scenario: Delete button on starting point dispatches OnRemoveStopClicked
+- **WHEN** the user taps the delete button on the starting point stop card
+- **THEN** `OnRemoveStopClicked` is dispatched with the starting point stop
+
+#### Scenario: Delete button on intermediate stop dispatches OnRemoveStopClicked
+- **WHEN** the user taps the delete button on an intermediate stop card
+- **THEN** `OnRemoveStopClicked` is dispatched with that intermediate stop
+
+#### Scenario: Delete button on destination dispatches OnRemoveStopClicked
+- **WHEN** the user taps the delete button on the destination stop card
+- **THEN** `OnRemoveStopClicked` is dispatched with the destination stop
+
+#### Scenario: Confirmation dialog displays stop name
+- **WHEN** `isRemoveStopDialogVisible` is `true` and `stopToRemove` has `placeName = "Florence, Italy"`
+- **THEN** the confirmation dialog message includes "Florence, Italy"
+
+#### Scenario: Confirming deletion dismisses dialog
+- **WHEN** the user taps the confirm button on the removal dialog
+- **THEN** `OnRemoveStopConfirmed` is dispatched
+
+#### Scenario: Cancelling deletion dismisses dialog
+- **WHEN** the user taps the cancel button on the removal dialog
+- **THEN** `OnDismissRemoveStopDialog` is dispatched
+
+### Requirement: Remove stop string resources
+The app SHALL include the following string resources in EN, IT, and ES:
+- `trip_detail_remove_stop`: "Remove stop" / "Rimuovi tappa" / "Eliminar parada"
+- `trip_detail_remove_stop_dialog_title`: "Remove stop?" / "Rimuovere la tappa?" / "Eliminar parada?"
+- `trip_detail_remove_stop_dialog_message`: "Are you sure you want to remove \"%s\"?" / "Vuoi davvero rimuovere \"%s\"?" / "Estas seguro de que quieres eliminar \"%s\"?"
+- `trip_detail_remove_stop_error`: "Failed to remove stop. Please try again." / "Impossibile rimuovere la tappa. Riprova." / "No se pudo eliminar la parada. Intentalo de nuevo."
+- `global_remove`: "Remove" / "Rimuovi" / "Eliminar"
+
+#### Scenario: English strings present
+- **WHEN** the app locale is English
+- **THEN** all five remove-related string resources resolve to their English values
+
+#### Scenario: Italian strings present
+- **WHEN** the app locale is Italian
+- **THEN** all five remove-related string resources resolve to their Italian values
+
+#### Scenario: Spanish strings present
+- **WHEN** the app locale is Spanish
+- **THEN** all five remove-related string resources resolve to their Spanish values
 
 ### Requirement: TripDetailScreen wired in navigation
 `MainScreen` SHALL wire `TripDetailViewModel` via `hiltViewModel()` in the `ROUTE_TRIP_DETAIL` composable destination, passing `uiState` and `onIntent` to `TripDetailScreen`.
