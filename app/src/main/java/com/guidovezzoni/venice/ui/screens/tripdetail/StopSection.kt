@@ -15,6 +15,7 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.TripOrigin
+import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -52,6 +53,7 @@ fun StopSection(
     @StringRes filledLabelRes: Int,
     onMoveUp: (() -> Unit)? = null,
     onMoveDown: (() -> Unit)? = null,
+    onDelete: (() -> Unit)? = null,
 ) {
     Column(modifier = modifier.fillMaxWidth().padding(horizontal = SECTION_PADDING)) {
         Text(
@@ -69,6 +71,7 @@ fun StopSection(
                 filledLabelRes = filledLabelRes,
                 onMoveUp = onMoveUp,
                 onMoveDown = onMoveDown,
+                onDelete = onDelete,
             )
         } else {
             EmptyStop(
@@ -88,6 +91,7 @@ private fun FilledStop(
     @StringRes filledLabelRes: Int,
     onMoveUp: (() -> Unit)? = null,
     onMoveDown: (() -> Unit)? = null,
+    onDelete: (() -> Unit)? = null,
 ) {
     val changeDescription = stringResource(changeDescriptionRes)
     Card(
@@ -136,6 +140,14 @@ private fun FilledStop(
                     Icon(
                         imageVector = Icons.Filled.KeyboardArrowDown,
                         contentDescription = stringResource(R.string.trip_detail_move_stop_down),
+                    )
+                }
+            }
+            if (onDelete != null) {
+                IconButton(onClick = onDelete) {
+                    Icon(
+                        imageVector = Icons.Outlined.Delete,
+                        contentDescription = stringResource(R.string.trip_detail_remove_stop),
                     )
                 }
             }
@@ -198,6 +210,7 @@ private fun PreviewStopSectionStartingPointFilled() {
             setButtonTextRes = R.string.trip_detail_set_starting_point,
             changeDescriptionRes = R.string.trip_detail_change_starting_point,
             filledLabelRes = R.string.trip_detail_starting_point_start_label,
+            onDelete = {},
         )
     }
 }
@@ -223,6 +236,7 @@ private fun PreviewStopSectionIntermediateWithBothButtons() {
             filledLabelRes = R.string.trip_detail_intermediate_stop_label,
             onMoveUp = {},
             onMoveDown = {},
+            onDelete = {},
         )
     }
 }
@@ -247,6 +261,7 @@ private fun PreviewStopSectionIntermediateWithMoveDownOnly() {
             changeDescriptionRes = R.string.trip_detail_change_intermediate_stop,
             filledLabelRes = R.string.trip_detail_intermediate_stop_label,
             onMoveDown = {},
+            onDelete = {},
         )
     }
 }
@@ -271,6 +286,7 @@ private fun PreviewStopSectionIntermediateWithMoveUpOnly() {
             changeDescriptionRes = R.string.trip_detail_change_intermediate_stop,
             filledLabelRes = R.string.trip_detail_intermediate_stop_label,
             onMoveUp = {},
+            onDelete = {},
         )
     }
 }
@@ -308,6 +324,7 @@ private fun PreviewStopSectionDestinationFilled() {
             setButtonTextRes = R.string.trip_detail_set_destination,
             changeDescriptionRes = R.string.trip_detail_change_destination,
             filledLabelRes = R.string.trip_detail_destination_label,
+            onDelete = {},
         )
     }
 }

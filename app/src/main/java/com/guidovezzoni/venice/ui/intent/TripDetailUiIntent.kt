@@ -34,4 +34,7 @@ sealed class TripDetailUiIntent {
         val longitude: Double,
     ) : TripDetailUiIntent()
     data object OnDismissEditStopDialog : TripDetailUiIntent()
+    data class OnRemoveStopClicked(val stop: Stop) : TripDetailUiIntent()
+    data object OnRemoveStopConfirmed : TripDetailUiIntent()
+    data object OnDismissRemoveStopDialog : TripDetailUiIntent()
 }

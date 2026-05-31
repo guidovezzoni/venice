@@ -15,15 +15,23 @@ Follow these steps:
    - If any TODOs are classified as RESOLVE NOW, stop here: present them to the user and do **not** proceed to the next steps.
    - If all TODOs are ACKNOWLEDGED (or none exist), proceed.
 
-4. **Verify the Definition of Done.** Read the user story file and identify the "Acceptance Criteria" or "Definition of Done" section. For each item listed:
+4. **Run security review.** Execute the `/security-review` command to review pending changes on the current branch for security issues. If the review reports any critical or high-severity findings, stop here: present them to the user and do **not** proceed to the next steps.
+
+5. **Run on-device tests.** Follow the on-device testing procedure in @docs/guidelines/guidelines-process.md:
+   - Check for a connected device with `adb devices`.
+   - If connected: run `./gradlew connectedDebugAndroidTest`, then install the app (`./gradlew installDebug`) and exercise the feature via adb to verify acceptance criteria that go beyond unit tests.
+   - If no device is connected: ask the user to connect one or perform the manual verification themselves.
+   - Do **not** proceed until on-device verification is confirmed (either by the agent or the user).
+
+6. **Verify the Definition of Done.** Read the user story file and identify the "Acceptance Criteria" or "Definition of Done" section. For each item listed:
    - Check the codebase (source files, tests, configuration) to confirm the criterion is met.
    - Report each item as PASS or FAIL with a brief justification.
      If any item is marked FAIL, stop here: present a summary to the user and do **not** proceed to the rename step.
 
-5. **Close the user story.** Once all verifications pass, perform the **Closing** operation as defined in @docs/guidelines/guidelines-userstories.md.
+7. **Close the user story.** Once all verifications pass, perform the **Closing** operation as defined in @docs/guidelines/guidelines-userstories.md.
 
-6. **Add a report.** Append a verification section to the report for this user story following @docs/guidelines/guidelines-reports.md. The section should summarise: date of verification, OpenSpec verify result (pass/fail summary), TODO scan result (list of ACKNOWLEDGED TODOs, or "none found"), Definition of Done checklist with each item's PASS/FAIL status and justification, and final outcome (PASSED / FAILED) with the renamed filename.
+8. **Add a report.** Append a verification section to the report for this user story following @docs/guidelines/guidelines-reports.md. The section should summarise: date of verification, OpenSpec verify result (pass/fail summary), TODO scan result (list of ACKNOWLEDGED TODOs, or "none found"), security review result (pass/fail with summary of findings, if any), on-device test results (method used — agent via adb or user-confirmed — and outcomes), Definition of Done checklist with each item's PASS/FAIL status and justification, and final outcome (PASSED / FAILED) with the renamed filename.
 
-7. **Display the summary.** Output the same summary on screen so the user can see what was verified.
+9. **Display the summary.** Output the same summary on screen so the user can see what was verified.
 
-8. **Suggest a commit message.** Suggest a commit message following @docs/guidelines/guidelines-git.md.
+10. **Suggest a commit message.** Suggest a commit message following @docs/guidelines/guidelines-git.md.

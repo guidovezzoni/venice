@@ -40,6 +40,20 @@ interface StopDao {
     @Query("UPDATE stops SET `order` = :newOrder WHERE id = :stopId")
     suspend fun updateStopOrder(stopId: String, newOrder: Int)
 
+    @Query("DELETE FROM stops WHERE id = :stopId")
+    suspend fun deleteById(stopId: String)
+
+    @Query("UPDATE stops SET `order` = `order` - 1 WHERE tripId = :tripId AND `order` > :fromOrder")
+    suspend fun decrementOrderAbove(tripId: String, fromOrder: Int)
+
+    @Transaction
+    suspend fun deleteAndReorder(tripId: String, stopId: String) {
+        val stop = getStopById(stopId)
+            ?: throw IllegalStateException("Stop not found: $stopId")
+        deleteById(stopId)
+        decrementOrderAbove(tripId, stop.order)
+    }
+
     @Transaction
     suspend fun shiftAndInsertStop(tripId: String, stop: StopEntity): Int {
         val destination = getDestination(tripId)

@@ -15,6 +15,7 @@ import androidx.compose.material.icons.filled.AddLocation
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.TripOrigin
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -23,6 +24,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -88,6 +90,9 @@ fun TripDetailScreen(
                     setButtonTextRes = R.string.trip_detail_set_starting_point,
                     changeDescriptionRes = R.string.trip_detail_change_starting_point,
                     filledLabelRes = R.string.trip_detail_starting_point_start_label,
+                    onDelete = uiState.startingPoint?.let { stop ->
+                        { onIntent(TripDetailUiIntent.OnRemoveStopClicked(stop)) }
+                    },
                 )
             }
             items(uiState.intermediateStops.size) { index ->
@@ -114,6 +119,7 @@ fun TripDetailScreen(
                     } else {
                         null
                     },
+                    onDelete = { onIntent(TripDetailUiIntent.OnRemoveStopClicked(stop)) },
                 )
             }
             if (uiState.canAddMoreStops) {
@@ -149,6 +155,9 @@ fun TripDetailScreen(
                     setButtonTextRes = R.string.trip_detail_set_destination,
                     changeDescriptionRes = R.string.trip_detail_change_destination,
                     filledLabelRes = R.string.trip_detail_destination_label,
+                    onDelete = uiState.destination?.let { stop ->
+                        { onIntent(TripDetailUiIntent.OnRemoveStopClicked(stop)) }
+                    },
                 )
             }
         }
@@ -227,6 +236,31 @@ fun TripDetailScreen(
                 onIntent(TripDetailUiIntent.OnDestinationConfirmed(placeName, latitude, longitude))
             },
             onDismiss = { onIntent(TripDetailUiIntent.OnDismissDestinationDialog) },
+        )
+    }
+
+    if (uiState.isRemoveStopDialogVisible) {
+        AlertDialog(
+            onDismissRequest = { onIntent(TripDetailUiIntent.OnDismissRemoveStopDialog) },
+            title = { Text(stringResource(R.string.trip_detail_remove_stop_dialog_title)) },
+            text = {
+                Text(
+                    stringResource(
+                        R.string.trip_detail_remove_stop_dialog_message,
+                        uiState.stopToRemove?.placeName ?: "",
+                    ),
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = { onIntent(TripDetailUiIntent.OnRemoveStopConfirmed) }) {
+                    Text(stringResource(R.string.global_remove))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { onIntent(TripDetailUiIntent.OnDismissRemoveStopDialog) }) {
+                    Text(stringResource(R.string.global_cancel))
+                }
+            },
         )
     }
 }
@@ -521,6 +555,58 @@ private fun PreviewTripDetailScreenEditStopDialog() {
                 ),
                 isEditStopDialogVisible = true,
                 editingStop = Stop(
+                    id = "2",
+                    tripId = "trip-1",
+                    placeName = "Florence, Italy",
+                    latitude = 43.7696,
+                    longitude = 11.2558,
+                    order = 1,
+                    status = StopStatus.PENDING,
+                ),
+                canAddMoreStops = true,
+            ),
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PreviewTripDetailScreenRemoveStopDialog() {
+    HeadingToTheAlpsTheme {
+        TripDetailScreen(
+            uiState = TripDetailUiState(
+                tripId = "trip-1",
+                startingPoint = Stop(
+                    id = "1",
+                    tripId = "trip-1",
+                    placeName = "Rome, Italy",
+                    latitude = 41.9028,
+                    longitude = 12.4964,
+                    order = 0,
+                    status = StopStatus.PENDING,
+                ),
+                intermediateStops = listOf(
+                    Stop(
+                        id = "2",
+                        tripId = "trip-1",
+                        placeName = "Florence, Italy",
+                        latitude = 43.7696,
+                        longitude = 11.2558,
+                        order = 1,
+                        status = StopStatus.PENDING,
+                    ),
+                ),
+                destination = Stop(
+                    id = "3",
+                    tripId = "trip-1",
+                    placeName = "Barcelona, Spain",
+                    latitude = 41.3851,
+                    longitude = 2.1734,
+                    order = 2,
+                    status = StopStatus.PENDING,
+                ),
+                isRemoveStopDialogVisible = true,
+                stopToRemove = Stop(
                     id = "2",
                     tripId = "trip-1",
                     placeName = "Florence, Italy",

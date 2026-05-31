@@ -90,6 +90,10 @@ class StopRepositoryImpl @Inject constructor(
         updated.toDomain()
     }
 
+    override suspend fun deleteStop(tripId: String, stopId: String): Result<Unit> = runCatching {
+        stopDao.deleteAndReorder(tripId, stopId)
+    }
+
     private suspend fun upsertStop(
         tripId: String,
         placeName: String,

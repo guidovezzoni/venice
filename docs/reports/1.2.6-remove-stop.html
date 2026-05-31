@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Report: 1.2.6 — Remove a Stop</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.6;
+      color: #1a1a1a;
+      background: #fafafa;
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+
+    .report-header {
+      border-bottom: 3px solid #2563eb;
+      padding-bottom: 1rem;
+      margin-bottom: 2rem;
+    }
+    .report-header h1 { font-size: 1.75rem; color: #1e293b; }
+    .report-meta {
+      display: flex; gap: 2rem; flex-wrap: wrap;
+      margin-top: 0.5rem; font-size: 0.875rem; color: #64748b;
+    }
+    .report-meta span { display: inline-flex; align-items: center; gap: 0.25rem; }
+
+    .report-section {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .report-section header {
+      display: flex; justify-content: space-between; align-items: baseline;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 0.75rem; margin-bottom: 1rem;
+    }
+    .report-section header h2 { font-size: 1.25rem; color: #1e293b; }
+    .report-section header time { font-size: 0.8rem; color: #94a3b8; white-space: nowrap; }
+    .section-source { font-size: 0.75rem; color: #94a3b8; font-style: italic; margin-bottom: 0.75rem; }
+
+    h3 { font-size: 1.05rem; color: #334155; margin: 1rem 0 0.5rem; }
+    p { margin-bottom: 0.75rem; }
+    ul, ol { margin: 0.5rem 0 0.75rem 1.5rem; }
+    li { margin-bottom: 0.25rem; }
+    code {
+      background: #f1f5f9; padding: 0.15rem 0.35rem; border-radius: 3px;
+      font-size: 0.875em;
+      font-family: "SF Mono", "Fira Code", Menlo, Consolas, monospace;
+    }
+
+    table { width: 100%; border-collapse: collapse; margin: 0.75rem 0; font-size: 0.9rem; }
+    th, td { text-align: left; padding: 0.5rem 0.75rem; border: 1px solid #e2e8f0; }
+    th { background: #f8fafc; font-weight: 600; color: #475569; }
+
+    .badge {
+      display: inline-block; padding: 0.15rem 0.5rem;
+      border-radius: 4px; font-size: 0.8rem; font-weight: 600;
+    }
+    .badge-pass { background: #dcfce7; color: #166534; }
+    .badge-fail { background: #fee2e2; color: #991b1b; }
+    .badge-warn { background: #fef9c3; color: #854d0e; }
+    .badge-info { background: #dbeafe; color: #1e40af; }
+
+    .outcome { margin-top: 1rem; padding: 0.75rem 1rem; border-radius: 6px; font-weight: 600; }
+    .outcome-passed { background: #dcfce7; color: #166534; border-left: 4px solid #22c55e; }
+    .outcome-failed { background: #fee2e2; color: #991b1b; border-left: 4px solid #ef4444; }
+  </style>
+</head>
+<body>
+
+  <div class="report-header">
+    <h1>1.2.6 — Remove a Stop</h1>
+    <div class="report-meta">
+      <span><strong>Story:</strong> 1.2.6</span>
+      <span><strong>Branch:</strong> feature/1.2.6-remove-stop</span>
+      <span><strong>Created:</strong> 2026-05-29</span>
+    </div>
+  </div>
+
+  <main id="report-sections">
+  <section class="report-section" data-source="open_user_story" data-timestamp="2026-05-29T15:40:49Z">
+    <header>
+      <h2>Story Opened</h2>
+      <time datetime="2026-05-29T15:40:49Z">29 May 2026</time>
+    </header>
+    <p class="section-source">Source: open_user_story</p>
+
+    <h3>User Story</h3>
+    <p><strong>1.2.6 — Remove a Stop</strong>: As a user, I want to remove a stop from my roadtrip so that I can simplify my journey or correct a mistake.</p>
+
+    <h3>Branch</h3>
+    <p><code>feature/1.2.6-remove-stop</code> created from <code>main</code>.</p>
+
+    <h3>Refinement Summary</h3>
+    <p>The original user story was enriched with full technical detail covering all architecture layers:</p>
+    <ul>
+      <li><strong>Data layer:</strong> New <code>StopDao</code> methods (<code>deleteById</code>, <code>decrementOrderAbove</code>, <code>deleteAndReorder</code>) for atomic delete-and-reorder within a <code>@Transaction</code>.</li>
+      <li><strong>Domain layer:</strong> New <code>deleteStop</code> method on <code>StopRepository</code> interface, implemented in <code>StopRepositoryImpl</code>. New <code>RemoveStopUseCase</code> with a TODO for leg invalidation (deferred to Epic 3).</li>
+      <li><strong>UI layer:</strong> Three new MVI intents (<code>OnRemoveStopClicked</code>, <code>OnRemoveStopConfirmed</code>, <code>OnDismissRemoveStopDialog</code>), two new state fields (<code>isRemoveStopDialogVisible</code>, <code>stopToRemove</code>), a delete button on <code>StopSection</code>, and a confirmation <code>AlertDialog</code> on <code>TripDetailScreen</code>.</li>
+      <li><strong>Strings:</strong> Five new string resources in EN, IT, and ES.</li>
+      <li><strong>Tests:</strong> New <code>RemoveStopUseCaseTest</code>, plus additions to <code>StopRepositoryImplTest</code> and <code>TripDetailViewModelTest</code>.</li>
+    </ul>
+    <p>Promotion rules for starting point/destination removal are handled by the reorder logic: after deleting any stop and decrementing orders above it, the stop at order 0 naturally becomes the starting point and the highest-order stop becomes the destination.</p>
+  </section>
+  <section class="report-section" data-source="sdlc_propose" data-timestamp="2026-05-30T10:00:00Z">
+    <header>
+      <h2>Change Proposed</h2>
+      <time datetime="2026-05-30T10:00:00Z">30 May 2026</time>
+    </header>
+    <p class="section-source">Source: sdlc_propose</p>
+
+    <h3>Exploration</h3>
+    <p>Investigated the existing codebase across all architecture layers to confirm the feature maps cleanly onto established patterns:</p>
+    <ul>
+      <li><strong>DAO:</strong> Existing <code>@Transaction</code> methods (<code>shiftAndInsertStop</code>, <code>swapStopOrders</code>) provide the template for <code>deleteAndReorder</code>. Existing <code>getStopById</code> and <code>incrementOrderFrom</code> queries confirm the order-manipulation pattern.</li>
+      <li><strong>Repository:</strong> All mutations use <code>runCatching</code> for the <code>Result</code> pattern. <code>deleteStop</code> follows suit.</li>
+      <li><strong>Use case:</strong> <code>MoveStopUseCase</code> (pass-through to repository) is the direct template. <code>EditStopUseCase</code> shows the TODO pattern for leg invalidation.</li>
+      <li><strong>MVI:</strong> The three-intent dialog pattern (Clicked/Confirmed/Dismissed) is repeated for starting point, destination, add stop, and edit stop. Remove follows identically.</li>
+      <li><strong>UI:</strong> <code>StopSection</code> already accepts optional action lambdas (<code>onMoveUp</code>, <code>onMoveDown</code>). Adding <code>onDelete</code> follows the same pattern.</li>
+    </ul>
+
+    <h3>Questions &amp; Answers</h3>
+    <table>
+      <tr><th>Question</th><th>Answer</th></tr>
+      <tr>
+        <td>Where should the delete button appear on starting point and destination cards?</td>
+        <td>On all filled stop cards, next to the move buttons — same row layout as existing action buttons.</td>
+      </tr>
+    </table>
+
+    <h3>Artifacts Created</h3>
+    <table>
+      <tr><th>Artifact</th><th>Description</th></tr>
+      <tr><td><code>proposal.md</code></td><td>Motivation, scope, and capability mapping (1 new: <code>stop-removal</code>; 2 modified: <code>stop-management</code>, <code>trip-detail</code>)</td></tr>
+      <tr><td><code>design.md</code></td><td>5 key design decisions: atomic DAO transaction, bulk UPDATE for reorder, implicit promotion, simple AlertDialog, delete on all filled cards</td></tr>
+      <tr><td><code>specs/stop-removal/spec.md</code></td><td>New capability: DAO queries, transaction, and <code>RemoveStopUseCase</code> (4 requirements, 8 scenarios)</td></tr>
+      <tr><td><code>specs/stop-management/spec.md</code></td><td>Modified: <code>StopRepository</code> interface adds <code>deleteStop</code>; added <code>StopRepositoryImpl.deleteStop</code> (2 requirements, 3 scenarios)</td></tr>
+      <tr><td><code>specs/trip-detail/spec.md</code></td><td>Modified: state, intents, ViewModel handling, delete button, confirmation dialog, string resources (6 requirements, 25 scenarios)</td></tr>
+      <tr><td><code>tasks.md</code></td><td>9 groups, 24 tasks — BDD test-first ordering with prerequisites, BDD pairs, UI integration, strings, and verification</td></tr>
+    </table>
+  </section>
+  <section class="report-section" data-source="apply_changes" data-timestamp="2026-05-30T14:30:00Z">
+    <header>
+      <h2>Changes Applied</h2>
+      <time datetime="2026-05-30T14:30:00Z">30 May 2026</time>
+    </header>
+    <p class="section-source">Source: apply_changes</p>
+
+    <h3>Summary</h3>
+    <p>Implemented all 26 of 27 tasks (task 9.2 is manual verification, deferred to the verify step). BDD Red/Green cycle followed for all test-driven sections.</p>
+
+    <h3>Implementation Details</h3>
+    <table>
+      <tr><th>Section</th><th>Tasks</th><th>Status</th></tr>
+      <tr><td>1. Prerequisites</td><td>DAO queries, MVI intents, UI state fields</td><td><span class="badge badge-pass">Done</span></td></tr>
+      <tr><td>2. StopDao deleteAndReorder</td><td>BDD test + implementation</td><td><span class="badge badge-pass">Done</span></td></tr>
+      <tr><td>3. StopRepository deleteStop</td><td>BDD tests + interface + implementation</td><td><span class="badge badge-pass">Done</span></td></tr>
+      <tr><td>4. RemoveStopUseCase</td><td>BDD tests + use case creation</td><td><span class="badge badge-pass">Done</span></td></tr>
+      <tr><td>5. TripDetailViewModel</td><td>BDD tests + intent handling</td><td><span class="badge badge-pass">Done</span></td></tr>
+      <tr><td>6. StopSection delete button</td><td>onDelete parameter + previews</td><td><span class="badge badge-pass">Done</span></td></tr>
+      <tr><td>7. TripDetailScreen wiring</td><td>Delete lambdas + AlertDialog + previews</td><td><span class="badge badge-pass">Done</span></td></tr>
+      <tr><td>8. String resources</td><td>EN, IT, ES strings</td><td><span class="badge badge-pass">Done</span></td></tr>
+      <tr><td>9. Verification</td><td><code>./gradlew check</code> passed</td><td><span class="badge badge-pass">Done</span></td></tr>
+    </table>
+
+    <h3>Iteration Cycles</h3>
+    <p>1 cycle — all tasks completed on the first pass with no blockers.</p>
+
+    <h3>Files Created</h3>
+    <ul>
+      <li><code>RemoveStopUseCase.kt</code> — domain use case delegating to repository</li>
+      <li><code>RemoveStopUseCaseTest.kt</code> — 2 tests (success + failure propagation)</li>
+      <li><code>StopDaoTest.kt</code> — 2 tests (delete-and-reorder + stop-not-found)</li>
+    </ul>
+
+    <h3>Files Modified</h3>
+    <ul>
+      <li><code>StopDao.kt</code> — added <code>deleteById</code>, <code>decrementOrderAbove</code>, <code>deleteAndReorder</code></li>
+      <li><code>StopRepository.kt</code> — added <code>deleteStop</code> to interface</li>
+      <li><code>StopRepositoryImpl.kt</code> — implemented <code>deleteStop</code></li>
+      <li><code>TripDetailUiIntent.kt</code> — added 3 remove intents</li>
+      <li><code>TripDetailUiState.kt</code> — added <code>isRemoveStopDialogVisible</code>, <code>stopToRemove</code></li>
+      <li><code>TripDetailViewModel.kt</code> — added <code>RemoveStopUseCase</code> dependency and intent handling</li>
+      <li><code>StopSection.kt</code> — added <code>onDelete</code> parameter with delete <code>IconButton</code></li>
+      <li><code>TripDetailScreen.kt</code> — wired delete lambdas + confirmation <code>AlertDialog</code></li>
+      <li><code>StopRepositoryImplTest.kt</code> — added 2 tests for <code>deleteStop</code></li>
+      <li><code>TripDetailViewModelTest.kt</code> — added 4 tests for remove stop intents</li>
+      <li><code>values/strings.xml</code>, <code>values-it/strings.xml</code>, <code>values-es-rES/strings.xml</code> — 5 new strings each</li>
+    </ul>
+
+    <h3>Acknowledged TODOs</h3>
+    <ul>
+      <li><code>RemoveStopUseCase.kt:9</code> — invalidate affected legs (deferred to Epic 3)</li>
+      <li><code>EditStopUseCase.kt:10</code> — invalidate affected legs (deferred to Epic 3, pre-existing)</li>
+    </ul>
+
+    <div class="outcome outcome-passed">All tests pass. <code>./gradlew check</code> succeeded. Ready for manual verification.</div>
+  </section>
+  <section class="report-section" data-source="verify_user_story" data-timestamp="2026-05-30T18:10:00Z">
+    <header>
+      <h2>Story Verified</h2>
+      <time datetime="2026-05-30T18:10:00Z">30 May 2026</time>
+    </header>
+    <p class="section-source">Source: verify_user_story</p>
+
+    <h3>OpenSpec Verify</h3>
+    <p>All 3 dimensions passed:</p>
+    <table>
+      <tr><th>Dimension</th><th>Result</th></tr>
+      <tr><td>Completeness</td><td><span class="badge badge-pass">27/27 tasks</span> — all requirements implemented</td></tr>
+      <tr><td>Correctness</td><td><span class="badge badge-pass">Pass</span> — all requirements covered, all scenarios have tests</td></tr>
+      <tr><td>Coherence</td><td><span class="badge badge-pass">Pass</span> — design decisions followed, patterns consistent</td></tr>
+    </table>
+
+    <h3>TODO Scan</h3>
+    <p>2 TODOs found, both <span class="badge badge-info">ACKNOWLEDGED</span>:</p>
+    <ul>
+      <li><code>EditStopUseCase.kt:10</code> — leg invalidation (Epic 3, pre-existing)</li>
+      <li><code>RemoveStopUseCase.kt:9</code> — leg invalidation (Epic 3, expected by spec)</li>
+    </ul>
+
+    <h3>Definition of Done</h3>
+    <table>
+      <tr><th>#</th><th>Criterion</th><th>Status</th><th>Justification</th></tr>
+      <tr><td>1</td><td>Remove any intermediate stop via delete button</td><td><span class="badge badge-pass">PASS</span></td><td>On-device test: Florence removed via delete IconButton</td></tr>
+      <tr><td>2</td><td>Remove starting point or destination via delete button</td><td><span class="badge badge-pass">PASS</span></td><td>On-device test: Rome (start) and Barcelona (dest) removed</td></tr>
+      <tr><td>3</td><td>Confirmation dialog with stop place name</td><td><span class="badge badge-pass">PASS</span></td><td>Screenshot confirms &ldquo;Are you sure you want to remove &quot;Rome&quot;?&rdquo;</td></tr>
+      <tr><td>4</td><td>Orders contiguous after intermediate removal</td><td><span class="badge badge-pass">PASS</span></td><td><code>decrementOrderAbove</code> in DAO + verified via UI after Florence removal</td></tr>
+      <tr><td>5</td><td>Starting point removed &rarr; next stop promoted to order 0</td><td><span class="badge badge-pass">PASS</span></td><td>On-device test: Nice promoted to starting point after Rome removed</td></tr>
+      <tr><td>6</td><td>Destination removed &rarr; previous stop becomes destination</td><td><span class="badge badge-pass">PASS</span></td><td>On-device test: Barcelona removed, Nice remained</td></tr>
+      <tr><td>7</td><td>Trip can have zero stops</td><td><span class="badge badge-pass">PASS</span></td><td>On-device test: empty trip shows &ldquo;Set starting point&rdquo; / &ldquo;Set destination&rdquo;</td></tr>
+      <tr><td>8</td><td>Delete within database transaction</td><td><span class="badge badge-pass">PASS</span></td><td><code>deleteAndReorder</code> is <code>@Transaction</code> in <code>StopDao.kt:49</code></td></tr>
+      <tr><td>9</td><td>On failure, snackbar error, no changes persisted</td><td><span class="badge badge-pass">PASS</span></td><td>ViewModel test confirms <code>ShowError</code> emitted on failure; <code>runCatching</code> ensures atomicity</td></tr>
+    </table>
+
+    <h3>Manual Verification (Task 9.2)</h3>
+    <p>Automated on-device test via adb on Pixel 6a (Android 16). Database seeded with 4 stops (Rome, Florence, Nice, Barcelona), then 5 test scenarios executed:</p>
+    <table>
+      <tr><th>Test</th><th>Result</th></tr>
+      <tr><td>Cancel remove dialog &mdash; all stops intact after dismissal</td><td><span class="badge badge-pass">PASS</span></td></tr>
+      <tr><td>Remove intermediate stop (Florence) &mdash; others remain</td><td><span class="badge badge-pass">PASS</span></td></tr>
+      <tr><td>Remove starting point (Rome) &mdash; Nice promoted</td><td><span class="badge badge-pass">PASS</span></td></tr>
+      <tr><td>Remove destination (Barcelona) &mdash; Nice remains</td><td><span class="badge badge-pass">PASS</span></td></tr>
+      <tr><td>Remove last stop (Nice) &mdash; empty trip, no delete buttons</td><td><span class="badge badge-pass">PASS</span></td></tr>
+    </table>
+
+    <h3>Renamed</h3>
+    <p><code>1.2.6-remove-stop-WIP.md</code> &rarr; <code>1.2.6-remove-stop-DONE.md</code></p>
+
+    <div class="outcome outcome-passed">PASSED &mdash; all acceptance criteria met, all tests pass, manual verification complete.</div>
+  </section>
+  <section class="report-section" data-source="opsx:archive" data-timestamp="2026-05-31T12:00:00Z">
+    <header>
+      <h2>Archived</h2>
+      <time datetime="2026-05-31T12:00:00Z">31 May 2026</time>
+    </header>
+    <p class="section-source">Source: opsx:archive</p>
+
+    <h3>Archive Summary</h3>
+    <table>
+      <tr><th>Item</th><th>Detail</th></tr>
+      <tr><td>Change</td><td><code>remove-stop</code></td></tr>
+      <tr><td>Schema</td><td>spec-driven</td></tr>
+      <tr><td>Archived to</td><td><code>openspec/changes/archive/2026-05-31-remove-stop/</code></td></tr>
+      <tr><td>Spec sync</td><td><span class="badge badge-pass">Synced</span> &mdash; 3 capabilities updated (stop-management, stop-removal, trip-detail)</td></tr>
+      <tr><td>README.md</td><td>Updated &mdash; added &ldquo;removing stops&rdquo; to feature list</td></tr>
+      <tr><td>AGENTS.md</td><td>Updated &mdash; added &ldquo;remove stop&rdquo; to completed stories, updated next-up</td></tr>
+    </table>
+
+    <h3>Artifact &amp; Task Status</h3>
+    <p>All artifacts complete. All 27 tasks complete (27/27).</p>
+
+    <div class="outcome outcome-passed">Archive complete &mdash; no warnings.</div>
+  </section>
+  </main>
+
+</body>
+</html>

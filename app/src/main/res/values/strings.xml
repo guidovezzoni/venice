@@ -51,4 +51,9 @@
     <string name="error_max_stops_reached">Maximum number of stops reached</string>
     <string name="trip_detail_move_stop_up">Move up</string>
     <string name="trip_detail_move_stop_down">Move down</string>
+    <string name="trip_detail_remove_stop">Remove stop</string>
+    <string name="trip_detail_remove_stop_dialog_title">Remove stop?</string>
+    <string name="trip_detail_remove_stop_dialog_message">Are you sure you want to remove \"%s\"?</string>
+    <string name="trip_detail_remove_stop_error">Failed to remove stop. Please try again.</string>
+    <string name="global_remove">Remove</string>
 </resources>
