@@ -172,6 +172,7 @@ private fun PreviewComponentName() {
 - **Functions**: camelCase (e.g., `findWhatsappFolder`, `checkPermission`)
 - **Variables**: camelCase, prefer descriptive names
 - **Constants**: UPPER_SNAKE_CASE for top-level constants
+- **No abbreviations or acronyms**: Use full, descriptive names for all variables, parameters, functions, and classes. Avoid shortened forms that require the reader to guess the meaning (e.g. use `destination` not `dest`, `startingPoint` not `sp`, `displayState` not `ds`).
 - **Packages**: lowercase, reverse domain notation
 - **MVI artefacts**:
   - State classes: `<Feature>UiState` (e.g., `HomeUiState`)

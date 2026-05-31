@@ -90,12 +90,12 @@ fun TripDetailScreen(
                 .padding(paddingValues),
         ) {
             item {
-                val sp = uiState.startingPoint
-                val spDisplayState = sp?.let { deriveDisplayState(it, currentStopId) }
+                val startingPoint = uiState.startingPoint
+                val startingPointDisplayState = startingPoint?.let { deriveDisplayState(it, currentStopId) }
                     ?: StopDisplayState.UPCOMING
                 Spacer(modifier = Modifier.height(CONTENT_SPACING))
                 StopSection(
-                    stop = sp,
+                    stop = startingPoint,
                     onSetStopClicked = {
                         onIntent(TripDetailUiIntent.OnSetStartingPointClicked)
                     },
@@ -104,14 +104,14 @@ fun TripDetailScreen(
                     setButtonTextRes = R.string.trip_detail_set_starting_point,
                     changeDescriptionRes = R.string.trip_detail_change_starting_point,
                     filledLabelRes = R.string.trip_detail_starting_point_start_label,
-                    onDelete = sp?.let { stop ->
+                    onDelete = startingPoint?.let { stop ->
                         { onIntent(TripDetailUiIntent.OnRemoveStopClicked(stop)) }
                     },
-                    stopDisplayState = spDisplayState,
-                    onMarkDeparted = sp?.takeIf { it.id == currentStopId }?.let {
+                    stopDisplayState = startingPointDisplayState,
+                    onMarkDeparted = startingPoint?.takeIf { it.id == currentStopId }?.let {
                         { onIntent(TripDetailUiIntent.OnMarkStopDepartedClicked(it.id)) }
                     },
-                    onUndoDeparted = sp?.takeIf { it.id == lastDepartedStopId }?.let {
+                    onUndoDeparted = startingPoint?.takeIf { it.id == lastDepartedStopId }?.let {
                         { onIntent(TripDetailUiIntent.OnUndoMarkStopDepartedClicked(it.id)) }
                     },
                 )
@@ -177,12 +177,12 @@ fun TripDetailScreen(
                 }
             }
             item {
-                val dest = uiState.destination
-                val destDisplayState = dest?.let { deriveDisplayState(it, currentStopId) }
+                val destination = uiState.destination
+                val destinationDisplayState = destination?.let { deriveDisplayState(it, currentStopId) }
                     ?: StopDisplayState.UPCOMING
                 Spacer(modifier = Modifier.height(CONTENT_SPACING))
                 StopSection(
-                    stop = dest,
+                    stop = destination,
                     onSetStopClicked = {
                         onIntent(TripDetailUiIntent.OnSetDestinationClicked)
                     },
@@ -191,14 +191,14 @@ fun TripDetailScreen(
                     setButtonTextRes = R.string.trip_detail_set_destination,
                     changeDescriptionRes = R.string.trip_detail_change_destination,
                     filledLabelRes = R.string.trip_detail_destination_label,
-                    onDelete = dest?.let { stop ->
+                    onDelete = destination?.let { stop ->
                         { onIntent(TripDetailUiIntent.OnRemoveStopClicked(stop)) }
                     },
-                    stopDisplayState = destDisplayState,
-                    onMarkDeparted = dest?.takeIf { it.id == currentStopId }?.let {
+                    stopDisplayState = destinationDisplayState,
+                    onMarkDeparted = destination?.takeIf { it.id == currentStopId }?.let {
                         { onIntent(TripDetailUiIntent.OnMarkStopDepartedClicked(it.id)) }
                     },
-                    onUndoDeparted = dest?.takeIf { it.id == lastDepartedStopId }?.let {
+                    onUndoDeparted = destination?.takeIf { it.id == lastDepartedStopId }?.let {
                         { onIntent(TripDetailUiIntent.OnUndoMarkStopDepartedClicked(it.id)) }
                     },
                 )
