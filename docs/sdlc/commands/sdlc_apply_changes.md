@@ -1,5 +1,20 @@
 Please apply the changes for the current OpenSpec change and resolve any outstanding TODOs.
 
+## Physical device gate
+
+Whenever any step in this command — or any task in the task list — requires a physical Android device (instrumented tests, on-device verification, manual UI checks, etc.):
+
+1. Run `adb devices` to check for a connected physical device.
+2. If no physical device is listed (or only emulators are listed):
+   a. Ask the user to connect a physical device via USB with USB debugging enabled — do not attempt to use an emulator (blocked by a Wayland compatibility issue).
+   b. **BLOCK here. Do NOT continue to subsequent steps or tasks.** Wait for the user to respond confirming the device is connected.
+   c. Re-run `adb devices` to verify the device appeared. If still not listed, repeat from sub-step a.
+3. Only proceed once a physical device is confirmed connected.
+
+This gate applies everywhere a device is needed — it is not limited to a specific step.
+
+## Steps
+
 Follow these steps:
 
 1. **Apply the OpenSpec change using BDD Red/Green cycle.** Execute the OpenSpec apply command (`/opsx:apply`) to implement the tasks defined in the current change artefacts.
@@ -29,6 +44,10 @@ Follow these steps:
 
    No special BDD procedure — just implement as normal.
 
+   **D. Task requiring a physical device** (description mentions on-device verification, manual UI check, or instrumented tests):
+
+   Apply the **physical device gate** (see above) before executing the task.
+
    **Task type detection**:
    - A task is a "test task" if its description contains: "Write test", "Add test",
      or references a test class (e.g., `*Test`, `*Test.kt`)
@@ -49,7 +68,7 @@ Follow these steps:
    3. **Re-apply the changes.** Execute the OpenSpec apply command (`/opsx:apply`) again to implement the updated tasks.
    4. **Re-check TODOs.** Repeat from step 2 to verify that no RESOLVE NOW TODOs remain. Continue this loop until all TODOs are either resolved or classified as ACKNOWLEDGED.
 
-4. **Run Compose UI tests on a physical device.** Once no RESOLVE NOW TODOs remain, check for a connected physical device by running `adb devices`. If no device is listed (or only emulators are listed), **stop and ask the user to connect a physical device via USB with USB debugging enabled** — do not attempt to use an emulator (blocked by a Wayland compatibility issue). Once a device is connected, run the instrumented tests:
+4. **Run Compose UI tests on a physical device.** Once no RESOLVE NOW TODOs remain, apply the **physical device gate** (see above), then run the instrumented tests:
    ```
    ./gradlew connectedDebugAndroidTest
    ```
