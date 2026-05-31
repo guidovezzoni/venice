@@ -2,7 +2,39 @@ Please apply the changes for the current OpenSpec change and resolve any outstan
 
 Follow these steps:
 
-1. **Apply the OpenSpec change.** Execute the OpenSpec apply command (`/opsx:apply`) to implement the tasks defined in the current change artefacts.
+1. **Apply the OpenSpec change using BDD Red/Green cycle.** Execute the OpenSpec apply command (`/opsx:apply`) to implement the tasks defined in the current change artefacts.
+
+   **IMPORTANT — BDD execution discipline.** When `/opsx:apply` processes each task, apply the following procedure based on task type:
+
+   **A. Test task** (description starts with "Write test:" or "Add test:", or references a test class like `*Test`):
+
+   1. Write the test code
+   2. Run the specific test class: `./gradlew test --tests "*<TestClass>"` (derive class name from task description)
+   3. **Verify RED**: Confirm the test fails (compilation error or assertion failure both count as red)
+      - If the test unexpectedly passes: PAUSE — the test may be trivial, testing existing behaviour,
+        or incorrectly written. Report this to the user before continuing.
+      - If tests fail for unrelated reasons: PAUSE — report the pre-existing failure.
+   4. After marking the task complete, show: `RED confirmed — test fails as expected`
+
+   **B. Implementation task following a test task** (the previous completed task was a test task in the same `## N.` section):
+
+   1. Write the implementation code (minimal — just enough to make the test pass)
+   2. Run the specific test class: `./gradlew test --tests "*<TestClass>"` (same class from the preceding test task)
+   3. **Verify GREEN**: Confirm the test now passes
+      - If this is an intermediate implementation task in the section and the test still fails: acceptable — note "Tests not yet green, continuing to next task in this section" and continue
+      - If this is the last implementation task in the section and the test still fails: iterate on the implementation until it passes, or PAUSE if stuck
+   4. After marking the task complete, show: `GREEN confirmed — test passes`
+
+   **C. Non-test task** (prerequisites, strings, DI, wiring, verification):
+
+   No special BDD procedure — just implement as normal.
+
+   **Task type detection**:
+   - A task is a "test task" if its description contains: "Write test", "Add test",
+     or references a test class (e.g., `*Test`, `*Test.kt`)
+   - A task is an "implementation after test" if the immediately preceding completed task
+     in the same `## N.` section was a test task
+   - All other tasks are "non-test tasks"
 
 2. **Review unresolved TODOs.** Scan all source files under `app/src/` for TODO comments (`// TODO`, `/* TODO`, `# TODO`). For each TODO found:
    - Determine if it is **related to the current story** (references the story number, touches a feature area modified by this story, or was introduced/should have been resolved by this story).

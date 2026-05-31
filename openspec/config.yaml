@@ -1,31 +1,20 @@
 schema: spec-driven
 
-rules:
-  tasks:
-    - |
-      Structure tasks using BDD (test-first) ordering. For each testable unit of work,
-      create a paired group:
+# Project context (optional)
+# This is shown to AI when creating artifacts.
+# Add your tech stack, conventions, style guides, domain knowledge, etc.
+# Example:
+#   context: |
+#     Tech stack: TypeScript, React, Node.js
+#     We use conventional commits
+#     Domain: e-commerce platform
 
-      1. A test task (write the test first)
-      2. The implementation task(s) that make the test pass
-
-      Group these pairs under a section heading that describes the feature being built.
-      Use the pattern:
-
-        ## N. <Feature Name> (BDD)
-        - [ ] N.1 Write test: <GIVEN/WHEN/THEN description> in <TestClass>
-        - [ ] N.2 Implement: <what to build to make the test pass>
-
-      Tasks that are NOT testable (string resources, DI wiring, project setup,
-      navigation wiring, composables, verification) should be grouped in their own
-      sections WITHOUT test pairs — either as prerequisites at the beginning or as
-      integration tasks at the end.
-
-      Ordering rules:
-      - Prerequisites (setup, dependencies, model/data classes that tests import) come first
-      - BDD pairs come in the middle, ordered by dependency
-      - Integration tasks (strings, DI, composables, navigation wiring) come after BDD pairs
-      - Final verification section at the end
-
-      Each test task description MUST include the GIVEN/WHEN/THEN name
-      and the target test class name.
+# Per-artifact rules (optional)
+# Add custom rules for specific artifacts.
+# Example:
+#   rules:
+#     proposal:
+#       - Keep proposals under 500 words
+#       - Always include a "Non-goals" section
+#     tasks:
+#       - Break tasks into chunks of max 2 hours
