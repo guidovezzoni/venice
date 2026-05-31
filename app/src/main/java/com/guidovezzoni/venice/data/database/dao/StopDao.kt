@@ -43,6 +43,9 @@ interface StopDao {
     @Query("DELETE FROM stops WHERE id = :stopId")
     suspend fun deleteById(stopId: String)
 
+    @Query("UPDATE stops SET status = :status WHERE id = :stopId")
+    suspend fun updateStopStatus(stopId: String, status: String)
+
     @Query("UPDATE stops SET `order` = `order` - 1 WHERE tripId = :tripId AND `order` > :fromOrder")
     suspend fun decrementOrderAbove(tripId: String, fromOrder: Int)
 

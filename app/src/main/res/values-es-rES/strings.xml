@@ -55,4 +55,6 @@
     <string name="trip_detail_remove_stop_dialog_message">¿Estas seguro de que quieres eliminar \"%s\"?</string>
     <string name="trip_detail_remove_stop_error">No se pudo eliminar la parada. Inténtalo de nuevo.</string>
     <string name="global_remove">Eliminar</string>
+    <string name="trip_detail_mark_departed">Marcar como partido</string>
+    <string name="trip_detail_undo_departed">Deshacer partida</string>
 </resources>

@@ -1,6 +1,7 @@
 package com.guidovezzoni.venice.domain.repository
 
 import com.guidovezzoni.venice.domain.model.Stop
+import com.guidovezzoni.venice.domain.model.StopStatus
 import kotlinx.coroutines.flow.Flow
 
 interface StopRepository {
@@ -39,4 +40,6 @@ interface StopRepository {
     ): Result<Stop>
 
     suspend fun deleteStop(tripId: String, stopId: String): Result<Unit>
+
+    suspend fun updateStopStatus(stopId: String, status: StopStatus): Result<Unit>
 }

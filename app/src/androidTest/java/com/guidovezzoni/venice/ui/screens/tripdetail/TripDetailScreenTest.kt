@@ -594,4 +594,98 @@ class TripDetailScreenTest {
     }
 
     // endregion
+
+    // region Stop progress — mark departed / undo
+
+    @Test
+    fun currentStop_showsMarkAsDepartedButton() {
+        setContent(
+            uiState = TripDetailUiState(
+                startingPoint = STARTING_POINT,
+                intermediateStops = listOf(INTERMEDIATE_1),
+                destination = DESTINATION,
+                canAddMoreStops = true,
+            ),
+        )
+
+        composeTestRule
+            .onNodeWithText("Mark as departed")
+            .assertIsDisplayed()
+    }
+
+    @Test
+    fun departedStop_showsUndoDepartureButton() {
+        setContent(
+            uiState = TripDetailUiState(
+                startingPoint = STARTING_POINT.copy(status = StopStatus.VISITED),
+                intermediateStops = listOf(INTERMEDIATE_1),
+                destination = DESTINATION,
+                canAddMoreStops = true,
+            ),
+        )
+
+        composeTestRule
+            .onNodeWithText("Undo departure")
+            .assertIsDisplayed()
+    }
+
+    @Test
+    fun upcomingStop_doesNotShowMarkOrUndoButtons() {
+        setContent(
+            uiState = TripDetailUiState(
+                startingPoint = STARTING_POINT,
+                intermediateStops = listOf(INTERMEDIATE_1, INTERMEDIATE_2),
+                destination = DESTINATION,
+                canAddMoreStops = true,
+            ),
+        )
+
+        composeTestRule
+            .onAllNodesWithText("Undo departure")
+            .fetchSemanticsNodes()
+            .let { assertTrue(it.isEmpty()) }
+    }
+
+    @Test
+    fun clickingMarkAsDeparted_firesOnMarkStopDepartedClicked() {
+        val intents = mutableListOf<TripDetailUiIntent>()
+        setContent(
+            uiState = TripDetailUiState(
+                startingPoint = STARTING_POINT,
+                destination = DESTINATION.copy(order = 1),
+                canAddMoreStops = true,
+            ),
+            onIntent = { intents.add(it) },
+        )
+
+        composeTestRule
+            .onNodeWithText("Mark as departed")
+            .performClick()
+
+        val intent = intents.filterIsInstance<TripDetailUiIntent.OnMarkStopDepartedClicked>().first()
+        assertEquals(STARTING_POINT.id, intent.stopId)
+    }
+
+    @Test
+    fun clickingUndoDeparture_firesOnUndoMarkStopDepartedClicked() {
+        val intents = mutableListOf<TripDetailUiIntent>()
+        setContent(
+            uiState = TripDetailUiState(
+                startingPoint = STARTING_POINT.copy(status = StopStatus.VISITED),
+                intermediateStops = listOf(INTERMEDIATE_1),
+                destination = DESTINATION,
+                canAddMoreStops = true,
+            ),
+            onIntent = { intents.add(it) },
+        )
+
+        composeTestRule
+            .onNodeWithText("Undo departure")
+            .performClick()
+
+        val intent = intents.filterIsInstance<TripDetailUiIntent.OnUndoMarkStopDepartedClicked>().first()
+        assertEquals(STARTING_POINT.id, intent.stopId)
+    }
+
+    // endregion
 }

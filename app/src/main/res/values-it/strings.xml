@@ -55,4 +55,6 @@
     <string name="trip_detail_remove_stop_dialog_message">Vuoi davvero rimuovere \"%s\"?</string>
     <string name="trip_detail_remove_stop_error">Impossibile rimuovere la tappa. Riprova.</string>
     <string name="global_remove">Rimuovi</string>
+    <string name="trip_detail_mark_departed">Segna come partito</string>
+    <string name="trip_detail_undo_departed">Annulla partenza</string>
 </resources>

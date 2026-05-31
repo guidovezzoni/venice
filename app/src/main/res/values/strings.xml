@@ -56,4 +56,6 @@
     <string name="trip_detail_remove_stop_dialog_message">Are you sure you want to remove \"%s\"?</string>
     <string name="trip_detail_remove_stop_error">Failed to remove stop. Please try again.</string>
     <string name="global_remove">Remove</string>
+    <string name="trip_detail_mark_departed">Mark as departed</string>
+    <string name="trip_detail_undo_departed">Undo departure</string>
 </resources>

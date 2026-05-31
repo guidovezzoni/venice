@@ -3,6 +3,7 @@ package com.guidovezzoni.venice.ui.screens.tripdetail
 import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -40,6 +41,7 @@ private val SECTION_PADDING = 16.dp
 private val ICON_SIZE = 24.dp
 private val ICON_SPACING = 12.dp
 private val VERTICAL_SPACING = 4.dp
+private const val DEPARTED_ALPHA = 0.6f
 
 @Composable
 fun StopSection(
@@ -54,6 +56,9 @@ fun StopSection(
     onMoveUp: (() -> Unit)? = null,
     onMoveDown: (() -> Unit)? = null,
     onDelete: (() -> Unit)? = null,
+    stopDisplayState: StopDisplayState = StopDisplayState.UPCOMING,
+    onMarkDeparted: (() -> Unit)? = null,
+    onUndoDeparted: (() -> Unit)? = null,
 ) {
     Column(modifier = modifier.fillMaxWidth().padding(horizontal = SECTION_PADDING)) {
         Text(
@@ -72,6 +77,9 @@ fun StopSection(
                 onMoveUp = onMoveUp,
                 onMoveDown = onMoveDown,
                 onDelete = onDelete,
+                stopDisplayState = stopDisplayState,
+                onMarkDeparted = onMarkDeparted,
+                onUndoDeparted = onUndoDeparted,
             )
         } else {
             EmptyStop(
@@ -92,8 +100,18 @@ private fun FilledStop(
     onMoveUp: (() -> Unit)? = null,
     onMoveDown: (() -> Unit)? = null,
     onDelete: (() -> Unit)? = null,
+    stopDisplayState: StopDisplayState = StopDisplayState.UPCOMING,
+    onMarkDeparted: (() -> Unit)? = null,
+    onUndoDeparted: (() -> Unit)? = null,
 ) {
     val changeDescription = stringResource(changeDescriptionRes)
+    val isDeparted = stopDisplayState == StopDisplayState.DEPARTED
+    val contentAlpha = if (isDeparted) DEPARTED_ALPHA else 1f
+    val iconTint = if (stopDisplayState == StopDisplayState.CURRENT) {
+        MaterialTheme.colorScheme.primary
+    } else {
+        MaterialTheme.colorScheme.onSurfaceVariant
+    }
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -107,8 +125,10 @@ private fun FilledStop(
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                modifier = Modifier.size(ICON_SIZE),
-                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier
+                    .size(ICON_SIZE)
+                    .graphicsLayer { alpha = contentAlpha },
+                tint = iconTint,
             )
             Spacer(modifier = Modifier.width(ICON_SPACING))
             Column(modifier = Modifier.weight(1f)) {
@@ -116,15 +136,18 @@ private fun FilledStop(
                     text = stringResource(filledLabelRes),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.graphicsLayer { alpha = contentAlpha },
                 )
                 Text(
                     text = stop.placeName,
                     style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier.graphicsLayer { alpha = contentAlpha },
                 )
                 Text(
                     text = "${stop.latitude}, ${stop.longitude}",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.graphicsLayer { alpha = contentAlpha },
                 )
             }
             if (onMoveUp != null) {
@@ -150,6 +173,28 @@ private fun FilledStop(
                         contentDescription = stringResource(R.string.trip_detail_remove_stop),
                     )
                 }
+            }
+        }
+        if (onMarkDeparted != null) {
+            OutlinedButton(
+                onClick = onMarkDeparted,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = SECTION_PADDING)
+                    .padding(bottom = VERTICAL_SPACING),
+            ) {
+                Text(text = stringResource(R.string.trip_detail_mark_departed))
+            }
+        }
+        if (onUndoDeparted != null) {
+            OutlinedButton(
+                onClick = onUndoDeparted,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = SECTION_PADDING)
+                    .padding(bottom = VERTICAL_SPACING),
+            ) {
+                Text(text = stringResource(R.string.trip_detail_undo_departed))
             }
         }
     }
@@ -325,6 +370,80 @@ private fun PreviewStopSectionDestinationFilled() {
             changeDescriptionRes = R.string.trip_detail_change_destination,
             filledLabelRes = R.string.trip_detail_destination_label,
             onDelete = {},
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PreviewStopSectionDeparted() {
+    HeadingToTheAlpsTheme {
+        StopSection(
+            stop = Stop(
+                id = "1",
+                tripId = "trip-1",
+                placeName = "Rome, Italy",
+                latitude = 41.9028,
+                longitude = 12.4964,
+                order = 0,
+                status = StopStatus.VISITED,
+            ),
+            icon = Icons.Filled.TripOrigin,
+            titleRes = R.string.trip_detail_starting_point_label,
+            setButtonTextRes = R.string.trip_detail_set_starting_point,
+            changeDescriptionRes = R.string.trip_detail_change_starting_point,
+            filledLabelRes = R.string.trip_detail_starting_point_start_label,
+            stopDisplayState = StopDisplayState.DEPARTED,
+            onUndoDeparted = {},
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PreviewStopSectionCurrent() {
+    HeadingToTheAlpsTheme {
+        StopSection(
+            stop = Stop(
+                id = "2",
+                tripId = "trip-1",
+                placeName = "Florence, Italy",
+                latitude = 43.7696,
+                longitude = 11.2558,
+                order = 1,
+                status = StopStatus.PENDING,
+            ),
+            icon = Icons.Filled.Place,
+            titleRes = R.string.trip_detail_intermediate_stop_label,
+            setButtonTextRes = R.string.trip_detail_add_stop,
+            changeDescriptionRes = R.string.trip_detail_change_intermediate_stop,
+            filledLabelRes = R.string.trip_detail_intermediate_stop_label,
+            stopDisplayState = StopDisplayState.CURRENT,
+            onMarkDeparted = {},
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PreviewStopSectionUpcoming() {
+    HeadingToTheAlpsTheme {
+        StopSection(
+            stop = Stop(
+                id = "3",
+                tripId = "trip-1",
+                placeName = "Barcelona, Spain",
+                latitude = 41.3851,
+                longitude = 2.1734,
+                order = 2,
+                status = StopStatus.PENDING,
+            ),
+            icon = Icons.Filled.Place,
+            titleRes = R.string.trip_detail_destination_label,
+            setButtonTextRes = R.string.trip_detail_set_destination,
+            changeDescriptionRes = R.string.trip_detail_change_destination,
+            filledLabelRes = R.string.trip_detail_destination_label,
+            stopDisplayState = StopDisplayState.UPCOMING,
         )
     }
 }

@@ -57,4 +57,6 @@ Completed stories (see `docs/userstories/index.md` for full backlog):
 - Epic 1 / Feature 1.1: Trip CRUD (create, list)
 - Epic 1 / Feature 1.2: Stop management (set starting point, set destination, add intermediate stops, consolidate use cases, reorder stops, edit stop, remove stop)
 
-Next up: UI feedback (1.4.x) and stop progress tracking (1.3.x).
+In progress: Stop progress tracking (1.3.x) — 1.3.1 (mark stop as departed) implemented.
+
+Next up: UI feedback (1.4.x) and remaining stop progress stories.
