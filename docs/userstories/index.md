@@ -33,7 +33,7 @@ The core ability to create, organise, and manage roadtrips and their stops.
 
 | ID | User Story | Details |
 |----|------------|---------|
-| 1.3.1 | As a user, I want to mark a stop as visited/departed | [1.3.1-mark-stop-visited](1.3.1-mark-stop-visited-WIP.md) |
+| 1.3.1 | As a user, I want to mark a stop as visited/departed | [1.3.1-mark-stop-visited](1.3.1-mark-stop-visited-DONE.md) |
 | 1.3.2 | As a user, I want to see which stops are upcoming vs completed | [1.3.2-see-stop-progress](1.3.2-see-stop-progress.md) |
 
 ---

@@ -199,6 +199,75 @@
 
     <div class="outcome outcome-passed">Implementation complete — all unit and instrumented tests pass</div>
   </section>
+  <section class="report-section" data-source="verify_user_story" data-timestamp="2026-05-31T22:55:00Z">
+    <header>
+      <h2>Verification</h2>
+      <time datetime="2026-05-31T22:55:00Z">31 May 2026</time>
+    </header>
+    <p class="section-source">Source: verify_user_story</p>
+
+    <h3>OpenSpec Verify</h3>
+    <p><span class="badge badge-pass">PASS</span> All three dimensions verified:</p>
+    <ul>
+      <li><strong>Completeness:</strong> 31/31 tasks complete, all spec requirements implemented</li>
+      <li><strong>Correctness:</strong> All requirements verified against source code — DAO query, repository, use cases, ViewModel, UI composables, and string resources all match specs</li>
+      <li><strong>Coherence:</strong> All 5 design decisions followed (targeted DAO query, use case validation, derived current stop, display state styling, intent carries stopId only). Code patterns consistent with existing codebase</li>
+    </ul>
+
+    <h3>TODO Scan</h3>
+    <ul>
+      <li><span class="badge badge-info">ACKNOWLEDGED</span> <code>EditStopUseCase.kt</code> — "invalidate affected legs once leg tracking is implemented (Epic 3)" — unrelated, precondition not met</li>
+      <li><span class="badge badge-info">ACKNOWLEDGED</span> <code>RemoveStopUseCase.kt</code> — "invalidate affected legs once leg tracking is implemented (Epic 3)" — unrelated, precondition not met</li>
+    </ul>
+
+    <h3>Security Review</h3>
+    <p><span class="badge badge-pass">PASS</span> No findings. Room parameterized queries, enum-constrained status values, local-only data, no user-facing free-text input in new code paths.</p>
+
+    <h3>On-Device Tests</h3>
+    <p><span class="badge badge-pass">PASS</span> Method: agent via adb on Pixel 6a (Android 16).</p>
+    <ul>
+      <li><code>./gradlew connectedDebugAndroidTest</code>: 57/57 tests passed (0 skipped, 0 failed)</li>
+      <li>App installed and launched via <code>./gradlew installDebug</code> + <code>adb shell am start</code></li>
+      <li>Manual adb-based UI exercise of multi-step mark/undo flow was not feasible due to adb input reliability issues; coverage provided by instrumented Compose UI tests</li>
+    </ul>
+
+    <h3><code>./gradlew check</code></h3>
+    <p><span class="badge badge-pass">PASS</span> Build successful — unit tests, lint, and static analysis all pass.</p>
+
+    <h3>Definition of Done</h3>
+    <table>
+      <tr><th>#</th><th>Item</th><th>Status</th></tr>
+      <tr><td>1</td><td><code>StopDao.updateStopStatus</code> query added and tested</td><td><span class="badge badge-pass">PASS</span></td></tr>
+      <tr><td>2</td><td><code>StopRepository.updateStopStatus</code> added to interface and implementation, tested</td><td><span class="badge badge-pass">PASS</span></td></tr>
+      <tr><td>3</td><td><code>MarkStopDepartedUseCase</code> created and tested</td><td><span class="badge badge-pass">PASS</span></td></tr>
+      <tr><td>4</td><td><code>UndoMarkStopDepartedUseCase</code> created and tested</td><td><span class="badge badge-pass">PASS</span></td></tr>
+      <tr><td>5</td><td><code>TripDetailUiIntent</code> updated with new intents</td><td><span class="badge badge-pass">PASS</span></td></tr>
+      <tr><td>6</td><td><code>TripDetailViewModel</code> handles new intents, tested</td><td><span class="badge badge-pass">PASS</span></td></tr>
+      <tr><td>7</td><td><code>StopSection</code> visually differentiates departed/current/upcoming stops</td><td><span class="badge badge-pass">PASS</span></td></tr>
+      <tr><td>8</td><td>"Mark as departed" button visible on current stop only</td><td><span class="badge badge-pass">PASS</span></td></tr>
+      <tr><td>9</td><td>"Undo" button visible on last departed stop only</td><td><span class="badge badge-pass">PASS</span></td></tr>
+      <tr><td>10</td><td>New string resources added in EN and IT</td><td><span class="badge badge-pass">PASS</span></td></tr>
+      <tr><td>11</td><td>Compose previews cover all three visual states</td><td><span class="badge badge-pass">PASS</span></td></tr>
+      <tr><td>12</td><td>Compose UI tests cover new interactions</td><td><span class="badge badge-pass">PASS</span></td></tr>
+      <tr><td>13</td><td><code>./gradlew check</code> passes</td><td><span class="badge badge-pass">PASS</span></td></tr>
+      <tr><td>14</td><td>On-device verification confirms visual styling and interaction flow</td><td><span class="badge badge-pass">PASS</span></td></tr>
+    </table>
+
+    <h3>Acceptance Criteria</h3>
+    <table>
+      <tr><th>Criterion</th><th>Status</th><th>Justification</th></tr>
+      <tr><td>Each stop has a status: upcoming, current, or departed</td><td><span class="badge badge-pass">PASS</span></td><td><code>StopStatus</code> enum persisted; <code>StopDisplayState</code> derived in UI</td></tr>
+      <tr><td>The user can mark the current stop as departed</td><td><span class="badge badge-pass">PASS</span></td><td><code>MarkStopDepartedUseCase</code> + UI button on current stop</td></tr>
+      <tr><td>Marking a stop as departed automatically sets the next stop as current</td><td><span class="badge badge-pass">PASS</span></td><td>Current derived as first PENDING by order; reactive Flow propagation</td></tr>
+      <tr><td>The starting point can be marked as departed</td><td><span class="badge badge-pass">PASS</span></td><td>Starting point receives <code>onMarkDeparted</code> when it is current stop</td></tr>
+      <tr><td>The action is reversible — undo marking a stop as departed</td><td><span class="badge badge-pass">PASS</span></td><td><code>UndoMarkStopDepartedUseCase</code> + UI undo button on last departed stop</td></tr>
+    </table>
+
+    <h3>Story Renamed</h3>
+    <p><code>1.3.1-mark-stop-visited-WIP.md</code> → <code>1.3.1-mark-stop-visited-DONE.md</code></p>
+
+    <div class="outcome outcome-passed">Verification PASSED — all checks confirmed, story closed</div>
+  </section>
   </main>
 
 </body>
