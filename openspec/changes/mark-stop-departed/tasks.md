@@ -51,4 +51,4 @@
 ## 8. Verification
 
 - [x] 8.1 Run `./gradlew check` and verify all tests pass
-- [ ] 8.2 On-device verification: confirm departed/current/upcoming styling, mark and undo flow
+- [x] 8.2 On-device verification: confirm departed/current/upcoming styling, mark and undo flow
