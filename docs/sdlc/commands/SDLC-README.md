@@ -18,11 +18,11 @@ Opens a user story for development. Creates a feature branch from `main`, rename
 
 ### 2. Propose change: `/sdlc_propose <story>`
 
-Explores the user story via `/opsx:explore`, asks clarifying questions until all doubts are resolved, then runs `/opsx:propose` to generate all SDD artefacts (proposal, design, delta specs, and tasks) needed before implementation can begin.
+Explores the user story via `/opsx:explore`, asks clarifying questions until all doubts are resolved, then runs `/opsx:propose` to generate all SDD artefacts with BDD-structured tasks (test-first pairs with GIVEN/WHEN/THEN descriptions).
 
 ### 3. Apply change: `/sdlc_apply_changes`
 
-Runs `/opsx:apply` to implement the current OpenSpec change, then scans `app/src/` for TODO comments. TODOs whose preconditions are now met are resolved iteratively until none remain; unrelated TODOs are acknowledged. Runs `/security-review` and iteratively fixes any findings until the review is clean. Updates `README.md` and `AGENTS.md` if affected by the delivered changes.
+Runs `/opsx:apply` to implement the current OpenSpec change using BDD Red/Green cycle (test tasks verified RED before implementation, implementation tasks verified GREEN after), then scans `app/src/` for TODO comments. TODOs whose preconditions are now met are resolved iteratively until none remain; unrelated TODOs are acknowledged. Runs `/security-review` and iteratively fixes any findings until the review is clean. Updates `README.md` and `AGENTS.md` if affected by the delivered changes.
 
 ### 4. Verify User Story: `/sdlc_verify_story <story>`
 
@@ -43,7 +43,18 @@ These scripts create symlinks in `.claude/commands/sdlc/` and `.cursor/commands/
 
 ## TODO
 
-- BDD should be taken out of opsx into sdlc
-- add PR review
+SDLC:
+- add PR review - other  LLM provider???
 - use git mv during verification
-- archive should also sync
+- archive should also sync???
+- archive should be merged with verification???
+- multi-agent orchestration
+- LLM agnostic
+- self-improvement
+- sort different phases in the command list -not sure how
+
+Guidelines:
+- DTOs should generally have nullable fields to avoid crashes on incomplete responses, but this should be confirmed by the user
+
+- UI layer should have models and enums defined in the UI layer
+- Domain layer should not depend on Data layer or UI layer

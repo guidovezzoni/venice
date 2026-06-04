@@ -19,9 +19,10 @@ Follow these steps:
 
 5. **Run on-device tests.** Follow the on-device testing procedure in @docs/guidelines/guidelines-process.md:
    - Check for a connected device with `adb devices`.
-   - If connected: run `./gradlew connectedDebugAndroidTest`, then install the app (`./gradlew installDebug`) and exercise the feature via adb to verify acceptance criteria that go beyond unit tests.
+   - If connected: run `./gradlew connectedDebugAndroidTest`, then install the app (`./gradlew installDebug`) and launch it with `adb shell am start`.
+   - **Time-box adb UI exercise to 3 interactions.** If manual adb-based UI exercise (tap/input/screenshot) fails or requires complex multi-step setup (e.g. creating test data through multiple dialogs), stop immediately — do not loop on retries or attempt to fix adb input issues. Record the instrumented test results as the on-device verification and note that manual adb exercise was not feasible.
    - If no device is connected: ask the user to connect one or perform the manual verification themselves.
-   - Do **not** proceed until on-device verification is confirmed (either by the agent or the user).
+   - **Do not block remaining steps** on manual adb exercise. Instrumented Compose UI tests on a physical device are sufficient to proceed. Always continue to step 6 after the instrumented tests complete.
 
 6. **Verify the Definition of Done.** Read the user story file and identify the "Acceptance Criteria" or "Definition of Done" section. For each item listed:
    - Check the codebase (source files, tests, configuration) to confirm the criterion is met.

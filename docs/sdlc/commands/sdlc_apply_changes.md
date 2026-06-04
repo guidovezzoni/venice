@@ -1,8 +1,59 @@
 Please apply the changes for the current OpenSpec change and resolve any outstanding TODOs.
 
+## Physical device gate
+
+Whenever any step in this command — or any task in the task list — requires a physical Android device (instrumented tests, on-device verification, manual UI checks, etc.):
+
+1. Run `adb devices` to check for a connected physical device.
+2. If no physical device is listed (or only emulators are listed):
+   a. Ask the user to connect a physical device via USB with USB debugging enabled — do not attempt to use an emulator (blocked by a Wayland compatibility issue).
+   b. **BLOCK here. Do NOT continue to subsequent steps or tasks.** Wait for the user to respond confirming the device is connected.
+   c. Re-run `adb devices` to verify the device appeared. If still not listed, repeat from sub-step a.
+3. Only proceed once a physical device is confirmed connected.
+
+This gate applies everywhere a device is needed — it is not limited to a specific step.
+
+## Steps
+
 Follow these steps:
 
-1. **Apply the OpenSpec change.** Execute the OpenSpec apply command (`/opsx:apply`) to implement the tasks defined in the current change artefacts.
+1. **Apply the OpenSpec change using BDD Red/Green cycle.** Execute the OpenSpec apply command (`/opsx:apply`) to implement the tasks defined in the current change artefacts.
+
+   **IMPORTANT — BDD execution discipline.** When `/opsx:apply` processes each task, apply the following procedure based on task type:
+
+   **A. Test task** (description starts with "Write test:" or "Add test:", or references a test class like `*Test`):
+
+   1. Write the test code
+   2. Run the specific test class: `./gradlew test --tests "*<TestClass>"` (derive class name from task description)
+   3. **Verify RED**: Confirm the test fails (compilation error or assertion failure both count as red)
+      - If the test unexpectedly passes: PAUSE — the test may be trivial, testing existing behaviour,
+        or incorrectly written. Report this to the user before continuing.
+      - If tests fail for unrelated reasons: PAUSE — report the pre-existing failure.
+   4. After marking the task complete, show: `RED confirmed — test fails as expected`
+
+   **B. Implementation task following a test task** (the previous completed task was a test task in the same `## N.` section):
+
+   1. Write the implementation code (minimal — just enough to make the test pass)
+   2. Run the specific test class: `./gradlew test --tests "*<TestClass>"` (same class from the preceding test task)
+   3. **Verify GREEN**: Confirm the test now passes
+      - If this is an intermediate implementation task in the section and the test still fails: acceptable — note "Tests not yet green, continuing to next task in this section" and continue
+      - If this is the last implementation task in the section and the test still fails: iterate on the implementation until it passes, or PAUSE if stuck
+   4. After marking the task complete, show: `GREEN confirmed — test passes`
+
+   **C. Non-test task** (prerequisites, strings, DI, wiring, verification):
+
+   No special BDD procedure — just implement as normal.
+
+   **D. Task requiring a physical device** (description mentions on-device verification, manual UI check, or instrumented tests):
+
+   Apply the **physical device gate** (see above) before executing the task.
+
+   **Task type detection**:
+   - A task is a "test task" if its description contains: "Write test", "Add test",
+     or references a test class (e.g., `*Test`, `*Test.kt`)
+   - A task is an "implementation after test" if the immediately preceding completed task
+     in the same `## N.` section was a test task
+   - All other tasks are "non-test tasks"
 
 2. **Review unresolved TODOs.** Scan all source files under `app/src/` for TODO comments (`// TODO`, `/* TODO`, `# TODO`). For each TODO found:
    - Determine if it is **related to the current story** (references the story number, touches a feature area modified by this story, or was introduced/should have been resolved by this story).
@@ -17,7 +68,7 @@ Follow these steps:
    3. **Re-apply the changes.** Execute the OpenSpec apply command (`/opsx:apply`) again to implement the updated tasks.
    4. **Re-check TODOs.** Repeat from step 2 to verify that no RESOLVE NOW TODOs remain. Continue this loop until all TODOs are either resolved or classified as ACKNOWLEDGED.
 
-4. **Run Compose UI tests on a physical device.** Once no RESOLVE NOW TODOs remain, check for a connected physical device by running `adb devices`. If no device is listed (or only emulators are listed), **stop and ask the user to connect a physical device via USB with USB debugging enabled** — do not attempt to use an emulator (blocked by a Wayland compatibility issue). Once a device is connected, run the instrumented tests:
+4. **Run Compose UI tests on a physical device.** Once no RESOLVE NOW TODOs remain, apply the **physical device gate** (see above), then run the instrumented tests:
    ```
    ./gradlew connectedDebugAndroidTest
    ```

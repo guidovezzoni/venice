@@ -21,6 +21,7 @@ Format: `{id}-{slug}.html`
 Derived from the user story filename by stripping any `-WIP` or `-DONE` suffix and changing the extension to `.html`.
 
 Examples:
+
 - User story `1.2.5-edit-stop-WIP.md` → report `1.2.5-edit-stop.html`
 - User story `1.2.3.1-consolidate-stop-usecases.md` → report `1.2.3.1-consolidate-stop-usecases.html`
 

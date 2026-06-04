@@ -73,15 +73,29 @@ fun TripDetailScreen(
         },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
     ) { paddingValues ->
+        val allStops = buildList {
+            uiState.startingPoint?.let { add(it) }
+            addAll(uiState.intermediateStops)
+            uiState.destination?.let { add(it) }
+        }
+        val currentStopId = allStops.sortedBy { it.order }
+            .firstOrNull { it.status == StopStatus.PENDING }?.id
+        val lastDepartedStopId = allStops
+            .filter { it.status == StopStatus.VISITED }
+            .maxByOrNull { it.order }?.id
+
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues),
         ) {
             item {
+                val startingPoint = uiState.startingPoint
+                val startingPointDisplayState = startingPoint?.let { deriveDisplayState(it, currentStopId) }
+                    ?: StopDisplayState.UPCOMING
                 Spacer(modifier = Modifier.height(CONTENT_SPACING))
                 StopSection(
-                    stop = uiState.startingPoint,
+                    stop = startingPoint,
                     onSetStopClicked = {
                         onIntent(TripDetailUiIntent.OnSetStartingPointClicked)
                     },
@@ -90,14 +104,22 @@ fun TripDetailScreen(
                     setButtonTextRes = R.string.trip_detail_set_starting_point,
                     changeDescriptionRes = R.string.trip_detail_change_starting_point,
                     filledLabelRes = R.string.trip_detail_starting_point_start_label,
-                    onDelete = uiState.startingPoint?.let { stop ->
+                    onDelete = startingPoint?.let { stop ->
                         { onIntent(TripDetailUiIntent.OnRemoveStopClicked(stop)) }
+                    },
+                    stopDisplayState = startingPointDisplayState,
+                    onMarkDeparted = startingPoint?.takeIf { it.id == currentStopId }?.let {
+                        { onIntent(TripDetailUiIntent.OnMarkStopDepartedClicked(it.id)) }
+                    },
+                    onUndoDeparted = startingPoint?.takeIf { it.id == lastDepartedStopId }?.let {
+                        { onIntent(TripDetailUiIntent.OnUndoMarkStopDepartedClicked(it.id)) }
                     },
                 )
             }
             items(uiState.intermediateStops.size) { index ->
                 val stop = uiState.intermediateStops[index]
                 val showReorderButtons = uiState.intermediateStops.size >= MIN_REORDERABLE_STOPS
+                val displayState = deriveDisplayState(stop, currentStopId)
                 Spacer(modifier = Modifier.height(CONTENT_SPACING))
                 StopSection(
                     stop = stop,
@@ -120,6 +142,17 @@ fun TripDetailScreen(
                         null
                     },
                     onDelete = { onIntent(TripDetailUiIntent.OnRemoveStopClicked(stop)) },
+                    stopDisplayState = displayState,
+                    onMarkDeparted = if (stop.id == currentStopId) {
+                        { onIntent(TripDetailUiIntent.OnMarkStopDepartedClicked(stop.id)) }
+                    } else {
+                        null
+                    },
+                    onUndoDeparted = if (stop.id == lastDepartedStopId) {
+                        { onIntent(TripDetailUiIntent.OnUndoMarkStopDepartedClicked(stop.id)) }
+                    } else {
+                        null
+                    },
                 )
             }
             if (uiState.canAddMoreStops) {
@@ -144,9 +177,12 @@ fun TripDetailScreen(
                 }
             }
             item {
+                val destination = uiState.destination
+                val destinationDisplayState = destination?.let { deriveDisplayState(it, currentStopId) }
+                    ?: StopDisplayState.UPCOMING
                 Spacer(modifier = Modifier.height(CONTENT_SPACING))
                 StopSection(
-                    stop = uiState.destination,
+                    stop = destination,
                     onSetStopClicked = {
                         onIntent(TripDetailUiIntent.OnSetDestinationClicked)
                     },
@@ -155,8 +191,15 @@ fun TripDetailScreen(
                     setButtonTextRes = R.string.trip_detail_set_destination,
                     changeDescriptionRes = R.string.trip_detail_change_destination,
                     filledLabelRes = R.string.trip_detail_destination_label,
-                    onDelete = uiState.destination?.let { stop ->
+                    onDelete = destination?.let { stop ->
                         { onIntent(TripDetailUiIntent.OnRemoveStopClicked(stop)) }
+                    },
+                    stopDisplayState = destinationDisplayState,
+                    onMarkDeparted = destination?.takeIf { it.id == currentStopId }?.let {
+                        { onIntent(TripDetailUiIntent.OnMarkStopDepartedClicked(it.id)) }
+                    },
+                    onUndoDeparted = destination?.takeIf { it.id == lastDepartedStopId }?.let {
+                        { onIntent(TripDetailUiIntent.OnUndoMarkStopDepartedClicked(it.id)) }
                     },
                 )
             }
@@ -263,6 +306,12 @@ fun TripDetailScreen(
             },
         )
     }
+}
+
+private fun deriveDisplayState(stop: Stop, currentStopId: String?): StopDisplayState = when {
+    stop.status == StopStatus.VISITED -> StopDisplayState.DEPARTED
+    stop.id == currentStopId -> StopDisplayState.CURRENT
+    else -> StopDisplayState.UPCOMING
 }
 
 @Preview(showBackground = true)
@@ -412,6 +461,57 @@ private fun PreviewTripDetailScreenAtStopLimit() {
                     order = 2,
                     status = StopStatus.PENDING,
                 ),
+            ),
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PreviewTripDetailScreenWithProgress() {
+    HeadingToTheAlpsTheme {
+        TripDetailScreen(
+            uiState = TripDetailUiState(
+                tripId = "trip-1",
+                startingPoint = Stop(
+                    id = "1",
+                    tripId = "trip-1",
+                    placeName = "Rome, Italy",
+                    latitude = 41.9028,
+                    longitude = 12.4964,
+                    order = 0,
+                    status = StopStatus.VISITED,
+                ),
+                intermediateStops = listOf(
+                    Stop(
+                        id = "2",
+                        tripId = "trip-1",
+                        placeName = "Florence, Italy",
+                        latitude = 43.7696,
+                        longitude = 11.2558,
+                        order = 1,
+                        status = StopStatus.PENDING,
+                    ),
+                    Stop(
+                        id = "3",
+                        tripId = "trip-1",
+                        placeName = "Nice, France",
+                        latitude = 43.7102,
+                        longitude = 7.2620,
+                        order = 2,
+                        status = StopStatus.PENDING,
+                    ),
+                ),
+                destination = Stop(
+                    id = "4",
+                    tripId = "trip-1",
+                    placeName = "Barcelona, Spain",
+                    latitude = 41.3851,
+                    longitude = 2.1734,
+                    order = 3,
+                    status = StopStatus.PENDING,
+                ),
+                canAddMoreStops = true,
             ),
         )
     }

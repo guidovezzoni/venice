@@ -94,6 +94,10 @@ class StopRepositoryImpl @Inject constructor(
         stopDao.deleteAndReorder(tripId, stopId)
     }
 
+    override suspend fun updateStopStatus(stopId: String, status: StopStatus): Result<Unit> = runCatching {
+        stopDao.updateStopStatus(stopId, status.name)
+    }
+
     private suspend fun upsertStop(
         tripId: String,
         placeName: String,

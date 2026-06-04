@@ -283,6 +283,27 @@ class StopRepositoryImplTest {
     }
 
     @Test
+    fun `GIVEN a valid stop ID WHEN updateStopStatus is called with VISITED THEN StopDao updateStopStatus is called with the stop ID and VISITED and Result success Unit is returned`() = runTest {
+        coEvery { stopDao.updateStopStatus("stop-1", "VISITED") } returns Unit
+
+        val result = repository.updateStopStatus("stop-1", StopStatus.VISITED)
+
+        assertTrue(result.isSuccess)
+        coVerify(exactly = 1) { stopDao.updateStopStatus("stop-1", "VISITED") }
+    }
+
+    @Test
+    fun `GIVEN StopDao throws WHEN updateStopStatus is called THEN Result failure with the exception is returned`() = runTest {
+        val exception = RuntimeException("DB error")
+        coEvery { stopDao.updateStopStatus("stop-1", "VISITED") } throws exception
+
+        val result = repository.updateStopStatus("stop-1", StopStatus.VISITED)
+
+        assertTrue(result.isFailure)
+        assertEquals(exception, result.exceptionOrNull())
+    }
+
+    @Test
     fun `GIVEN a non-existent target order WHEN swapStopOrder is called THEN result is failure`() = runTest {
         coEvery { stopDao.swapStopOrders(TRIP_ID, 1, 5) } throws IllegalStateException("No stop found at order 5")
 

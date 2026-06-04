@@ -5,10 +5,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.guidovezzoni.venice.domain.model.StopType
 import com.guidovezzoni.venice.domain.usecase.EditStopUseCase
+import com.guidovezzoni.venice.domain.usecase.MarkStopDepartedUseCase
 import com.guidovezzoni.venice.domain.usecase.MoveStopUseCase
 import com.guidovezzoni.venice.domain.usecase.ObserveStopsUseCase
 import com.guidovezzoni.venice.domain.usecase.RemoveStopUseCase
 import com.guidovezzoni.venice.domain.usecase.SetStopUseCase
+import com.guidovezzoni.venice.domain.usecase.UndoMarkStopDepartedUseCase
 import com.guidovezzoni.venice.ui.effect.TripDetailUiEffect
 import com.guidovezzoni.venice.ui.intent.TripDetailUiIntent
 import com.guidovezzoni.venice.ui.state.TripDetailUiState
@@ -36,6 +38,8 @@ class TripDetailViewModel @Inject constructor(
     private val moveStopUseCase: MoveStopUseCase,
     private val editStopUseCase: EditStopUseCase,
     private val removeStopUseCase: RemoveStopUseCase,
+    private val markStopDepartedUseCase: MarkStopDepartedUseCase,
+    private val undoMarkStopDepartedUseCase: UndoMarkStopDepartedUseCase,
     observeStopsUseCase: ObserveStopsUseCase,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
@@ -131,6 +135,30 @@ class TripDetailViewModel @Inject constructor(
 
             TripDetailUiIntent.OnDismissRemoveStopDialog ->
                 _uiState.update { it.copy(stopToRemove = null, isRemoveStopDialogVisible = false) }
+
+            is TripDetailUiIntent.OnMarkStopDepartedClicked ->
+                markStopDeparted(intent.stopId)
+
+            is TripDetailUiIntent.OnUndoMarkStopDepartedClicked ->
+                undoMarkStopDeparted()
+        }
+    }
+
+    private fun markStopDeparted(stopId: String) {
+        viewModelScope.launch {
+            markStopDepartedUseCase(tripId, stopId)
+                .onFailure { error ->
+                    _uiEffect.emit(TripDetailUiEffect.ShowError(error.message ?: UNKNOWN_ERROR))
+                }
+        }
+    }
+
+    private fun undoMarkStopDeparted() {
+        viewModelScope.launch {
+            undoMarkStopDepartedUseCase(tripId)
+                .onFailure { error ->
+                    _uiEffect.emit(TripDetailUiEffect.ShowError(error.message ?: UNKNOWN_ERROR))
+                }
         }
     }
 
