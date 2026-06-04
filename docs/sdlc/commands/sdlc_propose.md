@@ -6,7 +6,7 @@ Follow these steps:
 
 2. **Explore the user story.** Execute the OpenSpec explore command (`/opsx:explore`) with the user story content as input. Use this phase to think through the requirements, investigate the codebase, identify integration points, and surface any ambiguities or risks. DO NOT MAKE ASSUMPTIONS — if anything is unclear, ask the user for clarification before proceeding.
 
-3. **Clarify all doubts.** Before moving to the proposal phase, ensure all questions and ambiguities have been resolved. Ask the user additional questions if required. No assumptions or unresolved doubts should be carried forward into the proposal. Once the user confirms that all is clear, proceed.
+3. **Clarify all doubts.** Before moving to the proposal phase, ensure all questions and ambiguities have been resolved. Ask the user additional questions if required. No assumptions or unresolved doubts should be carried forward into the proposal.
 
 4. **Propose the change with BDD task structure.** Execute the OpenSpec propose command (`/opsx:propose`) to create all SDD artefacts (proposal, design, delta specs, and tasks) based on the explored and clarified requirements.
 

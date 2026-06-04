@@ -53,8 +53,16 @@ app/src/main/java/<package-name>/
     ├── repository/             # Repository implementations
     │   ├── Repository001Impl.kt
     │   └── Repository002Impl.kt
+    ├── mapper/                 # DTO → domain mappers
+    │   └── EntityMapper.kt
     └── database/
 ```
+
+- **Clean Architecture layer boundaries**: The domain layer must not import or reference any data-layer types (DTOs, database entities, network models). Violations include domain repository interfaces returning DTOs, or mappers living in `domain/mapper/`.
+  - **Repository interfaces** (in `domain/repository/`) must declare return types using only domain models.
+  - **Mappers** (DTO → domain) belong in `data/mapper/` — they operate on data-layer inputs and produce domain outputs.
+  - **Repository implementations** (in `data/repository/`) own the mapping step: parse/fetch the data-layer representation, apply the mapper, and return a domain model.
+  - **Use cases** receive domain models directly from the repository and must not perform DTO-to-domain mapping.
 
 - **MVI Contract**: Each feature exposes a clear contract between View and ViewModel:
   - `UiState`: a single immutable `data class` representing the full UI state. Default to a sensible initial state.
@@ -157,6 +165,7 @@ private fun PreviewComponentName() {
 - **Ellipsis**: Always replace three dots with ellipsis
 
 ### Kotlin Best Practices
+- **One class per file**: Each Kotlin model (data class, sealed class, enum) must live in its own file. Do not group multiple models into a single file.
 - **Immutability**: Always prefer `val` over `var` for immutable properties
 - Never use the `!!` symbol as it could lead to unexpected crashes, cast or find a solution that guarantees non-nullability.
 - Use `Result` type for operations that can fail
@@ -227,7 +236,7 @@ Unit tests should follow these criteria:
 - Located in `app/src/test/`
 - Use JUnit 4
 - Test composables with `compose-ui-test` library
-- The test name should use the GIVEN / WHEN / THEN pattern, f.i. fun `GIVEN a context WHEN an action happens THEN the expected outcome is reached` 
+- The test name should use the GIVEN / WHEN / THEN pattern, f.i. fun `GIVEN a context WHEN an action happens THEN the expected outcome is reached`
 - Mock dependencies appropriately using MockK
 - Create a setup method if required
 - use runTest if required

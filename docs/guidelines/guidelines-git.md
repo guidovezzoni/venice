@@ -3,6 +3,9 @@
 ## Commit Discipline
 - CRITICAL: never ever commit directly, always ask confirmation if committing is deemed important
 - After implementing a plan, always suggest a commit message summarising the operations performed in such plan. Prepend that suggestion with [Suggested Commit Message]
+- **Amend means files, not commits**: When asked to "amend" something, always interpret it as
+  amending file content. Never `git commit --amend` unless explicitly asked to amend a **commit**.
+  When in doubt, ask for confirmation.
 
 ## Commit Message Format
 1. **First line**: simple and concise summary of the change, prefixed with the issue reference number if available (check the branch name as it often starts with one)

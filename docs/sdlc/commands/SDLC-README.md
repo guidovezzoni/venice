@@ -43,6 +43,18 @@ These scripts create symlinks in `.claude/commands/sdlc/` and `.cursor/commands/
 
 ## TODO
 
-- add PR review
+SDLC:
+- add PR review - other  LLM provider???
 - use git mv during verification
-- archive should also sync
+- archive should also sync???
+- archive should be merged with verification???
+- multi-agent orchestration
+- LLM agnostic
+- self-improvement
+- sort different phases in the command list -not sure how
+
+Guidelines:
+- DTOs should generally have nullable fields to avoid crashes on incomplete responses, but this should be confirmed by the user
+
+- UI layer should have models and enums defined in the UI layer
+- Domain layer should not depend on Data layer or UI layer

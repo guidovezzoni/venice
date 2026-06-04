@@ -1,6 +1,5 @@
 # Process and Workflow Guidelines
 
-
 ## Development Workflow
 1. **Before Coding**: Run `./gradlew clean` to ensure clean state
 2. **During Development**: Use `./gradlew assembleDebug` for quick builds
@@ -11,6 +10,16 @@
 ## BDD Implementation Discipline
 - After reaching GREEN in a BDD cycle, **re-read the task description and spec** for requirements that mocked unit tests cannot verify — e.g. `@Transaction` annotations, threading constraints, runtime guarantees, database constraints, concurrency behaviour.
 - "Tests pass" is necessary but not sufficient. The spec is the source of truth, not the test suite.
+
+## Data Modelling Discipline
+- When modelling values from external data sources (APIs, JSON snapshots, protocols), only include
+  values that are **confirmed to exist** in the available data or documentation.
+- Do not speculatively add values that "seem likely" or "make sense" — they may be wrong and mislead
+  future developers.
+- Always provide a safe fallback (e.g. `UNKNOWN`) for unrecognised values to ensure forward
+  compatibility.
+- When full documentation is not available, add a comment in the code noting the limitation so
+  future maintainers know to revisit when documentation becomes accessible.
 
 ## Verification Discipline
 - Verification **cannot be marked as PASSED** until every check is confirmed — including on-device tests.
