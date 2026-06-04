@@ -1,36 +1,31 @@
-# Custom Commands
+# SDLC
 
-Custom slash commands that wrap and extend the standard OpenSpec (SDD) workflow, tailored to this project's user-story-driven development process.
+SDLC is a group of custom commands that wrap and extend the standard OpenSpec (SDD) workflow, tailored to this project's user-story-driven development process.
 
-## Standard OpenSpec flow
+The standard OpenSpec flow generally follows this sequence: propose → apply → verify → archive
+These commands replace the standard flow with a user-story-centric pipeline. Run them in order for a typical feature lifecycle.
 
-```
-propose -> apply -> verify -> archive
-```
+Each of the below operations adds a summary of the actions/results into an HTML report in [reports](../../reports)
 
-## Custom workflow
+### 1. Open user story: `/sdlc_open_story <story>` 
 
-The commands below replace the standard flow with a user-story-centric pipeline. Run them in order for a typical feature lifecycle:
-
-### 1. Open user story: `/sdlc_open_story <story>`
-
-Opens a user story for development. Creates a feature branch from `main`, renames the story file with a `-WIP` suffix, enriches it with technical detail, and creates the initial report.
+[sdlc_open_story.md](sdlc_open_story.md) analyses the next story to open, creates a branch, sets the story open and refines it adding a full and detailed product analysis.
 
 ### 2. Propose change: `/sdlc_propose <story>`
 
-Explores the user story via `/opsx:explore`, asks clarifying questions until all doubts are resolved, then runs `/opsx:propose` to generate all SDD artefacts with BDD-structured tasks (test-first pairs with GIVEN/WHEN/THEN descriptions).
+[sdlc_propose.md](sdlc_propose.md) analyses the user story, asks for clarifications if something isn't clear, and finally generates the SDD artifacts: proposal, design, specs, and tasks. Tasks are defined with a BDD approach, based on GIVEN/WHEN/THEN acceptance criteria and test-first approach. Uses `/opsx:explore` and `/opsx:propose`.
 
 ### 3. Apply change: `/sdlc_apply_changes`
 
-Runs `/opsx:apply` to implement the current OpenSpec change using BDD Red/Green cycle (test tasks verified RED before implementation, implementation tasks verified GREEN after), then scans `app/src/` for TODO comments. TODOs whose preconditions are now met are resolved iteratively until none remain; unrelated TODOs are acknowledged. Runs `/security-review` and iteratively fixes any findings until the review is clean. Updates `README.md` and `AGENTS.md` if affected by the delivered changes.
+[sdlc_apply_changes](sdlc_apply_changes.md) implements the current OpenSpec change using BDD Red/Green cycle (test tasks verified RED before implementation, implementation tasks verified GREEN after). Then looks for outstanding TODOs, runs a security review, and updates the documentation. Uses `/opsx:apply` and `/security-review`.
 
 ### 4. Verify User Story: `/sdlc_verify_story <story>`
 
-End-to-end verification gate. Runs `/opsx:verify`, scans for unresolved TODOs, runs `/security-review` on pending changes, checks every acceptance criterion in the story against the codebase, renames the story file to `-DONE`, and appends a verification section to the report.
+[sdlc_verify_story](sdlc_verify_story.md) is an end-to-end verification gate. Runs OpenSpec's verify, scans for unresolved TODOs, runs a security review on pending changes, checks every acceptance criterion in the story against the codebase, and finally closes the story. Uses `/opsx:verify` and `/security-review`.
 
 ### 5. Archive: `/sdlc_archive`
 
-Runs `/opsx:archive` to finalise and archive the completed change, then verifies that `README.md` and `AGENTS.md` are in sync with the codebase and specs. Appends an archive section to the report.
+[sdlc_archive](sdlc_archive.md) runs OpenSpec's archive to finalise and archive the completed change, then verifies that the documentation is in sync with the codebase and specs. Uses `/opsx:archive`.
 
 ## Setup
 
