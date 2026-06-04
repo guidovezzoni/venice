@@ -53,8 +53,5 @@ SDLC:
 - self-improvement
 - sort different phases in the command list -not sure how
 
-Guidelines:
-- DTOs should generally have nullable fields to avoid crashes on incomplete responses, but this should be confirmed by the user
-
-- UI layer should have models and enums defined in the UI layer
-- Domain layer should not depend on Data layer or UI layer
+Not sure what's best yet:
+- When both Domain and UI require the same data type, f.i. an enum, where should this be defined? In Domain? Should it be duplicated in UI? Should it be defined in another root package?
