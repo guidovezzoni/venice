@@ -63,6 +63,7 @@ app/src/main/java/<package-name>/
   - **Mappers** (DTO → domain) belong in `data/mapper/` — they operate on data-layer inputs and produce domain outputs.
   - **Repository implementations** (in `data/repository/`) own the mapping step: parse/fetch the data-layer representation, apply the mapper, and return a domain model.
   - **Use cases** receive domain models directly from the repository and must not perform DTO-to-domain mapping.
+  - **DTO nullability**: DTOs should generally declare their fields as nullable to avoid crashes on incomplete or unexpected responses from external sources. This default can be overridden on a case-by-case basis when a field is guaranteed to be present.
 
 - **MVI Contract**: Each feature exposes a clear contract between View and ViewModel:
   - `UiState`: a single immutable `data class` representing the full UI state. Default to a sensible initial state.
