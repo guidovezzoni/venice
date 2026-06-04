@@ -45,10 +45,20 @@ Defines the requirements for the trip detail screen, covering the MVI contract (
 - `OnRemoveStopClicked(stop: Stop)` — user taps the delete button on any stop card
 - `OnRemoveStopConfirmed` — user confirms the removal dialog
 - `OnDismissRemoveStopDialog` — user dismisses the removal dialog
+- `OnMarkStopDepartedClicked(stopId: String)` — user taps "Mark as departed" on the current stop
+- `OnUndoMarkStopDepartedClicked(stopId: String)` — user taps "Undo" on the last departed stop
 
 #### Scenario: All intents are representable
 - **WHEN** a user action occurs on the trip detail screen
 - **THEN** it maps to exactly one `TripDetailUiIntent` subclass
+
+#### Scenario: Mark departed intent carries stop ID
+- **WHEN** the user taps "Mark as departed" on a stop with `id = "s1"`
+- **THEN** `OnMarkStopDepartedClicked("s1")` is dispatched
+
+#### Scenario: Undo departed intent carries stop ID
+- **WHEN** the user taps "Undo" on a stop with `id = "s2"`
+- **THEN** `OnUndoMarkStopDepartedClicked("s2")` is dispatched
 
 ### Requirement: TripDetailUiEffect models one-shot side effects
 `TripDetailUiEffect` SHALL be a sealed class with:
@@ -85,6 +95,8 @@ Defines the requirements for the trip detail screen, covering the MVI contract (
 - On `OnRemoveStopClicked`: set `stopToRemove` to the provided stop and `isRemoveStopDialogVisible = true`.
 - On `OnDismissRemoveStopDialog`: set `stopToRemove = null` and `isRemoveStopDialogVisible = false`.
 - On `OnRemoveStopConfirmed`: call `RemoveStopUseCase(tripId, stopToRemove!!.id)`; on success set `stopToRemove = null` and `isRemoveStopDialogVisible = false`; on failure emit `ShowError`.
+- On `OnMarkStopDepartedClicked`: call `MarkStopDepartedUseCase(tripId, stopId)`; on failure emit `ShowError`.
+- On `OnUndoMarkStopDepartedClicked`: call `UndoMarkStopDepartedUseCase(tripId)`; on failure emit `ShowError`.
 
 #### Scenario: Opening starting point dialog
 - **WHEN** `OnSetStartingPointClicked` is dispatched
@@ -197,6 +209,22 @@ Defines the requirements for the trip detail screen, covering the MVI contract (
 #### Scenario: canAddMoreStops is false at limit
 - **WHEN** the ViewModel observes 25 stops for the trip
 - **THEN** `canAddMoreStops` is `false`
+
+#### Scenario: Mark stop departed — success
+- **WHEN** `OnMarkStopDepartedClicked` is dispatched and `MarkStopDepartedUseCase` succeeds
+- **THEN** the stop list updates via Flow observation (the departed stop now has `status = VISITED`)
+
+#### Scenario: Mark stop departed — failure
+- **WHEN** `OnMarkStopDepartedClicked` is dispatched and `MarkStopDepartedUseCase` fails
+- **THEN** a `ShowError` effect is emitted with the error message
+
+#### Scenario: Undo mark departed — success
+- **WHEN** `OnUndoMarkStopDepartedClicked` is dispatched and `UndoMarkStopDepartedUseCase` succeeds
+- **THEN** the stop list updates via Flow observation (the reverted stop now has `status = PENDING`)
+
+#### Scenario: Undo mark departed — failure
+- **WHEN** `OnUndoMarkStopDepartedClicked` is dispatched and `UndoMarkStopDepartedUseCase` fails
+- **THEN** a `ShowError` effect is emitted with the error message
 
 ### Requirement: Stop sections use consolidated StopSection composable
 The trip detail screen SHALL use `StopSection` (defined in destination-ui spec) for both the starting point and destination sections, parameterised with the appropriate icon, labels, and string resources for each.
@@ -383,3 +411,87 @@ The app SHALL include the following string resources in EN, IT, and ES:
 #### Scenario: Navigation to trip detail creates ViewModel
 - **WHEN** the user navigates to a trip's detail screen
 - **THEN** `TripDetailViewModel` is created with the trip's ID from the route arguments
+
+### Requirement: StopSection visually differentiates stop status
+`StopSection` SHALL accept an optional `stopDisplayState` parameter indicating `DEPARTED`, `CURRENT`, or `UPCOMING` (defaulting to `UPCOMING`). Visual styling SHALL vary:
+- **DEPARTED**: Icon uses `MaterialTheme.colorScheme.onSurfaceVariant` tint. Card has reduced emphasis (alpha `0.6f` on the icon and label).
+- **CURRENT**: Icon uses `MaterialTheme.colorScheme.primary` tint (existing style). Card is styled with default emphasis.
+- **UPCOMING**: Icon uses `MaterialTheme.colorScheme.onSurfaceVariant` tint. Card is styled with default emphasis.
+
+#### Scenario: Departed stop shows muted styling
+- **WHEN** `StopSection` is rendered with `stopDisplayState = DEPARTED`
+- **THEN** the icon tint is `onSurfaceVariant` and icon/label have alpha `0.6f`
+
+#### Scenario: Current stop shows primary styling
+- **WHEN** `StopSection` is rendered with `stopDisplayState = CURRENT`
+- **THEN** the icon tint is `primary` and no alpha reduction is applied
+
+#### Scenario: Upcoming stop shows default styling
+- **WHEN** `StopSection` is rendered with `stopDisplayState = UPCOMING`
+- **THEN** the icon tint is `onSurfaceVariant` and no alpha reduction is applied
+
+### Requirement: StopSection renders mark departed action button
+`StopSection` SHALL accept an optional `onMarkDeparted: (() -> Unit)?` lambda (defaulting to `null`). When non-null, a button labelled with string resource `trip_detail_mark_departed` SHALL be rendered.
+
+#### Scenario: Mark departed button shown when lambda provided
+- **WHEN** `StopSection` is rendered with a non-null `onMarkDeparted` lambda
+- **THEN** a "Mark as departed" button is visible
+
+#### Scenario: Mark departed button hidden when lambda is null
+- **WHEN** `StopSection` is rendered with `onMarkDeparted = null`
+- **THEN** no "Mark as departed" button is visible
+
+#### Scenario: Tapping mark departed fires callback
+- **WHEN** the user taps the "Mark as departed" button
+- **THEN** the `onMarkDeparted` lambda is invoked
+
+### Requirement: StopSection renders undo departed action button
+`StopSection` SHALL accept an optional `onUndoDeparted: (() -> Unit)?` lambda (defaulting to `null`). When non-null, a button labelled with string resource `trip_detail_undo_departed` SHALL be rendered.
+
+#### Scenario: Undo button shown when lambda provided
+- **WHEN** `StopSection` is rendered with a non-null `onUndoDeparted` lambda
+- **THEN** an "Undo departure" button is visible
+
+#### Scenario: Undo button hidden when lambda is null
+- **WHEN** `StopSection` is rendered with `onUndoDeparted = null`
+- **THEN** no "Undo departure" button is visible
+
+#### Scenario: Tapping undo fires callback
+- **WHEN** the user taps the "Undo departure" button
+- **THEN** the `onUndoDeparted` lambda is invoked
+
+### Requirement: TripDetailScreen passes mark/undo lambdas based on stop status
+`TripDetailScreen` SHALL derive the display state and action lambdas for each stop:
+- The **current stop** (first PENDING by order across all stops) SHALL receive `onMarkDeparted` dispatching `OnMarkStopDepartedClicked(stop.id)` and `stopDisplayState = CURRENT`.
+- The **last departed stop** (highest-order VISITED stop) SHALL receive `onUndoDeparted` dispatching `OnUndoMarkStopDepartedClicked(stop.id)` and `stopDisplayState = DEPARTED`.
+- All other VISITED stops SHALL receive `stopDisplayState = DEPARTED` with no action buttons for mark/undo.
+- All other PENDING stops (after the current one) SHALL receive `stopDisplayState = UPCOMING` with no action buttons for mark/undo.
+
+#### Scenario: Current stop gets mark departed button
+- **WHEN** the trip has stops [VISITED(order=0), PENDING(order=1), PENDING(order=2)]
+- **THEN** the stop at order 1 is rendered with `stopDisplayState = CURRENT` and `onMarkDeparted` set
+
+#### Scenario: Last departed stop gets undo button
+- **WHEN** the trip has stops [VISITED(order=0), VISITED(order=1), PENDING(order=2)]
+- **THEN** the stop at order 1 is rendered with `stopDisplayState = DEPARTED` and `onUndoDeparted` set
+
+#### Scenario: First stop as current when none departed
+- **WHEN** all stops are PENDING
+- **THEN** the stop at order 0 (starting point) is rendered with `stopDisplayState = CURRENT` and `onMarkDeparted` set
+
+#### Scenario: All stops departed — no action buttons
+- **WHEN** all stops have `status = VISITED`
+- **THEN** all stops are rendered with `stopDisplayState = DEPARTED`, no `onMarkDeparted`, and only the last one gets `onUndoDeparted`
+
+### Requirement: Stop progress string resources
+The app SHALL include the following string resources in EN and IT:
+- `trip_detail_mark_departed`: "Mark as departed" / "Segna come partito"
+- `trip_detail_undo_departed`: "Undo departure" / "Annulla partenza"
+
+#### Scenario: English strings present
+- **WHEN** the app locale is English
+- **THEN** `trip_detail_mark_departed` resolves to "Mark as departed" and `trip_detail_undo_departed` resolves to "Undo departure"
+
+#### Scenario: Italian strings present
+- **WHEN** the app locale is Italian
+- **THEN** `trip_detail_mark_departed` resolves to "Segna come partito" and `trip_detail_undo_departed` resolves to "Annulla partenza"
