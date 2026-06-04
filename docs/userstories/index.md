@@ -120,3 +120,37 @@ A read-only companion view of the current trip on the car display.
 |----|------------|---------|
 | 7.1.1 | As a user, I want to see my current roadtrip and upcoming stops on Android Auto | [7.1.1-android-auto-trip-view](7.1.1-android-auto-trip-view.md) |
 | 7.1.2 | As a user, I want to tap a stop on Android Auto to start navigation | [7.1.2-android-auto-navigate-to-stop](7.1.2-android-auto-navigate-to-stop.md) |
+
+---
+
+## Epic 8: Cloud Sync & Multi-User
+
+Cloud storage via Supabase, user authentication, and trip sharing between users.
+
+### Feature 8.1: Backend Foundation & Auth
+
+| ID | User Story | Details |
+|----|------------|---------|
+| 8.1.1 | As a developer, I want to analyse offline+online vs online-only architectures | [8.1.1-spike-offline-vs-online](8.1.1-spike-offline-vs-online.md) |
+| 8.1.2 | As a developer, I want the Supabase project configured with remote schema and Android SDK | [8.1.2-supabase-project-setup](8.1.2-supabase-project-setup.md) |
+| 8.1.3 | As a user, I want to create an account | [8.1.3-sign-up](8.1.3-sign-up.md) |
+| 8.1.4 | As a user, I want to log in to my account | [8.1.4-log-in](8.1.4-log-in.md) |
+| 8.1.5 | As a user, I want to log out of my account | [8.1.5-log-out](8.1.5-log-out.md) |
+| 8.1.6 | As a user, I want the app to remember my login | [8.1.6-auth-state-management](8.1.6-auth-state-management.md) |
+
+### Feature 8.2: Trip Sync
+
+| ID | User Story | Details |
+|----|------------|---------|
+| 8.2.1 | As a user, I want my trips saved to the cloud | [8.2.1-sync-trips-to-cloud](8.2.1-sync-trips-to-cloud.md) |
+| 8.2.2 | As a user, I want my stops saved to the cloud | [8.2.2-sync-stops-to-cloud](8.2.2-sync-stops-to-cloud.md) |
+| 8.2.3 | As a user, I want to see my trips when I log in on a new device | [8.2.3-pull-trips-on-login](8.2.3-pull-trips-on-login.md) |
+| 8.2.4 | As a user, I want to view and edit trips without an internet connection | [8.2.4-offline-support](8.2.4-offline-support.md) |
+
+### Feature 8.3: Trip Sharing *(future)*
+
+| ID | User Story | Details |
+|----|------------|---------|
+| 8.3.1 | As a developer, I want to design the trip sharing model | [8.3.1-spike-sharing-model](8.3.1-spike-sharing-model.md) |
+| 8.3.2 | As a user, I want to share a trip with another person | [8.3.2-share-trip-with-user](8.3.2-share-trip-with-user.md) |
+| 8.3.3 | As a user, I want to see trips that others have shared with me | [8.3.3-view-shared-trips](8.3.3-view-shared-trips.md) |
