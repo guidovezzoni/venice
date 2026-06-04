@@ -23,18 +23,18 @@ The core ability to create, organise, and manage roadtrips and their stops.
 | 1.2.5 | As a user, I want to edit a stop in my roadtrip | [1.2.5-edit-stop](1.2.5-edit-stop-DONE.md) |
 | 1.2.6 | As a user, I want to remove a stop from my roadtrip | [1.2.6-remove-stop](1.2.6-remove-stop-DONE.md) |
 
-### Feature 1.4: UI Feedback
-
-| ID | User Story | Details |
-|----|------------|---------|
-| 1.4.1 | As a user, I want dialogs to show that a save is in progress | [1.4.1-dialog-loading-feedback](1.4.1-dialog-loading-feedback.md) |
-
 ### Feature 1.3: Stop Progress
 
 | ID | User Story | Details |
 |----|------------|---------|
 | 1.3.1 | As a user, I want to mark a stop as visited/departed | [1.3.1-mark-stop-visited](1.3.1-mark-stop-visited-DONE.md) |
 | 1.3.2 | As a user, I want to see which stops are upcoming vs completed | [1.3.2-see-stop-progress](1.3.2-see-stop-progress.md) |
+
+### Feature 1.4: UI Feedback
+
+| ID | User Story | Details |
+|----|------------|---------|
+| 1.4.1 | As a user, I want dialogs to show that a save is in progress | [1.4.1-dialog-loading-feedback](1.4.1-dialog-loading-feedback.md) |
 
 ---
 

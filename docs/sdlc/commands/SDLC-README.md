@@ -1,24 +1,17 @@
-# Custom Commands
+# SDLC
 
-Custom slash commands that wrap and extend the standard OpenSpec (SDD) workflow, tailored to this project's user-story-driven development process.
+SDLC is a group of custom commands that wrap and extend the standard OpenSpec (SDD) workflow, tailored to this project's user-story-driven development process.
 
-## Standard OpenSpec flow
+The standard OpenSpec flow generally follows this sequence: propose → apply → verify → archive
+These commands replace the standard flow with a user-story-centric pipeline. Run them in order for a typical feature lifecycle:
 
-```
-propose -> apply -> verify -> archive
-```
+### 1. Open user story: `/sdlc_open_story <story>` 
 
-## Custom workflow
-
-The commands below replace the standard flow with a user-story-centric pipeline. Run them in order for a typical feature lifecycle:
-
-### 1. Open user story: `/sdlc_open_story <story>`
-
-Opens a user story for development. Creates a feature branch from `main`, renames the story file with a `-WIP` suffix, enriches it with technical detail, and creates the initial report.
+[sdlc_open_story.md](sdlc_open_story.md) analyses the next story to open, creates a branch, sets the story open and refines it adding a full and detailed product analysis.
 
 ### 2. Propose change: `/sdlc_propose <story>`
 
-Explores the user story via `/opsx:explore`, asks clarifying questions until all doubts are resolved, then runs `/opsx:propose` to generate all SDD artefacts with BDD-structured tasks (test-first pairs with GIVEN/WHEN/THEN descriptions).
+[sdlc_propose.md](sdlc_propose.md) analyses the user story, asks for clarifications if something isn't clear, and finally generates the SDD artifacts: proposal, design, specs, and tasks. Tasks are defined with a BDD approach, based on GIVEN/WHEN/THEN acceptance criteria and test-first approach. Uses `/opsx:explore` and `/opsx:propose`.
 
 ### 3. Apply change: `/sdlc_apply_changes`
 
