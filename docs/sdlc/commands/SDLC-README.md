@@ -40,7 +40,6 @@ These scripts create symlinks in `.claude/commands/sdlc/` and `.cursor/commands/
 
 SDLC:
 - add PR review - other  LLM provider???
-- use git mv during verification
 - archive should also sync???
 - archive should be merged with verification???
 - multi-agent orchestration
