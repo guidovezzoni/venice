@@ -186,6 +186,72 @@
       <li><strong>AGENTS.md</strong>: Updated Current Status to include story 1.3.2.</li>
     </ul>
   </section>
+  <section class="report-section" data-source="sdlc_verify_story" data-timestamp="2026-06-05T08:33:00Z">
+    <header>
+      <h2>Verification</h2>
+      <time datetime="2026-06-05T08:33:00Z">5 June 2026</time>
+    </header>
+    <p class="section-source">Source: sdlc_verify_story</p>
+
+    <h3>OpenSpec Verify</h3>
+    <p><span class="badge badge-pass">PASS</span> All 20/20 tasks complete. All 4 requirements and 10 scenarios verified against the implementation.</p>
+
+    <h3>TODO Scan</h3>
+    <p>3 TODOs found in <code>app/src/</code> — all ACKNOWLEDGED (unrelated to this story):</p>
+    <ul>
+      <li><code>res/xml/data_extraction_rules.xml:8</code> — XML backup config comment (pre-existing, unrelated)</li>
+      <li><code>domain/usecase/RemoveStopUseCase.kt:9</code> — leg invalidation, awaits Epic 3</li>
+      <li><code>domain/usecase/EditStopUseCase.kt:10</code> — leg invalidation, awaits Epic 3</li>
+    </ul>
+    <p>None block this story.</p>
+
+    <h3>Security Review</h3>
+    <p><span class="badge badge-pass">PASS</span> No findings. Changes are read-only UI composables with no new attack surfaces, user inputs, network calls, or permissions.</p>
+
+    <h3>On-Device Tests</h3>
+    <p><span class="badge badge-pass">PASS</span> Instrumented Compose UI tests on Pixel 6a (Android 16): <strong>66/66 passed, 0 failed, 0 skipped</strong>. App installed and launched successfully. Manual adb UI exercise not feasible within 3-interaction limit due to multi-step setup required (create trip → add stops → mark departed).</p>
+
+    <h3>Definition of Done</h3>
+    <table>
+      <thead>
+        <tr><th>Criterion</th><th>Result</th><th>Justification</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>AC-1: Departed stops show checkmark icon + 0.6f alpha</td>
+          <td><span class="badge badge-pass">PASS</span></td>
+          <td><code>StopSection.kt:120</code> — <code>Icons.Filled.CheckCircle</code> when <code>isDeparted</code>; <code>:48,114</code> — <code>DEPARTED_ALPHA = 0.6f</code> applied to all content elements</td>
+        </tr>
+        <tr>
+          <td>AC-2: Current stop card has primary-colour highlighted border</td>
+          <td><span class="badge badge-pass">PASS</span></td>
+          <td><code>StopSection.kt:129</code> — <code>Modifier.border(2.dp, primary, CardDefaults.shape)</code> when <code>isCurrent</code></td>
+        </tr>
+        <tr>
+          <td>AC-3: Upcoming stops shown in default style</td>
+          <td><span class="badge badge-pass">PASS</span></td>
+          <td>Default branch: <code>contentAlpha = 1f</code>, no border modifier, caller-provided icon used — no visual modifications</td>
+        </tr>
+        <tr>
+          <td>AC-4: Progress summary displayed at top when stops exist</td>
+          <td><span class="badge badge-pass">PASS</span></td>
+          <td><code>TripDetailScreen.kt:94–101</code> — <code>TripProgressSummary</code> is first <code>LazyColumn</code> item when <code>totalCount &gt; 0</code></td>
+        </tr>
+        <tr>
+          <td>AC-5: All departed shows N of N completed</td>
+          <td><span class="badge badge-pass">PASS</span></td>
+          <td><code>TripProgressSummaryTest</code> — <code>allStopsDeparted_showsCompleteProgressText()</code> asserts "6 of 6 stops completed"</td>
+        </tr>
+        <tr>
+          <td>AC-6: None departed shows "0 of N stops completed"</td>
+          <td><span class="badge badge-pass">PASS</span></td>
+          <td><code>TripProgressSummaryTest</code> — <code>zeroProgress_showsZeroProgressText()</code> asserts "0 of 4 stops completed"</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="outcome outcome-passed">PASSED — Story renamed to 1.3.2-see-stop-progress-DONE.md</div>
+  </section>
   </main>
 
 </body>
