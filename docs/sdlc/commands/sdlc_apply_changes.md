@@ -46,7 +46,7 @@ Follow these steps:
 
    **D. Task requiring a physical device** (description mentions on-device verification, manual UI check, or instrumented tests):
 
-   Apply the **physical device gate** (see above) before executing the task.
+   Apply the **physical device gate** (see above) before executing the task. Once the device is connected, perform the verification autonomously using `adb` (screenshots, UI dumps, taps) — do not ask the user to run or observe it.
 
    **Task type detection**:
    - A task is a "test task" if its description contains: "Write test", "Add test",
@@ -72,6 +72,7 @@ Follow these steps:
    ```
    ./gradlew connectedDebugAndroidTest
    ```
+   **Run this autonomously — do not ask the user to run it.** Once the device is confirmed connected, execute the command yourself and report the results.
    If any tests fail:
    1. Present the failures to the user for awareness.
    2. Fix the failing tests or the production code as appropriate.

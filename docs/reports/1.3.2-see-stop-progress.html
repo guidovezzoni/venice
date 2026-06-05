@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Report: 1.3.2 — See Which Stops Are Upcoming vs Completed</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.6;
+      color: #1a1a1a;
+      background: #fafafa;
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+
+    .report-header {
+      border-bottom: 3px solid #2563eb;
+      padding-bottom: 1rem;
+      margin-bottom: 2rem;
+    }
+    .report-header h1 { font-size: 1.75rem; color: #1e293b; }
+    .report-meta {
+      display: flex; gap: 2rem; flex-wrap: wrap;
+      margin-top: 0.5rem; font-size: 0.875rem; color: #64748b;
+    }
+    .report-meta span { display: inline-flex; align-items: center; gap: 0.25rem; }
+
+    .report-section {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .report-section header {
+      display: flex; justify-content: space-between; align-items: baseline;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 0.75rem; margin-bottom: 1rem;
+    }
+    .report-section header h2 { font-size: 1.25rem; color: #1e293b; }
+    .report-section header time { font-size: 0.8rem; color: #94a3b8; white-space: nowrap; }
+    .section-source { font-size: 0.75rem; color: #94a3b8; font-style: italic; margin-bottom: 0.75rem; }
+
+    h3 { font-size: 1.05rem; color: #334155; margin: 1rem 0 0.5rem; }
+    p { margin-bottom: 0.75rem; }
+    ul, ol { margin: 0.5rem 0 0.75rem 1.5rem; }
+    li { margin-bottom: 0.25rem; }
+    code {
+      background: #f1f5f9; padding: 0.15rem 0.35rem; border-radius: 3px;
+      font-size: 0.875em;
+      font-family: "SF Mono", "Fira Code", Menlo, Consolas, monospace;
+    }
+
+    table { width: 100%; border-collapse: collapse; margin: 0.75rem 0; font-size: 0.9rem; }
+    th, td { text-align: left; padding: 0.5rem 0.75rem; border: 1px solid #e2e8f0; }
+    th { background: #f8fafc; font-weight: 600; color: #475569; }
+
+    .badge {
+      display: inline-block; padding: 0.15rem 0.5rem;
+      border-radius: 4px; font-size: 0.8rem; font-weight: 600;
+    }
+    .badge-pass { background: #dcfce7; color: #166534; }
+    .badge-fail { background: #fee2e2; color: #991b1b; }
+    .badge-warn { background: #fef9c3; color: #854d0e; }
+    .badge-info { background: #dbeafe; color: #1e40af; }
+
+    .outcome { margin-top: 1rem; padding: 0.75rem 1rem; border-radius: 6px; font-weight: 600; }
+    .outcome-passed { background: #dcfce7; color: #166534; border-left: 4px solid #22c55e; }
+    .outcome-failed { background: #fee2e2; color: #991b1b; border-left: 4px solid #ef4444; }
+  </style>
+</head>
+<body>
+
+  <div class="report-header">
+    <h1>1.3.2 — See Which Stops Are Upcoming vs Completed</h1>
+    <div class="report-meta">
+      <span><strong>Story:</strong> 1.3.2</span>
+      <span><strong>Branch:</strong> feature/1.3.2-see-stop-progress</span>
+      <span><strong>Created:</strong> 2026-06-04</span>
+    </div>
+  </div>
+
+  <main id="report-sections">
+  <section class="report-section" data-source="open_user_story" data-timestamp="2026-06-04T00:00:00Z">
+    <header>
+      <h2>Story Opened</h2>
+      <time datetime="2026-06-04T00:00:00Z">4 June 2026</time>
+    </header>
+    <p class="section-source">Source: open_user_story</p>
+
+    <h3>User Story</h3>
+    <p><strong>1.3.2 — See Which Stops Are Upcoming vs Completed</strong></p>
+    <p>As a user, I want to see which stops are upcoming vs completed so that I can understand where I am in my roadtrip at a glance.</p>
+
+    <h3>Branch</h3>
+    <p><code>feature/1.3.2-see-stop-progress</code> created from <code>main</code></p>
+
+    <h3>Refinement Summary</h3>
+    <ul>
+      <li>Analysed the existing 1.3.1 implementation: <code>StopDisplayState</code> enum, <code>deriveDisplayState()</code>, and basic alpha/tint styling already in place.</li>
+      <li>Identified three gaps: no checkmark icon for departed stops, no card highlight for current stop, and no progress summary indicator.</li>
+      <li>Defined 6 specific acceptance criteria covering departed/current/upcoming visual states and the progress summary for all edge cases (0/N, partial, N/N).</li>
+      <li>Designed a new <code>TripProgressSummary</code> composable with <code>LinearProgressIndicator</code>.</li>
+      <li>Planned modifications to <code>StopSection</code> (checkmark icon, primary border) and <code>TripDetailScreen</code> (progress computation and display).</li>
+      <li>No data or domain layer changes required — purely UI story.</li>
+    </ul>
+  </section>
+  <section class="report-section" data-source="opsx:propose" data-timestamp="2026-06-04T00:00:00Z">
+    <header>
+      <h2>Change Proposed</h2>
+      <time datetime="2026-06-04T00:00:00Z">4 June 2026</time>
+    </header>
+    <p class="section-source">Source: opsx:propose</p>
+
+    <h3>Exploration Findings</h3>
+    <ul>
+      <li><code>StopDisplayState</code> (DEPARTED/CURRENT/UPCOMING) and <code>deriveDisplayState()</code> are fully functional from 1.3.1.</li>
+      <li><code>StopSection</code> already accepts <code>stopDisplayState</code> and applies alpha (0.6f) for departed and primary icon tint for current.</li>
+      <li>The <code>icon</code> parameter is caller-provided — override inside <code>FilledStop</code> is the cleanest approach for the checkmark swap.</li>
+      <li><code>TripDetailScreen</code> already assembles <code>allStops</code> and computes <code>currentStopId</code> / <code>lastDepartedStopId</code> — progress counts can derive from the same list.</li>
+      <li>No isolated <code>StopSectionTest</code> exists — tests for new stop visual states will be created.</li>
+      <li>Three locales need updating: en (default), it, es-ES.</li>
+    </ul>
+
+    <h3>Questions &amp; Answers</h3>
+    <p>No clarification needed — the story was fully refined during the open step with clear acceptance criteria and technical design.</p>
+
+    <h3>Artefacts Created</h3>
+    <table>
+      <tr><th>Artefact</th><th>Path</th><th>Description</th></tr>
+      <tr><td>Proposal</td><td><code>openspec/changes/see-stop-progress/proposal.md</code></td><td>Motivation, scope, and impact of the change</td></tr>
+      <tr><td>Design</td><td><code>openspec/changes/see-stop-progress/design.md</code></td><td>Technical decisions: icon override in StopSection, border approach, standalone TripProgressSummary</td></tr>
+      <tr><td>Spec</td><td><code>openspec/changes/see-stop-progress/specs/stop-progress-display/spec.md</code></td><td>5 requirements with 13 testable scenarios covering all visual states and progress summary</td></tr>
+      <tr><td>Tasks</td><td><code>openspec/changes/see-stop-progress/tasks.md</code></td><td>21 tasks in BDD structure: prerequisites, 4 BDD groups, preview updates, verification</td></tr>
+    </table>
+
+    <h3>Task Summary</h3>
+    <ol>
+      <li><strong>Prerequisites</strong> — String resources (en, it, es-ES)</li>
+      <li><strong>TripProgressSummary (BDD)</strong> — 3 test tasks + 1 implementation task</li>
+      <li><strong>StopSection Departed Checkmark (BDD)</strong> — 2 test tasks + 1 implementation task</li>
+      <li><strong>StopSection Current Border (BDD)</strong> — 2 test tasks + 1 implementation task</li>
+      <li><strong>TripDetailScreen Integration (BDD)</strong> — 2 test tasks + 1 implementation task</li>
+      <li><strong>Preview Updates</strong> — StopSection previews for new states</li>
+      <li><strong>Verification</strong> — gradlew check, connected tests, on-device visual confirmation</li>
+    </ol>
+  </section>
+  <section class="report-section" data-source="sdlc_apply_changes" data-timestamp="2026-06-05T08:10:00Z">
+    <header>
+      <h2>Apply Changes</h2>
+      <time datetime="2026-06-05T08:10:00Z">5 Jun 2026</time>
+    </header>
+    <p class="section-source">Source: sdlc_apply_changes</p>
+
+    <h3>Implementation Summary</h3>
+    <p>All 20 tasks completed in a single iteration cycle across 7 sections:</p>
+    <ul>
+      <li><strong>Prerequisites (1.1–1.3)</strong>: Added <code>trip_detail_progress_summary</code> string and <code>trip_detail_stop_departed_icon_description</code> to all three locales (en, it, es-ES).</li>
+      <li><strong>TripProgressSummary composable (2.1–2.4)</strong>: Created <code>TripProgressSummary.kt</code> with text label, <code>LinearProgressIndicator</code>, and three previews (zero / partial / complete). BDD RED confirmed by compilation failure; GREEN confirmed after implementation.</li>
+      <li><strong>StopSection departed checkmark (3.1–3.3)</strong>: Added <code>StopSectionTest.kt</code>. Implemented icon override in <code>FilledStop</code> — when <code>stopDisplayState == DEPARTED</code>, <code>Icons.Filled.CheckCircle</code> replaces the caller-provided icon with content description "Departed". RED confirmed by design (no content description existed); GREEN confirmed after implementation.</li>
+      <li><strong>StopSection current border (4.1–4.3)</strong>: Tests added in same file. Applied <code>Modifier.border(2.dp, primary, CardDefaults.shape)</code> to the Card when <code>stopDisplayState == CURRENT</code>.</li>
+      <li><strong>TripDetailScreen integration (5.1–5.3)</strong>: Added two tests to <code>TripDetailScreenTest.kt</code>. Integrated <code>TripProgressSummary</code> as the first <code>LazyColumn</code> item when <code>totalCount &gt; 0</code>, computing <code>departedCount</code> and <code>totalCount</code> from the existing <code>allStops</code> list.</li>
+      <li><strong>Preview updates (6.1)</strong>: Existing <code>PreviewStopSectionDeparted</code> and <code>PreviewStopSectionCurrent</code> already covered the new states — no additional previews needed.</li>
+      <li><strong>Verification (7.1–7.3)</strong>: <code>./gradlew check</code> passed. All 66 instrumented tests passed on Pixel 6a (Android 16). On-device visual verification confirmed: progress summary updates correctly, current stop shows primary-colour border, departed stop shows checkmark with reduced opacity.</li>
+    </ul>
+    <p><strong>BDD iteration cycles</strong>: 1 (no rework needed).</p>
+    <p><strong>Test naming fix</strong>: Backtick test names with spaces were replaced with camelCase names to satisfy DEX version constraints (minSdk=24 does not support spaces in DEX method names).</p>
+
+    <h3>TODOs</h3>
+    <p>2 TODOs found, both <span class="badge badge-info">ACKNOWLEDGED</span> — unrelated to this story:</p>
+    <ul>
+      <li><code>EditStopUseCase.kt</code>: invalidate affected legs once leg tracking is implemented (Epic 3)</li>
+      <li><code>RemoveStopUseCase.kt</code>: invalidate affected legs once leg tracking is implemented (Epic 3)</li>
+    </ul>
+
+    <h3>Security Review</h3>
+    <div class="outcome outcome-passed">PASSED — No findings. All changes are pure UI-layer additions with no new input surfaces, data persistence, network calls, or authentication logic.</div>
+
+    <h3>Documentation</h3>
+    <ul>
+      <li><strong>README.md</strong>: Updated feature description to include visual stop-state differentiation (checkmark icon, current border, progress summary).</li>
+      <li><strong>AGENTS.md</strong>: Updated Current Status to include story 1.3.2.</li>
+    </ul>
+  </section>
+  <section class="report-section" data-source="sdlc_verify_story" data-timestamp="2026-06-05T08:33:00Z">
+    <header>
+      <h2>Verification</h2>
+      <time datetime="2026-06-05T08:33:00Z">5 June 2026</time>
+    </header>
+    <p class="section-source">Source: sdlc_verify_story</p>
+
+    <h3>OpenSpec Verify</h3>
+    <p><span class="badge badge-pass">PASS</span> All 20/20 tasks complete. All 4 requirements and 10 scenarios verified against the implementation.</p>
+
+    <h3>TODO Scan</h3>
+    <p>3 TODOs found in <code>app/src/</code> — all ACKNOWLEDGED (unrelated to this story):</p>
+    <ul>
+      <li><code>res/xml/data_extraction_rules.xml:8</code> — XML backup config comment (pre-existing, unrelated)</li>
+      <li><code>domain/usecase/RemoveStopUseCase.kt:9</code> — leg invalidation, awaits Epic 3</li>
+      <li><code>domain/usecase/EditStopUseCase.kt:10</code> — leg invalidation, awaits Epic 3</li>
+    </ul>
+    <p>None block this story.</p>
+
+    <h3>Security Review</h3>
+    <p><span class="badge badge-pass">PASS</span> No findings. Changes are read-only UI composables with no new attack surfaces, user inputs, network calls, or permissions.</p>
+
+    <h3>On-Device Tests</h3>
+    <p><span class="badge badge-pass">PASS</span> Instrumented Compose UI tests on Pixel 6a (Android 16): <strong>66/66 passed, 0 failed, 0 skipped</strong>. App installed and launched successfully. Manual adb UI exercise not feasible within 3-interaction limit due to multi-step setup required (create trip → add stops → mark departed).</p>
+
+    <h3>Definition of Done</h3>
+    <table>
+      <thead>
+        <tr><th>Criterion</th><th>Result</th><th>Justification</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>AC-1: Departed stops show checkmark icon + 0.6f alpha</td>
+          <td><span class="badge badge-pass">PASS</span></td>
+          <td><code>StopSection.kt:120</code> — <code>Icons.Filled.CheckCircle</code> when <code>isDeparted</code>; <code>:48,114</code> — <code>DEPARTED_ALPHA = 0.6f</code> applied to all content elements</td>
+        </tr>
+        <tr>
+          <td>AC-2: Current stop card has primary-colour highlighted border</td>
+          <td><span class="badge badge-pass">PASS</span></td>
+          <td><code>StopSection.kt:129</code> — <code>Modifier.border(2.dp, primary, CardDefaults.shape)</code> when <code>isCurrent</code></td>
+        </tr>
+        <tr>
+          <td>AC-3: Upcoming stops shown in default style</td>
+          <td><span class="badge badge-pass">PASS</span></td>
+          <td>Default branch: <code>contentAlpha = 1f</code>, no border modifier, caller-provided icon used — no visual modifications</td>
+        </tr>
+        <tr>
+          <td>AC-4: Progress summary displayed at top when stops exist</td>
+          <td><span class="badge badge-pass">PASS</span></td>
+          <td><code>TripDetailScreen.kt:94–101</code> — <code>TripProgressSummary</code> is first <code>LazyColumn</code> item when <code>totalCount &gt; 0</code></td>
+        </tr>
+        <tr>
+          <td>AC-5: All departed shows N of N completed</td>
+          <td><span class="badge badge-pass">PASS</span></td>
+          <td><code>TripProgressSummaryTest</code> — <code>allStopsDeparted_showsCompleteProgressText()</code> asserts "6 of 6 stops completed"</td>
+        </tr>
+        <tr>
+          <td>AC-6: None departed shows "0 of N stops completed"</td>
+          <td><span class="badge badge-pass">PASS</span></td>
+          <td><code>TripProgressSummaryTest</code> — <code>zeroProgress_showsZeroProgressText()</code> asserts "0 of 4 stops completed"</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="outcome outcome-passed">PASSED — Story renamed to 1.3.2-see-stop-progress-DONE.md</div>
+  </section>
+
+  <section class="report-section" data-source="sdlc:sdlc_archive" data-timestamp="2026-06-05T10:00:00Z">
+    <header>
+      <h2>Archive</h2>
+      <time datetime="2026-06-05T10:00:00Z">5 June 2026</time>
+    </header>
+    <p class="section-source">Source: sdlc:sdlc_archive</p>
+
+    <table>
+      <tr><th>Item</th><th>Value</th></tr>
+      <tr><td>Change name</td><td><code>see-stop-progress</code></td></tr>
+      <tr><td>Schema</td><td><code>spec-driven</code></td></tr>
+      <tr><td>Archive location</td><td><code>openspec/changes/archive/2026-06-05-see-stop-progress/</code></td></tr>
+      <tr><td>Delta spec sync</td><td><span class="badge badge-pass">Synced</span> — new capability <code>stop-progress-display</code> created at <code>openspec/specs/stop-progress-display/spec.md</code> (5 requirements, 12 scenarios)</td></tr>
+      <tr><td>README.md</td><td><span class="badge badge-pass">In sync</span> — already reflects story 1.3.2 features</td></tr>
+      <tr><td>CLAUDE.md (AGENTS.md)</td><td><span class="badge badge-pass">In sync</span> — current status already lists 1.3.2 as completed</td></tr>
+      <tr><td>Artifacts</td><td><span class="badge badge-pass">All complete</span> — proposal, design, specs, tasks (4/4)</td></tr>
+      <tr><td>Tasks</td><td><span class="badge badge-pass">All complete</span> — 20/20 tasks done</td></tr>
+    </table>
+
+    <div class="outcome outcome-passed">Archive complete — no warnings.</div>
+  </section>
+
+  </main>
+
+</body>
+</html>

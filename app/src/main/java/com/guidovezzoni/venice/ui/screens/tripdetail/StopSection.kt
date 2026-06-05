@@ -1,6 +1,7 @@
 package com.guidovezzoni.venice.ui.screens.tripdetail
 
 import androidx.annotation.StringRes
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.ui.graphics.graphicsLayer
@@ -12,12 +13,14 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.TripOrigin
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -41,6 +44,7 @@ private val SECTION_PADDING = 16.dp
 private val ICON_SIZE = 24.dp
 private val ICON_SPACING = 12.dp
 private val VERTICAL_SPACING = 4.dp
+private val CURRENT_STOP_BORDER_WIDTH = 2.dp
 private const val DEPARTED_ALPHA = 0.6f
 
 @Composable
@@ -105,6 +109,7 @@ private fun FilledStop(
     onUndoDeparted: (() -> Unit)? = null,
 ) {
     val changeDescription = stringResource(changeDescriptionRes)
+    val departedDescription = stringResource(R.string.trip_detail_stop_departed_icon_description)
     val isDeparted = stopDisplayState == StopDisplayState.DEPARTED
     val contentAlpha = if (isDeparted) DEPARTED_ALPHA else 1f
     val iconTint = if (stopDisplayState == StopDisplayState.CURRENT) {
@@ -112,9 +117,20 @@ private fun FilledStop(
     } else {
         MaterialTheme.colorScheme.onSurfaceVariant
     }
+    val displayIcon = if (isDeparted) Icons.Filled.CheckCircle else icon
+    val iconContentDescription = if (isDeparted) departedDescription else null
+    val isCurrent = stopDisplayState == StopDisplayState.CURRENT
+    val primaryColor = MaterialTheme.colorScheme.primary
     Card(
         modifier = Modifier
             .fillMaxWidth()
+            .then(
+                if (isCurrent) {
+                    Modifier.border(CURRENT_STOP_BORDER_WIDTH, primaryColor, CardDefaults.shape)
+                } else {
+                    Modifier
+                },
+            )
             .clickable(onClick = onClick)
             .semantics { contentDescription = changeDescription },
     ) {
@@ -123,8 +139,8 @@ private fun FilledStop(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(
-                imageVector = icon,
-                contentDescription = null,
+                imageVector = displayIcon,
+                contentDescription = iconContentDescription,
                 modifier = Modifier
                     .size(ICON_SIZE)
                     .graphicsLayer { alpha = contentAlpha },

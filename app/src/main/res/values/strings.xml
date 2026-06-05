@@ -58,4 +58,6 @@
     <string name="global_remove">Remove</string>
     <string name="trip_detail_mark_departed">Mark as departed</string>
     <string name="trip_detail_undo_departed">Undo departure</string>
+    <string name="trip_detail_progress_summary">%1$d of %2$d stops completed</string>
+    <string name="trip_detail_stop_departed_icon_description">Departed</string>
 </resources>
