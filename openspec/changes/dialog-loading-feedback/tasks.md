@@ -1,20 +1,28 @@
+## 0. Minimum Duration Utility (BDD)
+
+- [ ] 0.1 Write test: GIVEN withMinimumDuration called with 500ms WHEN the block completes in under 500ms THEN the function does not return until 500ms have elapsed in WithMinimumDurationTest
+- [ ] 0.2 Write test: GIVEN withMinimumDuration called with 500ms WHEN the block takes longer than 500ms THEN the function returns immediately after the block completes in WithMinimumDurationTest
+- [ ] 0.3 Implement: Create withMinimumDuration suspend utility in ui/util/WithMinimumDuration.kt with minimumMillis defaulting to MINIMUM_LOADING_DURATION_MILLIS (500L)
+
 ## 1. ViewModel — isLoading Wrapping (BDD)
 
 - [ ] 1.1 Write test: GIVEN editStop operation WHEN OnEditStopConfirmed is dispatched and EditStopUseCase succeeds THEN isLoading is false after completion in TripDetailViewModelTest
 - [ ] 1.2 Write test: GIVEN editStop operation WHEN OnEditStopConfirmed is dispatched and EditStopUseCase fails THEN isLoading is false after completion in TripDetailViewModelTest
-- [ ] 1.3 Implement: Wrap editStop() with isLoading = true before async call and isLoading = false on success/failure in TripDetailViewModel
+- [ ] 1.3 Implement: Wrap editStop() with isLoading = true before async call, withMinimumDuration around use case, and isLoading = false on success/failure in TripDetailViewModel
 - [ ] 1.4 Write test: GIVEN removeStop operation WHEN OnRemoveStopConfirmed is dispatched and RemoveStopUseCase succeeds THEN isLoading is false after completion in TripDetailViewModelTest
 - [ ] 1.5 Write test: GIVEN removeStop operation WHEN OnRemoveStopConfirmed is dispatched and RemoveStopUseCase fails THEN isLoading is false after completion in TripDetailViewModelTest
-- [ ] 1.6 Implement: Wrap removeStop() with isLoading = true/false in TripDetailViewModel
+- [ ] 1.6 Implement: Wrap removeStop() with isLoading = true/false and withMinimumDuration in TripDetailViewModel
 - [ ] 1.7 Write test: GIVEN moveStop operation WHEN OnMoveStopUp is dispatched and MoveStopUseCase succeeds THEN isLoading is false after completion in TripDetailViewModelTest
 - [ ] 1.8 Write test: GIVEN moveStop operation WHEN OnMoveStopUp is dispatched and MoveStopUseCase fails THEN isLoading is false after completion in TripDetailViewModelTest
-- [ ] 1.9 Implement: Wrap moveStop() with isLoading = true/false in TripDetailViewModel
+- [ ] 1.9 Implement: Wrap moveStop() with isLoading = true/false and withMinimumDuration in TripDetailViewModel
 - [ ] 1.10 Write test: GIVEN markStopDeparted operation WHEN OnMarkStopDepartedClicked is dispatched and MarkStopDepartedUseCase succeeds THEN isLoading is false after completion in TripDetailViewModelTest
 - [ ] 1.11 Write test: GIVEN markStopDeparted operation WHEN OnMarkStopDepartedClicked is dispatched and MarkStopDepartedUseCase fails THEN isLoading is false after completion in TripDetailViewModelTest
-- [ ] 1.12 Implement: Wrap markStopDeparted() with isLoading = true/false in TripDetailViewModel
+- [ ] 1.12 Implement: Wrap markStopDeparted() with isLoading = true/false and withMinimumDuration in TripDetailViewModel
 - [ ] 1.13 Write test: GIVEN undoMarkStopDeparted operation WHEN OnUndoMarkStopDepartedClicked is dispatched and UndoMarkStopDepartedUseCase succeeds THEN isLoading is false after completion in TripDetailViewModelTest
 - [ ] 1.14 Write test: GIVEN undoMarkStopDeparted operation WHEN OnUndoMarkStopDepartedClicked is dispatched and UndoMarkStopDepartedUseCase fails THEN isLoading is false after completion in TripDetailViewModelTest
-- [ ] 1.15 Implement: Wrap undoMarkStopDeparted() with isLoading = true/false in TripDetailViewModel
+- [ ] 1.15 Implement: Wrap undoMarkStopDeparted() with isLoading = true/false and withMinimumDuration in TripDetailViewModel
+- [ ] 1.16 Implement: Wrap existing setStop() use case call with withMinimumDuration in TripDetailViewModel (isLoading already handled)
+- [ ] 1.17 Implement: Wrap existing createTrip() use case call with withMinimumDuration in TripListViewModel (isLoading already handled)
 
 ## 2. SetStopDialog — Loading State (BDD)
 

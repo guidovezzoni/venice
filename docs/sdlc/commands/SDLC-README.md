@@ -48,7 +48,7 @@ SDLC:
 - sort different phases in the command list -not sure how
 
 Guidelines:
-- async operations should be wrapped in a loading state with a spinner, and if required disabling the button that triggered the operation, to avoid re-trigger
+- async operations should be wrapped in a loading state with a spinner, and if required disabling the button that triggered the operation, to avoid re-trigger. The spinner should have a minimum duration of 0.5 seconds to avoid a flickering UI.
 - create a guideline for readme
 
 Not sure what's best yet:

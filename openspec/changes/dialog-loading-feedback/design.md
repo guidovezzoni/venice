@@ -36,6 +36,31 @@ A small `CircularProgressIndicator` will be shown inline next to the confirm but
 ### 5. Remove-stop confirmation dialog disabling
 The remove-stop confirmation dialog in `TripDetailScreen` is a plain `AlertDialog` (not `SetStopDialog`). Its confirm button will also be disabled during loading, consistent with the other dialogs.
 
+### 6. Minimum spinner duration of 500 ms
+Room DB operations complete in sub-100ms, making the spinner barely perceptible. A minimum 500ms display time ensures the user sees feedback and prepares the UX for future networking where latency will be higher.
+
+Implementation uses a `withMinimumDuration` suspend utility that runs the operation and a `delay(minimumMillis)` in parallel via `coroutineScope + async`, returning only when both complete:
+
+```kotlin
+private const val MINIMUM_LOADING_DURATION_MILLIS = 500L
+
+suspend fun <T> withMinimumDuration(
+    minimumMillis: Long = MINIMUM_LOADING_DURATION_MILLIS,
+    block: suspend () -> T,
+): T = coroutineScope {
+    val deferredDelay = async { delay(minimumMillis) }
+    val result = block()
+    deferredDelay.await()
+    result
+}
+```
+
+If the operation takes 50ms, the function waits until 500ms. If it takes 3 seconds, it returns immediately after the operation. The `MINIMUM_LOADING_DURATION_MILLIS` constant lives in the utility file as a file-level private constant, so callers simply write `withMinimumDuration { useCase(...) }` without specifying the duration.
+
+**Alternative considered**: UI-layer approach using `LaunchedEffect` with a delay to hold the spinner. Rejected because it mixes timing concerns into composables and doesn't compose cleanly with the ViewModel's `isLoading` flag lifecycle.
+
+**Testing**: `UnconfinedTestDispatcher` eagerly completes `delay()`, so existing ViewModel tests are unaffected. A dedicated unit test for `withMinimumDuration` using `StandardTestDispatcher` with `advanceTimeBy` verifies the timing guarantee.
+
 ## Risks / Trade-offs
 
 - **[Low] Operations already fast**: Room operations are typically sub-100ms. The spinner may barely be visible. This is acceptable — the primary benefit is preventing double-submission, not showing a long loading state.

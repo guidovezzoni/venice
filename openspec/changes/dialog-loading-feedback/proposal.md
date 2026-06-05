@@ -4,7 +4,9 @@ Both `TripDetailViewModel` and `TripListViewModel` declare `isLoading` in their 
 
 ## What Changes
 
-- Wrap all five uncovered async operations in `TripDetailViewModel` with `isLoading = true/false`
+- Create a reusable `withMinimumDuration` suspend utility that ensures the loading state is visible for at least 500 ms, even if the operation completes faster
+- Wrap all five uncovered async operations in `TripDetailViewModel` with `isLoading = true/false`, using `withMinimumDuration`
+- Wrap `createTrip()` in `TripListViewModel` and `setStop()` in `TripDetailViewModel` (already have `isLoading`) with `withMinimumDuration`
 - Add `isLoading: Boolean` parameter to `SetStopDialog` and `CreateTripDialog` to disable confirm buttons and show a `CircularProgressIndicator` while loading
 - Add `isLoading: Boolean` parameter to `StopSection` to disable action buttons (move up/down, delete, mark departed, undo departed) while loading
 - Pass `uiState.isLoading` from `TripDetailScreen` to all `SetStopDialog` instances, `StopSection` instances, and the remove-stop confirmation dialog
@@ -30,7 +32,8 @@ Both `TripDetailViewModel` and `TripListViewModel` declare `isLoading` in their 
 ## Impact
 
 - **UI layer**: `SetStopDialog`, `CreateTripDialog`, `StopSection`, `TripDetailScreen`, `TripListScreen` — parameter additions and wiring
-- **ViewModel layer**: `TripDetailViewModel` — five methods gain `isLoading` wrapping
-- **Tests**: New unit tests in `TripDetailViewModelTest`; new Compose UI tests in `TripDetailScreenTest` and `TripListScreenTest`
+- **ViewModel layer**: `TripDetailViewModel` — five methods gain `isLoading` wrapping; all async operations in both ViewModels use `withMinimumDuration`
+- **New utility**: `ui/util/WithMinimumDuration.kt` — reusable suspend function for minimum loading display time
+- **Tests**: New unit tests in `TripDetailViewModelTest`; new Compose UI tests in `TripDetailScreenTest` and `TripListScreenTest`; unit test for `withMinimumDuration`
 - **No domain/data layer changes**: All operations are already implemented; this is purely UI/ViewModel state wiring
 - **No new dependencies**: `CircularProgressIndicator` is already available via Material 3

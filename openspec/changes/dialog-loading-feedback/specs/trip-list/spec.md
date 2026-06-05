@@ -12,7 +12,7 @@ The `TripListViewModel` SHALL follow the MVI pattern:
 
 #### Scenario: Successful creation emits navigation effect
 - **WHEN** `ConfirmCreateTrip` intent is dispatched with a valid name
-- **THEN** `isLoading` is set to `true`, the use case is invoked, and on success `isLoading` is set to `false` and a `NavigateToTripDetail(tripId: String)` effect is emitted
+- **THEN** `isLoading` is set to `true`, the use case is invoked via `withMinimumDuration { ... }` (defaults to 500 ms), and on success `isLoading` is set to `false` and a `NavigateToTripDetail(tripId: String)` effect is emitted
 
 #### Scenario: Failed creation emits error effect
 - **WHEN** the use case returns failure

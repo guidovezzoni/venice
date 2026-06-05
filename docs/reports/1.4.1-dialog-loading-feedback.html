@@ -133,13 +133,13 @@
         <tr><th>Artefact</th><th>Path</th><th>Description</th></tr>
       </thead>
       <tbody>
-        <tr><td>Proposal</td><td><code>openspec/changes/dialog-loading-feedback/proposal.md</code></td><td>Motivation, scope, and capability mapping for the change</td></tr>
-        <tr><td>Design</td><td><code>openspec/changes/dialog-loading-feedback/design.md</code></td><td>Technical decisions: single isLoading flag, disable-not-hide buttons, spinner placement, screen overlay approach</td></tr>
+        <tr><td>Proposal</td><td><code>openspec/changes/dialog-loading-feedback/proposal.md</code></td><td>Motivation, scope, capability mapping, and withMinimumDuration utility</td></tr>
+        <tr><td>Design</td><td><code>openspec/changes/dialog-loading-feedback/design.md</code></td><td>Technical decisions: single isLoading flag, disable-not-hide buttons, spinner placement, minimum 500ms duration via coroutineScope + async</td></tr>
         <tr><td>Delta Spec: destination-ui</td><td><code>openspec/changes/dialog-loading-feedback/specs/destination-ui/spec.md</code></td><td>SetStopDialog gains isLoading; StopSection gains isLoading for button disabling</td></tr>
-        <tr><td>Delta Spec: trip-detail</td><td><code>openspec/changes/dialog-loading-feedback/specs/trip-detail/spec.md</code></td><td>ViewModel wraps all ops with isLoading; screen passes loading to dialogs, StopSections, and buttons</td></tr>
-        <tr><td>Delta Spec: trip-list</td><td><code>openspec/changes/dialog-loading-feedback/specs/trip-list/spec.md</code></td><td>Screen passes isLoading to CreateTripDialog</td></tr>
+        <tr><td>Delta Spec: trip-detail</td><td><code>openspec/changes/dialog-loading-feedback/specs/trip-detail/spec.md</code></td><td>ViewModel wraps all ops with isLoading + withMinimumDuration; screen passes loading to all composables</td></tr>
+        <tr><td>Delta Spec: trip-list</td><td><code>openspec/changes/dialog-loading-feedback/specs/trip-list/spec.md</code></td><td>Screen passes isLoading to CreateTripDialog; ViewModel uses withMinimumDuration</td></tr>
         <tr><td>Delta Spec: trip-creation</td><td><code>openspec/changes/dialog-loading-feedback/specs/trip-creation/spec.md</code></td><td>CreateTripDialog gains isLoading for button disabling and spinner</td></tr>
-        <tr><td>Tasks</td><td><code>openspec/changes/dialog-loading-feedback/tasks.md</code></td><td>29 tasks in BDD structure across 9 groups</td></tr>
+        <tr><td>Tasks</td><td><code>openspec/changes/dialog-loading-feedback/tasks.md</code></td><td>33 tasks in BDD structure across 10 groups (including withMinimumDuration utility)</td></tr>
       </tbody>
     </table>
   </section>

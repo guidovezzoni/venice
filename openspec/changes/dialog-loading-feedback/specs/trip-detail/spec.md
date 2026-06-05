@@ -10,6 +10,7 @@
   - `destination` with the stop having the highest `order` where `order > 0` (or `null` if absent).
   - `intermediateStops` with all stops where `order > 0` and `order < destination.order`, sorted by `order` ascending.
   - `canAddMoreStops` as `true` when the total stop count is less than 25, `false` otherwise.
+- All async operations SHALL use `withMinimumDuration { ... }` (which defaults to 500 ms) to ensure `isLoading` remains `true` for at least 500 ms, even if the underlying operation completes faster.
 - On `OnSetStartingPointClicked`: set `isSetStartingPointDialogVisible = true`.
 - On `OnDismissStartingPointDialog`: set `isSetStartingPointDialogVisible = false`.
 - On `OnStartingPointConfirmed`: set `isLoading = true`; call `SetStopUseCase` with `StopType.STARTING_POINT`; on success dismiss the dialog and set `isLoading = false`; on failure set `isLoading = false` and emit `ShowError`.
@@ -157,6 +158,14 @@
 #### Scenario: Undo mark departed — failure
 - **WHEN** `OnUndoMarkStopDepartedClicked` is dispatched and `UndoMarkStopDepartedUseCase` fails
 - **THEN** a `ShowError` effect is emitted with the error message and `isLoading` is `false`
+
+#### Scenario: Minimum loading duration enforced
+- **WHEN** any async operation completes in less than 500 ms
+- **THEN** `isLoading` remains `true` until at least 500 ms have elapsed since it was set to `true`
+
+#### Scenario: Long operation not artificially delayed
+- **WHEN** any async operation takes longer than 500 ms
+- **THEN** `isLoading` remains `true` for the full duration of the operation and is set to `false` immediately upon completion
 
 ### Requirement: TripDetailScreen integrates all components
 `TripDetailScreen` SHALL:
