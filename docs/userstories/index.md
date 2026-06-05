@@ -34,7 +34,7 @@ The core ability to create, organise, and manage roadtrips and their stops.
 
 | ID | User Story | Details |
 |----|------------|---------|
-| 1.4.1 | As a user, I want dialogs to show that a save is in progress | [1.4.1-dialog-loading-feedback](1.4.1-dialog-loading-feedback.md) |
+| 1.4.1 | As a user, I want dialogs to show that a save is in progress | [1.4.1-dialog-loading-feedback](1.4.1-dialog-loading-feedback-WIP.md) |
 
 ---
 
