@@ -109,6 +109,46 @@
       <li>No data or domain layer changes required — purely UI story.</li>
     </ul>
   </section>
+  <section class="report-section" data-source="opsx:propose" data-timestamp="2026-06-04T00:00:00Z">
+    <header>
+      <h2>Change Proposed</h2>
+      <time datetime="2026-06-04T00:00:00Z">4 June 2026</time>
+    </header>
+    <p class="section-source">Source: opsx:propose</p>
+
+    <h3>Exploration Findings</h3>
+    <ul>
+      <li><code>StopDisplayState</code> (DEPARTED/CURRENT/UPCOMING) and <code>deriveDisplayState()</code> are fully functional from 1.3.1.</li>
+      <li><code>StopSection</code> already accepts <code>stopDisplayState</code> and applies alpha (0.6f) for departed and primary icon tint for current.</li>
+      <li>The <code>icon</code> parameter is caller-provided — override inside <code>FilledStop</code> is the cleanest approach for the checkmark swap.</li>
+      <li><code>TripDetailScreen</code> already assembles <code>allStops</code> and computes <code>currentStopId</code> / <code>lastDepartedStopId</code> — progress counts can derive from the same list.</li>
+      <li>No isolated <code>StopSectionTest</code> exists — tests for new stop visual states will be created.</li>
+      <li>Three locales need updating: en (default), it, es-ES.</li>
+    </ul>
+
+    <h3>Questions &amp; Answers</h3>
+    <p>No clarification needed — the story was fully refined during the open step with clear acceptance criteria and technical design.</p>
+
+    <h3>Artefacts Created</h3>
+    <table>
+      <tr><th>Artefact</th><th>Path</th><th>Description</th></tr>
+      <tr><td>Proposal</td><td><code>openspec/changes/see-stop-progress/proposal.md</code></td><td>Motivation, scope, and impact of the change</td></tr>
+      <tr><td>Design</td><td><code>openspec/changes/see-stop-progress/design.md</code></td><td>Technical decisions: icon override in StopSection, border approach, standalone TripProgressSummary</td></tr>
+      <tr><td>Spec</td><td><code>openspec/changes/see-stop-progress/specs/stop-progress-display/spec.md</code></td><td>5 requirements with 13 testable scenarios covering all visual states and progress summary</td></tr>
+      <tr><td>Tasks</td><td><code>openspec/changes/see-stop-progress/tasks.md</code></td><td>21 tasks in BDD structure: prerequisites, 4 BDD groups, preview updates, verification</td></tr>
+    </table>
+
+    <h3>Task Summary</h3>
+    <ol>
+      <li><strong>Prerequisites</strong> — String resources (en, it, es-ES)</li>
+      <li><strong>TripProgressSummary (BDD)</strong> — 3 test tasks + 1 implementation task</li>
+      <li><strong>StopSection Departed Checkmark (BDD)</strong> — 2 test tasks + 1 implementation task</li>
+      <li><strong>StopSection Current Border (BDD)</strong> — 2 test tasks + 1 implementation task</li>
+      <li><strong>TripDetailScreen Integration (BDD)</strong> — 2 test tasks + 1 implementation task</li>
+      <li><strong>Preview Updates</strong> — StopSection previews for new states</li>
+      <li><strong>Verification</strong> — gradlew check, connected tests, on-device visual confirmation</li>
+    </ol>
+  </section>
   </main>
 
 </body>
