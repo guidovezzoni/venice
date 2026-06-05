@@ -1,0 +1,79 @@
+## MODIFIED Requirements
+
+### Requirement: SetStopDialog composable (consolidated)
+`SetStopDialog` SHALL be a single parameterised composable that replaces the separate `SetStartingPointDialog` and `SetDestinationDialog`. It accepts 7 `@StringRes` parameters for: dialog title, place name hint, place name error, latitude hint, latitude error, longitude hint, longitude error.
+
+It SHALL also accept three optional initial-value parameters:
+- `initialPlaceName: String = ""` — pre-populates the place name field
+- `initialLatitude: String = ""` — pre-populates the latitude field
+- `initialLongitude: String = ""` — pre-populates the longitude field
+
+It SHALL also accept a loading parameter:
+- `isLoading: Boolean = false` — when `true`, the confirm button SHALL be disabled and a `CircularProgressIndicator` SHALL be displayed inline in the confirm button slot
+
+When `isLoading` is `true`:
+- The confirm button SHALL be disabled regardless of field validation state
+- A `CircularProgressIndicator` SHALL be displayed next to the confirm button text
+- The dismiss button SHALL remain enabled so the user can still close the dialog
+
+It SHALL display an `AlertDialog` with:
+- Title from the provided string resource
+- Three `OutlinedTextField` inputs with labels from the provided hint resources, pre-populated with any provided initial values
+- Confirm and dismiss buttons
+- Input validation: place name must be non-blank; latitude in `[-90, 90]`; longitude in `[-180, 180]`. Inline error messages from the provided error resources shown on invalid input.
+
+#### Scenario: Dialog pre-populated when editing existing stop
+- **WHEN** the dialog is opened with `initialPlaceName = "Rome"`, `initialLatitude = "41.9028"`, `initialLongitude = "12.4964"`
+- **THEN** the place name field shows "Rome", latitude field shows "41.9028", and longitude field shows "12.4964"
+
+#### Scenario: Dialog empty when creating new stop
+- **WHEN** the dialog is opened with default (empty) initial values
+- **THEN** all fields are empty
+
+#### Scenario: Valid input enables confirmation
+- **WHEN** all fields contain valid values and `isLoading` is `false`
+- **THEN** the confirm button triggers `onConfirm` with the entered values
+
+#### Scenario: Invalid latitude shows error
+- **WHEN** the user enters a latitude outside `[-90, 90]`
+- **THEN** an inline error is shown on the latitude field using the provided latitude error resource
+
+#### Scenario: Invalid longitude shows error
+- **WHEN** the user enters a longitude outside `[-180, 180]`
+- **THEN** an inline error is shown on the longitude field using the provided longitude error resource
+
+#### Scenario: Blank place name shows error
+- **WHEN** the user leaves the place name field blank
+- **THEN** an inline error is shown on the place name field using the provided place name error resource
+
+#### Scenario: Confirm button disabled while loading
+- **WHEN** `isLoading` is `true`
+- **THEN** the confirm button is disabled regardless of field validation state
+
+#### Scenario: Spinner visible while loading
+- **WHEN** `isLoading` is `true`
+- **THEN** a `CircularProgressIndicator` is displayed in the confirm button slot
+
+#### Scenario: Dismiss button enabled while loading
+- **WHEN** `isLoading` is `true`
+- **THEN** the dismiss button remains enabled
+
+## ADDED Requirements
+
+### Requirement: StopSection accepts loading state
+`StopSection` SHALL accept an `isLoading: Boolean = false` parameter. When `isLoading` is `true`, all action buttons within the section SHALL be disabled:
+- `IconButton` for move up SHALL be disabled (rendered but not clickable)
+- `IconButton` for move down SHALL be disabled (rendered but not clickable)
+- `IconButton` for delete SHALL be disabled (rendered but not clickable)
+- `OutlinedButton` for mark departed SHALL be disabled
+- `OutlinedButton` for undo departed SHALL be disabled
+
+The buttons SHALL remain visible (not hidden) to communicate that the action exists but is temporarily unavailable.
+
+#### Scenario: Action buttons disabled while loading
+- **WHEN** `StopSection` is rendered with `isLoading = true` and all action lambdas are non-null
+- **THEN** move up, move down, delete, mark departed, and undo departed buttons are all visible but disabled
+
+#### Scenario: Action buttons enabled when not loading
+- **WHEN** `StopSection` is rendered with `isLoading = false` and all action lambdas are non-null
+- **THEN** move up, move down, delete, mark departed, and undo departed buttons are all enabled

@@ -47,5 +47,9 @@ SDLC:
 - self-improvement
 - sort different phases in the command list -not sure how
 
+Guidelines:
+- async operations should be wrapped in a loading state with a spinner, and if required disabling the button that triggered the operation, to avoid re-trigger
+- create a guideline for readme
+
 Not sure what's best yet:
 - When both Domain and UI require the same data type, f.i. an enum, where should this be defined? In Domain? Should it be duplicated in UI? Should it be defined in another root package?

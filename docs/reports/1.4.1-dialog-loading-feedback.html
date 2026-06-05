@@ -109,6 +109,40 @@
       <li><strong>Non-functional analysis</strong>: security (double-submission prevention), performance (negligible), GDPR (no impact), accessibility (built-in TalkBack support).</li>
     </ul>
   </section>
+  <section class="report-section" data-source="sdlc_propose" data-timestamp="2026-06-05T09:15:00Z">
+    <header>
+      <h2>Change Proposed</h2>
+      <time datetime="2026-06-05T09:15:00Z">5 Jun 2026</time>
+    </header>
+    <p class="section-source">Source: sdlc_propose</p>
+
+    <h3>Exploration Findings</h3>
+    <ul>
+      <li><strong>isLoading coverage gap</strong>: Only <code>setStop()</code> in <code>TripDetailViewModel</code> and <code>createTrip()</code> in <code>TripListViewModel</code> wrap with <code>isLoading</code>. Five operations (<code>editStop</code>, <code>removeStop</code>, <code>moveStop</code>, <code>markStopDeparted</code>, <code>undoMarkStopDeparted</code>) are missing.</li>
+      <li><strong>UI wiring absent</strong>: Neither <code>SetStopDialog</code> nor <code>CreateTripDialog</code> accept an <code>isLoading</code> parameter. Neither screen passes the flag to composables. Buttons remain enabled during async operations.</li>
+      <li><strong>StopSection design choice</strong>: Action buttons use nullable lambdas for show/hide. For loading state, adding an <code>isLoading</code> parameter to disable (not hide) buttons is preferred to avoid layout shift.</li>
+      <li><strong>Test gap</strong>: No existing tests verify <code>isLoading</code> transitions for any operation in either ViewModel.</li>
+    </ul>
+
+    <h3>Questions and Clarifications</h3>
+    <p>No clarifications needed — the story is precisely scoped with explicit file lists, acceptance criteria, and completion criteria.</p>
+
+    <h3>Artefacts Created</h3>
+    <table>
+      <thead>
+        <tr><th>Artefact</th><th>Path</th><th>Description</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Proposal</td><td><code>openspec/changes/dialog-loading-feedback/proposal.md</code></td><td>Motivation, scope, and capability mapping for the change</td></tr>
+        <tr><td>Design</td><td><code>openspec/changes/dialog-loading-feedback/design.md</code></td><td>Technical decisions: single isLoading flag, disable-not-hide buttons, spinner placement, screen overlay approach</td></tr>
+        <tr><td>Delta Spec: destination-ui</td><td><code>openspec/changes/dialog-loading-feedback/specs/destination-ui/spec.md</code></td><td>SetStopDialog gains isLoading; StopSection gains isLoading for button disabling</td></tr>
+        <tr><td>Delta Spec: trip-detail</td><td><code>openspec/changes/dialog-loading-feedback/specs/trip-detail/spec.md</code></td><td>ViewModel wraps all ops with isLoading; screen passes loading to dialogs, StopSections, and buttons</td></tr>
+        <tr><td>Delta Spec: trip-list</td><td><code>openspec/changes/dialog-loading-feedback/specs/trip-list/spec.md</code></td><td>Screen passes isLoading to CreateTripDialog</td></tr>
+        <tr><td>Delta Spec: trip-creation</td><td><code>openspec/changes/dialog-loading-feedback/specs/trip-creation/spec.md</code></td><td>CreateTripDialog gains isLoading for button disabling and spinner</td></tr>
+        <tr><td>Tasks</td><td><code>openspec/changes/dialog-loading-feedback/tasks.md</code></td><td>29 tasks in BDD structure across 9 groups</td></tr>
+      </tbody>
+    </table>
+  </section>
   </main>
 
 </body>
