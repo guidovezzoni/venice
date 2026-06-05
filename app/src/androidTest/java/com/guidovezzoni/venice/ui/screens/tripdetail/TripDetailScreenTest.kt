@@ -688,4 +688,33 @@ class TripDetailScreenTest {
     }
 
     // endregion
+
+    // region Progress summary
+
+    @Test
+    fun withStopsAndOneDeparted_showsProgressSummary() {
+        setContent(
+            uiState = TripDetailUiState(
+                startingPoint = STARTING_POINT.copy(status = StopStatus.VISITED),
+                intermediateStops = listOf(INTERMEDIATE_1, INTERMEDIATE_2),
+                destination = DESTINATION,
+                canAddMoreStops = true,
+            ),
+        )
+
+        composeTestRule
+            .onNodeWithText("1 of 4 stops completed")
+            .assertIsDisplayed()
+    }
+
+    @Test
+    fun withNoStops_progressSummaryNotDisplayed() {
+        setContent(uiState = TripDetailUiState())
+
+        composeTestRule
+            .onNodeWithText("0 of 0 stops completed")
+            .assertDoesNotExist()
+    }
+
+    // endregion
 }

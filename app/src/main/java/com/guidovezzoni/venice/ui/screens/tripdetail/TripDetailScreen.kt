@@ -83,12 +83,22 @@ fun TripDetailScreen(
         val lastDepartedStopId = allStops
             .filter { it.status == StopStatus.VISITED }
             .maxByOrNull { it.order }?.id
+        val totalCount = allStops.size
+        val departedCount = allStops.count { it.status == StopStatus.VISITED }
 
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues),
         ) {
+            if (totalCount > 0) {
+                item {
+                    TripProgressSummary(
+                        departedCount = departedCount,
+                        totalCount = totalCount,
+                    )
+                }
+            }
             item {
                 val startingPoint = uiState.startingPoint
                 val startingPointDisplayState = startingPoint?.let { deriveDisplayState(it, currentStopId) }

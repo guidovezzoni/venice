@@ -57,4 +57,6 @@
     <string name="global_remove">Eliminar</string>
     <string name="trip_detail_mark_departed">Marcar como partido</string>
     <string name="trip_detail_undo_departed">Deshacer partida</string>
+    <string name="trip_detail_progress_summary">%1$d de %2$d paradas completadas</string>
+    <string name="trip_detail_stop_departed_icon_description">Partido</string>
 </resources>
