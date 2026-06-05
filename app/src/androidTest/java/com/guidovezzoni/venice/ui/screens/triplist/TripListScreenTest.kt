@@ -1,6 +1,7 @@
 package com.guidovezzoni.venice.ui.screens.triplist
 
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -255,6 +256,25 @@ class TripListScreenTest {
         composeTestRule
             .onNodeWithText("New Roadtrip")
             .assertDoesNotExist()
+    }
+
+    // endregion
+
+    // region Loading state
+
+    @Test
+    fun loadingState_withDialogVisible_confirmButtonIsDisabled() {
+        setContent(
+            uiState = TripListUiState(
+                isCreateDialogVisible = true,
+                tripNameInput = "Summer Drive",
+                isLoading = true,
+            ),
+        )
+
+        composeTestRule
+            .onNodeWithText("Confirm")
+            .assertIsNotEnabled()
     }
 
     // endregion

@@ -3,6 +3,8 @@ package com.guidovezzoni.venice.ui.screens.tripdetail
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
@@ -31,6 +33,12 @@ class StopSectionTest {
     private fun setContent(
         stop: Stop? = SAMPLE_STOP,
         stopDisplayState: StopDisplayState = StopDisplayState.UPCOMING,
+        isLoading: Boolean = false,
+        onMoveUp: (() -> Unit)? = null,
+        onMoveDown: (() -> Unit)? = null,
+        onDelete: (() -> Unit)? = null,
+        onMarkDeparted: (() -> Unit)? = null,
+        onUndoDeparted: (() -> Unit)? = null,
     ) {
         composeTestRule.setContent {
             HeadingToTheAlpsTheme {
@@ -42,6 +50,12 @@ class StopSectionTest {
                     changeDescriptionRes = R.string.trip_detail_change_intermediate_stop,
                     filledLabelRes = R.string.trip_detail_intermediate_stop_label,
                     stopDisplayState = stopDisplayState,
+                    isLoading = isLoading,
+                    onMoveUp = onMoveUp,
+                    onMoveDown = onMoveDown,
+                    onDelete = onDelete,
+                    onMarkDeparted = onMarkDeparted,
+                    onUndoDeparted = onUndoDeparted,
                 )
             }
         }
@@ -87,6 +101,44 @@ class StopSectionTest {
         composeTestRule
             .onNodeWithText("Florence, Italy")
             .assertIsDisplayed()
+    }
+
+    // endregion
+
+    // region Loading state
+
+    @Test
+    fun loadingState_actionButtonsAreDisabled() {
+        setContent(
+            stopDisplayState = StopDisplayState.CURRENT,
+            isLoading = true,
+            onMoveUp = {},
+            onMoveDown = {},
+            onDelete = {},
+            onMarkDeparted = {},
+        )
+
+        composeTestRule.onNodeWithContentDescription("Move up").assertIsNotEnabled()
+        composeTestRule.onNodeWithContentDescription("Move down").assertIsNotEnabled()
+        composeTestRule.onNodeWithContentDescription("Remove stop").assertIsNotEnabled()
+        composeTestRule.onNodeWithText("Mark as departed").assertIsNotEnabled()
+    }
+
+    @Test
+    fun notLoadingState_actionButtonsAreEnabled() {
+        setContent(
+            stopDisplayState = StopDisplayState.CURRENT,
+            isLoading = false,
+            onMoveUp = {},
+            onMoveDown = {},
+            onDelete = {},
+            onMarkDeparted = {},
+        )
+
+        composeTestRule.onNodeWithContentDescription("Move up").assertIsEnabled()
+        composeTestRule.onNodeWithContentDescription("Move down").assertIsEnabled()
+        composeTestRule.onNodeWithContentDescription("Remove stop").assertIsEnabled()
+        composeTestRule.onNodeWithText("Mark as departed").assertIsEnabled()
     }
 
     // endregion

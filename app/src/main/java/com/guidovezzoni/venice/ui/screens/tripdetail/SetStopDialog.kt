@@ -1,13 +1,18 @@
 package com.guidovezzoni.venice.ui.screens.tripdetail
 
 import androidx.annotation.StringRes
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -17,8 +22,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -27,6 +35,8 @@ import com.guidovezzoni.venice.ui.theme.HeadingToTheAlpsTheme
 
 private val FIELD_SPACING = 8.dp
 private val PREVIEW_PADDING = 16.dp
+private val SPINNER_SIZE = 20.dp
+private val SPINNER_SPACING = 8.dp
 private const val MIN_LATITUDE = -90.0
 private const val MAX_LATITUDE = 90.0
 private const val MIN_LONGITUDE = -180.0
@@ -35,6 +45,7 @@ private const val MAX_LONGITUDE = 180.0
 @Composable
 fun SetStopDialog(
     modifier: Modifier = Modifier,
+    isLoading: Boolean = false,
     @StringRes dialogTitleRes: Int,
     @StringRes placeNameHintRes: Int,
     @StringRes placeNameErrorRes: Int,
@@ -83,20 +94,33 @@ fun SetStopDialog(
             )
         },
         confirmButton = {
-            TextButton(
-                onClick = {
-                    hasAttemptedSubmit = true
-                    val lat = latitudeText.toDoubleOrNull()
-                    val lng = longitudeText.toDoubleOrNull()
-                    if (placeName.isNotBlank() &&
-                        lat != null && lat in MIN_LATITUDE..MAX_LATITUDE &&
-                        lng != null && lng in MIN_LONGITUDE..MAX_LONGITUDE
-                    ) {
-                        onConfirm(placeName, lat, lng)
-                    }
-                },
-            ) {
-                Text(stringResource(R.string.global_confirm))
+            val loadingDescription = stringResource(R.string.global_loading)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                if (isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier
+                            .size(SPINNER_SIZE)
+                            .semantics { contentDescription = loadingDescription },
+                        strokeWidth = 2.dp,
+                    )
+                    Spacer(modifier = Modifier.width(SPINNER_SPACING))
+                }
+                TextButton(
+                    onClick = {
+                        hasAttemptedSubmit = true
+                        val lat = latitudeText.toDoubleOrNull()
+                        val lng = longitudeText.toDoubleOrNull()
+                        if (placeName.isNotBlank() &&
+                            lat != null && lat in MIN_LATITUDE..MAX_LATITUDE &&
+                            lng != null && lng in MIN_LONGITUDE..MAX_LONGITUDE
+                        ) {
+                            onConfirm(placeName, lat, lng)
+                        }
+                    },
+                    enabled = !isLoading,
+                ) {
+                    Text(stringResource(R.string.global_confirm))
+                }
             }
         },
         dismissButton = {
@@ -163,6 +187,58 @@ private fun StopForm(
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
             modifier = Modifier.fillMaxWidth(),
         )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PreviewSetStopDialogLoading() {
+    HeadingToTheAlpsTheme {
+        Column(modifier = Modifier.padding(PREVIEW_PADDING)) {
+            Text(
+                text = "Set starting point",
+                style = MaterialTheme.typography.headlineSmall,
+            )
+            Spacer(modifier = Modifier.height(PREVIEW_PADDING))
+            StopForm(
+                placeName = "Rome, Italy",
+                onPlaceNameChange = {},
+                placeNameError = false,
+                placeNameHintRes = R.string.trip_detail_starting_point_place_name_hint,
+                placeNameErrorRes = R.string.trip_detail_starting_point_place_name_error,
+                latitudeText = "41.9028",
+                onLatitudeChange = {},
+                latitudeError = false,
+                latitudeHintRes = R.string.trip_detail_starting_point_latitude_hint,
+                latitudeErrorRes = R.string.trip_detail_starting_point_latitude_error,
+                longitudeText = "12.4964",
+                onLongitudeChange = {},
+                longitudeError = false,
+                longitudeHintRes = R.string.trip_detail_starting_point_longitude_hint,
+                longitudeErrorRes = R.string.trip_detail_starting_point_longitude_error,
+            )
+            Spacer(modifier = Modifier.height(PREVIEW_PADDING))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                TextButton(onClick = {}) {
+                    Text(stringResource(R.string.global_cancel))
+                }
+                val loadingDescription = stringResource(R.string.global_loading)
+                CircularProgressIndicator(
+                    modifier = Modifier
+                        .size(SPINNER_SIZE)
+                        .semantics { contentDescription = loadingDescription },
+                    strokeWidth = 2.dp,
+                )
+                Spacer(modifier = Modifier.width(SPINNER_SPACING))
+                TextButton(onClick = {}, enabled = false) {
+                    Text(stringResource(R.string.global_confirm))
+                }
+            }
+        }
     }
 }
 

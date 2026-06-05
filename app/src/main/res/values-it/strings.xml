@@ -1,6 +1,7 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="global_confirm">Conferma</string>
     <string name="global_cancel">Annulla</string>
+    <string name="global_loading">Caricamento</string>
     <string name="trip_list_fab_label">Crea viaggio</string>
     <string name="trip_list_empty_title">Nessun viaggio</string>
     <string name="trip_list_empty_action">Crea il tuo primo viaggio</string>

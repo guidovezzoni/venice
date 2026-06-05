@@ -143,6 +143,49 @@
       </tbody>
     </table>
   </section>
+
+  <section class="report-section" data-source="sdlc_apply_changes" data-timestamp="2026-06-05T15:30:00+02:00">
+    <header>
+      <h2>Apply Changes</h2>
+      <time datetime="2026-06-05T15:30:00+02:00">5 June 2026</time>
+    </header>
+    <p class="section-source">Source: sdlc_apply_changes</p>
+
+    <h3>What Was Applied</h3>
+    <p>Implemented all 9 sections of the BDD task list for feature 1.4.1 — loading feedback during async DB operations.</p>
+    <table>
+      <thead><tr><th>Section</th><th>Description</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>0</td><td>Created <code>withMinimumDuration</code> suspend utility with 500 ms minimum and <code>WithMinimumDurationTest</code> (2 tests, StandardTestDispatcher)</td><td><span class="badge badge-pass">GREEN</span></td></tr>
+        <tr><td>1</td><td>Wrapped all 5 async ViewModel operations in TripDetailViewModel + createTrip in TripListViewModel with <code>isLoading = true/false</code> and <code>withMinimumDuration</code>; added 10 isLoading tests to TripDetailViewModelTest; fixed all existing ViewModel tests to use <code>advanceUntilIdle()</code> after intent dispatch</td><td><span class="badge badge-pass">GREEN</span></td></tr>
+        <tr><td>2</td><td>Added <code>isLoading</code> parameter to <code>SetStopDialog</code>: spinner in confirm-button slot, button disabled when loading; created <code>SetStopDialogTest</code> (3 tests)</td><td><span class="badge badge-pass">GREEN</span></td></tr>
+        <tr><td>3</td><td>Added <code>isLoading</code> parameter to <code>CreateTripDialog</code>: spinner in confirm-button slot, button disabled when loading; created <code>CreateTripDialogTest</code> (3 tests)</td><td><span class="badge badge-pass">GREEN</span></td></tr>
+        <tr><td>4</td><td>Added <code>isLoading</code> parameter to <code>StopSection</code>: disables IconButtons and OutlinedButtons; added 2 loading tests to <code>StopSectionTest</code></td><td><span class="badge badge-pass">GREEN</span></td></tr>
+        <tr><td>5</td><td>Wired <code>uiState.isLoading</code> to all 4 SetStopDialog instances, all 3 StopSection instances, Add Stop OutlinedButton, and remove-stop dialog confirm button in TripDetailScreen</td><td><span class="badge badge-pass">GREEN</span></td></tr>
+        <tr><td>6</td><td>Passed <code>uiState.isLoading</code> to CreateTripDialog in TripListScreen</td><td><span class="badge badge-pass">GREEN</span></td></tr>
+        <tr><td>7</td><td>Added loading-state previews: <code>PreviewSetStopDialogLoading</code> and <code>PreviewCreateTripDialogLoading</code></td><td><span class="badge badge-pass">GREEN</span></td></tr>
+        <tr><td>8</td><td>Added screen-level loading tests: 2 new tests in TripDetailScreenTest and 1 in TripListScreenTest</td><td><span class="badge badge-pass">GREEN</span></td></tr>
+        <tr><td>9</td><td>All 104 unit tests pass (<code>./gradlew check</code> clean); 77 instrumented tests pass on Pixel 6a device</td><td><span class="badge badge-pass">GREEN</span></td></tr>
+      </tbody>
+    </table>
+
+    <h3>BDD Cycle</h3>
+    <p>1 iteration cycle. Tests verified RED (compile error: <code>isLoading</code> parameter did not exist) before implementation for sections 2–4. Sections 0 and 1 tests verified RED via assertion failures before the implementation files existed.</p>
+    <p>Issue encountered and resolved: <code>withMinimumDuration</code> introduces <code>delay()</code> in ViewModel coroutines, causing existing ViewModel tests to fail. Fixed by adding class-level <code>@OptIn(ExperimentalCoroutinesApi::class)</code> and <code>advanceUntilIdle()</code> after every async intent dispatch (shared scheduler via <code>runTest(testDispatcher)</code>).</p>
+    <p>Pre-existing issue fixed: two <code>TripDetailScreenTest</code> assertions used <code>assertIsDisplayed()</code> on LazyColumn items beyond the physical device's viewport; changed to <code>assertExists()</code>.</p>
+
+    <h3>TODOs</h3>
+    <p>No RESOLVE NOW TODOs found. No ACKNOWLEDGED TODOs introduced by this change.</p>
+
+    <h3>Security Review</h3>
+    <p><span class="badge badge-pass">PASS</span> — No security findings. Changes are confined to UI loading state propagation and a coroutine timing utility with no new attack surface.</p>
+
+    <h3>Documentation</h3>
+    <p>README.md — no update required; loading feedback is a UX improvement below the level of detail described.</p>
+    <p>CLAUDE.md — current status will be updated in the archive step once the story is fully closed.</p>
+
+    <div class="outcome outcome-passed">Outcome: APPLIED — all tasks complete, all tests green, security review clean.</div>
+  </section>
   </main>
 
 </body>

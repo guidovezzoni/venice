@@ -105,6 +105,7 @@ fun TripDetailScreen(
                     ?: StopDisplayState.UPCOMING
                 Spacer(modifier = Modifier.height(CONTENT_SPACING))
                 StopSection(
+                    isLoading = uiState.isLoading,
                     stop = startingPoint,
                     onSetStopClicked = {
                         onIntent(TripDetailUiIntent.OnSetStartingPointClicked)
@@ -132,6 +133,7 @@ fun TripDetailScreen(
                 val displayState = deriveDisplayState(stop, currentStopId)
                 Spacer(modifier = Modifier.height(CONTENT_SPACING))
                 StopSection(
+                    isLoading = uiState.isLoading,
                     stop = stop,
                     onSetStopClicked = {
                         onIntent(TripDetailUiIntent.OnEditStopClicked(stop))
@@ -171,6 +173,7 @@ fun TripDetailScreen(
                     Spacer(modifier = Modifier.height(CONTENT_SPACING))
                     OutlinedButton(
                         onClick = { onIntent(TripDetailUiIntent.OnAddStopClicked) },
+                        enabled = !uiState.isLoading,
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = BUTTON_PADDING)
@@ -192,6 +195,7 @@ fun TripDetailScreen(
                     ?: StopDisplayState.UPCOMING
                 Spacer(modifier = Modifier.height(CONTENT_SPACING))
                 StopSection(
+                    isLoading = uiState.isLoading,
                     stop = destination,
                     onSetStopClicked = {
                         onIntent(TripDetailUiIntent.OnSetDestinationClicked)
@@ -218,6 +222,7 @@ fun TripDetailScreen(
 
     if (uiState.isSetStartingPointDialogVisible) {
         SetStopDialog(
+            isLoading = uiState.isLoading,
             dialogTitleRes = R.string.trip_detail_starting_point_dialog_title,
             placeNameHintRes = R.string.trip_detail_starting_point_place_name_hint,
             placeNameErrorRes = R.string.trip_detail_starting_point_place_name_error,
@@ -237,6 +242,7 @@ fun TripDetailScreen(
 
     if (uiState.isAddStopDialogVisible) {
         SetStopDialog(
+            isLoading = uiState.isLoading,
             dialogTitleRes = R.string.trip_detail_add_stop_dialog_title,
             placeNameHintRes = R.string.trip_detail_add_stop_place_name_hint,
             placeNameErrorRes = R.string.trip_detail_add_stop_place_name_error,
@@ -254,6 +260,7 @@ fun TripDetailScreen(
     if (uiState.isEditStopDialogVisible) {
         val editingStop = uiState.editingStop
         SetStopDialog(
+            isLoading = uiState.isLoading,
             dialogTitleRes = R.string.trip_detail_edit_stop_dialog_title,
             placeNameHintRes = R.string.trip_detail_add_stop_place_name_hint,
             placeNameErrorRes = R.string.trip_detail_add_stop_place_name_error,
@@ -275,6 +282,7 @@ fun TripDetailScreen(
 
     if (uiState.isSetDestinationDialogVisible) {
         SetStopDialog(
+            isLoading = uiState.isLoading,
             dialogTitleRes = R.string.trip_detail_destination_dialog_title,
             placeNameHintRes = R.string.trip_detail_destination_place_name_hint,
             placeNameErrorRes = R.string.trip_detail_destination_place_name_error,
@@ -305,7 +313,10 @@ fun TripDetailScreen(
                 )
             },
             confirmButton = {
-                TextButton(onClick = { onIntent(TripDetailUiIntent.OnRemoveStopConfirmed) }) {
+                TextButton(
+                    onClick = { onIntent(TripDetailUiIntent.OnRemoveStopConfirmed) },
+                    enabled = !uiState.isLoading,
+                ) {
                     Text(stringResource(R.string.global_remove))
                 }
             },

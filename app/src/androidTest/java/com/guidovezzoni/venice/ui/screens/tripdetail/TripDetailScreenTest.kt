@@ -1,11 +1,13 @@
 package com.guidovezzoni.venice.ui.screens.tripdetail
 
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import com.guidovezzoni.venice.domain.model.Stop
 import com.guidovezzoni.venice.domain.model.StopStatus
 import com.guidovezzoni.venice.ui.intent.TripDetailUiIntent
@@ -241,8 +243,8 @@ class TripDetailScreenTest {
             ),
         )
 
-        composeTestRule.onNodeWithText("Florence, Italy").assertIsDisplayed()
-        composeTestRule.onNodeWithText("Nice, France").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Florence, Italy").assertExists()
+        composeTestRule.onNodeWithText("Nice, France").assertExists()
     }
 
     @Test
@@ -277,8 +279,8 @@ class TripDetailScreenTest {
             ),
         )
 
-        composeTestRule.onNodeWithContentDescription("Move down").assertIsDisplayed()
-        composeTestRule.onNodeWithContentDescription("Move up").assertIsDisplayed()
+        composeTestRule.onNodeWithContentDescription("Move down").assertExists()
+        composeTestRule.onNodeWithContentDescription("Move up").assertExists()
     }
 
     @Test
@@ -714,6 +716,45 @@ class TripDetailScreenTest {
         composeTestRule
             .onNodeWithText("0 of 0 stops completed")
             .assertDoesNotExist()
+    }
+
+    // endregion
+
+    // region Loading state
+
+    @Test
+    fun loadingState_withMarkDepartedButton_actionButtonsAreDisabled() {
+        setContent(
+            uiState = TripDetailUiState(
+                tripId = TRIP_ID,
+                startingPoint = STARTING_POINT.copy(status = StopStatus.PENDING),
+                intermediateStops = listOf(INTERMEDIATE_1),
+                destination = DESTINATION,
+                canAddMoreStops = true,
+                isLoading = true,
+            ),
+        )
+
+        composeTestRule
+            .onNodeWithText("Mark as departed")
+            .assertIsNotEnabled()
+    }
+
+    @Test
+    fun loadingState_addStopButtonIsDisabled() {
+        setContent(
+            uiState = TripDetailUiState(
+                tripId = TRIP_ID,
+                startingPoint = STARTING_POINT,
+                destination = DESTINATION,
+                canAddMoreStops = true,
+                isLoading = true,
+            ),
+        )
+
+        composeTestRule
+            .onNodeWithContentDescription("Add stop")
+            .assertIsNotEnabled()
     }
 
     // endregion

@@ -2,6 +2,7 @@
     <string name="app_name" translatable="false">Venice</string>
     <string name="global_confirm">Confirm</string>
     <string name="global_cancel">Cancel</string>
+    <string name="global_loading">Loading</string>
     <string name="trip_list_fab_label">Create roadtrip</string>
     <string name="trip_list_empty_title">No trips yet</string>
     <string name="trip_list_empty_action">Create your first trip</string>
