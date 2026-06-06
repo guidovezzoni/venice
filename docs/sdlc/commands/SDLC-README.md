@@ -19,13 +19,9 @@ Each of the below operations adds a summary of the actions/results into an HTML 
 
 [sdlc_apply_changes](sdlc_apply_changes.md) implements the current OpenSpec change using BDD Red/Green cycle (test tasks verified RED before implementation, implementation tasks verified GREEN after). Then looks for outstanding TODOs, runs a security review, and updates the documentation. Uses `/opsx:apply` and `/security-review`.
 
-### 4. Verify User Story: `/sdlc_verify_story <story>`
+### 4. Verify and Archive: `/sdlc_verify_story <story>`
 
-[sdlc_verify_story](sdlc_verify_story.md) is an end-to-end verification gate. Runs OpenSpec's verify, scans for unresolved TODOs, runs a security review on pending changes, checks every acceptance criterion in the story against the codebase, and finally closes the story. Uses `/opsx:verify` and `/security-review`.
-
-### 5. Archive: `/sdlc_archive`
-
-[sdlc_archive](sdlc_archive.md) runs OpenSpec's archive to finalise and archive the completed change, then verifies that the documentation is in sync with the codebase and specs. Uses `/opsx:archive`.
+[sdlc_verify_story](sdlc_verify_story.md) is an end-to-end verification and archive gate. Runs OpenSpec's verify, scans for unresolved TODOs, runs a security review on pending changes, checks every acceptance criterion in the story against the codebase, closes the story, then archives the OpenSpec change and verifies documentation is in sync. Uses `/opsx:verify`, `/security-review`, and `/opsx:archive`.
 
 ## Setup
 
@@ -41,11 +37,11 @@ These scripts create symlinks in `.claude/commands/sdlc/` and `.cursor/commands/
 SDLC:
 - add PR review - other  LLM provider???
 - archive should also sync???
-- archive should be merged with verification???
 - multi-agent orchestration
 - LLM agnostic
 - self-improvement
 - sort different phases in the command list -not sure how
+- verification: remind the user to connect a phone but then start the verification anyway. When the on-device test need to be run, then ask the user to connect the device.
 
 Guidelines:
 - async operations should be wrapped in a loading state with a spinner, and if required disabling the button that triggered the operation, to avoid re-trigger. The spinner should have a minimum duration of 0.5 seconds to avoid a flickering UI.
