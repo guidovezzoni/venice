@@ -70,4 +70,3 @@
 ## 9. Verification
 
 - [ ] 9.1 Run ./gradlew check and verify all tests pass
-- [ ] 9.2 Update OpenSpec main specs via /opsx:sync
