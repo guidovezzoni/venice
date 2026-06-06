@@ -32,12 +32,14 @@ Follow these steps:
 
 7. **Close the user story.** Once all verifications pass, perform the **Closing** operation as defined in @docs/guidelines/guidelines-userstories.md.
 
-8. **Archive the OpenSpec change.** Execute the OpenSpec archive command (`/opsx:archive`) to finalise and archive the completed change artefacts. Ensure that all file moves use `git mv` so that Git tracks the renames.
+8. **Sync delta specs.** Execute the OpenSpec sync command (`/opsx:sync`) to merge any delta specs from this change into the main specs. Ensure that all file moves use `git mv` so that Git tracks the renames.
 
-9. **Verify README.md and AGENTS.md are in sync.** Read `README.md` and `AGENTS.md` and verify that they accurately reflect the current state of the codebase and specs after the archived change. If any section is outdated or incomplete, flag it to the user and update it. If everything is already accurate, note that the check passed.
+9. **Archive the OpenSpec change.** Execute the OpenSpec archive command (`/opsx:archive`) to finalise and archive the completed change artefacts. Ensure that all file moves use `git mv` so that Git tracks the renames.
 
-10. **Add a report.** Append a verification and archive section to the report for this user story following @docs/guidelines/guidelines-reports.md. The section should summarise: date of verification, OpenSpec verify result (pass/fail summary), TODO scan result (list of ACKNOWLEDGED TODOs, or "none found"), security review result (pass/fail with summary of findings, if any), on-device test results (method used — agent via adb or user-confirmed — and outcomes), Definition of Done checklist with each item's PASS/FAIL status and justification, archive location, spec sync status (synced / skipped / no delta specs), README.md and AGENTS.md sync check result (in sync / updated), and final outcome (PASSED / FAILED) with the renamed filename.
+10. **Verify README.md and AGENTS.md are in sync.** Read `README.md` and `AGENTS.md` and verify that they accurately reflect the current state of the codebase and specs after the archived change. If any section is outdated or incomplete, flag it to the user and update it. If everything is already accurate, note that the check passed.
 
-11. **Display the summary.** Output the same summary on screen so the user can see what was verified and archived.
+11. **Add a report.** Append a verification and archive section to the report for this user story following @docs/guidelines/guidelines-reports.md. The section should summarise: date of verification, OpenSpec verify result (pass/fail summary), TODO scan result (list of ACKNOWLEDGED TODOs, or "none found"), security review result (pass/fail with summary of findings, if any), on-device test results (method used — agent via adb or user-confirmed — and outcomes), Definition of Done checklist with each item's PASS/FAIL status and justification, archive location, spec sync status (synced / skipped / no delta specs), README.md and AGENTS.md sync check result (in sync / updated), and final outcome (PASSED / FAILED) with the renamed filename.
 
-12. **Suggest a commit message.** Suggest a commit message following @docs/guidelines/guidelines-git.md.
+12. **Display the summary.** Output the same summary on screen so the user can see what was verified and archived.
+
+13. **Suggest a commit message.** Suggest a commit message following @docs/guidelines/guidelines-git.md.

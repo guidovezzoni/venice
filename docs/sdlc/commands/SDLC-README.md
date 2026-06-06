@@ -39,8 +39,6 @@ These scripts create symlinks in `.claude/commands/sdlc/` and `.cursor/commands/
 ## TODO
 
 SDLC:
-- add PR review - other  LLM provider???
-- archive should also sync???
 - multi-agent orchestration
 - LLM agnostic
 - self-improvement
@@ -50,7 +48,9 @@ SDLC:
 Guidelines:
 - async operations should be wrapped in a loading state with a spinner, and if required disabling the button that triggered the operation, to avoid re-trigger. The spinner should have a minimum duration of 0.5 seconds to avoid a flickering UI.
 - create a guideline for readme
-- TripDetailScreenTest unused imports
+- step for static checks:
+  - unused import directive / deprecation
 
 Not sure what's best yet:
 - When both Domain and UI require the same data type, f.i. an enum, where should this be defined? In Domain? Should it be duplicated in UI? Should it be defined in another root package?
+- add PR review - other  LLM provider???
