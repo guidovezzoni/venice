@@ -757,5 +757,21 @@ class TripDetailScreenTest {
             .assertIsNotEnabled()
     }
 
+    @Test
+    fun loadingState_progressIndicatorIsVisible() {
+        setContent(
+            uiState = TripDetailUiState(
+                tripId = TRIP_ID,
+                startingPoint = STARTING_POINT,
+                destination = DESTINATION,
+                isLoading = true,
+            ),
+        )
+
+        composeTestRule
+            .onNodeWithContentDescription("Loading")
+            .assertExists()
+    }
+
     // endregion
 }
