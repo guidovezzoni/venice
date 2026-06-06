@@ -1,5 +1,26 @@
 Please verify and archive the user story: $ARGUMENTS.
 
+## Device connectivity
+
+### Early reminder (non-blocking)
+
+At the very start of this command — before executing any step — inform the user that a connected Android device (physical or emulator) will be needed later for instrumented tests and on-device verification. **Do not block.** Proceed immediately with the steps.
+
+### Device gate (blocking)
+
+Whenever any step in this command requires a connected Android device (instrumented tests, on-device verification, manual UI checks, etc.):
+
+1. Run `adb devices` to check for a connected device (physical or emulator).
+2. If no device is listed:
+   a. Ask the user to connect a device — either a physical device via USB with USB debugging enabled, or an emulator.
+   b. **BLOCK here. Do NOT continue to subsequent steps or tasks.** Wait for the user to respond confirming the device is available.
+   c. Re-run `adb devices` to verify the device appeared. If still not listed, repeat from sub-step a.
+3. Only proceed once a device is confirmed connected.
+
+This gate applies everywhere a device is needed — it is not limited to a specific step.
+
+## Steps
+
 Follow these steps:
 
 1. **Locate the user story.** Match `$ARGUMENTS` against the user story files by number or partial name. If no match is found, ask the user which user story to verify. Validate the **preconditions for Closing** as defined in @docs/guidelines/guidelines-userstories.md. If they are not met, inform the user and stop.
@@ -17,12 +38,12 @@ Follow these steps:
 
 4. **Run security review.** Execute the `/security-review` command to review pending changes on the current branch for security issues. If the review reports any critical or high-severity findings, stop here: present them to the user and do **not** proceed to the next steps. If no critical or high-severity findings are reported, proceed immediately to step 5.
 
-5. **Run on-device tests.** Follow the on-device testing procedure in @docs/guidelines/guidelines-process.md:
-   - Check for a connected device with `adb devices`.
-   - If connected: run `./gradlew connectedDebugAndroidTest`, then install the app (`./gradlew installDebug`) and launch it with `adb shell am start`.
-   - **Time-box adb UI exercise to 3 interactions.** If manual adb-based UI exercise (tap/input/screenshot) fails or requires complex multi-step setup (e.g. creating test data through multiple dialogs), stop immediately — do not loop on retries or attempt to fix adb input issues. Record the instrumented test results as the on-device verification and note that manual adb exercise was not feasible.
-   - If no device is connected: ask the user to connect one or perform the manual verification themselves.
-   - **Do not block remaining steps** on manual adb exercise. Instrumented Compose UI tests on a physical device are sufficient to proceed. Always continue to step 6 after the instrumented tests complete.
+5. **Run on-device tests.** Apply the **device gate** (see above), then:
+   - Run `./gradlew connectedDebugAndroidTest`. If any tests fail, stop here and present the failures.
+   - Install the app (`./gradlew installDebug`) and launch it with `adb shell am start`.
+   - **Time-box adb UI exercise to 3 interactions.** If manual adb-based UI exercise (tap/input/screenshot) fails or requires complex multi-step setup (e.g. creating test data through multiple dialogs), stop immediately — do not loop on retries or attempt to fix adb input issues.
+   - **If adb exercise is not feasible**, ask the user to perform the manual verification and describe what to check. **BLOCK here** — wait for the user to confirm the result before proceeding. If the user reports a failure, stop and present it.
+   - Only proceed to step 6 once both instrumented tests and manual verification (agent or user) have passed.
 
 6. **Verify the Definition of Done.** Read the user story file and identify the "Acceptance Criteria" or "Definition of Done" section. For each item listed:
    - Check the codebase (source files, tests, configuration) to confirm the criterion is met.
