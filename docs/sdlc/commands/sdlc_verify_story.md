@@ -1,4 +1,25 @@
-Please verify the user story: $ARGUMENTS.
+Please verify and archive the user story: $ARGUMENTS.
+
+## Device connectivity
+
+### Early reminder (non-blocking)
+
+At the very start of this command — before executing any step — inform the user that a connected Android device (physical or emulator) will be needed later for instrumented tests and on-device verification. **Do not block.** Proceed immediately with the steps.
+
+### Device gate (blocking)
+
+Whenever any step in this command requires a connected Android device (instrumented tests, on-device verification, manual UI checks, etc.):
+
+1. Run `adb devices` to check for a connected device (physical or emulator).
+2. If no device is listed:
+   a. Ask the user to connect a device — either a physical device via USB with USB debugging enabled, or an emulator.
+   b. **BLOCK here. Do NOT continue to subsequent steps or tasks.** Wait for the user to respond confirming the device is available.
+   c. Re-run `adb devices` to verify the device appeared. If still not listed, repeat from sub-step a.
+3. Only proceed once a device is confirmed connected.
+
+This gate applies everywhere a device is needed — it is not limited to a specific step.
+
+## Steps
 
 Follow these steps:
 
@@ -17,23 +38,29 @@ Follow these steps:
 
 4. **Run security review.** Execute the `/security-review` command to review pending changes on the current branch for security issues. If the review reports any critical or high-severity findings, stop here: present them to the user and do **not** proceed to the next steps. If no critical or high-severity findings are reported, proceed immediately to step 5.
 
-5. **Run on-device tests.** Follow the on-device testing procedure in @docs/guidelines/guidelines-process.md:
-   - Check for a connected device with `adb devices`.
-   - If connected: run `./gradlew connectedDebugAndroidTest`, then install the app (`./gradlew installDebug`) and launch it with `adb shell am start`.
-   - **Time-box adb UI exercise to 3 interactions.** If manual adb-based UI exercise (tap/input/screenshot) fails or requires complex multi-step setup (e.g. creating test data through multiple dialogs), stop immediately — do not loop on retries or attempt to fix adb input issues. Record the instrumented test results as the on-device verification and note that manual adb exercise was not feasible.
-   - If no device is connected: ask the user to connect one or perform the manual verification themselves.
-   - **Do not block remaining steps** on manual adb exercise. Instrumented Compose UI tests on a physical device are sufficient to proceed. Always continue to step 6 after the instrumented tests complete.
+5. **Run on-device tests.** Apply the **device gate** (see above), then:
+   - Run `./gradlew connectedDebugAndroidTest`. If any tests fail, stop here and present the failures.
+   - Install the app (`./gradlew installDebug`) and launch it with `adb shell am start`.
+   - **Time-box adb UI exercise to 3 interactions.** If manual adb-based UI exercise (tap/input/screenshot) fails or requires complex multi-step setup (e.g. creating test data through multiple dialogs), stop immediately — do not loop on retries or attempt to fix adb input issues.
+   - **If adb exercise is not feasible**, ask the user to perform the manual verification and describe what to check. **BLOCK here** — wait for the user to confirm the result before proceeding. If the user reports a failure, stop and present it.
+   - Only proceed to step 6 once both instrumented tests and manual verification (agent or user) have passed.
 
 6. **Verify the Definition of Done.** Read the user story file and identify the "Acceptance Criteria" or "Definition of Done" section. For each item listed:
    - Check the codebase (source files, tests, configuration) to confirm the criterion is met.
    - Report each item as PASS or FAIL with a brief justification.
-   - If any item is marked FAIL, stop here: present a summary to the user and do **not** proceed to the rename step.
+   - If any item is marked FAIL, stop here: present a summary to the user and do **not** proceed to the next steps.
    - If all items pass, proceed immediately to step 7.
 
 7. **Close the user story.** Once all verifications pass, perform the **Closing** operation as defined in @docs/guidelines/guidelines-userstories.md.
 
-8. **Add a report.** Append a verification section to the report for this user story following @docs/guidelines/guidelines-reports.md. The section should summarise: date of verification, OpenSpec verify result (pass/fail summary), TODO scan result (list of ACKNOWLEDGED TODOs, or "none found"), security review result (pass/fail with summary of findings, if any), on-device test results (method used — agent via adb or user-confirmed — and outcomes), Definition of Done checklist with each item's PASS/FAIL status and justification, and final outcome (PASSED / FAILED) with the renamed filename.
+8. **Sync delta specs.** Execute the OpenSpec sync command (`/opsx:sync`) to merge any delta specs from this change into the main specs. Ensure that all file moves use `git mv` so that Git tracks the renames.
 
-9. **Display the summary.** Output the same summary on screen so the user can see what was verified.
+9. **Archive the OpenSpec change.** Execute the OpenSpec archive command (`/opsx:archive`) to finalise and archive the completed change artefacts. Ensure that all file moves use `git mv` so that Git tracks the renames.
 
-10. **Suggest a commit message.** Suggest a commit message following @docs/guidelines/guidelines-git.md.
+10. **Verify README.md and AGENTS.md are in sync.** Read `README.md` and `AGENTS.md` and verify that they accurately reflect the current state of the codebase and specs after the archived change. If any section is outdated or incomplete, flag it to the user and update it. If everything is already accurate, note that the check passed.
+
+11. **Add a report.** Append a verification and archive section to the report for this user story following @docs/guidelines/guidelines-reports.md. The section should summarise: date of verification, OpenSpec verify result (pass/fail summary), TODO scan result (list of ACKNOWLEDGED TODOs, or "none found"), security review result (pass/fail with summary of findings, if any), on-device test results (method used — agent via adb or user-confirmed — and outcomes), Definition of Done checklist with each item's PASS/FAIL status and justification, archive location, spec sync status (synced / skipped / no delta specs), README.md and AGENTS.md sync check result (in sync / updated), and final outcome (PASSED / FAILED) with the renamed filename.
+
+12. **Display the summary.** Output the same summary on screen so the user can see what was verified and archived.
+
+13. **Suggest a commit message.** Suggest a commit message following @docs/guidelines/guidelines-git.md.

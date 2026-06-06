@@ -22,6 +22,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
@@ -38,9 +39,9 @@ private const val PLACE_NAME = "Rome"
 private const val LATITUDE = 41.9028
 private const val LONGITUDE = 12.4964
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class TripDetailViewModelTest {
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     private val testDispatcher = UnconfinedTestDispatcher()
 
     private lateinit var setStopUseCase: SetStopUseCase
@@ -52,7 +53,6 @@ class TripDetailViewModelTest {
     private lateinit var observeStopsUseCase: ObserveStopsUseCase
     private lateinit var savedStateHandle: SavedStateHandle
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
@@ -66,7 +66,6 @@ class TripDetailViewModelTest {
         savedStateHandle = SavedStateHandle(mapOf("tripId" to TRIP_ID))
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     @After
     fun tearDown() {
         Dispatchers.resetMain()
@@ -78,7 +77,7 @@ class TripDetailViewModelTest {
     }
 
     @Test
-    fun `GIVEN initial state WHEN OnSetStartingPointClicked is dispatched THEN isSetStartingPointDialogVisible becomes true`() = runTest {
+    fun `GIVEN initial state WHEN OnSetStartingPointClicked is dispatched THEN isSetStartingPointDialogVisible becomes true`() = runTest(testDispatcher) {
         val viewModel = createViewModel()
 
         viewModel.onIntent(TripDetailUiIntent.OnSetStartingPointClicked)
@@ -87,7 +86,7 @@ class TripDetailViewModelTest {
     }
 
     @Test
-    fun `GIVEN dialog is visible WHEN OnDismissStartingPointDialog is dispatched THEN isSetStartingPointDialogVisible becomes false`() = runTest {
+    fun `GIVEN dialog is visible WHEN OnDismissStartingPointDialog is dispatched THEN isSetStartingPointDialogVisible becomes false`() = runTest(testDispatcher) {
         val viewModel = createViewModel()
 
         viewModel.onIntent(TripDetailUiIntent.OnSetStartingPointClicked)
@@ -97,7 +96,7 @@ class TripDetailViewModelTest {
     }
 
     @Test
-    fun `GIVEN valid input WHEN OnStartingPointConfirmed is dispatched and use case succeeds THEN startingPoint is updated and dialog is dismissed`() = runTest {
+    fun `GIVEN valid input WHEN OnStartingPointConfirmed is dispatched and use case succeeds THEN startingPoint is updated and dialog is dismissed`() = runTest(testDispatcher) {
         val stop = Stop(
             id = "stop-1",
             tripId = TRIP_ID,
@@ -113,6 +112,7 @@ class TripDetailViewModelTest {
         val viewModel = TripDetailViewModel(setStopUseCase, moveStopUseCase, editStopUseCase, removeStopUseCase, markStopDepartedUseCase, undoMarkStopDepartedUseCase, observeStopsUseCase, savedStateHandle)
         viewModel.onIntent(TripDetailUiIntent.OnSetStartingPointClicked)
         viewModel.onIntent(TripDetailUiIntent.OnStartingPointConfirmed(PLACE_NAME, LATITUDE, LONGITUDE))
+        advanceUntilIdle()
 
         assertFalse(viewModel.uiState.value.isSetStartingPointDialogVisible)
     }
@@ -128,13 +128,14 @@ class TripDetailViewModelTest {
         }
 
         viewModel.onIntent(TripDetailUiIntent.OnStartingPointConfirmed(PLACE_NAME, LATITUDE, LONGITUDE))
+        advanceUntilIdle()
 
         assertTrue(effects.any { it is TripDetailUiEffect.ShowError })
         collectJob.cancel()
     }
 
     @Test
-    fun `GIVEN a stop with order=0 in the stream WHEN ViewModel initialises THEN startingPoint reflects that stop`() = runTest {
+    fun `GIVEN a stop with order=0 in the stream WHEN ViewModel initialises THEN startingPoint reflects that stop`() = runTest(testDispatcher) {
         val expectedStop = Stop(
             id = "stop-1",
             tripId = TRIP_ID,
@@ -152,14 +153,14 @@ class TripDetailViewModelTest {
     }
 
     @Test
-    fun `GIVEN no stops in the stream WHEN ViewModel initialises THEN startingPoint is null`() = runTest {
+    fun `GIVEN no stops in the stream WHEN ViewModel initialises THEN startingPoint is null`() = runTest(testDispatcher) {
         val viewModel = createViewModel()
 
         assertNull(viewModel.uiState.value.startingPoint)
     }
 
     @Test
-    fun `GIVEN initial state WHEN OnSetDestinationClicked is dispatched THEN isSetDestinationDialogVisible becomes true`() = runTest {
+    fun `GIVEN initial state WHEN OnSetDestinationClicked is dispatched THEN isSetDestinationDialogVisible becomes true`() = runTest(testDispatcher) {
         val viewModel = createViewModel()
 
         viewModel.onIntent(TripDetailUiIntent.OnSetDestinationClicked)
@@ -168,7 +169,7 @@ class TripDetailViewModelTest {
     }
 
     @Test
-    fun `GIVEN dialog is visible WHEN OnDismissDestinationDialog is dispatched THEN isSetDestinationDialogVisible becomes false`() = runTest {
+    fun `GIVEN dialog is visible WHEN OnDismissDestinationDialog is dispatched THEN isSetDestinationDialogVisible becomes false`() = runTest(testDispatcher) {
         val viewModel = createViewModel()
 
         viewModel.onIntent(TripDetailUiIntent.OnSetDestinationClicked)
@@ -178,7 +179,7 @@ class TripDetailViewModelTest {
     }
 
     @Test
-    fun `GIVEN valid input WHEN OnDestinationConfirmed is dispatched and use case succeeds THEN destination is updated and dialog is dismissed`() = runTest {
+    fun `GIVEN valid input WHEN OnDestinationConfirmed is dispatched and use case succeeds THEN destination is updated and dialog is dismissed`() = runTest(testDispatcher) {
         val destinationStop = Stop(
             id = "stop-dest",
             tripId = TRIP_ID,
@@ -194,6 +195,7 @@ class TripDetailViewModelTest {
         val viewModel = TripDetailViewModel(setStopUseCase, moveStopUseCase, editStopUseCase, removeStopUseCase, markStopDepartedUseCase, undoMarkStopDepartedUseCase, observeStopsUseCase, savedStateHandle)
         viewModel.onIntent(TripDetailUiIntent.OnSetDestinationClicked)
         viewModel.onIntent(TripDetailUiIntent.OnDestinationConfirmed(PLACE_NAME, LATITUDE, LONGITUDE))
+        advanceUntilIdle()
 
         assertFalse(viewModel.uiState.value.isSetDestinationDialogVisible)
     }
@@ -209,13 +211,14 @@ class TripDetailViewModelTest {
         }
 
         viewModel.onIntent(TripDetailUiIntent.OnDestinationConfirmed(PLACE_NAME, LATITUDE, LONGITUDE))
+        advanceUntilIdle()
 
         assertTrue(effects.any { it is TripDetailUiEffect.ShowError })
         collectJob.cancel()
     }
 
     @Test
-    fun `GIVEN a stop with order=1 in the stream WHEN ViewModel initialises THEN destination reflects that stop`() = runTest {
+    fun `GIVEN a stop with order=1 in the stream WHEN ViewModel initialises THEN destination reflects that stop`() = runTest(testDispatcher) {
         val expectedDestination = Stop(
             id = "stop-dest",
             tripId = TRIP_ID,
@@ -233,7 +236,7 @@ class TripDetailViewModelTest {
     }
 
     @Test
-    fun `GIVEN only a stop with order=0 in the stream WHEN ViewModel initialises THEN destination is null`() = runTest {
+    fun `GIVEN only a stop with order=0 in the stream WHEN ViewModel initialises THEN destination is null`() = runTest(testDispatcher) {
         val startingPoint = Stop(
             id = "stop-start",
             tripId = TRIP_ID,
@@ -251,7 +254,7 @@ class TripDetailViewModelTest {
     }
 
     @Test
-    fun `GIVEN stops exist WHEN observed THEN intermediateStops contains only stops with order between start and destination`() = runTest {
+    fun `GIVEN stops exist WHEN observed THEN intermediateStops contains only stops with order between start and destination`() = runTest(testDispatcher) {
         val startingPoint = Stop("s0", TRIP_ID, "Start", 0.0, 0.0, 0, StopStatus.PENDING)
         val intermediate1 = Stop("s1", TRIP_ID, "Stop A", 1.0, 1.0, 1, StopStatus.PENDING)
         val intermediate2 = Stop("s2", TRIP_ID, "Stop B", 2.0, 2.0, 2, StopStatus.PENDING)
@@ -267,7 +270,7 @@ class TripDetailViewModelTest {
     }
 
     @Test
-    fun `GIVEN OnAddStopClicked intent WHEN dispatched THEN isAddStopDialogVisible becomes true`() = runTest {
+    fun `GIVEN OnAddStopClicked intent WHEN dispatched THEN isAddStopDialogVisible becomes true`() = runTest(testDispatcher) {
         val viewModel = createViewModel()
 
         viewModel.onIntent(TripDetailUiIntent.OnAddStopClicked)
@@ -276,7 +279,7 @@ class TripDetailViewModelTest {
     }
 
     @Test
-    fun `GIVEN OnDismissAddStopDialog intent WHEN dispatched THEN isAddStopDialogVisible becomes false`() = runTest {
+    fun `GIVEN OnDismissAddStopDialog intent WHEN dispatched THEN isAddStopDialogVisible becomes false`() = runTest(testDispatcher) {
         val viewModel = createViewModel()
 
         viewModel.onIntent(TripDetailUiIntent.OnAddStopClicked)
@@ -286,13 +289,14 @@ class TripDetailViewModelTest {
     }
 
     @Test
-    fun `GIVEN OnAddStopConfirmed intent WHEN dispatched and use case succeeds THEN dialog is dismissed`() = runTest {
+    fun `GIVEN OnAddStopConfirmed intent WHEN dispatched and use case succeeds THEN dialog is dismissed`() = runTest(testDispatcher) {
         val stop = Stop("s1", TRIP_ID, PLACE_NAME, LATITUDE, LONGITUDE, 1, StopStatus.PENDING)
         coEvery { setStopUseCase(TRIP_ID, PLACE_NAME, LATITUDE, LONGITUDE, StopType.INTERMEDIATE) } returns Result.success(stop)
         val viewModel = createViewModel()
 
         viewModel.onIntent(TripDetailUiIntent.OnAddStopClicked)
         viewModel.onIntent(TripDetailUiIntent.OnAddStopConfirmed(PLACE_NAME, LATITUDE, LONGITUDE))
+        advanceUntilIdle()
 
         assertFalse(viewModel.uiState.value.isAddStopDialogVisible)
     }
@@ -308,13 +312,14 @@ class TripDetailViewModelTest {
         }
 
         viewModel.onIntent(TripDetailUiIntent.OnAddStopConfirmed(PLACE_NAME, LATITUDE, LONGITUDE))
+        advanceUntilIdle()
 
         assertTrue(effects.any { it is TripDetailUiEffect.ShowError })
         collectJob.cancel()
     }
 
     @Test
-    fun `GIVEN 25 stops exist WHEN observed THEN canAddMoreStops is false`() = runTest {
+    fun `GIVEN 25 stops exist WHEN observed THEN canAddMoreStops is false`() = runTest(testDispatcher) {
         val stops = (0 until 25).map { i ->
             Stop("s$i", TRIP_ID, "Stop $i", i.toDouble(), i.toDouble(), i, StopStatus.PENDING)
         }
@@ -326,7 +331,7 @@ class TripDetailViewModelTest {
     }
 
     @Test
-    fun `GIVEN intermediate stops WHEN OnMoveStopUp intent is received THEN MoveStopUseCase is called with correct orders`() = runTest {
+    fun `GIVEN intermediate stops WHEN OnMoveStopUp intent is received THEN MoveStopUseCase is called with correct orders`() = runTest(testDispatcher) {
         val stops = listOf(
             Stop("s0", TRIP_ID, "Start", 0.0, 0.0, 0, StopStatus.PENDING),
             Stop("s1", TRIP_ID, "Stop A", 1.0, 1.0, 1, StopStatus.PENDING),
@@ -343,7 +348,7 @@ class TripDetailViewModelTest {
     }
 
     @Test
-    fun `GIVEN intermediate stops WHEN OnMoveStopDown intent is received THEN MoveStopUseCase is called with correct orders`() = runTest {
+    fun `GIVEN intermediate stops WHEN OnMoveStopDown intent is received THEN MoveStopUseCase is called with correct orders`() = runTest(testDispatcher) {
         val stops = listOf(
             Stop("s0", TRIP_ID, "Start", 0.0, 0.0, 0, StopStatus.PENDING),
             Stop("s1", TRIP_ID, "Stop A", 1.0, 1.0, 1, StopStatus.PENDING),
@@ -370,13 +375,14 @@ class TripDetailViewModelTest {
         }
 
         viewModel.onIntent(TripDetailUiIntent.OnMoveStopUp("s2", 2))
+        advanceUntilIdle()
 
         assertTrue(effects.any { it is TripDetailUiEffect.ShowError })
         collectJob.cancel()
     }
 
     @Test
-    fun `GIVEN initial state WHEN OnEditStopClicked is dispatched THEN editingStop is set and isEditStopDialogVisible is true`() = runTest {
+    fun `GIVEN initial state WHEN OnEditStopClicked is dispatched THEN editingStop is set and isEditStopDialogVisible is true`() = runTest(testDispatcher) {
         val stop = Stop("s1", TRIP_ID, PLACE_NAME, LATITUDE, LONGITUDE, 1, StopStatus.PENDING)
         val viewModel = createViewModel()
 
@@ -387,7 +393,7 @@ class TripDetailViewModelTest {
     }
 
     @Test
-    fun `GIVEN edit dialog visible WHEN OnDismissEditStopDialog is dispatched THEN editingStop is null and isEditStopDialogVisible is false`() = runTest {
+    fun `GIVEN edit dialog visible WHEN OnDismissEditStopDialog is dispatched THEN editingStop is null and isEditStopDialogVisible is false`() = runTest(testDispatcher) {
         val stop = Stop("s1", TRIP_ID, PLACE_NAME, LATITUDE, LONGITUDE, 1, StopStatus.PENDING)
         val viewModel = createViewModel()
 
@@ -399,13 +405,14 @@ class TripDetailViewModelTest {
     }
 
     @Test
-    fun `GIVEN edit dialog visible WHEN OnEditStopConfirmed is dispatched and EditStopUseCase succeeds THEN editingStop is null and isEditStopDialogVisible is false`() = runTest {
+    fun `GIVEN edit dialog visible WHEN OnEditStopConfirmed is dispatched and EditStopUseCase succeeds THEN editingStop is null and isEditStopDialogVisible is false`() = runTest(testDispatcher) {
         val stop = Stop("s1", TRIP_ID, PLACE_NAME, LATITUDE, LONGITUDE, 1, StopStatus.PENDING)
         coEvery { editStopUseCase("s1", PLACE_NAME, LATITUDE, LONGITUDE) } returns Result.success(stop)
         val viewModel = createViewModel()
 
         viewModel.onIntent(TripDetailUiIntent.OnEditStopClicked(stop))
         viewModel.onIntent(TripDetailUiIntent.OnEditStopConfirmed("s1", PLACE_NAME, LATITUDE, LONGITUDE))
+        advanceUntilIdle()
 
         assertNull(viewModel.uiState.value.editingStop)
         assertFalse(viewModel.uiState.value.isEditStopDialogVisible)
@@ -424,13 +431,14 @@ class TripDetailViewModelTest {
 
         viewModel.onIntent(TripDetailUiIntent.OnEditStopClicked(stop))
         viewModel.onIntent(TripDetailUiIntent.OnEditStopConfirmed("s1", PLACE_NAME, LATITUDE, LONGITUDE))
+        advanceUntilIdle()
 
         assertTrue(effects.any { it is TripDetailUiEffect.ShowError })
         collectJob.cancel()
     }
 
     @Test
-    fun `GIVEN the screen is displayed WHEN OnRemoveStopClicked is dispatched THEN stopToRemove is set and isRemoveStopDialogVisible becomes true`() = runTest {
+    fun `GIVEN the screen is displayed WHEN OnRemoveStopClicked is dispatched THEN stopToRemove is set and isRemoveStopDialogVisible becomes true`() = runTest(testDispatcher) {
         val stop = Stop("s1", TRIP_ID, PLACE_NAME, LATITUDE, LONGITUDE, 1, StopStatus.PENDING)
         val viewModel = createViewModel()
 
@@ -441,7 +449,7 @@ class TripDetailViewModelTest {
     }
 
     @Test
-    fun `GIVEN remove dialog is visible WHEN OnDismissRemoveStopDialog is dispatched THEN stopToRemove is null and isRemoveStopDialogVisible becomes false`() = runTest {
+    fun `GIVEN remove dialog is visible WHEN OnDismissRemoveStopDialog is dispatched THEN stopToRemove is null and isRemoveStopDialogVisible becomes false`() = runTest(testDispatcher) {
         val stop = Stop("s1", TRIP_ID, PLACE_NAME, LATITUDE, LONGITUDE, 1, StopStatus.PENDING)
         val viewModel = createViewModel()
 
@@ -453,13 +461,14 @@ class TripDetailViewModelTest {
     }
 
     @Test
-    fun `GIVEN remove dialog is visible WHEN OnRemoveStopConfirmed is dispatched and RemoveStopUseCase succeeds THEN stopToRemove is null and isRemoveStopDialogVisible becomes false`() = runTest {
+    fun `GIVEN remove dialog is visible WHEN OnRemoveStopConfirmed is dispatched and RemoveStopUseCase succeeds THEN stopToRemove is null and isRemoveStopDialogVisible becomes false`() = runTest(testDispatcher) {
         val stop = Stop("s1", TRIP_ID, PLACE_NAME, LATITUDE, LONGITUDE, 1, StopStatus.PENDING)
         coEvery { removeStopUseCase(TRIP_ID, "s1") } returns Result.success(Unit)
         val viewModel = createViewModel()
 
         viewModel.onIntent(TripDetailUiIntent.OnRemoveStopClicked(stop))
         viewModel.onIntent(TripDetailUiIntent.OnRemoveStopConfirmed)
+        advanceUntilIdle()
 
         assertNull(viewModel.uiState.value.stopToRemove)
         assertFalse(viewModel.uiState.value.isRemoveStopDialogVisible)
@@ -478,6 +487,7 @@ class TripDetailViewModelTest {
 
         viewModel.onIntent(TripDetailUiIntent.OnRemoveStopClicked(stop))
         viewModel.onIntent(TripDetailUiIntent.OnRemoveStopConfirmed)
+        advanceUntilIdle()
 
         assertTrue(effects.any { it is TripDetailUiEffect.ShowError })
         collectJob.cancel()
@@ -494,6 +504,7 @@ class TripDetailViewModelTest {
         }
 
         viewModel.onIntent(TripDetailUiIntent.OnMarkStopDepartedClicked("s1"))
+        advanceUntilIdle()
 
         assertTrue(effects.none { it is TripDetailUiEffect.ShowError })
         collectJob.cancel()
@@ -510,6 +521,7 @@ class TripDetailViewModelTest {
         }
 
         viewModel.onIntent(TripDetailUiIntent.OnMarkStopDepartedClicked("s1"))
+        advanceUntilIdle()
 
         assertTrue(effects.any { it is TripDetailUiEffect.ShowError })
         collectJob.cancel()
@@ -526,6 +538,7 @@ class TripDetailViewModelTest {
         }
 
         viewModel.onIntent(TripDetailUiIntent.OnUndoMarkStopDepartedClicked("s1"))
+        advanceUntilIdle()
 
         assertTrue(effects.none { it is TripDetailUiEffect.ShowError })
         collectJob.cancel()
@@ -542,8 +555,127 @@ class TripDetailViewModelTest {
         }
 
         viewModel.onIntent(TripDetailUiIntent.OnUndoMarkStopDepartedClicked("s1"))
+        advanceUntilIdle()
 
         assertTrue(effects.any { it is TripDetailUiEffect.ShowError })
         collectJob.cancel()
+    }
+
+    @Test
+    fun `GIVEN editStop operation WHEN OnEditStopConfirmed is dispatched and EditStopUseCase succeeds THEN isLoading is false after completion`() = runTest(testDispatcher) {
+        val stop = Stop("s1", TRIP_ID, PLACE_NAME, LATITUDE, LONGITUDE, 1, StopStatus.PENDING)
+        coEvery { editStopUseCase("s1", PLACE_NAME, LATITUDE, LONGITUDE) } returns Result.success(stop)
+        val viewModel = createViewModel()
+
+        viewModel.onIntent(TripDetailUiIntent.OnEditStopClicked(stop))
+        viewModel.onIntent(TripDetailUiIntent.OnEditStopConfirmed("s1", PLACE_NAME, LATITUDE, LONGITUDE))
+        advanceUntilIdle()
+
+        assertFalse(viewModel.uiState.value.isLoading)
+    }
+
+    @Test
+    fun `GIVEN editStop operation WHEN OnEditStopConfirmed is dispatched and EditStopUseCase fails THEN isLoading is false after completion`() = runTest(testDispatcher) {
+        val stop = Stop("s1", TRIP_ID, PLACE_NAME, LATITUDE, LONGITUDE, 1, StopStatus.PENDING)
+        coEvery { editStopUseCase("s1", PLACE_NAME, LATITUDE, LONGITUDE) } returns Result.failure(RuntimeException("error"))
+        val viewModel = createViewModel()
+
+        viewModel.onIntent(TripDetailUiIntent.OnEditStopClicked(stop))
+        viewModel.onIntent(TripDetailUiIntent.OnEditStopConfirmed("s1", PLACE_NAME, LATITUDE, LONGITUDE))
+        advanceUntilIdle()
+
+        assertFalse(viewModel.uiState.value.isLoading)
+    }
+
+    @Test
+    fun `GIVEN removeStop operation WHEN OnRemoveStopConfirmed is dispatched and RemoveStopUseCase succeeds THEN isLoading is false after completion`() = runTest(testDispatcher) {
+        val stop = Stop("s1", TRIP_ID, PLACE_NAME, LATITUDE, LONGITUDE, 1, StopStatus.PENDING)
+        coEvery { removeStopUseCase(TRIP_ID, "s1") } returns Result.success(Unit)
+        val viewModel = createViewModel()
+
+        viewModel.onIntent(TripDetailUiIntent.OnRemoveStopClicked(stop))
+        viewModel.onIntent(TripDetailUiIntent.OnRemoveStopConfirmed)
+        advanceUntilIdle()
+
+        assertFalse(viewModel.uiState.value.isLoading)
+    }
+
+    @Test
+    fun `GIVEN removeStop operation WHEN OnRemoveStopConfirmed is dispatched and RemoveStopUseCase fails THEN isLoading is false after completion`() = runTest(testDispatcher) {
+        val stop = Stop("s1", TRIP_ID, PLACE_NAME, LATITUDE, LONGITUDE, 1, StopStatus.PENDING)
+        coEvery { removeStopUseCase(TRIP_ID, "s1") } returns Result.failure(RuntimeException("error"))
+        val viewModel = createViewModel()
+
+        viewModel.onIntent(TripDetailUiIntent.OnRemoveStopClicked(stop))
+        viewModel.onIntent(TripDetailUiIntent.OnRemoveStopConfirmed)
+        advanceUntilIdle()
+
+        assertFalse(viewModel.uiState.value.isLoading)
+    }
+
+    @Test
+    fun `GIVEN moveStop operation WHEN OnMoveStopUp is dispatched and MoveStopUseCase succeeds THEN isLoading is false after completion`() = runTest(testDispatcher) {
+        coEvery { moveStopUseCase(TRIP_ID, 2, 1) } returns Result.success(Unit)
+        val viewModel = createViewModel()
+
+        viewModel.onIntent(TripDetailUiIntent.OnMoveStopUp("s2", 2))
+        advanceUntilIdle()
+
+        assertFalse(viewModel.uiState.value.isLoading)
+    }
+
+    @Test
+    fun `GIVEN moveStop operation WHEN OnMoveStopUp is dispatched and MoveStopUseCase fails THEN isLoading is false after completion`() = runTest(testDispatcher) {
+        coEvery { moveStopUseCase(TRIP_ID, 2, 1) } returns Result.failure(RuntimeException("error"))
+        val viewModel = createViewModel()
+
+        viewModel.onIntent(TripDetailUiIntent.OnMoveStopUp("s2", 2))
+        advanceUntilIdle()
+
+        assertFalse(viewModel.uiState.value.isLoading)
+    }
+
+    @Test
+    fun `GIVEN markStopDeparted operation WHEN OnMarkStopDepartedClicked is dispatched and MarkStopDepartedUseCase succeeds THEN isLoading is false after completion`() = runTest(testDispatcher) {
+        coEvery { markStopDepartedUseCase(TRIP_ID, "s1") } returns Result.success(Unit)
+        val viewModel = createViewModel()
+
+        viewModel.onIntent(TripDetailUiIntent.OnMarkStopDepartedClicked("s1"))
+        advanceUntilIdle()
+
+        assertFalse(viewModel.uiState.value.isLoading)
+    }
+
+    @Test
+    fun `GIVEN markStopDeparted operation WHEN OnMarkStopDepartedClicked is dispatched and MarkStopDepartedUseCase fails THEN isLoading is false after completion`() = runTest(testDispatcher) {
+        coEvery { markStopDepartedUseCase(TRIP_ID, "s1") } returns Result.failure(RuntimeException("error"))
+        val viewModel = createViewModel()
+
+        viewModel.onIntent(TripDetailUiIntent.OnMarkStopDepartedClicked("s1"))
+        advanceUntilIdle()
+
+        assertFalse(viewModel.uiState.value.isLoading)
+    }
+
+    @Test
+    fun `GIVEN undoMarkStopDeparted operation WHEN OnUndoMarkStopDepartedClicked is dispatched and UndoMarkStopDepartedUseCase succeeds THEN isLoading is false after completion`() = runTest(testDispatcher) {
+        coEvery { undoMarkStopDepartedUseCase(TRIP_ID) } returns Result.success(Unit)
+        val viewModel = createViewModel()
+
+        viewModel.onIntent(TripDetailUiIntent.OnUndoMarkStopDepartedClicked("s1"))
+        advanceUntilIdle()
+
+        assertFalse(viewModel.uiState.value.isLoading)
+    }
+
+    @Test
+    fun `GIVEN undoMarkStopDeparted operation WHEN OnUndoMarkStopDepartedClicked is dispatched and UndoMarkStopDepartedUseCase fails THEN isLoading is false after completion`() = runTest(testDispatcher) {
+        coEvery { undoMarkStopDepartedUseCase(TRIP_ID) } returns Result.failure(RuntimeException("error"))
+        val viewModel = createViewModel()
+
+        viewModel.onIntent(TripDetailUiIntent.OnUndoMarkStopDepartedClicked("s1"))
+        advanceUntilIdle()
+
+        assertFalse(viewModel.uiState.value.isLoading)
     }
 }

@@ -1,0 +1,72 @@
+## 0. Minimum Duration Utility (BDD)
+
+- [x] 0.1 Write test: GIVEN withMinimumDuration called with 500ms WHEN the block completes in under 500ms THEN the function does not return until 500ms have elapsed in WithMinimumDurationTest
+- [x] 0.2 Write test: GIVEN withMinimumDuration called with 500ms WHEN the block takes longer than 500ms THEN the function returns immediately after the block completes in WithMinimumDurationTest
+- [x] 0.3 Implement: Create withMinimumDuration suspend utility in ui/util/WithMinimumDuration.kt with minimumMillis defaulting to MINIMUM_LOADING_DURATION_MILLIS (500L)
+
+## 1. ViewModel — isLoading Wrapping (BDD)
+
+- [x] 1.1 Write test: GIVEN editStop operation WHEN OnEditStopConfirmed is dispatched and EditStopUseCase succeeds THEN isLoading is false after completion in TripDetailViewModelTest
+- [x] 1.2 Write test: GIVEN editStop operation WHEN OnEditStopConfirmed is dispatched and EditStopUseCase fails THEN isLoading is false after completion in TripDetailViewModelTest
+- [x] 1.3 Implement: Wrap editStop() with isLoading = true before async call, withMinimumDuration around use case, and isLoading = false on success/failure in TripDetailViewModel
+- [x] 1.4 Write test: GIVEN removeStop operation WHEN OnRemoveStopConfirmed is dispatched and RemoveStopUseCase succeeds THEN isLoading is false after completion in TripDetailViewModelTest
+- [x] 1.5 Write test: GIVEN removeStop operation WHEN OnRemoveStopConfirmed is dispatched and RemoveStopUseCase fails THEN isLoading is false after completion in TripDetailViewModelTest
+- [x] 1.6 Implement: Wrap removeStop() with isLoading = true/false and withMinimumDuration in TripDetailViewModel
+- [x] 1.7 Write test: GIVEN moveStop operation WHEN OnMoveStopUp is dispatched and MoveStopUseCase succeeds THEN isLoading is false after completion in TripDetailViewModelTest
+- [x] 1.8 Write test: GIVEN moveStop operation WHEN OnMoveStopUp is dispatched and MoveStopUseCase fails THEN isLoading is false after completion in TripDetailViewModelTest
+- [x] 1.9 Implement: Wrap moveStop() with isLoading = true/false and withMinimumDuration in TripDetailViewModel
+- [x] 1.10 Write test: GIVEN markStopDeparted operation WHEN OnMarkStopDepartedClicked is dispatched and MarkStopDepartedUseCase succeeds THEN isLoading is false after completion in TripDetailViewModelTest
+- [x] 1.11 Write test: GIVEN markStopDeparted operation WHEN OnMarkStopDepartedClicked is dispatched and MarkStopDepartedUseCase fails THEN isLoading is false after completion in TripDetailViewModelTest
+- [x] 1.12 Implement: Wrap markStopDeparted() with isLoading = true/false and withMinimumDuration in TripDetailViewModel
+- [x] 1.13 Write test: GIVEN undoMarkStopDeparted operation WHEN OnUndoMarkStopDepartedClicked is dispatched and UndoMarkStopDepartedUseCase succeeds THEN isLoading is false after completion in TripDetailViewModelTest
+- [x] 1.14 Write test: GIVEN undoMarkStopDeparted operation WHEN OnUndoMarkStopDepartedClicked is dispatched and UndoMarkStopDepartedUseCase fails THEN isLoading is false after completion in TripDetailViewModelTest
+- [x] 1.15 Implement: Wrap undoMarkStopDeparted() with isLoading = true/false and withMinimumDuration in TripDetailViewModel
+- [x] 1.16 Implement: Wrap existing setStop() use case call with withMinimumDuration in TripDetailViewModel (isLoading already handled)
+- [x] 1.17 Implement: Wrap existing createTrip() use case call with withMinimumDuration in TripListViewModel (isLoading already handled)
+
+## 2. SetStopDialog — Loading State (BDD)
+
+- [x] 2.1 Write test: GIVEN SetStopDialog with isLoading true WHEN rendered THEN confirm button is disabled in SetStopDialog Compose UI test
+- [x] 2.2 Write test: GIVEN SetStopDialog with isLoading true WHEN rendered THEN CircularProgressIndicator is visible in SetStopDialog Compose UI test
+- [x] 2.3 Write test: GIVEN SetStopDialog with isLoading false and valid input WHEN rendered THEN confirm button is enabled in SetStopDialog Compose UI test
+- [x] 2.4 Implement: Add isLoading parameter to SetStopDialog, disable confirm button when loading, show CircularProgressIndicator in confirm button slot
+
+## 3. CreateTripDialog — Loading State (BDD)
+
+- [x] 3.1 Write test: GIVEN CreateTripDialog with isLoading true WHEN rendered THEN confirm button is disabled in CreateTripDialog Compose UI test
+- [x] 3.2 Write test: GIVEN CreateTripDialog with isLoading true WHEN rendered THEN CircularProgressIndicator is visible in CreateTripDialog Compose UI test
+- [x] 3.3 Write test: GIVEN CreateTripDialog with isLoading false and valid name WHEN rendered THEN confirm button is enabled in CreateTripDialog Compose UI test
+- [x] 3.4 Implement: Add isLoading parameter to CreateTripDialog, disable confirm button when loading, show CircularProgressIndicator in confirm button slot
+
+## 4. StopSection — Loading State (BDD)
+
+- [x] 4.1 Write test: GIVEN StopSection with isLoading true WHEN rendered with action buttons THEN all action buttons are disabled in StopSection Compose UI test
+- [x] 4.2 Write test: GIVEN StopSection with isLoading false WHEN rendered with action buttons THEN all action buttons are enabled in StopSection Compose UI test
+- [x] 4.3 Implement: Add isLoading parameter to StopSection, disable IconButtons and OutlinedButtons when loading
+
+## 5. Screen Wiring — TripDetailScreen
+
+- [x] 5.1 Pass uiState.isLoading to all four SetStopDialog instances (starting point, add stop, edit stop, destination) in TripDetailScreen
+- [x] 5.2 Pass uiState.isLoading to all StopSection instances (starting point, intermediates, destination) in TripDetailScreen
+- [x] 5.3 Disable the "Add Stop" OutlinedButton when uiState.isLoading is true in TripDetailScreen
+- [x] 5.4 Disable the remove-stop confirmation dialog confirm button when uiState.isLoading is true in TripDetailScreen
+
+## 6. Screen Wiring — TripListScreen
+
+- [x] 6.1 Pass uiState.isLoading to CreateTripDialog in TripListScreen
+
+## 7. Previews
+
+- [x] 7.1 Add loading-state preview for SetStopDialog (StopForm with isLoading = true showing spinner and disabled confirm)
+- [x] 7.2 Add loading-state preview for CreateTripDialog (isLoading = true showing spinner and disabled confirm)
+- [x] 7.3 Verify existing PreviewTripDetailScreenLoading preview now visually shows disabled buttons (no code change needed if wiring is correct)
+- [x] 7.4 Verify existing PreviewTripListScreenLoading preview now visually shows loading state (no code change needed if wiring is correct)
+
+## 8. Compose UI Tests — Screen Level
+
+- [x] 8.1 Write test: GIVEN TripDetailScreen with isLoading true WHEN rendered THEN action buttons are disabled in TripDetailScreenTest
+- [x] 8.2 Write test: GIVEN TripListScreen with isLoading true and dialog visible WHEN rendered THEN confirm button is disabled in TripListScreenTest
+
+## 9. Verification
+
+- [x] 9.1 Run ./gradlew check and verify all tests pass

@@ -14,6 +14,7 @@ import com.guidovezzoni.venice.domain.usecase.UndoMarkStopDepartedUseCase
 import com.guidovezzoni.venice.ui.effect.TripDetailUiEffect
 import com.guidovezzoni.venice.ui.intent.TripDetailUiIntent
 import com.guidovezzoni.venice.ui.state.TripDetailUiState
+import com.guidovezzoni.venice.ui.util.withMinimumDuration
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -146,38 +147,46 @@ class TripDetailViewModel @Inject constructor(
 
     private fun markStopDeparted(stopId: String) {
         viewModelScope.launch {
-            markStopDepartedUseCase(tripId, stopId)
-                .onFailure { error ->
-                    _uiEffect.emit(TripDetailUiEffect.ShowError(error.message ?: UNKNOWN_ERROR))
-                }
+            _uiState.update { it.copy(isLoading = true) }
+            val result = withMinimumDuration { markStopDepartedUseCase(tripId, stopId) }
+            result.onFailure { error ->
+                _uiEffect.emit(TripDetailUiEffect.ShowError(error.message ?: UNKNOWN_ERROR))
+            }
+            _uiState.update { it.copy(isLoading = false) }
         }
     }
 
     private fun undoMarkStopDeparted() {
         viewModelScope.launch {
-            undoMarkStopDepartedUseCase(tripId)
-                .onFailure { error ->
-                    _uiEffect.emit(TripDetailUiEffect.ShowError(error.message ?: UNKNOWN_ERROR))
-                }
+            _uiState.update { it.copy(isLoading = true) }
+            val result = withMinimumDuration { undoMarkStopDepartedUseCase(tripId) }
+            result.onFailure { error ->
+                _uiEffect.emit(TripDetailUiEffect.ShowError(error.message ?: UNKNOWN_ERROR))
+            }
+            _uiState.update { it.copy(isLoading = false) }
         }
     }
 
     private fun moveStop(fromOrder: Int, toOrder: Int) {
         viewModelScope.launch {
-            moveStopUseCase(tripId, fromOrder, toOrder)
-                .onFailure { error ->
-                    _uiEffect.emit(TripDetailUiEffect.ShowError(error.message ?: UNKNOWN_ERROR))
-                }
+            _uiState.update { it.copy(isLoading = true) }
+            val result = withMinimumDuration { moveStopUseCase(tripId, fromOrder, toOrder) }
+            result.onFailure { error ->
+                _uiEffect.emit(TripDetailUiEffect.ShowError(error.message ?: UNKNOWN_ERROR))
+            }
+            _uiState.update { it.copy(isLoading = false) }
         }
     }
 
     private fun editStop(stopId: String, placeName: String, latitude: Double, longitude: Double) {
         viewModelScope.launch {
-            editStopUseCase(stopId, placeName, latitude, longitude)
+            _uiState.update { it.copy(isLoading = true) }
+            withMinimumDuration { editStopUseCase(stopId, placeName, latitude, longitude) }
                 .onSuccess {
-                    _uiState.update { it.copy(editingStop = null, isEditStopDialogVisible = false) }
+                    _uiState.update { it.copy(editingStop = null, isEditStopDialogVisible = false, isLoading = false) }
                 }
                 .onFailure { error ->
+                    _uiState.update { it.copy(isLoading = false) }
                     _uiEffect.emit(TripDetailUiEffect.ShowError(error.message ?: UNKNOWN_ERROR))
                 }
         }
@@ -186,11 +195,13 @@ class TripDetailViewModel @Inject constructor(
     private fun removeStop() {
         val stop = _uiState.value.stopToRemove ?: return
         viewModelScope.launch {
-            removeStopUseCase(tripId, stop.id)
+            _uiState.update { it.copy(isLoading = true) }
+            withMinimumDuration { removeStopUseCase(tripId, stop.id) }
                 .onSuccess {
-                    _uiState.update { it.copy(stopToRemove = null, isRemoveStopDialogVisible = false) }
+                    _uiState.update { it.copy(stopToRemove = null, isRemoveStopDialogVisible = false, isLoading = false) }
                 }
                 .onFailure { error ->
+                    _uiState.update { it.copy(isLoading = false) }
                     _uiEffect.emit(TripDetailUiEffect.ShowError(error.message ?: UNKNOWN_ERROR))
                 }
         }
@@ -205,7 +216,7 @@ class TripDetailViewModel @Inject constructor(
     ) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
-            setStopUseCase(tripId, placeName, latitude, longitude, stopType)
+            withMinimumDuration { setStopUseCase(tripId, placeName, latitude, longitude, stopType) }
                 .onSuccess {
                     _uiState.update { dismissDialog(it).copy(isLoading = false) }
                 }

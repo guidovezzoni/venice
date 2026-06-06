@@ -259,4 +259,4 @@ Unit tests should follow these criteria:
 - When a text string appears in multiple nodes (e.g. a button label and a dialog title), use `onAllNodesWithText(...)[index]` instead of `onNodeWithText`.
 - Wrap the composable in the app theme (`HeadingToTheAlpsTheme`) for accurate rendering.
 - Cover at minimum: empty/default state, populated state, visibility toggles for dialogs, button click intents, and dismiss intents.
-- **Execution**: tests run on a physical device via `./gradlew connectedDebugAndroidTest`. Emulator support is currently blocked by a Wayland compatibility issue.
+- **Execution**: tests run on a connected device (physical or emulator) via `./gradlew connectedDebugAndroidTest`.

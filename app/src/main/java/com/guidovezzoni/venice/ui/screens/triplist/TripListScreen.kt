@@ -84,6 +84,7 @@ fun TripListScreen(
 
         if (uiState.isCreateDialogVisible) {
             CreateTripDialog(
+                isLoading = uiState.isLoading,
                 tripName = uiState.tripNameInput,
                 onNameChange = onNameChange,
                 onConfirm = onConfirmCreateTrip,

@@ -1,41 +1,4 @@
-# Destination UI
-
-## Purpose
-
-Defines the consolidated, parameterised UI composables for displaying and editing stops (starting point and destination) in a trip.
-
-## Requirements
-
-### Requirement: StopSection composable (consolidated)
-`StopSection` SHALL be a single parameterised composable that replaces the separate `StartingPointSection` and `DestinationSection`. It accepts:
-- `icon: ImageVector` — the icon to display in the filled state
-- `@StringRes titleRes` — the section title
-- `@StringRes setButtonTextRes` — the empty-state button label
-- `@StringRes changeDescriptionRes` — the accessibility description for the filled card
-- `@StringRes filledLabelRes` — the label shown above the place name in the filled state
-- `stop: Stop?` — the stop to display, or null for empty state
-- `onSetStopClicked: () -> Unit` — callback when the user taps to set/change
-
-When `stop` is `null`: a placeholder card with an outlined button is displayed.
-When `stop` is non-null: a card showing the place name, coordinates, icon, and label. Tapping it triggers the callback.
-
-The section SHALL include a `contentDescription` on the button/card for accessibility.
-
-#### Scenario: Empty state shown for starting point
-- **WHEN** `stop` is `null` and `setButtonTextRes` is the "Set starting point" resource
-- **THEN** a placeholder with "Set starting point" button is displayed
-
-#### Scenario: Empty state shown for destination
-- **WHEN** `stop` is `null` and `setButtonTextRes` is the "Set destination" resource
-- **THEN** a placeholder with "Set destination" button is displayed
-
-#### Scenario: Filled state shown for destination
-- **WHEN** `stop` has `placeName = "Barcelona"` and coordinates, with `Place` icon and "Destination" label
-- **THEN** a card with "Barcelona", coordinates, and a "Destination" label is displayed
-
-#### Scenario: Tapping filled state triggers callback
-- **WHEN** the user taps the stop card
-- **THEN** `onSetStopClicked` is triggered
+## MODIFIED Requirements
 
 ### Requirement: SetStopDialog composable (consolidated)
 `SetStopDialog` SHALL be a single parameterised composable that replaces the separate `SetStartingPointDialog` and `SetDestinationDialog`. It accepts 7 `@StringRes` parameters for: dialog title, place name hint, place name error, latitude hint, latitude error, longitude hint, longitude error.
@@ -47,8 +10,6 @@ It SHALL also accept three optional initial-value parameters:
 
 It SHALL also accept a loading parameter:
 - `isLoading: Boolean = false` — when `true`, the confirm button SHALL be disabled and a `CircularProgressIndicator` SHALL be displayed inline in the confirm button slot
-
-When initial values are provided, the corresponding fields SHALL be initialised with those values instead of empty strings.
 
 When `isLoading` is `true`:
 - The confirm button SHALL be disabled regardless of field validation state
@@ -96,6 +57,8 @@ It SHALL display an `AlertDialog` with:
 #### Scenario: Dismiss button enabled while loading
 - **WHEN** `isLoading` is `true`
 - **THEN** the dismiss button remains enabled
+
+## ADDED Requirements
 
 ### Requirement: StopSection accepts loading state
 `StopSection` SHALL accept an `isLoading: Boolean = false` parameter. When `isLoading` is `true`, all action buttons within the section SHALL be disabled:

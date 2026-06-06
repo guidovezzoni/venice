@@ -1,15 +1,21 @@
 Please apply the changes for the current OpenSpec change and resolve any outstanding TODOs.
 
-## Physical device gate
+## Device connectivity
 
-Whenever any step in this command — or any task in the task list — requires a physical Android device (instrumented tests, on-device verification, manual UI checks, etc.):
+### Early reminder (non-blocking)
 
-1. Run `adb devices` to check for a connected physical device.
-2. If no physical device is listed (or only emulators are listed):
-   a. Ask the user to connect a physical device via USB with USB debugging enabled — do not attempt to use an emulator (blocked by a Wayland compatibility issue).
-   b. **BLOCK here. Do NOT continue to subsequent steps or tasks.** Wait for the user to respond confirming the device is connected.
+At the very start of this command — before executing any task — inform the user that a connected Android device (physical or emulator) will be needed later for instrumented tests and on-device verification. **Do not block.** Proceed immediately with the tasks.
+
+### Device gate (blocking)
+
+Whenever any step in this command — or any task in the task list — requires a connected Android device (instrumented tests, on-device verification, manual UI checks, etc.):
+
+1. Run `adb devices` to check for a connected device (physical or emulator).
+2. If no device is listed:
+   a. Ask the user to connect a device — either a physical device via USB with USB debugging enabled, or an emulator.
+   b. **BLOCK here. Do NOT continue to subsequent steps or tasks.** Wait for the user to respond confirming the device is available.
    c. Re-run `adb devices` to verify the device appeared. If still not listed, repeat from sub-step a.
-3. Only proceed once a physical device is confirmed connected.
+3. Only proceed once a device is confirmed connected.
 
 This gate applies everywhere a device is needed — it is not limited to a specific step.
 
@@ -44,9 +50,9 @@ Follow these steps:
 
    No special BDD procedure — just implement as normal.
 
-   **D. Task requiring a physical device** (description mentions on-device verification, manual UI check, or instrumented tests):
+   **D. Task requiring a connected device** (description mentions on-device verification, manual UI check, or instrumented tests):
 
-   Apply the **physical device gate** (see above) before executing the task. Once the device is connected, perform the verification autonomously using `adb` (screenshots, UI dumps, taps) — do not ask the user to run or observe it.
+   Apply the **device gate** (see above) before executing the task. Once the device is connected, perform the verification autonomously using `adb` (screenshots, UI dumps, taps) — do not ask the user to run or observe it.
 
    **Task type detection**:
    - A task is a "test task" if its description contains: "Write test", "Add test",
@@ -68,7 +74,7 @@ Follow these steps:
    3. **Re-apply the changes.** Execute the OpenSpec apply command (`/opsx:apply`) again to implement the updated tasks.
    4. **Re-check TODOs.** Repeat from step 2 to verify that no RESOLVE NOW TODOs remain. Continue this loop until all TODOs are either resolved or classified as ACKNOWLEDGED.
 
-4. **Run Compose UI tests on a physical device.** Once no RESOLVE NOW TODOs remain, apply the **physical device gate** (see above), then run the instrumented tests:
+4. **Run Compose UI tests on a connected device.** Once no RESOLVE NOW TODOs remain, apply the **device gate** (see above), then run the instrumented tests:
    ```
    ./gradlew connectedDebugAndroidTest
    ```

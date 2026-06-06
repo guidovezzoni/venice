@@ -50,6 +50,7 @@ private const val DEPARTED_ALPHA = 0.6f
 @Composable
 fun StopSection(
     modifier: Modifier = Modifier,
+    isLoading: Boolean = false,
     stop: Stop? = null,
     onSetStopClicked: () -> Unit = {},
     icon: ImageVector,
@@ -78,6 +79,7 @@ fun StopSection(
                 icon = icon,
                 changeDescriptionRes = changeDescriptionRes,
                 filledLabelRes = filledLabelRes,
+                isLoading = isLoading,
                 onMoveUp = onMoveUp,
                 onMoveDown = onMoveDown,
                 onDelete = onDelete,
@@ -89,6 +91,7 @@ fun StopSection(
             EmptyStop(
                 onClick = onSetStopClicked,
                 setButtonTextRes = setButtonTextRes,
+                isLoading = isLoading,
             )
         }
     }
@@ -101,6 +104,7 @@ private fun FilledStop(
     icon: ImageVector,
     @StringRes changeDescriptionRes: Int,
     @StringRes filledLabelRes: Int,
+    isLoading: Boolean = false,
     onMoveUp: (() -> Unit)? = null,
     onMoveDown: (() -> Unit)? = null,
     onDelete: (() -> Unit)? = null,
@@ -167,7 +171,7 @@ private fun FilledStop(
                 )
             }
             if (onMoveUp != null) {
-                IconButton(onClick = onMoveUp) {
+                IconButton(onClick = onMoveUp, enabled = !isLoading) {
                     Icon(
                         imageVector = Icons.Filled.KeyboardArrowUp,
                         contentDescription = stringResource(R.string.trip_detail_move_stop_up),
@@ -175,7 +179,7 @@ private fun FilledStop(
                 }
             }
             if (onMoveDown != null) {
-                IconButton(onClick = onMoveDown) {
+                IconButton(onClick = onMoveDown, enabled = !isLoading) {
                     Icon(
                         imageVector = Icons.Filled.KeyboardArrowDown,
                         contentDescription = stringResource(R.string.trip_detail_move_stop_down),
@@ -183,7 +187,7 @@ private fun FilledStop(
                 }
             }
             if (onDelete != null) {
-                IconButton(onClick = onDelete) {
+                IconButton(onClick = onDelete, enabled = !isLoading) {
                     Icon(
                         imageVector = Icons.Outlined.Delete,
                         contentDescription = stringResource(R.string.trip_detail_remove_stop),
@@ -194,6 +198,7 @@ private fun FilledStop(
         if (onMarkDeparted != null) {
             OutlinedButton(
                 onClick = onMarkDeparted,
+                enabled = !isLoading,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = SECTION_PADDING)
@@ -205,6 +210,7 @@ private fun FilledStop(
         if (onUndoDeparted != null) {
             OutlinedButton(
                 onClick = onUndoDeparted,
+                enabled = !isLoading,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = SECTION_PADDING)
@@ -220,10 +226,12 @@ private fun FilledStop(
 private fun EmptyStop(
     onClick: () -> Unit,
     @StringRes setButtonTextRes: Int,
+    isLoading: Boolean = false,
 ) {
     val buttonDescription = stringResource(setButtonTextRes)
     OutlinedButton(
         onClick = onClick,
+        enabled = !isLoading,
         modifier = Modifier
             .fillMaxWidth()
             .semantics { contentDescription = buttonDescription },
@@ -435,6 +443,35 @@ private fun PreviewStopSectionCurrent() {
             changeDescriptionRes = R.string.trip_detail_change_intermediate_stop,
             filledLabelRes = R.string.trip_detail_intermediate_stop_label,
             stopDisplayState = StopDisplayState.CURRENT,
+            onMarkDeparted = {},
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PreviewStopSectionLoading() {
+    HeadingToTheAlpsTheme {
+        StopSection(
+            stop = Stop(
+                id = "3",
+                tripId = "trip-1",
+                placeName = "Florence, Italy",
+                latitude = 43.7696,
+                longitude = 11.2558,
+                order = 1,
+                status = StopStatus.PENDING,
+            ),
+            icon = Icons.Filled.Place,
+            titleRes = R.string.trip_detail_intermediate_stop_label,
+            setButtonTextRes = R.string.trip_detail_add_stop,
+            changeDescriptionRes = R.string.trip_detail_change_intermediate_stop,
+            filledLabelRes = R.string.trip_detail_intermediate_stop_label,
+            stopDisplayState = StopDisplayState.CURRENT,
+            isLoading = true,
+            onMoveUp = {},
+            onMoveDown = {},
+            onDelete = {},
             onMarkDeparted = {},
         )
     }

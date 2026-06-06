@@ -19,13 +19,13 @@ Each of the below operations adds a summary of the actions/results into an HTML 
 
 [sdlc_apply_changes](sdlc_apply_changes.md) implements the current OpenSpec change using BDD Red/Green cycle (test tasks verified RED before implementation, implementation tasks verified GREEN after). Then looks for outstanding TODOs, runs a security review, and updates the documentation. Uses `/opsx:apply` and `/security-review`.
 
-### 4. Verify User Story: `/sdlc_verify_story <story>`
+### 3b. Apply change (sub-agents): `/sdlc_apply_changes_with_sub_agents`
 
-[sdlc_verify_story](sdlc_verify_story.md) is an end-to-end verification gate. Runs OpenSpec's verify, scans for unresolved TODOs, runs a security review on pending changes, checks every acceptance criterion in the story against the codebase, and finally closes the story. Uses `/opsx:verify` and `/security-review`.
+[sdlc_apply_changes_with_sub_agents](sdlc_apply_changes_with_sub_agents.md) is an alternative to `/sdlc_apply_changes` that uses sub-agent orchestration. Instead of running all tasks in a single session, it delegates each task section to a separate sub-agent with a fresh context window. This prevents task checkboxes from being forgotten in long sessions. It also reduces cost by using cheaper models: Sonnet for BDD sections (test + implement cycles) and Haiku for mechanical tasks (wiring, previews, commands). The parent agent orchestrates, verifies checkbox completion after each section, and handles failures. Steps 2-10 (TODO scan, security review, etc.) are identical to the standard apply command.
 
-### 5. Archive: `/sdlc_archive`
+### 4. Verify and Archive: `/sdlc_verify_story <story>`
 
-[sdlc_archive](sdlc_archive.md) runs OpenSpec's archive to finalise and archive the completed change, then verifies that the documentation is in sync with the codebase and specs. Uses `/opsx:archive`.
+[sdlc_verify_story](sdlc_verify_story.md) is an end-to-end verification and archive gate. Runs OpenSpec's verify, scans for unresolved TODOs, runs a security review on pending changes, checks every acceptance criterion in the story against the codebase, closes the story, then archives the OpenSpec change and verifies documentation is in sync. Uses `/opsx:verify`, `/security-review`, and `/opsx:archive`.
 
 ## Setup
 
@@ -39,13 +39,18 @@ These scripts create symlinks in `.claude/commands/sdlc/` and `.cursor/commands/
 ## TODO
 
 SDLC:
-- add PR review - other  LLM provider???
-- archive should also sync???
-- archive should be merged with verification???
 - multi-agent orchestration
 - LLM agnostic
 - self-improvement
 - sort different phases in the command list -not sure how
+- verification: remind the user to connect a phone but then start the verification anyway. When the on-device test need to be run, then ask the user to connect the device.
+
+Guidelines:
+- async operations should be wrapped in a loading state with a spinner, and if required disabling the button that triggered the operation, to avoid re-trigger. The spinner should have a minimum duration of 0.5 seconds to avoid a flickering UI.
+- create a guideline for readme
+- step for static checks:
+  - unused import directive / deprecation
 
 Not sure what's best yet:
 - When both Domain and UI require the same data type, f.i. an enum, where should this be defined? In Domain? Should it be duplicated in UI? Should it be defined in another root package?
+- add PR review - other  LLM provider???

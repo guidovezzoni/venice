@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.guidovezzoni.venice.domain.repository.TripRepository
 import com.guidovezzoni.venice.domain.usecase.CreateTripUseCase
 import com.guidovezzoni.venice.ui.effect.TripListUiEffect
+import com.guidovezzoni.venice.ui.util.withMinimumDuration
 import com.guidovezzoni.venice.ui.intent.TripListUiIntent
 import com.guidovezzoni.venice.ui.state.TripListUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -60,7 +61,7 @@ class TripListViewModel @Inject constructor(
         val name = _uiState.value.tripNameInput
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
-            createTripUseCase(name)
+            withMinimumDuration { createTripUseCase(name) }
                 .onSuccess { trip ->
                     _uiState.update { it.copy(isLoading = false, isCreateDialogVisible = false, tripNameInput = "") }
                     _uiEffect.emit(TripListUiEffect.NavigateToTripDetail(trip.id))

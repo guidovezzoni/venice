@@ -13,6 +13,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
@@ -23,16 +24,15 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class TripListViewModelTest {
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     private val testDispatcher = UnconfinedTestDispatcher()
 
     private lateinit var createTripUseCase: CreateTripUseCase
     private lateinit var tripRepository: TripRepository
     private lateinit var viewModel: TripListViewModel
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
@@ -42,21 +42,20 @@ class TripListViewModelTest {
         viewModel = TripListViewModel(createTripUseCase, tripRepository)
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     @After
     fun tearDown() {
         Dispatchers.resetMain()
     }
 
     @Test
-    fun `GIVEN initial state WHEN OnCreateTripClicked intent is dispatched THEN isCreateDialogVisible becomes true`() = runTest {
+    fun `GIVEN initial state WHEN OnCreateTripClicked intent is dispatched THEN isCreateDialogVisible becomes true`() = runTest(testDispatcher) {
         viewModel.onIntent(TripListUiIntent.OnCreateTripClicked)
 
         assertTrue(viewModel.uiState.value.isCreateDialogVisible)
     }
 
     @Test
-    fun `GIVEN dialog visible WHEN OnDismissCreateDialog intent is dispatched THEN isCreateDialogVisible becomes false`() = runTest {
+    fun `GIVEN dialog visible WHEN OnDismissCreateDialog intent is dispatched THEN isCreateDialogVisible becomes false`() = runTest(testDispatcher) {
         viewModel.onIntent(TripListUiIntent.OnCreateTripClicked)
         viewModel.onIntent(TripListUiIntent.OnDismissCreateDialog)
 
@@ -75,6 +74,7 @@ class TripListViewModelTest {
 
         viewModel.onIntent(TripListUiIntent.OnTripNameChanged("Summer Drive"))
         viewModel.onIntent(TripListUiIntent.ConfirmCreateTrip)
+        advanceUntilIdle()
 
         val expectedEffect = TripListUiEffect.NavigateToTripDetail("trip-id")
         assertEquals(expectedEffect, effects.first())
@@ -82,7 +82,7 @@ class TripListViewModelTest {
     }
 
     @Test
-    fun `GIVEN an empty trip list WHEN ViewModel is initialised THEN uiState trips is empty`() = runTest {
+    fun `GIVEN an empty trip list WHEN ViewModel is initialised THEN uiState trips is empty`() = runTest(testDispatcher) {
         val expectedTrips = emptyList<Trip>()
         assertEquals(expectedTrips, viewModel.uiState.value.trips)
     }
@@ -112,6 +112,7 @@ class TripListViewModelTest {
 
         viewModel.onIntent(TripListUiIntent.OnTripNameChanged("Trip"))
         viewModel.onIntent(TripListUiIntent.ConfirmCreateTrip)
+        advanceUntilIdle()
 
         assertTrue(effects.any { it is TripListUiEffect.ShowError })
         collectJob.cancel()
