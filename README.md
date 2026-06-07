@@ -97,3 +97,7 @@ Prerequisites (setup, models) come first, BDD pairs in the middle ordered by dep
 ./gradlew check              # Full checks
 ./gradlew build              # Complete verification
 ```
+
+
+## TODO
+- Location biased search

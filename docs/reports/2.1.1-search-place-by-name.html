@@ -111,6 +111,38 @@
       <li><strong>19-item completion checklist</strong> including on-device manual verification.</li>
     </ul>
   </section>
+  <section class="report-section" data-source="opsx:propose" data-timestamp="2026-06-07T14:15:00Z">
+    <header>
+      <h2>Change Proposed</h2>
+      <time datetime="2026-06-07T14:15:00Z">07 June 2026, 16:15</time>
+    </header>
+    <p class="section-source">Source: opsx:propose</p>
+
+    <h3>Exploration Findings</h3>
+    <p>Investigated 8 key design questions before proposing. Findings grounded in Google Places SDK (New) documentation via Context7:</p>
+    <ul>
+      <li><strong>Places SDK API surface</strong>: <code>FindAutocompletePredictionsRequest</code> + <code>FetchPlaceRequest</code> with <code>AutocompleteSessionToken</code> for billing (~$0.017/session). Task-based API requires <code>kotlinx-coroutines-play-services</code> for <code>.await()</code>.</li>
+      <li><strong>Session token</strong>: Managed entirely inside <code>PlaceSearchRepositoryImpl</code> — domain layer never sees it. Auto-created on first search, consumed on place detail fetch, cleared on dialog dismiss.</li>
+      <li><strong>Debouncing</strong>: Job cancellation pattern (300ms) — matches existing ViewModel style.</li>
+      <li><strong>State split</strong>: Search state (suggestions, loading, error) in ViewModel; form fields (placeName, lat, lng) remain as local composable state. Coordinate writeback via <code>selectedPlaceDetail</code> field consumed by <code>LaunchedEffect</code>.</li>
+      <li><strong>Read-only coordinates</strong>: Local composable boolean, set on selection, cleared on manual edit.</li>
+      <li><strong>SDK initialisation</strong>: <code>Places.initializeWithNewPlacesApiEnabled()</code> in <code>VeniceApplication.onCreate()</code>; <code>PlacesClient</code> provided via Hilt.</li>
+    </ul>
+
+    <h3>Questions Asked and Answers</h3>
+    <p>All 8 design questions were explored and resolved during the exploration phase. No blocking ambiguities remained — the user confirmed the approach was solid and approved moving to proposal.</p>
+
+    <h3>Artefacts Created</h3>
+    <table>
+      <tr><th>Artefact</th><th>Path</th><th>Description</th></tr>
+      <tr><td>Proposal</td><td><code>openspec/changes/search-place-by-name/proposal.md</code></td><td>Motivation, what changes, capabilities (1 new, 2 modified), impact</td></tr>
+      <tr><td>Design</td><td><code>openspec/changes/search-place-by-name/design.md</code></td><td>6 key decisions with rationale: token management, debounce strategy, hybrid state, PlacesClient init, coroutine bridge, read-only coordinates</td></tr>
+      <tr><td>Spec: place-search</td><td><code>openspec/changes/search-place-by-name/specs/place-search/spec.md</code></td><td>New capability: domain models, repository, mappers, use cases, DI, SDK init, dependencies (14 requirements)</td></tr>
+      <tr><td>Spec: destination-ui</td><td><code>openspec/changes/search-place-by-name/specs/destination-ui/spec.md</code></td><td>Modified: SetStopDialog gains suggestion list, search loading, read-only coordinates, selection callbacks</td></tr>
+      <tr><td>Spec: trip-detail</td><td><code>openspec/changes/search-place-by-name/specs/trip-detail/spec.md</code></td><td>Modified: UiState + 4 fields, UiIntent + 2 intents, ViewModel debounced search + selection logic, screen wiring, string resources</td></tr>
+      <tr><td>Tasks</td><td><code>openspec/changes/search-place-by-name/tasks.md</code></td><td>15 sections, 41 tasks, BDD test-first ordering for mappers, repository, use cases, ViewModel, and UI</td></tr>
+    </table>
+  </section>
   </main>
 
 </body>
