@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Report: 2.1.1 — Search for a Place by Name</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.6;
+      color: #1a1a1a;
+      background: #fafafa;
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+
+    .report-header {
+      border-bottom: 3px solid #2563eb;
+      padding-bottom: 1rem;
+      margin-bottom: 2rem;
+    }
+    .report-header h1 { font-size: 1.75rem; color: #1e293b; }
+    .report-meta {
+      display: flex; gap: 2rem; flex-wrap: wrap;
+      margin-top: 0.5rem; font-size: 0.875rem; color: #64748b;
+    }
+    .report-meta span { display: inline-flex; align-items: center; gap: 0.25rem; }
+
+    .report-section {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .report-section header {
+      display: flex; justify-content: space-between; align-items: baseline;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 0.75rem; margin-bottom: 1rem;
+    }
+    .report-section header h2 { font-size: 1.25rem; color: #1e293b; }
+    .report-section header time { font-size: 0.8rem; color: #94a3b8; white-space: nowrap; }
+    .section-source { font-size: 0.75rem; color: #94a3b8; font-style: italic; margin-bottom: 0.75rem; }
+
+    h3 { font-size: 1.05rem; color: #334155; margin: 1rem 0 0.5rem; }
+    p { margin-bottom: 0.75rem; }
+    ul, ol { margin: 0.5rem 0 0.75rem 1.5rem; }
+    li { margin-bottom: 0.25rem; }
+    code {
+      background: #f1f5f9; padding: 0.15rem 0.35rem; border-radius: 3px;
+      font-size: 0.875em;
+      font-family: "SF Mono", "Fira Code", Menlo, Consolas, monospace;
+    }
+
+    table { width: 100%; border-collapse: collapse; margin: 0.75rem 0; font-size: 0.9rem; }
+    th, td { text-align: left; padding: 0.5rem 0.75rem; border: 1px solid #e2e8f0; }
+    th { background: #f8fafc; font-weight: 600; color: #475569; }
+
+    .badge {
+      display: inline-block; padding: 0.15rem 0.5rem;
+      border-radius: 4px; font-size: 0.8rem; font-weight: 600;
+    }
+    .badge-pass { background: #dcfce7; color: #166534; }
+    .badge-fail { background: #fee2e2; color: #991b1b; }
+    .badge-warn { background: #fef9c3; color: #854d0e; }
+    .badge-info { background: #dbeafe; color: #1e40af; }
+
+    .outcome { margin-top: 1rem; padding: 0.75rem 1rem; border-radius: 6px; font-weight: 600; }
+    .outcome-passed { background: #dcfce7; color: #166534; border-left: 4px solid #22c55e; }
+    .outcome-failed { background: #fee2e2; color: #991b1b; border-left: 4px solid #ef4444; }
+  </style>
+</head>
+<body>
+
+  <div class="report-header">
+    <h1>2.1.1 — Search for a Place by Name</h1>
+    <div class="report-meta">
+      <span><strong>Story:</strong> 2.1.1</span>
+      <span><strong>Branch:</strong> feature/2.1.1-search-place-by-name</span>
+      <span><strong>Created:</strong> 2026-06-07</span>
+    </div>
+  </div>
+
+  <main id="report-sections">
+  <section class="report-section" data-source="open_user_story" data-timestamp="2026-06-07T11:33:20Z">
+    <header>
+      <h2>Story Opened</h2>
+      <time datetime="2026-06-07T11:33:20Z">07 June 2026, 13:33</time>
+    </header>
+    <p class="section-source">Source: open_user_story</p>
+
+    <h3>User Story</h3>
+    <p><strong>2.1.1 — Search for a Place by Name</strong></p>
+    <p>As a user, I want to search for a place by name when adding or editing a stop so that I don't have to know exact coordinates.</p>
+
+    <h3>Branch</h3>
+    <p><code>feature/2.1.1-search-place-by-name</code> created from <code>main</code> at <code>ef1af19</code>.</p>
+
+    <h3>Refinement Summary</h3>
+    <p>The original user story was high-level. The refined version adds:</p>
+    <ul>
+      <li><strong>10 detailed acceptance criteria</strong> covering search integration, debouncing, suggestion display, selection, read-only coordinates, manual fallback, edit mode, error handling, loading indicator, and session token lifecycle.</li>
+      <li><strong>Full technical specification</strong> across 9 new files (domain models, repository interface/implementation, mappers, use cases, DI module) and 8 files to modify (gradle, build config, UI composables, state, intents, ViewModel, strings, app initialisation).</li>
+      <li><strong>Google Places SDK (New)</strong> integration via <code>com.google.android.libraries.places:places:4.2.0</code> with session-token-based billing.</li>
+      <li><strong>API key security</strong>: stored in <code>local.properties</code> (gitignored), surfaced via <code>BuildConfig</code>, restricted to app package and signing certificate.</li>
+      <li><strong>Clean Architecture compliance</strong>: domain layer uses <code>Any</code> for session token to avoid SDK type leakage; mappers reside in the data layer.</li>
+      <li><strong>Non-functional analysis</strong>: GDPR (no PII sent beyond search query), performance (debounce + coroutine cancellation), accessibility (focusable suggestions, screen reader announcements), offline graceful degradation.</li>
+      <li><strong>19-item completion checklist</strong> including on-device manual verification.</li>
+    </ul>
+  </section>
+  </main>
+
+</body>
+</html>
