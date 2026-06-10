@@ -4,11 +4,14 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.guidovezzoni.venice.domain.model.StopType
+import com.guidovezzoni.venice.domain.repository.PlaceSearchRepository
 import com.guidovezzoni.venice.domain.usecase.EditStopUseCase
+import com.guidovezzoni.venice.domain.usecase.GetPlaceDetailUseCase
 import com.guidovezzoni.venice.domain.usecase.MarkStopDepartedUseCase
 import com.guidovezzoni.venice.domain.usecase.MoveStopUseCase
 import com.guidovezzoni.venice.domain.usecase.ObserveStopsUseCase
 import com.guidovezzoni.venice.domain.usecase.RemoveStopUseCase
+import com.guidovezzoni.venice.domain.usecase.SearchPlacesUseCase
 import com.guidovezzoni.venice.domain.usecase.SetStopUseCase
 import com.guidovezzoni.venice.domain.usecase.UndoMarkStopDepartedUseCase
 import com.guidovezzoni.venice.ui.effect.TripDetailUiEffect
@@ -16,6 +19,8 @@ import com.guidovezzoni.venice.ui.intent.TripDetailUiIntent
 import com.guidovezzoni.venice.ui.state.TripDetailUiState
 import com.guidovezzoni.venice.ui.util.withMinimumDuration
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -32,6 +37,7 @@ private const val ARG_TRIP_ID = "tripId"
 private const val STARTING_POINT_ORDER = 0
 private const val MAX_STOP_COUNT = 25
 private const val UNKNOWN_ERROR = "Unknown error"
+private const val SEARCH_DEBOUNCE_MILLIS = 300L
 
 @HiltViewModel
 class TripDetailViewModel @Inject constructor(
@@ -42,10 +48,15 @@ class TripDetailViewModel @Inject constructor(
     private val markStopDepartedUseCase: MarkStopDepartedUseCase,
     private val undoMarkStopDepartedUseCase: UndoMarkStopDepartedUseCase,
     observeStopsUseCase: ObserveStopsUseCase,
+    private val searchPlacesUseCase: SearchPlacesUseCase,
+    private val getPlaceDetailUseCase: GetPlaceDetailUseCase,
+    private val placeSearchRepository: PlaceSearchRepository,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
     private val tripId: String = checkNotNull(savedStateHandle[ARG_TRIP_ID])
+
+    private var searchJob: Job? = null
 
     private val _uiState = MutableStateFlow(TripDetailUiState(tripId = tripId))
     val uiState: StateFlow<TripDetailUiState> = _uiState.asStateFlow()
@@ -83,8 +94,12 @@ class TripDetailViewModel @Inject constructor(
             TripDetailUiIntent.OnSetStartingPointClicked ->
                 _uiState.update { it.copy(isSetStartingPointDialogVisible = true) }
 
-            TripDetailUiIntent.OnDismissStartingPointDialog ->
+            TripDetailUiIntent.OnDismissStartingPointDialog -> {
+                searchJob?.cancel()
                 _uiState.update { it.copy(isSetStartingPointDialogVisible = false) }
+                clearSearchState()
+                placeSearchRepository.resetSession()
+            }
 
             is TripDetailUiIntent.OnStartingPointConfirmed ->
                 setStop(intent.placeName, intent.latitude, intent.longitude, StopType.STARTING_POINT) {
@@ -94,8 +109,12 @@ class TripDetailViewModel @Inject constructor(
             TripDetailUiIntent.OnSetDestinationClicked ->
                 _uiState.update { it.copy(isSetDestinationDialogVisible = true) }
 
-            TripDetailUiIntent.OnDismissDestinationDialog ->
+            TripDetailUiIntent.OnDismissDestinationDialog -> {
+                searchJob?.cancel()
                 _uiState.update { it.copy(isSetDestinationDialogVisible = false) }
+                clearSearchState()
+                placeSearchRepository.resetSession()
+            }
 
             is TripDetailUiIntent.OnDestinationConfirmed ->
                 setStop(intent.placeName, intent.latitude, intent.longitude, StopType.DESTINATION) {
@@ -105,8 +124,12 @@ class TripDetailViewModel @Inject constructor(
             TripDetailUiIntent.OnAddStopClicked ->
                 _uiState.update { it.copy(isAddStopDialogVisible = true) }
 
-            TripDetailUiIntent.OnDismissAddStopDialog ->
+            TripDetailUiIntent.OnDismissAddStopDialog -> {
+                searchJob?.cancel()
                 _uiState.update { it.copy(isAddStopDialogVisible = false) }
+                clearSearchState()
+                placeSearchRepository.resetSession()
+            }
 
             is TripDetailUiIntent.OnAddStopConfirmed ->
                 setStop(intent.placeName, intent.latitude, intent.longitude, StopType.INTERMEDIATE) {
@@ -122,8 +145,12 @@ class TripDetailViewModel @Inject constructor(
             is TripDetailUiIntent.OnEditStopClicked ->
                 _uiState.update { it.copy(editingStop = intent.stop, isEditStopDialogVisible = true) }
 
-            TripDetailUiIntent.OnDismissEditStopDialog ->
+            TripDetailUiIntent.OnDismissEditStopDialog -> {
+                searchJob?.cancel()
                 _uiState.update { it.copy(editingStop = null, isEditStopDialogVisible = false) }
+                clearSearchState()
+                placeSearchRepository.resetSession()
+            }
 
             is TripDetailUiIntent.OnEditStopConfirmed ->
                 editStop(intent.stopId, intent.placeName, intent.latitude, intent.longitude)
@@ -142,6 +169,35 @@ class TripDetailViewModel @Inject constructor(
 
             is TripDetailUiIntent.OnUndoMarkStopDepartedClicked ->
                 undoMarkStopDeparted()
+
+            is TripDetailUiIntent.OnSearchQueryChanged -> {
+                searchJob?.cancel()
+                if (intent.query.isBlank()) {
+                    clearSearchState()
+                } else {
+                    searchJob = viewModelScope.launch {
+                        _uiState.update { it.copy(isSearchingPlaces = true) }
+                        delay(SEARCH_DEBOUNCE_MILLIS)
+                        val result = searchPlacesUseCase(intent.query)
+                        result.onSuccess { suggestions ->
+                            _uiState.update { it.copy(placeSuggestions = suggestions, isSearchingPlaces = false, searchError = null) }
+                        }.onFailure { error ->
+                            _uiState.update { it.copy(isSearchingPlaces = false, searchError = error.message, placeSuggestions = emptyList()) }
+                        }
+                    }
+                }
+            }
+
+            is TripDetailUiIntent.OnSuggestionSelected -> {
+                viewModelScope.launch {
+                    val result = getPlaceDetailUseCase(intent.suggestion.placeId)
+                    result.onSuccess { detail ->
+                        _uiState.update { it.copy(selectedPlaceDetail = detail, placeSuggestions = emptyList()) }
+                    }.onFailure { error ->
+                        _uiEffect.emit(TripDetailUiEffect.ShowError(error.message ?: UNKNOWN_ERROR))
+                    }
+                }
+            }
         }
     }
 
@@ -224,6 +280,17 @@ class TripDetailViewModel @Inject constructor(
                     _uiState.update { it.copy(isLoading = false) }
                     _uiEffect.emit(TripDetailUiEffect.ShowError(error.message ?: UNKNOWN_ERROR))
                 }
+        }
+    }
+
+    private fun clearSearchState() {
+        _uiState.update {
+            it.copy(
+                placeSuggestions = emptyList(),
+                isSearchingPlaces = false,
+                searchError = null,
+                selectedPlaceDetail = null,
+            )
         }
     }
 }

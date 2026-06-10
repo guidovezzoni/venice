@@ -143,6 +143,54 @@
       <tr><td>Tasks</td><td><code>openspec/changes/search-place-by-name/tasks.md</code></td><td>15 sections, 41 tasks, BDD test-first ordering for mappers, repository, use cases, ViewModel, and UI</td></tr>
     </table>
   </section>
+  <section class="report-section" data-source="sdlc_apply_changes" data-timestamp="2026-06-08T00:00:00+02:00">
+    <header>
+      <h2>Apply Changes</h2>
+      <time datetime="2026-06-08T00:00:00+02:00">8 June 2026</time>
+    </header>
+    <p class="section-source">Source: sdlc_apply_changes_with_sub_agents</p>
+
+    <h3>Summary</h3>
+    <p>All 44 tasks implemented and verified. Implementation was resumed mid-run (tasks 1–39 were already complete from a prior session); this session completed the remaining 5 verification tasks in section 15.</p>
+
+    <h3>Progress</h3>
+    <table>
+      <tr><th>Metric</th><th>Value</th></tr>
+      <tr><td>Total tasks</td><td>44 / 44 complete</td></tr>
+      <tr><td>Sections processed this session</td><td>1 (Section 15: Verification)</td></tr>
+      <tr><td>Sub-agent iterations</td><td>3 (Haiku × 2 for 15.1 and 15.2, manual confirmation for 15.3–15.5)</td></tr>
+    </table>
+
+    <h3>Test Results</h3>
+    <table>
+      <tr><th>Suite</th><th>Result</th><th>Notes</th></tr>
+      <tr><td>Unit tests (<code>./gradlew clean check</code>)</td><td><span class="badge badge-pass">PASS</span></td><td>All tests passed; minor non-fatal Room schema and coroutines warnings</td></tr>
+      <tr><td>Compose UI tests (<code>./gradlew connectedDebugAndroidTest</code>)</td><td><span class="badge badge-pass">PASS</span></td><td>82 tests passed after fixing DEX-incompatible backtick test names and ambiguous text assertions in <code>SetStopDialogTest</code></td></tr>
+      <tr><td>On-device: search → select → save (15.3)</td><td><span class="badge badge-pass">PASS</span></td><td>Suggestions appear, coordinates auto-fill, lat/lon read-only, stop saves</td></tr>
+      <tr><td>On-device: edit stop → re-search → save (15.4)</td><td><span class="badge badge-pass">PASS</span></td><td>Stop updated correctly</td></tr>
+      <tr><td>On-device: manual coordinate entry (15.5)</td><td><span class="badge badge-pass">PASS</span></td><td>Manual entry works without autocomplete selection</td></tr>
+    </table>
+
+    <h3>TODO Scan</h3>
+    <p>2 TODOs found in <code>RemoveStopUseCase</code> and <code>EditStopUseCase</code>. Both reference Epic 3 leg tracking — unrelated to this story and precondition not met.</p>
+    <p><strong>RESOLVE NOW:</strong> 0 &nbsp;&nbsp; <strong>ACKNOWLEDGED:</strong> 2</p>
+    <ul>
+      <li><code>RemoveStopUseCase.kt:9</code> — invalidate affected legs once leg tracking is implemented (Epic 3)</li>
+      <li><code>EditStopUseCase.kt:10</code> — invalidate affected legs once leg tracking is implemented (Epic 3)</li>
+    </ul>
+
+    <h3>Security Review</h3>
+    <p><span class="badge badge-pass">PASS</span> — 0 findings. API key sourced from <code>local.properties</code> via <code>buildConfigField</code>; Places SDK handles input sanitisation; no sensitive data logged; no unsafe deserialisation.</p>
+
+    <h3>Documentation</h3>
+    <table>
+      <tr><th>File</th><th>Updated?</th><th>Changes</th></tr>
+      <tr><td><code>README.md</code></td><td><span class="badge badge-pass">YES</span></td><td>App description updated to mention place search; Google Places SDK added to tech stack table</td></tr>
+      <tr><td><code>AGENTS.md</code></td><td><span class="badge badge-pass">YES</span></td><td>Story 2.1.1 added to completed stories in Current Status section</td></tr>
+    </table>
+
+    <div class="outcome outcome-passed">Overall outcome: PASSED — all tasks complete, all tests green, security clean.</div>
+  </section>
   </main>
 
 </body>

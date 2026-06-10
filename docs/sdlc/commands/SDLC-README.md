@@ -50,6 +50,12 @@ Guidelines:
 - create a guideline for readme
 - step for static checks:
   - unused import directive / deprecation
+- Test: when writing a test:
+  - use SUT to clarify what class is being tested
+  - do not use for the expected value, the same internal function being tested -> this however conflicts with BDD's black box behaviour
+  - insert a comment with the AAA?
+- There are several decisions that have been taken just "because it's a small project": that should not happen: all the projects I start are small and they will likely  become bigger, so they should use the expected architecture and structures.
+- Check coverage - 100% ???
 
 Not sure what's best yet:
 - When both Domain and UI require the same data type, f.i. an enum, where should this be defined? In Domain? Should it be duplicated in UI? Should it be defined in another root package?

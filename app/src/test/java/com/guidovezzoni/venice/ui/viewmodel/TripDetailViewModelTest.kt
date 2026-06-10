@@ -1,14 +1,19 @@
 package com.guidovezzoni.venice.ui.viewmodel
 
 import androidx.lifecycle.SavedStateHandle
+import com.guidovezzoni.venice.domain.model.PlaceDetail
+import com.guidovezzoni.venice.domain.model.PlaceSuggestion
 import com.guidovezzoni.venice.domain.model.Stop
 import com.guidovezzoni.venice.domain.model.StopStatus
 import com.guidovezzoni.venice.domain.model.StopType
+import com.guidovezzoni.venice.domain.repository.PlaceSearchRepository
 import com.guidovezzoni.venice.domain.usecase.EditStopUseCase
+import com.guidovezzoni.venice.domain.usecase.GetPlaceDetailUseCase
 import com.guidovezzoni.venice.domain.usecase.MarkStopDepartedUseCase
 import com.guidovezzoni.venice.domain.usecase.MoveStopUseCase
 import com.guidovezzoni.venice.domain.usecase.ObserveStopsUseCase
 import com.guidovezzoni.venice.domain.usecase.RemoveStopUseCase
+import com.guidovezzoni.venice.domain.usecase.SearchPlacesUseCase
 import com.guidovezzoni.venice.domain.usecase.SetStopUseCase
 import com.guidovezzoni.venice.domain.usecase.UndoMarkStopDepartedUseCase
 import com.guidovezzoni.venice.ui.effect.TripDetailUiEffect
@@ -16,14 +21,20 @@ import com.guidovezzoni.venice.ui.intent.TripDetailUiIntent
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.runs
+import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
@@ -38,6 +49,7 @@ private const val TRIP_ID = "trip-1"
 private const val PLACE_NAME = "Rome"
 private const val LATITUDE = 41.9028
 private const val LONGITUDE = 12.4964
+private const val DEBOUNCE_MILLIS = 300L
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class TripDetailViewModelTest {
@@ -51,6 +63,9 @@ class TripDetailViewModelTest {
     private lateinit var markStopDepartedUseCase: MarkStopDepartedUseCase
     private lateinit var undoMarkStopDepartedUseCase: UndoMarkStopDepartedUseCase
     private lateinit var observeStopsUseCase: ObserveStopsUseCase
+    private lateinit var searchPlacesUseCase: SearchPlacesUseCase
+    private lateinit var getPlaceDetailUseCase: GetPlaceDetailUseCase
+    private lateinit var placeSearchRepository: PlaceSearchRepository
     private lateinit var savedStateHandle: SavedStateHandle
 
     @Before
@@ -63,6 +78,9 @@ class TripDetailViewModelTest {
         markStopDepartedUseCase = mockk()
         undoMarkStopDepartedUseCase = mockk()
         observeStopsUseCase = mockk()
+        searchPlacesUseCase = mockk()
+        getPlaceDetailUseCase = mockk()
+        placeSearchRepository = mockk(relaxed = true)
         savedStateHandle = SavedStateHandle(mapOf("tripId" to TRIP_ID))
     }
 
@@ -73,7 +91,7 @@ class TripDetailViewModelTest {
 
     private fun createViewModel(): TripDetailViewModel {
         every { observeStopsUseCase(TRIP_ID) } returns flowOf(emptyList())
-        return TripDetailViewModel(setStopUseCase, moveStopUseCase, editStopUseCase, removeStopUseCase, markStopDepartedUseCase, undoMarkStopDepartedUseCase, observeStopsUseCase, savedStateHandle)
+        return TripDetailViewModel(setStopUseCase, moveStopUseCase, editStopUseCase, removeStopUseCase, markStopDepartedUseCase, undoMarkStopDepartedUseCase, observeStopsUseCase, searchPlacesUseCase, getPlaceDetailUseCase, placeSearchRepository, savedStateHandle)
     }
 
     @Test
@@ -109,7 +127,7 @@ class TripDetailViewModelTest {
         every { observeStopsUseCase(TRIP_ID) } returns flowOf(listOf(stop))
         coEvery { setStopUseCase(TRIP_ID, PLACE_NAME, LATITUDE, LONGITUDE, StopType.STARTING_POINT) } returns Result.success(stop)
 
-        val viewModel = TripDetailViewModel(setStopUseCase, moveStopUseCase, editStopUseCase, removeStopUseCase, markStopDepartedUseCase, undoMarkStopDepartedUseCase, observeStopsUseCase, savedStateHandle)
+        val viewModel = TripDetailViewModel(setStopUseCase, moveStopUseCase, editStopUseCase, removeStopUseCase, markStopDepartedUseCase, undoMarkStopDepartedUseCase, observeStopsUseCase, searchPlacesUseCase, getPlaceDetailUseCase, placeSearchRepository, savedStateHandle)
         viewModel.onIntent(TripDetailUiIntent.OnSetStartingPointClicked)
         viewModel.onIntent(TripDetailUiIntent.OnStartingPointConfirmed(PLACE_NAME, LATITUDE, LONGITUDE))
         advanceUntilIdle()
@@ -147,7 +165,7 @@ class TripDetailViewModelTest {
         )
         every { observeStopsUseCase(TRIP_ID) } returns flowOf(listOf(expectedStop))
 
-        val viewModel = TripDetailViewModel(setStopUseCase, moveStopUseCase, editStopUseCase, removeStopUseCase, markStopDepartedUseCase, undoMarkStopDepartedUseCase, observeStopsUseCase, savedStateHandle)
+        val viewModel = TripDetailViewModel(setStopUseCase, moveStopUseCase, editStopUseCase, removeStopUseCase, markStopDepartedUseCase, undoMarkStopDepartedUseCase, observeStopsUseCase, searchPlacesUseCase, getPlaceDetailUseCase, placeSearchRepository, savedStateHandle)
 
         assertEquals(expectedStop, viewModel.uiState.value.startingPoint)
     }
@@ -192,7 +210,7 @@ class TripDetailViewModelTest {
         every { observeStopsUseCase(TRIP_ID) } returns flowOf(listOf(destinationStop))
         coEvery { setStopUseCase(TRIP_ID, PLACE_NAME, LATITUDE, LONGITUDE, StopType.DESTINATION) } returns Result.success(destinationStop)
 
-        val viewModel = TripDetailViewModel(setStopUseCase, moveStopUseCase, editStopUseCase, removeStopUseCase, markStopDepartedUseCase, undoMarkStopDepartedUseCase, observeStopsUseCase, savedStateHandle)
+        val viewModel = TripDetailViewModel(setStopUseCase, moveStopUseCase, editStopUseCase, removeStopUseCase, markStopDepartedUseCase, undoMarkStopDepartedUseCase, observeStopsUseCase, searchPlacesUseCase, getPlaceDetailUseCase, placeSearchRepository, savedStateHandle)
         viewModel.onIntent(TripDetailUiIntent.OnSetDestinationClicked)
         viewModel.onIntent(TripDetailUiIntent.OnDestinationConfirmed(PLACE_NAME, LATITUDE, LONGITUDE))
         advanceUntilIdle()
@@ -230,7 +248,7 @@ class TripDetailViewModelTest {
         )
         every { observeStopsUseCase(TRIP_ID) } returns flowOf(listOf(expectedDestination))
 
-        val viewModel = TripDetailViewModel(setStopUseCase, moveStopUseCase, editStopUseCase, removeStopUseCase, markStopDepartedUseCase, undoMarkStopDepartedUseCase, observeStopsUseCase, savedStateHandle)
+        val viewModel = TripDetailViewModel(setStopUseCase, moveStopUseCase, editStopUseCase, removeStopUseCase, markStopDepartedUseCase, undoMarkStopDepartedUseCase, observeStopsUseCase, searchPlacesUseCase, getPlaceDetailUseCase, placeSearchRepository, savedStateHandle)
 
         assertEquals(expectedDestination, viewModel.uiState.value.destination)
     }
@@ -248,7 +266,7 @@ class TripDetailViewModelTest {
         )
         every { observeStopsUseCase(TRIP_ID) } returns flowOf(listOf(startingPoint))
 
-        val viewModel = TripDetailViewModel(setStopUseCase, moveStopUseCase, editStopUseCase, removeStopUseCase, markStopDepartedUseCase, undoMarkStopDepartedUseCase, observeStopsUseCase, savedStateHandle)
+        val viewModel = TripDetailViewModel(setStopUseCase, moveStopUseCase, editStopUseCase, removeStopUseCase, markStopDepartedUseCase, undoMarkStopDepartedUseCase, observeStopsUseCase, searchPlacesUseCase, getPlaceDetailUseCase, placeSearchRepository, savedStateHandle)
 
         assertNull(viewModel.uiState.value.destination)
     }
@@ -261,7 +279,7 @@ class TripDetailViewModelTest {
         val destination = Stop("s3", TRIP_ID, "End", 3.0, 3.0, 3, StopStatus.PENDING)
         every { observeStopsUseCase(TRIP_ID) } returns flowOf(listOf(startingPoint, intermediate1, intermediate2, destination))
 
-        val viewModel = TripDetailViewModel(setStopUseCase, moveStopUseCase, editStopUseCase, removeStopUseCase, markStopDepartedUseCase, undoMarkStopDepartedUseCase, observeStopsUseCase, savedStateHandle)
+        val viewModel = TripDetailViewModel(setStopUseCase, moveStopUseCase, editStopUseCase, removeStopUseCase, markStopDepartedUseCase, undoMarkStopDepartedUseCase, observeStopsUseCase, searchPlacesUseCase, getPlaceDetailUseCase, placeSearchRepository, savedStateHandle)
 
         val expectedIntermediateStops = listOf(intermediate1, intermediate2)
         assertEquals(expectedIntermediateStops, viewModel.uiState.value.intermediateStops)
@@ -325,7 +343,7 @@ class TripDetailViewModelTest {
         }
         every { observeStopsUseCase(TRIP_ID) } returns flowOf(stops)
 
-        val viewModel = TripDetailViewModel(setStopUseCase, moveStopUseCase, editStopUseCase, removeStopUseCase, markStopDepartedUseCase, undoMarkStopDepartedUseCase, observeStopsUseCase, savedStateHandle)
+        val viewModel = TripDetailViewModel(setStopUseCase, moveStopUseCase, editStopUseCase, removeStopUseCase, markStopDepartedUseCase, undoMarkStopDepartedUseCase, observeStopsUseCase, searchPlacesUseCase, getPlaceDetailUseCase, placeSearchRepository, savedStateHandle)
 
         assertFalse(viewModel.uiState.value.canAddMoreStops)
     }
@@ -341,7 +359,7 @@ class TripDetailViewModelTest {
         every { observeStopsUseCase(TRIP_ID) } returns flowOf(stops)
         coEvery { moveStopUseCase(TRIP_ID, 2, 1) } returns Result.success(Unit)
 
-        val viewModel = TripDetailViewModel(setStopUseCase, moveStopUseCase, editStopUseCase, removeStopUseCase, markStopDepartedUseCase, undoMarkStopDepartedUseCase, observeStopsUseCase, savedStateHandle)
+        val viewModel = TripDetailViewModel(setStopUseCase, moveStopUseCase, editStopUseCase, removeStopUseCase, markStopDepartedUseCase, undoMarkStopDepartedUseCase, observeStopsUseCase, searchPlacesUseCase, getPlaceDetailUseCase, placeSearchRepository, savedStateHandle)
         viewModel.onIntent(TripDetailUiIntent.OnMoveStopUp("s2", 2))
 
         coVerify(exactly = 1) { moveStopUseCase(TRIP_ID, 2, 1) }
@@ -358,7 +376,7 @@ class TripDetailViewModelTest {
         every { observeStopsUseCase(TRIP_ID) } returns flowOf(stops)
         coEvery { moveStopUseCase(TRIP_ID, 1, 2) } returns Result.success(Unit)
 
-        val viewModel = TripDetailViewModel(setStopUseCase, moveStopUseCase, editStopUseCase, removeStopUseCase, markStopDepartedUseCase, undoMarkStopDepartedUseCase, observeStopsUseCase, savedStateHandle)
+        val viewModel = TripDetailViewModel(setStopUseCase, moveStopUseCase, editStopUseCase, removeStopUseCase, markStopDepartedUseCase, undoMarkStopDepartedUseCase, observeStopsUseCase, searchPlacesUseCase, getPlaceDetailUseCase, placeSearchRepository, savedStateHandle)
         viewModel.onIntent(TripDetailUiIntent.OnMoveStopDown("s1", 1))
 
         coVerify(exactly = 1) { moveStopUseCase(TRIP_ID, 1, 2) }
@@ -677,5 +695,159 @@ class TripDetailViewModelTest {
         advanceUntilIdle()
 
         assertFalse(viewModel.uiState.value.isLoading)
+    }
+
+    // --- Task 10.1: Search query debounce and blank query ---
+
+    @Test
+    fun `GIVEN OnSearchQueryChanged dispatched WHEN debounce elapses THEN SearchPlacesUseCase called and placeSuggestions updated`() = runTest {
+        val standardDispatcher = StandardTestDispatcher(testScheduler)
+        Dispatchers.setMain(standardDispatcher)
+        val suggestions = listOf(
+            PlaceSuggestion("id-1", "Rome", "Italy"),
+            PlaceSuggestion("id-2", "Roma", "Texas"),
+        )
+        coEvery { searchPlacesUseCase("Rome") } returns Result.success(suggestions)
+        val viewModel = createViewModel()
+
+        viewModel.onIntent(TripDetailUiIntent.OnSearchQueryChanged("Rome"))
+        advanceTimeBy(DEBOUNCE_MILLIS)
+        runCurrent()
+
+        val expectedSuggestions = suggestions
+        assertEquals(expectedSuggestions, viewModel.uiState.value.placeSuggestions)
+        assertFalse(viewModel.uiState.value.isSearchingPlaces)
+        coVerify(exactly = 1) { searchPlacesUseCase("Rome") }
+    }
+
+    @Test
+    fun `GIVEN blank query WHEN OnSearchQueryChanged dispatched THEN search state cleared without use case call`() = runTest(testDispatcher) {
+        val viewModel = createViewModel()
+
+        viewModel.onIntent(TripDetailUiIntent.OnSearchQueryChanged(""))
+
+        val expectedSuggestions = emptyList<PlaceSuggestion>()
+        assertEquals(expectedSuggestions, viewModel.uiState.value.placeSuggestions)
+        assertFalse(viewModel.uiState.value.isSearchingPlaces)
+        assertNull(viewModel.uiState.value.searchError)
+        coVerify(exactly = 0) { searchPlacesUseCase(any()) }
+    }
+
+    // --- Task 10.2: Debounce cancels previous query ---
+
+    @Test
+    fun `GIVEN OnSearchQueryChanged dispatched twice within 300ms WHEN debounce elapses THEN only last query triggers use case call`() = runTest {
+        val standardDispatcher = StandardTestDispatcher(testScheduler)
+        Dispatchers.setMain(standardDispatcher)
+        val suggestions = listOf(PlaceSuggestion("id-1", "Rome", "Italy"))
+        coEvery { searchPlacesUseCase("Rome") } returns Result.success(suggestions)
+        val viewModel = createViewModel()
+
+        viewModel.onIntent(TripDetailUiIntent.OnSearchQueryChanged("Rom"))
+        advanceTimeBy(150L)
+        viewModel.onIntent(TripDetailUiIntent.OnSearchQueryChanged("Rome"))
+        advanceTimeBy(DEBOUNCE_MILLIS)
+        runCurrent()
+
+        coVerify(exactly = 0) { searchPlacesUseCase("Rom") }
+        coVerify(exactly = 1) { searchPlacesUseCase("Rome") }
+    }
+
+    // --- Task 10.3: OnSuggestionSelected ---
+
+    @Test
+    fun `GIVEN OnSuggestionSelected dispatched WHEN GetPlaceDetailUseCase succeeds THEN selectedPlaceDetail set and suggestions cleared`() = runTest(testDispatcher) {
+        val suggestion = PlaceSuggestion("place-abc", "Colosseum", "Rome, Italy")
+        val placeDetail = PlaceDetail("Colosseum", 41.8902, 12.4922)
+        coEvery { getPlaceDetailUseCase("place-abc") } returns Result.success(placeDetail)
+        val viewModel = createViewModel()
+
+        viewModel.onIntent(TripDetailUiIntent.OnSuggestionSelected(suggestion))
+        advanceUntilIdle()
+
+        val expectedPlaceDetail = placeDetail
+        assertEquals(expectedPlaceDetail, viewModel.uiState.value.selectedPlaceDetail)
+        assertEquals(emptyList<PlaceSuggestion>(), viewModel.uiState.value.placeSuggestions)
+    }
+
+    @Test
+    fun `GIVEN OnSuggestionSelected dispatched WHEN GetPlaceDetailUseCase fails THEN ShowError emitted`() = runTest(testDispatcher) {
+        val suggestion = PlaceSuggestion("place-abc", "Colosseum", "Rome, Italy")
+        coEvery { getPlaceDetailUseCase("place-abc") } returns Result.failure(RuntimeException("Network error"))
+        val viewModel = createViewModel()
+
+        val effects = mutableListOf<TripDetailUiEffect>()
+        val collectJob = launch {
+            viewModel.uiEffect.collect { effects.add(it) }
+        }
+
+        viewModel.onIntent(TripDetailUiIntent.OnSuggestionSelected(suggestion))
+        advanceUntilIdle()
+
+        assertTrue(effects.any { it is TripDetailUiEffect.ShowError })
+        assertNull(viewModel.uiState.value.selectedPlaceDetail)
+        collectJob.cancel()
+    }
+
+    // --- Task 10.4: Dialog dismiss clears search state ---
+
+    @Test
+    fun `GIVEN search state populated WHEN OnDismissStartingPointDialog dispatched THEN search state cleared and resetSession called`() = runTest(testDispatcher) {
+        val suggestions = listOf(PlaceSuggestion("id-1", "Rome", "Italy"))
+        coEvery { searchPlacesUseCase("Rome") } returns Result.success(suggestions)
+        every { placeSearchRepository.resetSession() } just runs
+        val viewModel = createViewModel()
+
+        viewModel.onIntent(TripDetailUiIntent.OnSearchQueryChanged("Rome"))
+        advanceTimeBy(DEBOUNCE_MILLIS)
+        viewModel.onIntent(TripDetailUiIntent.OnDismissStartingPointDialog)
+
+        assertEquals(emptyList<PlaceSuggestion>(), viewModel.uiState.value.placeSuggestions)
+        assertFalse(viewModel.uiState.value.isSearchingPlaces)
+        assertNull(viewModel.uiState.value.searchError)
+        assertNull(viewModel.uiState.value.selectedPlaceDetail)
+        verify(exactly = 1) { placeSearchRepository.resetSession() }
+    }
+
+    @Test
+    fun `GIVEN search state populated WHEN OnDismissDestinationDialog dispatched THEN search state cleared and resetSession called`() = runTest(testDispatcher) {
+        every { placeSearchRepository.resetSession() } just runs
+        val viewModel = createViewModel()
+
+        viewModel.onIntent(TripDetailUiIntent.OnDismissDestinationDialog)
+
+        assertEquals(emptyList<PlaceSuggestion>(), viewModel.uiState.value.placeSuggestions)
+        assertFalse(viewModel.uiState.value.isSearchingPlaces)
+        assertNull(viewModel.uiState.value.searchError)
+        assertNull(viewModel.uiState.value.selectedPlaceDetail)
+        verify(exactly = 1) { placeSearchRepository.resetSession() }
+    }
+
+    @Test
+    fun `GIVEN search state populated WHEN OnDismissAddStopDialog dispatched THEN search state cleared and resetSession called`() = runTest(testDispatcher) {
+        every { placeSearchRepository.resetSession() } just runs
+        val viewModel = createViewModel()
+
+        viewModel.onIntent(TripDetailUiIntent.OnDismissAddStopDialog)
+
+        assertEquals(emptyList<PlaceSuggestion>(), viewModel.uiState.value.placeSuggestions)
+        assertFalse(viewModel.uiState.value.isSearchingPlaces)
+        assertNull(viewModel.uiState.value.searchError)
+        assertNull(viewModel.uiState.value.selectedPlaceDetail)
+        verify(exactly = 1) { placeSearchRepository.resetSession() }
+    }
+
+    @Test
+    fun `GIVEN search state populated WHEN OnDismissEditStopDialog dispatched THEN search state cleared and resetSession called`() = runTest(testDispatcher) {
+        every { placeSearchRepository.resetSession() } just runs
+        val viewModel = createViewModel()
+
+        viewModel.onIntent(TripDetailUiIntent.OnDismissEditStopDialog)
+
+        assertEquals(emptyList<PlaceSuggestion>(), viewModel.uiState.value.placeSuggestions)
+        assertFalse(viewModel.uiState.value.isSearchingPlaces)
+        assertNull(viewModel.uiState.value.searchError)
+        assertNull(viewModel.uiState.value.selectedPlaceDetail)
+        verify(exactly = 1) { placeSearchRepository.resetSession() }
     }
 }

@@ -3,6 +3,7 @@
     <string name="global_confirm">Confirm</string>
     <string name="global_cancel">Cancel</string>
     <string name="global_loading">Loading</string>
+    <string name="global_searching_places">Searching places</string>
     <string name="trip_list_fab_label">Create roadtrip</string>
     <string name="trip_list_empty_title">No trips yet</string>
     <string name="trip_list_empty_action">Create your first trip</string>
@@ -61,4 +62,7 @@
     <string name="trip_detail_undo_departed">Undo departure</string>
     <string name="trip_detail_progress_summary">%1$d of %2$d stops completed</string>
     <string name="trip_detail_stop_departed_icon_description">Departed</string>
+    <string name="trip_detail_search_no_results">No results found</string>
+    <string name="trip_detail_search_unavailable">Search unavailable</string>
+    <string name="trip_detail_search_loading">Searching…</string>
 </resources>

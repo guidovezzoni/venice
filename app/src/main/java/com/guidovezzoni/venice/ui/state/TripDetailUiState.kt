@@ -1,5 +1,7 @@
 package com.guidovezzoni.venice.ui.state
 
+import com.guidovezzoni.venice.domain.model.PlaceDetail
+import com.guidovezzoni.venice.domain.model.PlaceSuggestion
 import com.guidovezzoni.venice.domain.model.Stop
 
 data class TripDetailUiState(
@@ -16,4 +18,9 @@ data class TripDetailUiState(
     val canAddMoreStops: Boolean = false,
     val isRemoveStopDialogVisible: Boolean = false,
     val stopToRemove: Stop? = null,
+    val placeSuggestions: List<PlaceSuggestion> = emptyList(),
+    val isSearchingPlaces: Boolean = false,
+    val searchError: String? = null,
+    val selectedPlaceDetail: PlaceDetail? = null,
 )
+

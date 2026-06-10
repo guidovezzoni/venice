@@ -38,6 +38,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.guidovezzoni.venice.R
+import com.guidovezzoni.venice.domain.model.PlaceDetail
+import com.guidovezzoni.venice.domain.model.PlaceSuggestion
 import com.guidovezzoni.venice.domain.model.Stop
 import com.guidovezzoni.venice.domain.model.StopStatus
 import com.guidovezzoni.venice.ui.intent.TripDetailUiIntent
@@ -246,6 +248,12 @@ fun TripDetailScreen(
             initialPlaceName = uiState.startingPoint?.placeName ?: "",
             initialLatitude = uiState.startingPoint?.latitude?.toString() ?: "",
             initialLongitude = uiState.startingPoint?.longitude?.toString() ?: "",
+            suggestions = uiState.placeSuggestions,
+            isSearchingPlaces = uiState.isSearchingPlaces,
+            searchError = uiState.searchError,
+            selectedPlaceDetail = uiState.selectedPlaceDetail,
+            onSearchQueryChanged = { query -> onIntent(TripDetailUiIntent.OnSearchQueryChanged(query)) },
+            onSuggestionSelected = { suggestion -> onIntent(TripDetailUiIntent.OnSuggestionSelected(suggestion)) },
             onConfirm = { placeName, latitude, longitude ->
                 onIntent(TripDetailUiIntent.OnStartingPointConfirmed(placeName, latitude, longitude))
             },
@@ -263,6 +271,12 @@ fun TripDetailScreen(
             latitudeErrorRes = R.string.trip_detail_add_stop_latitude_error,
             longitudeHintRes = R.string.trip_detail_add_stop_longitude_hint,
             longitudeErrorRes = R.string.trip_detail_add_stop_longitude_error,
+            suggestions = uiState.placeSuggestions,
+            isSearchingPlaces = uiState.isSearchingPlaces,
+            searchError = uiState.searchError,
+            selectedPlaceDetail = uiState.selectedPlaceDetail,
+            onSearchQueryChanged = { query -> onIntent(TripDetailUiIntent.OnSearchQueryChanged(query)) },
+            onSuggestionSelected = { suggestion -> onIntent(TripDetailUiIntent.OnSuggestionSelected(suggestion)) },
             onConfirm = { placeName, latitude, longitude ->
                 onIntent(TripDetailUiIntent.OnAddStopConfirmed(placeName, latitude, longitude))
             },
@@ -284,6 +298,12 @@ fun TripDetailScreen(
             initialPlaceName = editingStop?.placeName ?: "",
             initialLatitude = editingStop?.latitude?.toString() ?: "",
             initialLongitude = editingStop?.longitude?.toString() ?: "",
+            suggestions = uiState.placeSuggestions,
+            isSearchingPlaces = uiState.isSearchingPlaces,
+            searchError = uiState.searchError,
+            selectedPlaceDetail = uiState.selectedPlaceDetail,
+            onSearchQueryChanged = { query -> onIntent(TripDetailUiIntent.OnSearchQueryChanged(query)) },
+            onSuggestionSelected = { suggestion -> onIntent(TripDetailUiIntent.OnSuggestionSelected(suggestion)) },
             onConfirm = { placeName, latitude, longitude ->
                 editingStop?.let {
                     onIntent(TripDetailUiIntent.OnEditStopConfirmed(it.id, placeName, latitude, longitude))
@@ -306,6 +326,12 @@ fun TripDetailScreen(
             initialPlaceName = uiState.destination?.placeName ?: "",
             initialLatitude = uiState.destination?.latitude?.toString() ?: "",
             initialLongitude = uiState.destination?.longitude?.toString() ?: "",
+            suggestions = uiState.placeSuggestions,
+            isSearchingPlaces = uiState.isSearchingPlaces,
+            searchError = uiState.searchError,
+            selectedPlaceDetail = uiState.selectedPlaceDetail,
+            onSearchQueryChanged = { query -> onIntent(TripDetailUiIntent.OnSearchQueryChanged(query)) },
+            onSuggestionSelected = { suggestion -> onIntent(TripDetailUiIntent.OnSuggestionSelected(suggestion)) },
             onConfirm = { placeName, latitude, longitude ->
                 onIntent(TripDetailUiIntent.OnDestinationConfirmed(placeName, latitude, longitude))
             },
@@ -749,6 +775,99 @@ private fun PreviewTripDetailScreenRemoveStopDialog() {
                     order = 1,
                     status = StopStatus.PENDING,
                 ),
+                canAddMoreStops = true,
+            ),
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PreviewTripDetailScreenWithSuggestions() {
+    HeadingToTheAlpsTheme {
+        TripDetailScreen(
+            uiState = TripDetailUiState(
+                tripId = "trip-1",
+                startingPoint = Stop(
+                    id = "1",
+                    tripId = "trip-1",
+                    placeName = "Rome, Italy",
+                    latitude = 41.9028,
+                    longitude = 12.4964,
+                    order = 0,
+                    status = StopStatus.PENDING,
+                ),
+                isSetStartingPointDialogVisible = true,
+                placeSuggestions = listOf(
+                    PlaceSuggestion(
+                        placeId = "place-1",
+                        primaryText = "Colosseum",
+                        secondaryText = "Rome, Italy",
+                    ),
+                    PlaceSuggestion(
+                        placeId = "place-2",
+                        primaryText = "Vatican City",
+                        secondaryText = "Rome, Italy",
+                    ),
+                    PlaceSuggestion(
+                        placeId = "place-3",
+                        primaryText = "Roman Forum",
+                        secondaryText = "Rome, Italy",
+                    ),
+                ),
+                selectedPlaceDetail = PlaceDetail(
+                    name = "Colosseum",
+                    latitude = 41.8902,
+                    longitude = 12.4924,
+                ),
+                canAddMoreStops = true,
+            ),
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PreviewTripDetailScreenSearchLoading() {
+    HeadingToTheAlpsTheme {
+        TripDetailScreen(
+            uiState = TripDetailUiState(
+                tripId = "trip-1",
+                startingPoint = Stop(
+                    id = "1",
+                    tripId = "trip-1",
+                    placeName = "Rome, Italy",
+                    latitude = 41.9028,
+                    longitude = 12.4964,
+                    order = 0,
+                    status = StopStatus.PENDING,
+                ),
+                isSetStartingPointDialogVisible = true,
+                isSearchingPlaces = true,
+                canAddMoreStops = true,
+            ),
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PreviewTripDetailScreenSearchError() {
+    HeadingToTheAlpsTheme {
+        TripDetailScreen(
+            uiState = TripDetailUiState(
+                tripId = "trip-1",
+                startingPoint = Stop(
+                    id = "1",
+                    tripId = "trip-1",
+                    placeName = "Rome, Italy",
+                    latitude = 41.9028,
+                    longitude = 12.4964,
+                    order = 0,
+                    status = StopStatus.PENDING,
+                ),
+                isSetStartingPointDialogVisible = true,
+                searchError = "Search unavailable",
                 canAddMoreStops = true,
             ),
         )
