@@ -1,9 +1,8 @@
 # SDLC
 
-SDLC is a group of custom commands that wrap and extend the standard OpenSpec (SDD) workflow, tailored to this project's user-story-driven development process.
-
+SDLC is a group of custom commands that wrap and extend the standard OpenSpec (SDD) workflow.
 The standard OpenSpec flow generally follows this sequence: propose → apply → verify → archive
-These commands replace the standard flow with a user-story-centric pipeline. Run them in order for a typical feature lifecycle.
+SDLC commands replace the standard flow with a user-story-centric pipeline. Run them in order for a typical feature lifecycle.
 
 Each of the below operations adds a summary of the actions/results into an HTML report in [reports](../../reports)
 
@@ -35,6 +34,38 @@ Run once after cloning, or after adding a new command to `docs/sdlc/commands/`:
 - **Windows** (PowerShell, Developer Mode or elevated): `.\docs\sdlc\sdlc_init.ps1`
 
 These scripts create symlinks in `.claude/commands/sdlc/` and `.cursor/commands/` for every SDLC command.
+
+## Customisation
+
+The folder structure is:
+
+```
+base project folder
+├── openspec/                            # OpenSpec standard folder, managed by OpenSpec commands
+├── docs/                                # Documentation & SDLC folders
+│   ├── guidelines/                      # Development guidelines
+│   │   ├── guidelines-android.md
+│   │   ├── guidelines-git.md
+│   │   ├── guidelines-process.md
+│   │   ├── guidelines-reports.md
+│   │   └── guidelines-userstories.md
+│   ├── reports/                         # Verification and archive reports (HTML/MD)
+│   ├── sdlc/                            # SDLC framework
+│   │   ├── commands/                    # Command definitions (source of truth)
+│   │   │   ├── SDLC-README.md
+│   │   │   ├── <sdlc_command>.md
+│   │   ├── sdlc_init.sh                 # Symlink setup script (Linux/macOS)
+│   │   └── sdlc_init.ps1                # Symlink setup script (Windows)
+│   └── userstories/                     # User story backlog organised by epic/feature
+│       ├── index.md
+│       ├── <id>-<name>-DONE.md          # Completed stories
+│       ├── <id>-<name>-WIP.md           # In-progress stories
+│       └── <id>-<name>.md               # Backlog stories
+├── AGENTS.md                            # Agent instructions (CLAUDE.md symlinks here)
+└── README.md
+```
+
+
 
 ## TODO
 

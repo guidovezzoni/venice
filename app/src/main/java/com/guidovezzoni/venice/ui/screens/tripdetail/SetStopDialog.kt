@@ -24,7 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -48,6 +48,8 @@ private const val MIN_LATITUDE = -90.0
 private const val MAX_LATITUDE = 90.0
 private const val MIN_LONGITUDE = -180.0
 private const val MAX_LONGITUDE = 180.0
+private const val COORDINATE_DECIMAL_PLACES = 4
+private const val COORDINATE_FORMAT = "%.${COORDINATE_DECIMAL_PLACES}f"
 
 @Composable
 fun SetStopDialog(
@@ -72,17 +74,17 @@ fun SetStopDialog(
     onConfirm: (placeName: String, latitude: Double, longitude: Double) -> Unit = { _, _, _ -> },
     onDismiss: () -> Unit = {},
 ) {
-    var placeName by rememberSaveable { mutableStateOf(initialPlaceName) }
-    var latitudeText by rememberSaveable { mutableStateOf(initialLatitude) }
-    var longitudeText by rememberSaveable { mutableStateOf(initialLongitude) }
-    var hasAttemptedSubmit by rememberSaveable { mutableStateOf(false) }
-    var coordinatesFromAutocomplete by rememberSaveable { mutableStateOf(false) }
+    var placeName by remember { mutableStateOf(initialPlaceName) }
+    var latitudeText by remember { mutableStateOf(initialLatitude) }
+    var longitudeText by remember { mutableStateOf(initialLongitude) }
+    var hasAttemptedSubmit by remember { mutableStateOf(false) }
+    var coordinatesFromAutocomplete by remember { mutableStateOf(false) }
 
     LaunchedEffect(selectedPlaceDetail) {
         if (selectedPlaceDetail != null) {
             placeName = selectedPlaceDetail.name
-            latitudeText = selectedPlaceDetail.latitude.toString()
-            longitudeText = selectedPlaceDetail.longitude.toString()
+            latitudeText = COORDINATE_FORMAT.format(selectedPlaceDetail.latitude)
+            longitudeText = COORDINATE_FORMAT.format(selectedPlaceDetail.longitude)
             coordinatesFromAutocomplete = true
         }
     }

@@ -239,6 +239,9 @@ class TripDetailViewModel @Inject constructor(
             _uiState.update { it.copy(isLoading = true) }
             withMinimumDuration { editStopUseCase(stopId, placeName, latitude, longitude) }
                 .onSuccess {
+                    searchJob?.cancel()
+                    clearSearchState()
+                    placeSearchRepository.resetSession()
                     _uiState.update { it.copy(editingStop = null, isEditStopDialogVisible = false, isLoading = false) }
                 }
                 .onFailure { error ->
@@ -274,6 +277,9 @@ class TripDetailViewModel @Inject constructor(
             _uiState.update { it.copy(isLoading = true) }
             withMinimumDuration { setStopUseCase(tripId, placeName, latitude, longitude, stopType) }
                 .onSuccess {
+                    searchJob?.cancel()
+                    clearSearchState()
+                    placeSearchRepository.resetSession()
                     _uiState.update { dismissDialog(it).copy(isLoading = false) }
                 }
                 .onFailure { error ->
