@@ -39,8 +39,17 @@ class PlaceDetailMapperTest {
         assertEquals(expected, result)
     }
 
-    @Test(expected = NullPointerException::class)
-    fun `GIVEN a Place with null location WHEN mapped THEN throws NullPointerException`() {
+    @Test(expected = IllegalStateException::class)
+    fun `GIVEN a Place with null displayName WHEN mapped THEN throws IllegalStateException`() {
+        val place = mockk<Place>(relaxed = true)
+        every { place.displayName } returns null
+        every { place.location } returns LatLng(LATITUDE, LONGITUDE)
+
+        mapper.map(place)
+    }
+
+    @Test(expected = IllegalStateException::class)
+    fun `GIVEN a Place with null location WHEN mapped THEN throws IllegalStateException`() {
         val place = mockk<Place>(relaxed = true)
         every { place.displayName } returns PLACE_NAME
         every { place.location } returns null

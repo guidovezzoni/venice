@@ -17,7 +17,7 @@
 
 - [x] 4.1 Write test: GIVEN an AutocompletePrediction WHEN mapped THEN returns PlaceSuggestion with correct fields in `PlaceSuggestionMapperTest`
 - [x] 4.2 Implement `PlaceSuggestionMapper` in `data/mapper/PlaceSuggestionMapper.kt`
-- [x] 4.3 Write test: GIVEN a Place with displayName and location WHEN mapped THEN returns PlaceDetail with correct fields; GIVEN a Place with null location WHEN mapped THEN throws in `PlaceDetailMapperTest`
+- [x] 4.3 Write test: GIVEN a Place with displayName and location WHEN mapped THEN returns PlaceDetail with correct fields; GIVEN a Place with null displayName WHEN mapped THEN throws IllegalStateException; GIVEN a Place with null location WHEN mapped THEN throws IllegalStateException in `PlaceDetailMapperTest`
 - [x] 4.4 Implement `PlaceDetailMapper` in `data/mapper/PlaceDetailMapper.kt`
 
 ## 5. Data Layer — Repository Implementation (BDD)

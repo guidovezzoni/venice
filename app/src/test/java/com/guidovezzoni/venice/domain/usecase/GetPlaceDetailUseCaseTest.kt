@@ -5,7 +5,6 @@ import com.guidovezzoni.venice.domain.repository.PlaceSearchRepository
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -27,7 +26,7 @@ class GetPlaceDetailUseCaseTest {
 
     @Test
     fun `GIVEN a placeId WHEN invoke is called THEN repository getPlaceDetails is called with that placeId`() =
-        runTest(UnconfinedTestDispatcher()) {
+        runTest {
             val placeDetail = PlaceDetail("Colosseum", 41.8902, 12.4922)
             coEvery { repository.getPlaceDetails(PLACE_ID) } returns Result.success(placeDetail)
 
@@ -38,7 +37,7 @@ class GetPlaceDetailUseCaseTest {
 
     @Test
     fun `GIVEN repository returns success WHEN invoke is called THEN Result success with PlaceDetail is returned`() =
-        runTest(UnconfinedTestDispatcher()) {
+        runTest {
             val expectedDetail = PlaceDetail("Colosseum", 41.8902, 12.4922)
             coEvery { repository.getPlaceDetails(PLACE_ID) } returns Result.success(expectedDetail)
 
@@ -50,7 +49,7 @@ class GetPlaceDetailUseCaseTest {
 
     @Test
     fun `GIVEN repository returns failure WHEN invoke is called THEN failure is propagated`() =
-        runTest(UnconfinedTestDispatcher()) {
+        runTest {
             val exception = RuntimeException("API error")
             coEvery { repository.getPlaceDetails(PLACE_ID) } returns Result.failure(exception)
 

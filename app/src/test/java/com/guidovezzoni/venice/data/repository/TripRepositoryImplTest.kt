@@ -31,7 +31,7 @@ class TripRepositoryImplTest {
         val result = repository.createTrip("  Summer Drive  ")
 
         assertTrue(result.isSuccess)
-        val trip = result.getOrNull()!!
+        val trip = result.getOrThrow()
         assertEquals("Summer Drive", trip.name)
         assertEquals(0, trip.stopCount)
         assertTrue(trip.id.isNotBlank())

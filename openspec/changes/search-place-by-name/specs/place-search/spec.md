@@ -109,19 +109,23 @@ The data layer SHALL define a `PlaceSuggestionMapper` in `data/mapper/` that con
 
 ### Requirement: PlaceDetailMapper
 The data layer SHALL define a `PlaceDetailMapper` in `data/mapper/` that converts a `Place` to a `PlaceDetail`:
-- `name` from `place.displayName`
-- `latitude` from `place.location!!.latitude`
-- `longitude` from `place.location!!.longitude`
+- `name` from `place.displayName ?: throw IllegalStateException`
+- `latitude` from `place.location?.latitude ?: throw IllegalStateException`
+- `longitude` from `place.location?.longitude ?: throw IllegalStateException`
 
-The mapper SHALL throw if `displayName` is null or `location` is null. The caller (`PlaceSearchRepositoryImpl`) is responsible for catching exceptions.
+The mapper SHALL throw `IllegalStateException` if `displayName` is null or `location` is null. The caller (`PlaceSearchRepositoryImpl`) is responsible for catching exceptions.
 
 #### Scenario: Place mapped to detail
 - **WHEN** a `Place` has `displayName = "Colosseum"` and `location = LatLng(41.8902, 12.4922)`
 - **THEN** the mapper returns `PlaceDetail("Colosseum", 41.8902, 12.4922)`
 
+#### Scenario: Null displayName throws
+- **WHEN** a `Place` has `displayName = null`
+- **THEN** the mapper throws an `IllegalStateException`
+
 #### Scenario: Null location throws
 - **WHEN** a `Place` has `location = null`
-- **THEN** the mapper throws a `NullPointerException`
+- **THEN** the mapper throws an `IllegalStateException`
 
 ### Requirement: SearchPlacesUseCase
 `SearchPlacesUseCase` SHALL be an `@Inject` constructor class in `domain/usecase/` that accepts `PlaceSearchRepository` and exposes:

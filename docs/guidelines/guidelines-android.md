@@ -168,7 +168,11 @@ private fun PreviewComponentName() {
 ### Kotlin Best Practices
 - **One class per file**: Each Kotlin model (data class, sealed class, enum) must live in its own file. Do not group multiple models into a single file.
 - **Immutability**: Always prefer `val` over `var` for immutable properties
-- Never use the `!!` symbol as it could lead to unexpected crashes, cast or find a solution that guarantees non-nullability.
+- **Never use `!!`**: The non-null assertion operator can lead to unexpected crashes. Instead, use one of these alternatives:
+  - `?: throw IllegalStateException("descriptive message")` — when null means a programming error or broken contract.
+  - `?: return` / `?: return defaultValue` — when null is a valid signal to stop or fall back.
+  - `?.let { ... }` — when the operation should simply be skipped if the value is absent.
+  - Safe-cast with `as?` — when the type is uncertain.
 - Use `Result` type for operations that can fail
 
 ### Import Organization

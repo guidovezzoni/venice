@@ -14,8 +14,6 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -29,7 +27,6 @@ private const val PLACE_NAME = "Colosseum"
 private const val PLACE_LATITUDE = 41.8902
 private const val PLACE_LONGITUDE = 12.4922
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class PlaceSearchRepositoryImplTest {
 
     private lateinit var placesClient: PlacesClient
@@ -49,7 +46,7 @@ class PlaceSearchRepositoryImplTest {
 
     @Test
     fun `GIVEN no session token WHEN getAutocompleteSuggestions called THEN token auto-created and used in request`() =
-        runTest(UnconfinedTestDispatcher()) {
+        runTest {
             val requestSlot = slot<FindAutocompletePredictionsRequest>()
             val mockResponse = mockk<FindAutocompletePredictionsResponse>(relaxed = true)
             every { mockResponse.autocompletePredictions } returns emptyList()
@@ -64,7 +61,7 @@ class PlaceSearchRepositoryImplTest {
 
     @Test
     fun `GIVEN blank query WHEN getAutocompleteSuggestions called THEN returns empty list without API call`() =
-        runTest(UnconfinedTestDispatcher()) {
+        runTest {
             val result = repository.getAutocompleteSuggestions("   ")
 
             assertTrue(result.isSuccess)
@@ -75,7 +72,7 @@ class PlaceSearchRepositoryImplTest {
 
     @Test
     fun `GIVEN valid query WHEN API succeeds THEN returns mapped suggestions`() =
-        runTest(UnconfinedTestDispatcher()) {
+        runTest {
             val mockPrediction1 = mockk<AutocompletePrediction>(relaxed = true)
             val mockPrediction2 = mockk<AutocompletePrediction>(relaxed = true)
             val mockPrediction3 = mockk<AutocompletePrediction>(relaxed = true)
@@ -102,7 +99,7 @@ class PlaceSearchRepositoryImplTest {
 
     @Test
     fun `GIVEN valid query WHEN API fails THEN returns failure`() =
-        runTest(UnconfinedTestDispatcher()) {
+        runTest {
             val exception = RuntimeException("Network error")
             every {
                 placesClient.findAutocompletePredictions(any())
@@ -118,7 +115,7 @@ class PlaceSearchRepositoryImplTest {
 
     @Test
     fun `GIVEN a placeId WHEN getPlaceDetails succeeds THEN returns mapped PlaceDetail and clears token`() =
-        runTest(UnconfinedTestDispatcher()) {
+        runTest {
             // First set up a session token by calling getAutocompleteSuggestions
             val mockSuggestionsResponse = mockk<FindAutocompletePredictionsResponse>(relaxed = true)
             every { mockSuggestionsResponse.autocompletePredictions } returns emptyList()
@@ -158,7 +155,7 @@ class PlaceSearchRepositoryImplTest {
 
     @Test
     fun `GIVEN a placeId WHEN API fails THEN returns failure`() =
-        runTest(UnconfinedTestDispatcher()) {
+        runTest {
             val exception = RuntimeException("API error")
             every {
                 placesClient.fetchPlace(any())
@@ -174,7 +171,7 @@ class PlaceSearchRepositoryImplTest {
 
     @Test
     fun `GIVEN an active session WHEN resetSession called THEN token is cleared`() =
-        runTest(UnconfinedTestDispatcher()) {
+        runTest {
             // Establish a session token by calling getAutocompleteSuggestions
             val firstRequestSlot = slot<FindAutocompletePredictionsRequest>()
             val mockResponse1 = mockk<FindAutocompletePredictionsResponse>(relaxed = true)

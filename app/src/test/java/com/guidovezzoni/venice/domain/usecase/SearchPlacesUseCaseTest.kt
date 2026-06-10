@@ -5,7 +5,6 @@ import com.guidovezzoni.venice.domain.repository.PlaceSearchRepository
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -29,7 +28,7 @@ class SearchPlacesUseCaseTest {
 
     @Test
     fun `GIVEN query with leading and trailing spaces WHEN invoke is called THEN repository receives trimmed query`() =
-        runTest(UnconfinedTestDispatcher()) {
+        runTest {
             val expectedSuggestions = emptyList<PlaceSuggestion>()
             coEvery { repository.getAutocompleteSuggestions(TRIMMED_QUERY) } returns Result.success(expectedSuggestions)
 
@@ -40,7 +39,7 @@ class SearchPlacesUseCaseTest {
 
     @Test
     fun `GIVEN query WHEN repository returns success THEN Result success with suggestions is returned`() =
-        runTest(UnconfinedTestDispatcher()) {
+        runTest {
             val expectedSuggestions = listOf(
                 PlaceSuggestion("id1", "Colosseum", "Rome, Italy"),
                 PlaceSuggestion("id2", "Cologne", "Germany"),
@@ -55,7 +54,7 @@ class SearchPlacesUseCaseTest {
 
     @Test
     fun `GIVEN repository returns failure WHEN invoke is called THEN failure is propagated`() =
-        runTest(UnconfinedTestDispatcher()) {
+        runTest {
             val exception = RuntimeException("API error")
             coEvery { repository.getAutocompleteSuggestions(QUERY) } returns Result.failure(exception)
 

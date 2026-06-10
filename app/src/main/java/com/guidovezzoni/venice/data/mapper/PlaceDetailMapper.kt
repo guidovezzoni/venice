@@ -6,10 +6,16 @@ import javax.inject.Inject
 
 class PlaceDetailMapper @Inject constructor() {
 
-    fun map(place: Place): PlaceDetail = PlaceDetail(
-        // TODO !! should be replaced with some explicit exception throwing like place.displayName?: throw NullPointerException()
-        name = place.displayName!!,
-        latitude = place.location!!.latitude,
-        longitude = place.location!!.longitude,
-    )
+    fun map(place: Place): PlaceDetail {
+        val displayName = place.displayName
+            ?: throw IllegalStateException("Place displayName is null")
+        val location = place.location
+            ?: throw IllegalStateException("Place location is null")
+
+        return PlaceDetail(
+            name = displayName,
+            latitude = location.latitude,
+            longitude = location.longitude,
+        )
+    }
 }
