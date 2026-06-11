@@ -6,6 +6,7 @@ import com.guidovezzoni.venice.domain.model.Stop
 sealed class TripDetailUiIntent {
     data object OnSetStartingPointClicked : TripDetailUiIntent()
     data class OnStartingPointConfirmed(
+        // TODO: should PlaceDetail be used here? And in the following cases
         val placeName: String,
         val latitude: Double,
         val longitude: Double,

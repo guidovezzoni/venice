@@ -4,6 +4,7 @@ import com.guidovezzoni.venice.domain.model.PlaceDetail
 import com.guidovezzoni.venice.domain.model.PlaceSuggestion
 import com.guidovezzoni.venice.domain.model.Stop
 
+// TODO Ideally this should be broken down in a sealed class, to make the info more consistent
 data class TripDetailUiState(
     val tripId: String = "",
     val startingPoint: Stop? = null,
