@@ -191,6 +191,89 @@
 
     <div class="outcome outcome-passed">Overall outcome: PASSED — all tasks complete, all tests green, security clean.</div>
   </section>
+  <section class="report-section" data-source="sdlc:sdlc_verify_story" data-timestamp="2026-06-11T09:19:00+02:00">
+    <header>
+      <h2>Verification &amp; Archive</h2>
+      <time datetime="2026-06-11T09:19:00+02:00">11 Jun 2026</time>
+    </header>
+    <p class="section-source">Source: sdlc:sdlc_verify_story</p>
+
+    <h3>OpenSpec Verify</h3>
+    <p><span class="badge badge-pass">PASS</span> All 44/44 tasks complete. All artifacts (proposal, design, specs, tasks) in <code>done</code> status.</p>
+
+    <h3>TODO Scan</h3>
+    <p>2 TODOs found in source — both <strong>ACKNOWLEDGED</strong> (unrelated to this story):</p>
+    <ul>
+      <li><code>RemoveStopUseCase.kt:9</code> — invalidate affected legs once leg tracking is implemented (Epic 3)</li>
+      <li><code>EditStopUseCase.kt:10</code> — invalidate affected legs once leg tracking is implemented (Epic 3)</li>
+    </ul>
+
+    <h3>Security Review</h3>
+    <p><span class="badge badge-pass">PASS</span> No critical or high-severity findings. Three candidates reviewed and filtered as false positives (confidence ≤ 2/10): error message data exposure (not exploitable in local consumer app context), API key in BuildConfig (standard Android practice, key gitignored), coordinate float formatting (data from trusted API, no injection risk).</p>
+
+    <h3>On-Device Tests</h3>
+    <p>Device: Pixel 6a — Android 16 (ADB ID: <code>2C091JEGR07097</code>)</p>
+    <table>
+      <tr><th>Check</th><th>Method</th><th>Result</th></tr>
+      <tr>
+        <td>Instrumented Compose UI tests</td>
+        <td><code>./gradlew connectedDebugAndroidTest</code></td>
+        <td><span class="badge badge-pass">PASS</span> 82/82 tests passed</td>
+      </tr>
+      <tr>
+        <td>Type place name → suggestions appear</td>
+        <td>Agent via adb</td>
+        <td><span class="badge badge-pass">PASS</span> Typed "Rome", 5 suggestions appeared with primary + secondary text</td>
+      </tr>
+      <tr>
+        <td>Select suggestion → coordinates auto-fill</td>
+        <td>Agent via adb</td>
+        <td><span class="badge badge-pass">PASS</span> Selected "Rome / Metropolitan City of Rome Capital, Italy" → lat=41.8967, lon=12.4822</td>
+      </tr>
+      <tr>
+        <td>Lat/lon fields become read-only after selection</td>
+        <td>Agent via adb</td>
+        <td><span class="badge badge-pass">PASS</span> Attempted to type "99" into latitude field — value remained 41.8967</td>
+      </tr>
+      <tr>
+        <td>Stop saves correctly with autocomplete coordinates</td>
+        <td>Agent via adb</td>
+        <td><span class="badge badge-pass">PASS</span> Trip Detail showed "Rome — 41.8967, 12.4822" after confirmation</td>
+      </tr>
+    </table>
+
+    <h3>Definition of Done</h3>
+    <table>
+      <tr><th>#</th><th>Criterion</th><th>Status</th><th>Evidence</th></tr>
+      <tr><td>1</td><td>Search field integration</td><td><span class="badge badge-pass">PASS</span></td><td>Verified on-device: typing triggers suggestions below Place name field</td></tr>
+      <tr><td>2</td><td>Debounced requests (300 ms)</td><td><span class="badge badge-pass">PASS</span></td><td><code>delay(SEARCH_DEBOUNCE_MILLIS)</code> in ViewModel; unit tests cover debounce</td></tr>
+      <tr><td>3</td><td>Suggestion list with primary + secondary text</td><td><span class="badge badge-pass">PASS</span></td><td>On-device: "Rome / Metropolitan City of Rome Capital, Italy"</td></tr>
+      <tr><td>4</td><td>Selection auto-populates lat/lon, list dismissed</td><td><span class="badge badge-pass">PASS</span></td><td>On-device: lat=41.8967, lon=12.4822 auto-filled; suggestions cleared</td></tr>
+      <tr><td>5</td><td>Coordinates read-only after selection; revert on name change</td><td><span class="badge badge-pass">PASS</span></td><td>On-device: typing "99" had no effect; <code>coordinatesFromAutocomplete</code> flag verified in code</td></tr>
+      <tr><td>6</td><td>Manual fallback still works</td><td><span class="badge badge-pass">PASS</span></td><td><code>coordinatesFromAutocomplete</code> flag; Compose UI test covers manual entry</td></tr>
+      <tr><td>7</td><td>Edit mode pre-population</td><td><span class="badge badge-pass">PASS</span></td><td><code>initialPlaceName/Latitude/Longitude</code> params in <code>SetStopDialog</code></td></tr>
+      <tr><td>8</td><td>Error handling: inline message, non-blocking</td><td><span class="badge badge-pass">PASS</span></td><td><code>searchError</code> inline text; string resources for no-results/unavailable</td></tr>
+      <tr><td>9</td><td>Loading indicator during fetch</td><td><span class="badge badge-pass">PASS</span></td><td><code>CircularProgressIndicator</code> when <code>isSearchingPlaces=true</code></td></tr>
+      <tr><td>10</td><td>Session token lifecycle</td><td><span class="badge badge-pass">PASS</span></td><td>Token cleared on place selection and dialog dismiss; <code>resetSession()</code> verified in code and tests</td></tr>
+    </table>
+
+    <h3>Spec Sync</h3>
+    <p><span class="badge badge-pass">SYNCED</span> Delta specs merged into main specs:</p>
+    <ul>
+      <li><strong>destination-ui</strong>: <code>SetStopDialog</code> requirement updated with 6 new place search parameters and 9 new scenarios</li>
+      <li><strong>place-search</strong>: New spec file created with 13 requirements (domain models, repository, mappers, use cases, DI wiring, SDK config)</li>
+      <li><strong>trip-detail</strong>: <code>TripDetailUiState</code>, <code>TripDetailUiIntent</code>, <code>TripDetailViewModel</code>, <code>TripDetailScreen</code> requirements updated; new <code>Place search string resources</code> requirement added</li>
+    </ul>
+
+    <h3>Archive</h3>
+    <p>Change archived to <code>openspec/changes/archive/2026-06-11-search-place-by-name/</code></p>
+
+    <h3>README.md &amp; AGENTS.md Sync Check</h3>
+    <p><span class="badge badge-pass">IN SYNC</span> Both files already reflected the completed story. No updates required.</p>
+
+    <div class="outcome outcome-passed">PASSED — Story closed as <code>2.1.1-search-place-by-name-DONE.md</code></div>
+  </section>
+
   </main>
 
 </body>
