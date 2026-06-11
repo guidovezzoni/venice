@@ -33,7 +33,12 @@ When verification requires running the app on a physical device or emulator:
 2. **If a device is connected**, attempt automated verification autonomously:
    - Run `./gradlew connectedDebugAndroidTest` to execute instrumented Compose UI tests.
    - Run `./gradlew installDebug` to install the app, then launch it with `adb shell am start -n com.guidovezzoni.venice/.ui.MainActivity`.
-   - Use `adb` to exercise the feature under test (tap, input, screenshot) and verify behaviour.
+   - Exercise the feature under test using this **UIAutomator-first workflow**:
+     1. **Discover elements** — run `adb shell uiautomator dump /sdcard/ui.xml && adb pull /sdcard/ui.xml /tmp/ui.xml` and parse the XML for element `text`, `content-desc`, `bounds`, and `clickable` attributes. Never estimate coordinates from screenshots — display scaling makes them unreliable.
+     2. **Tap** — extract the `bounds="[left,top][right,bottom]"` of the target element, compute the centre `((left+right)/2, (top+bottom)/2)`, and run `adb shell input tap <x> <y>`.
+     3. **Type text** — tap the target field first (step 2), then run `adb shell input text "<value>"`. For special characters use `adb shell input keyevent <code>`.
+     4. **Verify** — after each interaction, either dump the UI again to assert the new state, or take a screenshot with `adb shell screencap -p /sdcard/screen.png && adb pull /sdcard/screen.png /tmp/screen.png` for visual confirmation.
+     5. **Re-dump after navigation** — whenever the screen changes (dialog opens, screen navigates), dump the UI hierarchy again before the next tap. Stale bounds from a previous dump will miss.
 3. **If no device is connected**, ask the user to connect one and retry, or ask them to perform the manual test and report back.
 4. **If adb-based verification is not feasible** for a specific check (e.g. subjective UX judgement, complex multi-app interaction), ask the user to perform that specific check and wait for confirmation.
 
