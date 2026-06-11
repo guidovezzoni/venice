@@ -1,10 +1,12 @@
 package com.guidovezzoni.venice.ui.intent
 
+import com.guidovezzoni.venice.domain.model.PlaceSuggestion
 import com.guidovezzoni.venice.domain.model.Stop
 
 sealed class TripDetailUiIntent {
     data object OnSetStartingPointClicked : TripDetailUiIntent()
     data class OnStartingPointConfirmed(
+        // TODO: should PlaceDetail be used here? And in the following cases
         val placeName: String,
         val latitude: Double,
         val longitude: Double,
@@ -39,4 +41,7 @@ sealed class TripDetailUiIntent {
     data object OnDismissRemoveStopDialog : TripDetailUiIntent()
     data class OnMarkStopDepartedClicked(val stopId: String) : TripDetailUiIntent()
     data class OnUndoMarkStopDepartedClicked(val stopId: String) : TripDetailUiIntent()
+    data class OnSearchQueryChanged(val query: String) : TripDetailUiIntent()
+    data class OnSuggestionSelected(val suggestion: PlaceSuggestion) : TripDetailUiIntent()
 }
+

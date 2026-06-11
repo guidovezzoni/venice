@@ -1,7 +1,9 @@
 package com.guidovezzoni.venice.di
 
+import com.guidovezzoni.venice.data.repository.PlaceSearchRepositoryImpl
 import com.guidovezzoni.venice.data.repository.StopRepositoryImpl
 import com.guidovezzoni.venice.data.repository.TripRepositoryImpl
+import com.guidovezzoni.venice.domain.repository.PlaceSearchRepository
 import com.guidovezzoni.venice.domain.repository.StopRepository
 import com.guidovezzoni.venice.domain.repository.TripRepository
 import dagger.Binds
@@ -21,4 +23,8 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindStopRepository(impl: StopRepositoryImpl): StopRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindPlaceSearchRepository(impl: PlaceSearchRepositoryImpl): PlaceSearchRepository
 }

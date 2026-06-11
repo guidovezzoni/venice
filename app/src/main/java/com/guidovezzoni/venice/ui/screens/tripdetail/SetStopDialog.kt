@@ -1,6 +1,7 @@
 package com.guidovezzoni.venice.ui.screens.tripdetail
 
 import androidx.annotation.StringRes
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -10,6 +11,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
@@ -18,9 +21,10 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,16 +35,21 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.guidovezzoni.venice.R
+import com.guidovezzoni.venice.domain.model.PlaceDetail
+import com.guidovezzoni.venice.domain.model.PlaceSuggestion
 import com.guidovezzoni.venice.ui.theme.HeadingToTheAlpsTheme
 
 private val FIELD_SPACING = 8.dp
 private val PREVIEW_PADDING = 16.dp
 private val SPINNER_SIZE = 20.dp
 private val SPINNER_SPACING = 8.dp
+private val SEARCH_SPINNER_SIZE = 16.dp
 private const val MIN_LATITUDE = -90.0
 private const val MAX_LATITUDE = 90.0
 private const val MIN_LONGITUDE = -180.0
 private const val MAX_LONGITUDE = 180.0
+private const val COORDINATE_DECIMAL_PLACES = 4
+private const val COORDINATE_FORMAT = "%.${COORDINATE_DECIMAL_PLACES}f"
 
 @Composable
 fun SetStopDialog(
@@ -56,13 +65,29 @@ fun SetStopDialog(
     initialPlaceName: String = "",
     initialLatitude: String = "",
     initialLongitude: String = "",
+    suggestions: List<PlaceSuggestion> = emptyList(),
+    isSearchingPlaces: Boolean = false,
+    searchError: String? = null,
+    selectedPlaceDetail: PlaceDetail? = null,
+    onSearchQueryChanged: (String) -> Unit = {},
+    onSuggestionSelected: (PlaceSuggestion) -> Unit = {},
     onConfirm: (placeName: String, latitude: Double, longitude: Double) -> Unit = { _, _, _ -> },
     onDismiss: () -> Unit = {},
 ) {
-    var placeName by rememberSaveable { mutableStateOf(initialPlaceName) }
-    var latitudeText by rememberSaveable { mutableStateOf(initialLatitude) }
-    var longitudeText by rememberSaveable { mutableStateOf(initialLongitude) }
-    var hasAttemptedSubmit by rememberSaveable { mutableStateOf(false) }
+    var placeName by remember { mutableStateOf(initialPlaceName) }
+    var latitudeText by remember { mutableStateOf(initialLatitude) }
+    var longitudeText by remember { mutableStateOf(initialLongitude) }
+    var hasAttemptedSubmit by remember { mutableStateOf(false) }
+    var coordinatesFromAutocomplete by remember { mutableStateOf(false) }
+
+    LaunchedEffect(selectedPlaceDetail) {
+        if (selectedPlaceDetail != null) {
+            placeName = selectedPlaceDetail.name
+            latitudeText = COORDINATE_FORMAT.format(selectedPlaceDetail.latitude)
+            longitudeText = COORDINATE_FORMAT.format(selectedPlaceDetail.longitude)
+            coordinatesFromAutocomplete = true
+        }
+    }
 
     val placeNameError = hasAttemptedSubmit && placeName.isBlank()
     val latitude = latitudeText.toDoubleOrNull()
@@ -77,7 +102,13 @@ fun SetStopDialog(
         text = {
             StopForm(
                 placeName = placeName,
-                onPlaceNameChange = { placeName = it },
+                onPlaceNameChange = { newValue ->
+                    placeName = newValue
+                    onSearchQueryChanged(newValue)
+                    if (coordinatesFromAutocomplete && newValue != selectedPlaceDetail?.name) {
+                        coordinatesFromAutocomplete = false
+                    }
+                },
                 placeNameError = placeNameError,
                 placeNameHintRes = placeNameHintRes,
                 placeNameErrorRes = placeNameErrorRes,
@@ -91,6 +122,11 @@ fun SetStopDialog(
                 longitudeError = longitudeError,
                 longitudeHintRes = longitudeHintRes,
                 longitudeErrorRes = longitudeErrorRes,
+                coordinatesReadOnly = coordinatesFromAutocomplete,
+                suggestions = suggestions,
+                isSearchingPlaces = isSearchingPlaces,
+                searchError = searchError,
+                onSuggestionSelected = onSuggestionSelected,
             )
         },
         confirmButton = {
@@ -148,7 +184,14 @@ private fun StopForm(
     longitudeError: Boolean,
     @StringRes longitudeHintRes: Int,
     @StringRes longitudeErrorRes: Int,
+    coordinatesReadOnly: Boolean = false,
+    suggestions: List<PlaceSuggestion> = emptyList(),
+    isSearchingPlaces: Boolean = false,
+    searchError: String? = null,
+    onSuggestionSelected: (PlaceSuggestion) -> Unit = {},
 ) {
+    val searchingPlacesDescription = stringResource(R.string.global_searching_places)
+
     Column {
         OutlinedTextField(
             value = placeName,
@@ -161,6 +204,50 @@ private fun StopForm(
             singleLine = true,
             modifier = Modifier.fillMaxWidth(),
         )
+
+        if (isSearchingPlaces) {
+            Spacer(modifier = Modifier.height(FIELD_SPACING))
+            CircularProgressIndicator(
+                modifier = Modifier
+                    .size(SEARCH_SPINNER_SIZE)
+                    .semantics { contentDescription = searchingPlacesDescription },
+                strokeWidth = 2.dp,
+            )
+        }
+
+        if (searchError != null) {
+            Spacer(modifier = Modifier.height(FIELD_SPACING))
+            Text(
+                text = searchError,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error,
+            )
+        }
+
+        if (suggestions.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(FIELD_SPACING))
+            LazyColumn {
+                items(suggestions) { suggestion ->
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onSuggestionSelected(suggestion) }
+                            .padding(vertical = FIELD_SPACING),
+                    ) {
+                        Text(
+                            text = suggestion.primaryText,
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
+                        Text(
+                            text = suggestion.secondaryText,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+            }
+        }
+
         Spacer(modifier = Modifier.height(FIELD_SPACING))
         OutlinedTextField(
             value = latitudeText,
@@ -171,6 +258,7 @@ private fun StopForm(
                 { Text(stringResource(latitudeErrorRes)) }
             } else null,
             singleLine = true,
+            readOnly = coordinatesReadOnly,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
             modifier = Modifier.fillMaxWidth(),
         )
@@ -184,6 +272,7 @@ private fun StopForm(
                 { Text(stringResource(longitudeErrorRes)) }
             } else null,
             singleLine = true,
+            readOnly = coordinatesReadOnly,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
             modifier = Modifier.fillMaxWidth(),
         )
@@ -423,6 +512,113 @@ private fun PreviewSetStopDialogDestinationWithErrors() {
                 longitudeError = true,
                 longitudeHintRes = R.string.trip_detail_destination_longitude_hint,
                 longitudeErrorRes = R.string.trip_detail_destination_longitude_error,
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PreviewSetStopDialogWithSuggestions() {
+    HeadingToTheAlpsTheme {
+        Column(modifier = Modifier.padding(PREVIEW_PADDING)) {
+            Text(
+                text = "Search with suggestions",
+                style = MaterialTheme.typography.headlineSmall,
+            )
+            Spacer(modifier = Modifier.height(PREVIEW_PADDING))
+            StopForm(
+                placeName = "Colos",
+                onPlaceNameChange = {},
+                placeNameError = false,
+                placeNameHintRes = R.string.trip_detail_starting_point_place_name_hint,
+                placeNameErrorRes = R.string.trip_detail_starting_point_place_name_error,
+                latitudeText = "",
+                onLatitudeChange = {},
+                latitudeError = false,
+                latitudeHintRes = R.string.trip_detail_starting_point_latitude_hint,
+                latitudeErrorRes = R.string.trip_detail_starting_point_latitude_error,
+                longitudeText = "",
+                onLongitudeChange = {},
+                longitudeError = false,
+                longitudeHintRes = R.string.trip_detail_starting_point_longitude_hint,
+                longitudeErrorRes = R.string.trip_detail_starting_point_longitude_error,
+                suggestions = listOf(
+                    PlaceSuggestion(
+                        placeId = "place-1",
+                        primaryText = "Colosseum",
+                        secondaryText = "Rome, Metropolitan City of Rome Capital, Italy",
+                    ),
+                    PlaceSuggestion(
+                        placeId = "place-2",
+                        primaryText = "Colosseo",
+                        secondaryText = "Via Sacra, Rome, Italy",
+                    ),
+                ),
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PreviewSetStopDialogSearchLoading() {
+    HeadingToTheAlpsTheme {
+        Column(modifier = Modifier.padding(PREVIEW_PADDING)) {
+            Text(
+                text = "Search loading",
+                style = MaterialTheme.typography.headlineSmall,
+            )
+            Spacer(modifier = Modifier.height(PREVIEW_PADDING))
+            StopForm(
+                placeName = "Colos",
+                onPlaceNameChange = {},
+                placeNameError = false,
+                placeNameHintRes = R.string.trip_detail_starting_point_place_name_hint,
+                placeNameErrorRes = R.string.trip_detail_starting_point_place_name_error,
+                latitudeText = "",
+                onLatitudeChange = {},
+                latitudeError = false,
+                latitudeHintRes = R.string.trip_detail_starting_point_latitude_hint,
+                latitudeErrorRes = R.string.trip_detail_starting_point_latitude_error,
+                longitudeText = "",
+                onLongitudeChange = {},
+                longitudeError = false,
+                longitudeHintRes = R.string.trip_detail_starting_point_longitude_hint,
+                longitudeErrorRes = R.string.trip_detail_starting_point_longitude_error,
+                isSearchingPlaces = true,
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PreviewSetStopDialogReadOnlyCoordinates() {
+    HeadingToTheAlpsTheme {
+        Column(modifier = Modifier.padding(PREVIEW_PADDING)) {
+            Text(
+                text = "Read-only coordinates after selection",
+                style = MaterialTheme.typography.headlineSmall,
+            )
+            Spacer(modifier = Modifier.height(PREVIEW_PADDING))
+            StopForm(
+                placeName = "Colosseum",
+                onPlaceNameChange = {},
+                placeNameError = false,
+                placeNameHintRes = R.string.trip_detail_starting_point_place_name_hint,
+                placeNameErrorRes = R.string.trip_detail_starting_point_place_name_error,
+                latitudeText = "41.8902",
+                onLatitudeChange = {},
+                latitudeError = false,
+                latitudeHintRes = R.string.trip_detail_starting_point_latitude_hint,
+                latitudeErrorRes = R.string.trip_detail_starting_point_latitude_error,
+                longitudeText = "12.4922",
+                onLongitudeChange = {},
+                longitudeError = false,
+                longitudeHintRes = R.string.trip_detail_starting_point_longitude_hint,
+                longitudeErrorRes = R.string.trip_detail_starting_point_longitude_error,
+                coordinatesReadOnly = true,
             )
         }
     }

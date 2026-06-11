@@ -1,9 +1,8 @@
 # SDLC
 
-SDLC is a group of custom commands that wrap and extend the standard OpenSpec (SDD) workflow, tailored to this project's user-story-driven development process.
-
+SDLC is a group of custom commands that wrap and extend the standard OpenSpec (SDD) workflow.
 The standard OpenSpec flow generally follows this sequence: propose → apply → verify → archive
-These commands replace the standard flow with a user-story-centric pipeline. Run them in order for a typical feature lifecycle.
+SDLC commands replace the standard flow with a user-story-centric pipeline. Run them in order for a typical feature lifecycle.
 
 Each of the below operations adds a summary of the actions/results into an HTML report in [reports](../../reports)
 
@@ -36,6 +35,38 @@ Run once after cloning, or after adding a new command to `docs/sdlc/commands/`:
 
 These scripts create symlinks in `.claude/commands/sdlc/` and `.cursor/commands/` for every SDLC command.
 
+## Customisation
+
+The folder structure is:
+
+```
+base project folder
+├── openspec/                            # OpenSpec standard folder, managed by OpenSpec commands
+├── docs/                                # Documentation & SDLC folders
+│   ├── guidelines/                      # Development guidelines
+│   │   ├── guidelines-android.md
+│   │   ├── guidelines-git.md
+│   │   ├── guidelines-process.md
+│   │   ├── guidelines-reports.md
+│   │   └── guidelines-userstories.md
+│   ├── reports/                         # Verification and archive reports (HTML/MD)
+│   ├── sdlc/                            # SDLC framework
+│   │   ├── commands/                    # Command definitions (source of truth)
+│   │   │   ├── SDLC-README.md
+│   │   │   ├── <sdlc_command>.md
+│   │   ├── sdlc_init.sh                 # Symlink setup script (Linux/macOS)
+│   │   └── sdlc_init.ps1                # Symlink setup script (Windows)
+│   └── userstories/                     # User story backlog organised by epic/feature
+│       ├── index.md
+│       ├── <id>-<name>-DONE.md          # Completed stories
+│       ├── <id>-<name>-WIP.md           # In-progress stories
+│       └── <id>-<name>.md               # Backlog stories
+├── AGENTS.md                            # Agent instructions (CLAUDE.md symlinks here)
+└── README.md
+```
+
+
+
 ## TODO
 
 SDLC:
@@ -50,6 +81,12 @@ Guidelines:
 - create a guideline for readme
 - step for static checks:
   - unused import directive / deprecation
+- Test: when writing a test:
+  - use SUT to clarify what class is being tested
+  - do not use for the expected value, the same internal function being tested -> this however conflicts with BDD's black box behaviour
+  - insert a comment with the AAA?
+- There are several decisions that have been taken just "because it's a small project": that should not happen: all the projects I start are small and they will likely  become bigger, so they should use the expected architecture and structures.
+- Check coverage - 100% ???
 
 Not sure what's best yet:
 - When both Domain and UI require the same data type, f.i. an enum, where should this be defined? In Domain? Should it be duplicated in UI? Should it be defined in another root package?

@@ -46,7 +46,7 @@ Resolving human-readable place names to geographic coordinates when adding or ed
 
 | ID | User Story | Details |
 |----|------------|---------|
-| 2.1.1 | As a user, I want to search for a place by name when adding a stop | [2.1.1-search-place-by-name](2.1.1-search-place-by-name.md) |
+| 2.1.1 | As a user, I want to search for a place by name when adding a stop | [2.1.1-search-place-by-name](2.1.1-search-place-by-name-DONE.md) |
 | 2.1.2 | As a user, I want the app to resolve place names to coordinates | [2.1.2-resolve-place-to-coordinates](2.1.2-resolve-place-to-coordinates.md) |
 
 ---

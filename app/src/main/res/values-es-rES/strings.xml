@@ -2,6 +2,7 @@
     <string name="global_confirm">Confirmar</string>
     <string name="global_cancel">Cancelar</string>
     <string name="global_loading">Cargando</string>
+    <string name="global_searching_places">Buscando lugares</string>
     <string name="trip_list_fab_label">Crear viaje</string>
     <string name="trip_list_empty_title">Aún no hay viajes</string>
     <string name="trip_list_empty_action">Crea tu primer viaje</string>
@@ -60,4 +61,7 @@
     <string name="trip_detail_undo_departed">Deshacer partida</string>
     <string name="trip_detail_progress_summary">%1$d de %2$d paradas completadas</string>
     <string name="trip_detail_stop_departed_icon_description">Partido</string>
+    <string name="trip_detail_search_no_results">No se encontraron resultados</string>
+    <string name="trip_detail_search_unavailable">Búsqueda no disponible</string>
+    <string name="trip_detail_search_loading">Buscando…</string>
 </resources>

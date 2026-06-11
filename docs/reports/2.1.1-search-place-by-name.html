@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Report: 2.1.1 — Search for a Place by Name</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.6;
+      color: #1a1a1a;
+      background: #fafafa;
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+
+    .report-header {
+      border-bottom: 3px solid #2563eb;
+      padding-bottom: 1rem;
+      margin-bottom: 2rem;
+    }
+    .report-header h1 { font-size: 1.75rem; color: #1e293b; }
+    .report-meta {
+      display: flex; gap: 2rem; flex-wrap: wrap;
+      margin-top: 0.5rem; font-size: 0.875rem; color: #64748b;
+    }
+    .report-meta span { display: inline-flex; align-items: center; gap: 0.25rem; }
+
+    .report-section {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .report-section header {
+      display: flex; justify-content: space-between; align-items: baseline;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 0.75rem; margin-bottom: 1rem;
+    }
+    .report-section header h2 { font-size: 1.25rem; color: #1e293b; }
+    .report-section header time { font-size: 0.8rem; color: #94a3b8; white-space: nowrap; }
+    .section-source { font-size: 0.75rem; color: #94a3b8; font-style: italic; margin-bottom: 0.75rem; }
+
+    h3 { font-size: 1.05rem; color: #334155; margin: 1rem 0 0.5rem; }
+    p { margin-bottom: 0.75rem; }
+    ul, ol { margin: 0.5rem 0 0.75rem 1.5rem; }
+    li { margin-bottom: 0.25rem; }
+    code {
+      background: #f1f5f9; padding: 0.15rem 0.35rem; border-radius: 3px;
+      font-size: 0.875em;
+      font-family: "SF Mono", "Fira Code", Menlo, Consolas, monospace;
+    }
+
+    table { width: 100%; border-collapse: collapse; margin: 0.75rem 0; font-size: 0.9rem; }
+    th, td { text-align: left; padding: 0.5rem 0.75rem; border: 1px solid #e2e8f0; }
+    th { background: #f8fafc; font-weight: 600; color: #475569; }
+
+    .badge {
+      display: inline-block; padding: 0.15rem 0.5rem;
+      border-radius: 4px; font-size: 0.8rem; font-weight: 600;
+    }
+    .badge-pass { background: #dcfce7; color: #166534; }
+    .badge-fail { background: #fee2e2; color: #991b1b; }
+    .badge-warn { background: #fef9c3; color: #854d0e; }
+    .badge-info { background: #dbeafe; color: #1e40af; }
+
+    .outcome { margin-top: 1rem; padding: 0.75rem 1rem; border-radius: 6px; font-weight: 600; }
+    .outcome-passed { background: #dcfce7; color: #166534; border-left: 4px solid #22c55e; }
+    .outcome-failed { background: #fee2e2; color: #991b1b; border-left: 4px solid #ef4444; }
+  </style>
+</head>
+<body>
+
+  <div class="report-header">
+    <h1>2.1.1 — Search for a Place by Name</h1>
+    <div class="report-meta">
+      <span><strong>Story:</strong> 2.1.1</span>
+      <span><strong>Branch:</strong> feature/2.1.1-search-place-by-name</span>
+      <span><strong>Created:</strong> 2026-06-07</span>
+    </div>
+  </div>
+
+  <main id="report-sections">
+  <section class="report-section" data-source="open_user_story" data-timestamp="2026-06-07T11:33:20Z">
+    <header>
+      <h2>Story Opened</h2>
+      <time datetime="2026-06-07T11:33:20Z">07 June 2026, 13:33</time>
+    </header>
+    <p class="section-source">Source: open_user_story</p>
+
+    <h3>User Story</h3>
+    <p><strong>2.1.1 — Search for a Place by Name</strong></p>
+    <p>As a user, I want to search for a place by name when adding or editing a stop so that I don't have to know exact coordinates.</p>
+
+    <h3>Branch</h3>
+    <p><code>feature/2.1.1-search-place-by-name</code> created from <code>main</code> at <code>ef1af19</code>.</p>
+
+    <h3>Refinement Summary</h3>
+    <p>The original user story was high-level. The refined version adds:</p>
+    <ul>
+      <li><strong>10 detailed acceptance criteria</strong> covering search integration, debouncing, suggestion display, selection, read-only coordinates, manual fallback, edit mode, error handling, loading indicator, and session token lifecycle.</li>
+      <li><strong>Full technical specification</strong> across 9 new files (domain models, repository interface/implementation, mappers, use cases, DI module) and 8 files to modify (gradle, build config, UI composables, state, intents, ViewModel, strings, app initialisation).</li>
+      <li><strong>Google Places SDK (New)</strong> integration via <code>com.google.android.libraries.places:places:4.2.0</code> with session-token-based billing.</li>
+      <li><strong>API key security</strong>: stored in <code>local.properties</code> (gitignored), surfaced via <code>BuildConfig</code>, restricted to app package and signing certificate.</li>
+      <li><strong>Clean Architecture compliance</strong>: domain layer uses <code>Any</code> for session token to avoid SDK type leakage; mappers reside in the data layer.</li>
+      <li><strong>Non-functional analysis</strong>: GDPR (no PII sent beyond search query), performance (debounce + coroutine cancellation), accessibility (focusable suggestions, screen reader announcements), offline graceful degradation.</li>
+      <li><strong>19-item completion checklist</strong> including on-device manual verification.</li>
+    </ul>
+  </section>
+  <section class="report-section" data-source="opsx:propose" data-timestamp="2026-06-07T14:15:00Z">
+    <header>
+      <h2>Change Proposed</h2>
+      <time datetime="2026-06-07T14:15:00Z">07 June 2026, 16:15</time>
+    </header>
+    <p class="section-source">Source: opsx:propose</p>
+
+    <h3>Exploration Findings</h3>
+    <p>Investigated 8 key design questions before proposing. Findings grounded in Google Places SDK (New) documentation via Context7:</p>
+    <ul>
+      <li><strong>Places SDK API surface</strong>: <code>FindAutocompletePredictionsRequest</code> + <code>FetchPlaceRequest</code> with <code>AutocompleteSessionToken</code> for billing (~$0.017/session). Task-based API requires <code>kotlinx-coroutines-play-services</code> for <code>.await()</code>.</li>
+      <li><strong>Session token</strong>: Managed entirely inside <code>PlaceSearchRepositoryImpl</code> — domain layer never sees it. Auto-created on first search, consumed on place detail fetch, cleared on dialog dismiss.</li>
+      <li><strong>Debouncing</strong>: Job cancellation pattern (300ms) — matches existing ViewModel style.</li>
+      <li><strong>State split</strong>: Search state (suggestions, loading, error) in ViewModel; form fields (placeName, lat, lng) remain as local composable state. Coordinate writeback via <code>selectedPlaceDetail</code> field consumed by <code>LaunchedEffect</code>.</li>
+      <li><strong>Read-only coordinates</strong>: Local composable boolean, set on selection, cleared on manual edit.</li>
+      <li><strong>SDK initialisation</strong>: <code>Places.initializeWithNewPlacesApiEnabled()</code> in <code>VeniceApplication.onCreate()</code>; <code>PlacesClient</code> provided via Hilt.</li>
+    </ul>
+
+    <h3>Questions Asked and Answers</h3>
+    <p>All 8 design questions were explored and resolved during the exploration phase. No blocking ambiguities remained — the user confirmed the approach was solid and approved moving to proposal.</p>
+
+    <h3>Artefacts Created</h3>
+    <table>
+      <tr><th>Artefact</th><th>Path</th><th>Description</th></tr>
+      <tr><td>Proposal</td><td><code>openspec/changes/search-place-by-name/proposal.md</code></td><td>Motivation, what changes, capabilities (1 new, 2 modified), impact</td></tr>
+      <tr><td>Design</td><td><code>openspec/changes/search-place-by-name/design.md</code></td><td>6 key decisions with rationale: token management, debounce strategy, hybrid state, PlacesClient init, coroutine bridge, read-only coordinates</td></tr>
+      <tr><td>Spec: place-search</td><td><code>openspec/changes/search-place-by-name/specs/place-search/spec.md</code></td><td>New capability: domain models, repository, mappers, use cases, DI, SDK init, dependencies (14 requirements)</td></tr>
+      <tr><td>Spec: destination-ui</td><td><code>openspec/changes/search-place-by-name/specs/destination-ui/spec.md</code></td><td>Modified: SetStopDialog gains suggestion list, search loading, read-only coordinates, selection callbacks</td></tr>
+      <tr><td>Spec: trip-detail</td><td><code>openspec/changes/search-place-by-name/specs/trip-detail/spec.md</code></td><td>Modified: UiState + 4 fields, UiIntent + 2 intents, ViewModel debounced search + selection logic, screen wiring, string resources</td></tr>
+      <tr><td>Tasks</td><td><code>openspec/changes/search-place-by-name/tasks.md</code></td><td>15 sections, 41 tasks, BDD test-first ordering for mappers, repository, use cases, ViewModel, and UI</td></tr>
+    </table>
+  </section>
+  <section class="report-section" data-source="sdlc_apply_changes" data-timestamp="2026-06-08T00:00:00+02:00">
+    <header>
+      <h2>Apply Changes</h2>
+      <time datetime="2026-06-08T00:00:00+02:00">8 June 2026</time>
+    </header>
+    <p class="section-source">Source: sdlc_apply_changes_with_sub_agents</p>
+
+    <h3>Summary</h3>
+    <p>All 44 tasks implemented and verified. Implementation was resumed mid-run (tasks 1–39 were already complete from a prior session); this session completed the remaining 5 verification tasks in section 15.</p>
+
+    <h3>Progress</h3>
+    <table>
+      <tr><th>Metric</th><th>Value</th></tr>
+      <tr><td>Total tasks</td><td>44 / 44 complete</td></tr>
+      <tr><td>Sections processed this session</td><td>1 (Section 15: Verification)</td></tr>
+      <tr><td>Sub-agent iterations</td><td>3 (Haiku × 2 for 15.1 and 15.2, manual confirmation for 15.3–15.5)</td></tr>
+    </table>
+
+    <h3>Test Results</h3>
+    <table>
+      <tr><th>Suite</th><th>Result</th><th>Notes</th></tr>
+      <tr><td>Unit tests (<code>./gradlew clean check</code>)</td><td><span class="badge badge-pass">PASS</span></td><td>All tests passed; minor non-fatal Room schema and coroutines warnings</td></tr>
+      <tr><td>Compose UI tests (<code>./gradlew connectedDebugAndroidTest</code>)</td><td><span class="badge badge-pass">PASS</span></td><td>82 tests passed after fixing DEX-incompatible backtick test names and ambiguous text assertions in <code>SetStopDialogTest</code></td></tr>
+      <tr><td>On-device: search → select → save (15.3)</td><td><span class="badge badge-pass">PASS</span></td><td>Suggestions appear, coordinates auto-fill, lat/lon read-only, stop saves</td></tr>
+      <tr><td>On-device: edit stop → re-search → save (15.4)</td><td><span class="badge badge-pass">PASS</span></td><td>Stop updated correctly</td></tr>
+      <tr><td>On-device: manual coordinate entry (15.5)</td><td><span class="badge badge-pass">PASS</span></td><td>Manual entry works without autocomplete selection</td></tr>
+    </table>
+
+    <h3>TODO Scan</h3>
+    <p>2 TODOs found in <code>RemoveStopUseCase</code> and <code>EditStopUseCase</code>. Both reference Epic 3 leg tracking — unrelated to this story and precondition not met.</p>
+    <p><strong>RESOLVE NOW:</strong> 0 &nbsp;&nbsp; <strong>ACKNOWLEDGED:</strong> 2</p>
+    <ul>
+      <li><code>RemoveStopUseCase.kt:9</code> — invalidate affected legs once leg tracking is implemented (Epic 3)</li>
+      <li><code>EditStopUseCase.kt:10</code> — invalidate affected legs once leg tracking is implemented (Epic 3)</li>
+    </ul>
+
+    <h3>Security Review</h3>
+    <p><span class="badge badge-pass">PASS</span> — 0 findings. API key sourced from <code>local.properties</code> via <code>buildConfigField</code>; Places SDK handles input sanitisation; no sensitive data logged; no unsafe deserialisation.</p>
+
+    <h3>Documentation</h3>
+    <table>
+      <tr><th>File</th><th>Updated?</th><th>Changes</th></tr>
+      <tr><td><code>README.md</code></td><td><span class="badge badge-pass">YES</span></td><td>App description updated to mention place search; Google Places SDK added to tech stack table</td></tr>
+      <tr><td><code>AGENTS.md</code></td><td><span class="badge badge-pass">YES</span></td><td>Story 2.1.1 added to completed stories in Current Status section</td></tr>
+    </table>
+
+    <div class="outcome outcome-passed">Overall outcome: PASSED — all tasks complete, all tests green, security clean.</div>
+  </section>
+  <section class="report-section" data-source="sdlc:sdlc_verify_story" data-timestamp="2026-06-11T09:19:00+02:00">
+    <header>
+      <h2>Verification &amp; Archive</h2>
+      <time datetime="2026-06-11T09:19:00+02:00">11 Jun 2026</time>
+    </header>
+    <p class="section-source">Source: sdlc:sdlc_verify_story</p>
+
+    <h3>OpenSpec Verify</h3>
+    <p><span class="badge badge-pass">PASS</span> All 44/44 tasks complete. All artifacts (proposal, design, specs, tasks) in <code>done</code> status.</p>
+
+    <h3>TODO Scan</h3>
+    <p>2 TODOs found in source — both <strong>ACKNOWLEDGED</strong> (unrelated to this story):</p>
+    <ul>
+      <li><code>RemoveStopUseCase.kt:9</code> — invalidate affected legs once leg tracking is implemented (Epic 3)</li>
+      <li><code>EditStopUseCase.kt:10</code> — invalidate affected legs once leg tracking is implemented (Epic 3)</li>
+    </ul>
+
+    <h3>Security Review</h3>
+    <p><span class="badge badge-pass">PASS</span> No critical or high-severity findings. Three candidates reviewed and filtered as false positives (confidence ≤ 2/10): error message data exposure (not exploitable in local consumer app context), API key in BuildConfig (standard Android practice, key gitignored), coordinate float formatting (data from trusted API, no injection risk).</p>
+
+    <h3>On-Device Tests</h3>
+    <p>Device: Pixel 6a — Android 16 (ADB ID: <code>2C091JEGR07097</code>)</p>
+    <table>
+      <tr><th>Check</th><th>Method</th><th>Result</th></tr>
+      <tr>
+        <td>Instrumented Compose UI tests</td>
+        <td><code>./gradlew connectedDebugAndroidTest</code></td>
+        <td><span class="badge badge-pass">PASS</span> 82/82 tests passed</td>
+      </tr>
+      <tr>
+        <td>Type place name → suggestions appear</td>
+        <td>Agent via adb</td>
+        <td><span class="badge badge-pass">PASS</span> Typed "Rome", 5 suggestions appeared with primary + secondary text</td>
+      </tr>
+      <tr>
+        <td>Select suggestion → coordinates auto-fill</td>
+        <td>Agent via adb</td>
+        <td><span class="badge badge-pass">PASS</span> Selected "Rome / Metropolitan City of Rome Capital, Italy" → lat=41.8967, lon=12.4822</td>
+      </tr>
+      <tr>
+        <td>Lat/lon fields become read-only after selection</td>
+        <td>Agent via adb</td>
+        <td><span class="badge badge-pass">PASS</span> Attempted to type "99" into latitude field — value remained 41.8967</td>
+      </tr>
+      <tr>
+        <td>Stop saves correctly with autocomplete coordinates</td>
+        <td>Agent via adb</td>
+        <td><span class="badge badge-pass">PASS</span> Trip Detail showed "Rome — 41.8967, 12.4822" after confirmation</td>
+      </tr>
+    </table>
+
+    <h3>Definition of Done</h3>
+    <table>
+      <tr><th>#</th><th>Criterion</th><th>Status</th><th>Evidence</th></tr>
+      <tr><td>1</td><td>Search field integration</td><td><span class="badge badge-pass">PASS</span></td><td>Verified on-device: typing triggers suggestions below Place name field</td></tr>
+      <tr><td>2</td><td>Debounced requests (300 ms)</td><td><span class="badge badge-pass">PASS</span></td><td><code>delay(SEARCH_DEBOUNCE_MILLIS)</code> in ViewModel; unit tests cover debounce</td></tr>
+      <tr><td>3</td><td>Suggestion list with primary + secondary text</td><td><span class="badge badge-pass">PASS</span></td><td>On-device: "Rome / Metropolitan City of Rome Capital, Italy"</td></tr>
+      <tr><td>4</td><td>Selection auto-populates lat/lon, list dismissed</td><td><span class="badge badge-pass">PASS</span></td><td>On-device: lat=41.8967, lon=12.4822 auto-filled; suggestions cleared</td></tr>
+      <tr><td>5</td><td>Coordinates read-only after selection; revert on name change</td><td><span class="badge badge-pass">PASS</span></td><td>On-device: typing "99" had no effect; <code>coordinatesFromAutocomplete</code> flag verified in code</td></tr>
+      <tr><td>6</td><td>Manual fallback still works</td><td><span class="badge badge-pass">PASS</span></td><td><code>coordinatesFromAutocomplete</code> flag; Compose UI test covers manual entry</td></tr>
+      <tr><td>7</td><td>Edit mode pre-population</td><td><span class="badge badge-pass">PASS</span></td><td><code>initialPlaceName/Latitude/Longitude</code> params in <code>SetStopDialog</code></td></tr>
+      <tr><td>8</td><td>Error handling: inline message, non-blocking</td><td><span class="badge badge-pass">PASS</span></td><td><code>searchError</code> inline text; string resources for no-results/unavailable</td></tr>
+      <tr><td>9</td><td>Loading indicator during fetch</td><td><span class="badge badge-pass">PASS</span></td><td><code>CircularProgressIndicator</code> when <code>isSearchingPlaces=true</code></td></tr>
+      <tr><td>10</td><td>Session token lifecycle</td><td><span class="badge badge-pass">PASS</span></td><td>Token cleared on place selection and dialog dismiss; <code>resetSession()</code> verified in code and tests</td></tr>
+    </table>
+
+    <h3>Spec Sync</h3>
+    <p><span class="badge badge-pass">SYNCED</span> Delta specs merged into main specs:</p>
+    <ul>
+      <li><strong>destination-ui</strong>: <code>SetStopDialog</code> requirement updated with 6 new place search parameters and 9 new scenarios</li>
+      <li><strong>place-search</strong>: New spec file created with 13 requirements (domain models, repository, mappers, use cases, DI wiring, SDK config)</li>
+      <li><strong>trip-detail</strong>: <code>TripDetailUiState</code>, <code>TripDetailUiIntent</code>, <code>TripDetailViewModel</code>, <code>TripDetailScreen</code> requirements updated; new <code>Place search string resources</code> requirement added</li>
+    </ul>
+
+    <h3>Archive</h3>
+    <p>Change archived to <code>openspec/changes/archive/2026-06-11-search-place-by-name/</code></p>
+
+    <h3>README.md &amp; AGENTS.md Sync Check</h3>
+    <p><span class="badge badge-pass">IN SYNC</span> Both files already reflected the completed story. No updates required.</p>
+
+    <div class="outcome outcome-passed">PASSED — Story closed as <code>2.1.1-search-place-by-name-DONE.md</code></div>
+  </section>
+
+  </main>
+
+</body>
+</html>

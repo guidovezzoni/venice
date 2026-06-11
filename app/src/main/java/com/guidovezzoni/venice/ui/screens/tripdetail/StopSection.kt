@@ -46,6 +46,8 @@ private val ICON_SPACING = 12.dp
 private val VERTICAL_SPACING = 4.dp
 private val CURRENT_STOP_BORDER_WIDTH = 2.dp
 private const val DEPARTED_ALPHA = 0.6f
+private const val COORDINATE_DECIMAL_PLACES = 4
+private const val COORDINATE_FORMAT = "%.${COORDINATE_DECIMAL_PLACES}f"
 
 @Composable
 fun StopSection(
@@ -164,7 +166,7 @@ private fun FilledStop(
                     modifier = Modifier.graphicsLayer { alpha = contentAlpha },
                 )
                 Text(
-                    text = "${stop.latitude}, ${stop.longitude}",
+                    text = "${COORDINATE_FORMAT.format(stop.latitude)}, ${COORDINATE_FORMAT.format(stop.longitude)}",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.graphicsLayer { alpha = contentAlpha },
