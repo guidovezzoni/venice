@@ -25,10 +25,12 @@ Defines the requirements for the trip detail screen, covering the MVI contract (
 - `isSearchingPlaces: Boolean` (default `false`)
 - `searchError: String?` (default `null`)
 - `selectedPlaceDetail: PlaceDetail?` (default `null`)
+- `isResolvingPlace: Boolean` (default `false`)
+- `placeDetailError: String?` (default `null`)
 
 #### Scenario: Default initial state
 - **WHEN** `TripDetailUiState()` is created with defaults
-- **THEN** `tripId` is `""`, `startingPoint` is `null`, `destination` is `null`, `intermediateStops` is empty, `isLoading` is `false`, `isSetStartingPointDialogVisible` is `false`, `isSetDestinationDialogVisible` is `false`, `isAddStopDialogVisible` is `false`, `isEditStopDialogVisible` is `false`, `editingStop` is `null`, `canAddMoreStops` is `false`, `isRemoveStopDialogVisible` is `false`, `stopToRemove` is `null`, `placeSuggestions` is empty, `isSearchingPlaces` is `false`, `searchError` is `null`, `selectedPlaceDetail` is `null`
+- **THEN** `tripId` is `""`, `startingPoint` is `null`, `destination` is `null`, `intermediateStops` is empty, `isLoading` is `false`, `isSetStartingPointDialogVisible` is `false`, `isSetDestinationDialogVisible` is `false`, `isAddStopDialogVisible` is `false`, `isEditStopDialogVisible` is `false`, `editingStop` is `null`, `canAddMoreStops` is `false`, `isRemoveStopDialogVisible` is `false`, `stopToRemove` is `null`, `placeSuggestions` is empty, `isSearchingPlaces` is `false`, `searchError` is `null`, `selectedPlaceDetail` is `null`, `isResolvingPlace` is `false`, `placeDetailError` is `null`
 
 ### Requirement: TripDetailUiIntent models user actions
 `TripDetailUiIntent` SHALL be a sealed class with:
@@ -94,7 +96,7 @@ Defines the requirements for the trip detail screen, covering the MVI contract (
   - `canAddMoreStops` as `true` when the total stop count is less than 25, `false` otherwise.
 - On `OnSetStartingPointClicked`: set `isSetStartingPointDialogVisible = true`.
 - On `OnDismissStartingPointDialog`: set `isSetStartingPointDialogVisible = false`, clear search state, cancel search job, call `PlaceSearchRepository.resetSession()`.
-- All async operations SHALL use `withMinimumDuration { ... }` (which defaults to 500 ms) to ensure `isLoading` remains `true` for at least 500 ms, even if the underlying operation completes faster.
+- All async save operations SHALL use `withMinimumDuration { ... }` (which defaults to 500 ms) to ensure `isLoading` remains `true` for at least 500 ms, even if the underlying operation completes faster.
 - On `OnStartingPointConfirmed`: set `isLoading = true`; call `SetStopUseCase` with `StopType.STARTING_POINT`; on success dismiss the dialog and set `isLoading = false`; on failure set `isLoading = false` and emit `ShowError`.
 - On `OnSetDestinationClicked`: set `isSetDestinationDialogVisible = true`.
 - On `OnDismissDestinationDialog`: set `isSetDestinationDialogVisible = false`, clear search state, cancel search job, call `PlaceSearchRepository.resetSession()`.
@@ -112,8 +114,8 @@ Defines the requirements for the trip detail screen, covering the MVI contract (
 - On `OnRemoveStopConfirmed`: set `isLoading = true`; call `RemoveStopUseCase(tripId, stopToRemove!!.id)`; on success set `stopToRemove = null`, `isRemoveStopDialogVisible = false`, and `isLoading = false`; on failure set `isLoading = false` and emit `ShowError`.
 - On `OnMarkStopDepartedClicked`: set `isLoading = true`; call `MarkStopDepartedUseCase(tripId, stopId)`; on success set `isLoading = false`; on failure set `isLoading = false` and emit `ShowError`.
 - On `OnUndoMarkStopDepartedClicked`: set `isLoading = true`; call `UndoMarkStopDepartedUseCase(tripId)`; on success set `isLoading = false`; on failure set `isLoading = false` and emit `ShowError`.
-- On `OnSearchQueryChanged`: cancel any pending search job; if query (trimmed) is blank, clear `placeSuggestions`, `isSearchingPlaces`, and `searchError`; otherwise launch a new coroutine that delays 300 ms, sets `isSearchingPlaces = true`, calls `SearchPlacesUseCase(query)`, and on success updates `placeSuggestions` and clears `isSearchingPlaces` and `searchError`, on failure sets `searchError` and clears `isSearchingPlaces` and `placeSuggestions`.
-- On `OnSuggestionSelected`: clear `placeSuggestions`; set `isSearchingPlaces = false`; launch a coroutine that calls `GetPlaceDetailUseCase(suggestion.placeId)`; on success set `selectedPlaceDetail` to the result; on failure emit `ShowError`. After the composable consumes `selectedPlaceDetail`, the ViewModel SHALL clear it (set to `null`).
+- On `OnSearchQueryChanged(query)`: cancel any pending search job; if query is blank, call `clearSearchState()`; otherwise set `isSearchingPlaces = true`, clear `placeDetailError`, debounce 300ms, call `SearchPlacesUseCase`; on success update `placeSuggestions`, clear `searchError`, set `isSearchingPlaces = false`; on failure set `searchError`, clear `placeSuggestions`, set `isSearchingPlaces = false`.
+- On `OnSuggestionSelected(suggestion)`: set `isResolvingPlace = true` and clear `placeDetailError`; call `GetPlaceDetailUseCase(suggestion.placeId)`; on success set `selectedPlaceDetail`, clear `placeSuggestions`, set `isResolvingPlace = false`; on failure set `placeDetailError` with the error message, set `isResolvingPlace = false`. SHALL NOT emit `ShowError` effect on Place Details failure.
 
 #### Scenario: Search query debounced at 300 ms
 - **WHEN** `OnSearchQueryChanged("R")` is dispatched, then `OnSearchQueryChanged("Ro")` 100 ms later, then `OnSearchQueryChanged("Rom")` 100 ms later
@@ -135,13 +137,29 @@ Defines the requirements for the trip detail screen, covering the MVI contract (
 - **WHEN** `OnSuggestionSelected` is dispatched with a suggestion with `placeId = "abc"` and `GetPlaceDetailUseCase` returns `PlaceDetail("Colosseum", 41.8902, 12.4922)`
 - **THEN** `selectedPlaceDetail` is set to `PlaceDetail("Colosseum", 41.8902, 12.4922)` and `placeSuggestions` is cleared
 
-#### Scenario: Suggestion selected but detail fetch fails
-- **WHEN** `OnSuggestionSelected` is dispatched and `GetPlaceDetailUseCase` returns failure
-- **THEN** a `ShowError` effect is emitted and `selectedPlaceDetail` remains `null`
+#### Scenario: Suggestion selected sets resolving flag
+- **WHEN** `OnSuggestionSelected` is dispatched and `GetPlaceDetailUseCase` is in-flight
+- **THEN** `isResolvingPlace` is `true`
+
+#### Scenario: Suggestion selected succeeds clears resolving flag
+- **WHEN** `OnSuggestionSelected` is dispatched and `GetPlaceDetailUseCase` succeeds
+- **THEN** `isResolvingPlace` is `false` and `selectedPlaceDetail` is populated
+
+#### Scenario: Suggestion selected fails sets inline error
+- **WHEN** `OnSuggestionSelected` is dispatched and `GetPlaceDetailUseCase` fails
+- **THEN** `isResolvingPlace` is `false` and `placeDetailError` contains the error message
+
+#### Scenario: New search query clears place detail error
+- **WHEN** `placeDetailError` is set and `OnSearchQueryChanged` is dispatched with a non-blank query
+- **THEN** `placeDetailError` is `null`
+
+#### Scenario: New suggestion selected clears place detail error
+- **WHEN** `placeDetailError` is set and `OnSuggestionSelected` is dispatched
+- **THEN** `placeDetailError` is cleared before the new API call begins
 
 #### Scenario: Dialog dismiss clears search state
 - **WHEN** any dialog dismiss intent is dispatched (e.g. `OnDismissStartingPointDialog`)
-- **THEN** `placeSuggestions` is cleared, `isSearchingPlaces` is `false`, `searchError` is `null`, `selectedPlaceDetail` is `null`, the search job is cancelled, and `PlaceSearchRepository.resetSession()` is called
+- **THEN** `placeSuggestions` is cleared, `isSearchingPlaces` is `false`, `searchError` is `null`, `selectedPlaceDetail` is `null`, `isResolvingPlace` is `false`, `placeDetailError` is `null`, the search job is cancelled, and `PlaceSearchRepository.resetSession()` is called
 
 #### Scenario: Search job cancelled on new query
 - **WHEN** `OnSearchQueryChanged("Rome")` is dispatched while a previous search for "Rom" is still debouncing
@@ -569,6 +587,20 @@ The app SHALL include the following string resources in EN and IT:
 #### Scenario: Italian strings present
 - **WHEN** the app locale is Italian
 - **THEN** `trip_detail_mark_departed` resolves to "Segna come partito" and `trip_detail_undo_departed` resolves to "Annulla partenza"
+
+### Requirement: TripDetailScreen passes resolving state to dialogs
+`TripDetailScreen` SHALL pass `isResolvingPlace` and `placeDetailError` from `TripDetailUiState` to all `SetStopDialog` invocations (starting point, destination, add stop, edit stop).
+
+#### Scenario: All dialog call sites receive resolving state
+- **WHEN** `TripDetailScreen` renders any `SetStopDialog`
+- **THEN** it passes `uiState.isResolvingPlace` as `isResolvingPlace` and `uiState.placeDetailError` as `placeDetailError`
+
+### Requirement: Place detail error string resource
+A string resource SHALL be defined for the place detail error message at `R.string.trip_detail_place_detail_error` with the value "Could not resolve place. Tap a suggestion to try again."
+
+#### Scenario: Error string is available
+- **WHEN** the app references `R.string.trip_detail_place_detail_error`
+- **THEN** the string "Could not resolve place. Tap a suggestion to try again." is returned
 
 ### Requirement: Place search string resources
 The app SHALL include the following string resources in EN, IT, and ES:

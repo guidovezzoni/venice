@@ -56,12 +56,18 @@ It SHALL also accept place search parameters:
 - `onSearchQueryChanged: (String) -> Unit = {}` — callback invoked when the place name text changes, used to trigger autocomplete search
 - `onSuggestionSelected: (PlaceSuggestion) -> Unit = {}` — callback invoked when the user taps a suggestion
 
+It SHALL also accept place-resolution feedback parameters:
+- `isResolvingPlace: Boolean = false` — when `true`, a `CircularProgressIndicator` SHALL be displayed inside the form body with semantics content description "Resolving place", and the confirm button SHALL be disabled
+- `placeDetailError: String? = null` — when non-null, the error text SHALL be displayed inline in the form body using `MaterialTheme.colorScheme.error` styling, following the same pattern as `searchError`
+
 When initial values are provided, the corresponding fields SHALL be initialised with those values instead of empty strings.
 
 When `isLoading` is `true`:
 - The confirm button SHALL be disabled regardless of field validation state
 - A `CircularProgressIndicator` SHALL be displayed next to the confirm button text
 - The dismiss button SHALL remain enabled so the user can still close the dialog
+
+The confirm button SHALL also be disabled when `isResolvingPlace` is `true`.
 
 It SHALL display an `AlertDialog` with:
 - Title from the provided string resource
@@ -129,6 +135,18 @@ It SHALL display an `AlertDialog` with:
 #### Scenario: Place name change invokes search callback
 - **WHEN** the user types in the place name field
 - **THEN** `onSearchQueryChanged` is called with the current text AND the local `placeName` state is updated
+
+#### Scenario: Resolving place shows indicator and disables confirm
+- **WHEN** `isResolvingPlace` is `true`
+- **THEN** a progress indicator with content description "Resolving place" is visible and the confirm button is disabled
+
+#### Scenario: Place detail error shown inline
+- **WHEN** `placeDetailError` is set to a non-null value
+- **THEN** the error message is displayed inline in the dialog using error colour styling
+
+#### Scenario: Default state shows no resolving indicator or error
+- **WHEN** `isResolvingPlace` is `false` and `placeDetailError` is `null`
+- **THEN** no resolving indicator or place detail error message is shown
 
 #### Scenario: Selected place detail populates fields
 - **WHEN** `selectedPlaceDetail` transitions from `null` to a non-null `PlaceDetail(name = "Colosseum", latitude = 41.8902, longitude = 12.4922)`

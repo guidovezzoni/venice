@@ -196,6 +196,89 @@
 
     <div class="outcome outcome-passed">Implementation complete — 24/24 tasks, all tests green, security review clean.</div>
   </section>
+  <section class="report-section" data-source="sdlc_verify_story" data-timestamp="2026-06-12T14:45:00Z">
+    <header>
+      <h2>Verification &amp; Archive</h2>
+      <time datetime="2026-06-12T14:45:00Z">12 June 2026</time>
+    </header>
+    <p class="section-source">Source: sdlc_verify_story</p>
+
+    <h3>OpenSpec Verify</h3>
+    <p><span class="badge badge-pass">PASS</span> 24/24 tasks complete. All 4 requirements (TripDetailUiState, TripDetailViewModel, SetStopDialog, TripDetailScreen) and their scenarios are implemented. No critical, warning, or suggestion issues found.</p>
+
+    <h3>TODO Scan</h3>
+    <p>4 TODOs found, all ACKNOWLEDGED:</p>
+    <ul>
+      <li><code>TripDetailUiIntent.kt:9</code> — design question about PlaceDetail in intent layer (state-driven story, out of scope)</li>
+      <li><code>TripDetailUiState.kt:7</code> — refactor to sealed class (explicitly out of scope in design.md)</li>
+      <li><code>EditStopUseCase.kt:10</code> — invalidate legs once Epic 3 leg tracking implemented</li>
+      <li><code>RemoveStopUseCase.kt:9</code> — same as above</li>
+    </ul>
+
+    <h3>Security Review</h3>
+    <p><span class="badge badge-pass">PASS</span> No findings. Changes limited to UI state fields, ViewModel logic, Compose UI, and string resources. No new attack surfaces introduced.</p>
+
+    <h3>Clean Build &amp; Static Analysis</h3>
+    <p><span class="badge badge-pass">PASS</span> <code>./gradlew clean check</code> — BUILD SUCCESSFUL. 1 pre-existing warning (Room schema export, unrelated to this story). No lint errors.</p>
+
+    <h3>Unit Tests</h3>
+    <p><span class="badge badge-pass">PASS</span> All unit tests pass as part of <code>./gradlew check</code>.</p>
+
+    <h3>Test File Coverage</h3>
+    <p><span class="badge badge-pass">PASS</span></p>
+    <ul>
+      <li><code>TripDetailViewModelTest.kt</code> — exists, covers all new ViewModel states (18 references to isResolvingPlace/placeDetailError)</li>
+      <li><code>SetStopDialogTest.kt</code> — exists, covers all 3 new Compose UI scenarios</li>
+    </ul>
+
+    <h3>Compose Preview Coverage</h3>
+    <p><span class="badge badge-pass">PASS</span> Both new <code>TripDetailUiState</code> fields have non-default values in previews:</p>
+    <ul>
+      <li><code>PreviewSetStopDialogResolvingPlace</code> — <code>isResolvingPlace = true</code></li>
+      <li><code>PreviewSetStopDialogPlaceDetailError</code> — <code>placeDetailError = "..."</code></li>
+      <li><code>PreviewTripDetailScreenResolvingPlace</code> — <code>isResolvingPlace = true</code></li>
+    </ul>
+
+    <h3>On-Device Tests</h3>
+    <p><span class="badge badge-pass">PASS</span></p>
+    <ul>
+      <li><strong>Instrumented tests</strong> — <code>./gradlew connectedDebugAndroidTest</code> on Pixel 6a (Android 16): 85/85 tests passed (0 failures, 0 skipped). First run failed due to device swap mid-run; resolved by force-installing on second device.</li>
+      <li><strong>Manual adb verification</strong> — App launched on Pixel 6a. Created trip, opened "Set starting point" dialog, typed "Roma", autocomplete suggestions appeared. Tapped "Roma / Metropolitan City of Rome Capital, Italy" suggestion; coordinates resolved to <code>41.8967</code> lat / <code>12.4822</code> lng and auto-filled. Place resolution completed successfully.</li>
+    </ul>
+
+    <h3>Definition of Done</h3>
+    <table>
+      <thead>
+        <tr><th>Criterion</th><th>Status</th><th>Justification</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>AC1: Every stop has valid lat/lon after place selection</td><td><span class="badge badge-pass">PASS</span></td><td>Inherited from 2.1.1; on-device confirmed coordinates auto-filled</td></tr>
+        <tr><td>AC2: Coordinates obtained automatically (no manual input)</td><td><span class="badge badge-pass">PASS</span></td><td>Inherited from 2.1.1; confirmed on-device with suggestion tap</td></tr>
+        <tr><td>AC3: Loading indicator shown and confirm disabled while resolving</td><td><span class="badge badge-pass">PASS</span></td><td><code>CircularProgressIndicator</code> when <code>isResolvingPlace=true</code>; button <code>enabled = !isLoading &amp;&amp; !isResolvingPlace</code></td></tr>
+        <tr><td>AC4: Inline error on resolution failure (not Snackbar behind dialog)</td><td><span class="badge badge-pass">PASS</span></td><td><code>placeDetailError</code> rendered inline; <code>ShowError</code> effect no longer emitted on Place Details failure</td></tr>
+        <tr><td>AC5: User can retry after failure by tapping same/different suggestion</td><td><span class="badge badge-pass">PASS</span></td><td><code>placeSuggestions</code> not cleared on <code>onFailure</code>; only <code>isResolvingPlace=false</code> and <code>placeDetailError</code> set</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Spec Sync</h3>
+    <p><span class="badge badge-pass">SYNCED</span> Delta specs merged into main specs:</p>
+    <ul>
+      <li><code>openspec/specs/trip-detail/spec.md</code> — updated TripDetailUiState (2 new fields), TripDetailViewModel (OnSuggestionSelected behavior, clearSearchState, 5 new scenarios); added TripDetailScreen passes resolving state to dialogs; added Place detail error string resource</li>
+      <li><code>openspec/specs/destination-ui/spec.md</code> — updated SetStopDialog composable (consolidated): added isResolvingPlace &amp; placeDetailError parameters, confirm-button disable condition, 3 new scenarios</li>
+    </ul>
+
+    <h3>Archive</h3>
+    <p><span class="badge badge-pass">ARCHIVED</span> Change archived to <code>openspec/changes/archive/2026-06-12-resolve-place-to-coordinates/</code></p>
+
+    <h3>README.md &amp; AGENTS.md Sync</h3>
+    <p><span class="badge badge-pass">UPDATED</span></p>
+    <ul>
+      <li><strong>README.md</strong> — already described the resolving-place feature; no update needed</li>
+      <li><strong>AGENTS.md</strong> — updated Current Status to include 2.1.2 completion; updated "Next up" to Epic 3</li>
+    </ul>
+
+    <div class="outcome outcome-passed">PASSED — Story 2.1.2-resolve-place-to-coordinates-DONE.md</div>
+  </section>
   </main>
 
 </body>
