@@ -29,8 +29,10 @@ Each of the below operations adds a summary of the actions/results into an HTML 
 1. Download the `docs` folder into your project
 2. Install OpenSpec from https://github.com/Fission-AI/OpenSpec/ and ensure these commands are available: explore, propose, apply, verify, sync, archive
 3. Run the script in `./docs/sdlc`:
-- **Linux / macOS**: `./docs/sdlc/sdlc_init.sh`
-- **Windows** (PowerShell, Developer Mode or elevated): `.\docs\sdlc\sdlc_init.ps1`
+- **Linux / macOS**: `./docs/sdlc/sdlc_init_claude_code.sh`
+- **Windows** (PowerShell, Developer Mode or elevated): `.\docs\sdlc\sdlc_init_claude_code.ps1`
+
+The script creates a `CLAUDE.md → AGENTS.md` symlink in the project root and links SDLC command files into `.claude/commands/sdlc/`.
 
 **Please note** : currently only Claude is supported.
 
@@ -53,8 +55,8 @@ base project folder
 │   │   ├── SDLC-README.md               # This file – SDLC overview and setup
 │   │   ├── commands/                    # Command definitions (source of truth)
 │   │   │   ├── <sdlc_command>.md
-│   │   ├── sdlc_init.sh                 # Symlink setup script (Linux/macOS)
-│   │   └── sdlc_init.ps1                # Symlink setup script (Windows)
+│   │   ├── sdlc_init_claude_code.sh      # Symlink setup script (Linux/macOS)
+│   │   └── sdlc_init_claude_code.ps1    # Symlink setup script (Windows)
 │   └── userstories/                     # User story backlog organised by epic/feature
 │       ├── index.md
 │       ├── <id>-<name>-DONE.md          # Completed stories

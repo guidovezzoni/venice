@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Initialise SDLC command symlinks for Claude Code and Cursor.
+# Initialise SDLC symlinks for Claude Code.
 # Works on Linux and macOS.
 
 set -euo pipefail
@@ -8,21 +8,16 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 COMMANDS_SRC="$PROJECT_ROOT/docs/sdlc/commands"
 CLAUDE_DST="$PROJECT_ROOT/.claude/commands/sdlc"
-CURSOR_DST="$PROJECT_ROOT/.cursor/commands"
 
 mkdir -p "$CLAUDE_DST"
-mkdir -p "$CURSOR_DST"
 
 created=0
 skipped=0
 updated=0
 
-link_command() {
+link_file() {
     local src="$1"
-    local dst="$2"
-    local filename
-    filename="$(basename "$src")"
-    local target="$dst/$filename"
+    local target="$2"
 
     if [ -L "$target" ]; then
         local existing
@@ -44,14 +39,15 @@ link_command() {
     fi
 }
 
-echo "Linking SDLC commands..."
+echo "Linking SDLC for Claude Code..."
 echo ""
 
-for file in "$COMMANDS_SRC"/*.md; do
-    filename="$(basename "$file")"
+# CLAUDE.md -> AGENTS.md
+link_file "$PROJECT_ROOT/AGENTS.md" "$PROJECT_ROOT/CLAUDE.md"
 
-    link_command "$file" "$CLAUDE_DST"
-    link_command "$file" "$CURSOR_DST"
+# SDLC command symlinks
+for file in "$COMMANDS_SRC"/*.md; do
+    link_file "$file" "$CLAUDE_DST/$(basename "$file")"
 done
 
 echo ""
