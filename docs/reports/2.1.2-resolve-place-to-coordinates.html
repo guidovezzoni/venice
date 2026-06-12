@@ -111,6 +111,46 @@
 
     <p>Five acceptance criteria defined, covering the already-satisfied original criteria plus the new UX requirements. Unit and Compose UI test plans included.</p>
   </section>
+  <section class="report-section" data-source="opsx:propose" data-timestamp="2026-06-12T06:51:36Z">
+    <header>
+      <h2>Change Proposed</h2>
+      <time datetime="2026-06-12T06:51:36Z">12 Jun 2026</time>
+    </header>
+    <p class="section-source">Source: opsx:propose</p>
+
+    <h3>Exploration Findings</h3>
+    <p>Explored the existing codebase to understand integration points for the two UX gaps identified in the story refinement:</p>
+    <ul>
+      <li><strong>OnSuggestionSelected handler</strong> (<code>TripDetailViewModel:191-200</code>): launches a bare coroutine with no loading flag — no feedback until success/failure.</li>
+      <li><strong>Error routing</strong>: On failure, emits <code>TripDetailUiEffect.ShowError</code> which renders as a Snackbar at screen level, hidden behind the open dialog.</li>
+      <li><strong>Existing patterns identified</strong>: <code>isSearchingPlaces</code> + <code>searchError</code> inline display in <code>StopForm</code>; <code>isLoading</code> + confirm button disable in <code>SetStopDialog</code>; <code>clearSearchState()</code> for state cleanup.</li>
+      <li><strong>Distinct concerns</strong>: <code>isResolvingPlace</code> is separate from <code>isLoading</code> — different semantics (no minimum duration, dialog-scoped fetch vs screen-level save).</li>
+    </ul>
+
+    <h3>Questions &amp; Clarifications</h3>
+    <p>No questions needed — the story was comprehensively defined during refinement (Gap 1, Gap 2, Gap 3, acceptance criteria, test plans, file lists).</p>
+
+    <h3>Artefacts Created</h3>
+    <table>
+      <thead>
+        <tr><th>Artefact</th><th>Path</th><th>Description</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Proposal</td><td><code>openspec/changes/resolve-place-to-coordinates/proposal.md</code></td><td>Motivation, what changes, capabilities, impact</td></tr>
+        <tr><td>Design</td><td><code>openspec/changes/resolve-place-to-coordinates/design.md</code></td><td>Key decisions: separate flag, inline error, spinner placement, error clearing triggers</td></tr>
+        <tr><td>Delta Spec</td><td><code>openspec/changes/resolve-place-to-coordinates/specs/trip-detail/spec.md</code></td><td>Modified requirements for UiState, ViewModel, SetStopDialog, TripDetailScreen (9 scenarios)</td></tr>
+        <tr><td>Tasks</td><td><code>openspec/changes/resolve-place-to-coordinates/tasks.md</code></td><td>22 tasks in 8 sections: prerequisites, BDD pairs, wiring, previews, verification</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Key Design Decisions</h3>
+    <ul>
+      <li>Separate <code>isResolvingPlace</code> flag (not reusing <code>isLoading</code>) — different semantics, no minimum duration</li>
+      <li>Inline error via <code>placeDetailError</code> state field — dialog is modal, Snackbar would be hidden</li>
+      <li>Resolving spinner inside <code>StopForm</code> body — consistent with <code>isSearchingPlaces</code> spinner placement</li>
+      <li>Error cleared on new search query, new suggestion selection, and dialog dismiss</li>
+    </ul>
+  </section>
   </main>
 
 </body>
