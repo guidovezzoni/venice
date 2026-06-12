@@ -16,11 +16,7 @@ Here is a short description of each of the steps.
 
 3. Implement change: `/sdlc_implement_change`
 
-[sdlc_implement_change](sdlc_implement_change.md) implements the current OpenSpec change using BDD Red/Green cycle (test tasks verified RED before implementation, implementation tasks verified GREEN after). Then looks for outstanding TODOs, runs a security review, and updates the documentation. Uses `/opsx:apply` and `/security-review`.
-
-3. (b) Implement change (sub-agents): `/sdlc_implement_changes_with_sub_agents`
-
-[sdlc_implement_changes_with_sub_agents](sdlc_implement_changes_with_sub_agents.md) is an alternative to `/sdlc_implement_change` that uses sub-agent orchestration. Instead of running all tasks in a single session, it delegates each task section to a separate sub-agent with a fresh context window. This prevents task checkboxes from being forgotten in long sessions. It also reduces cost by using cheaper models: Sonnet for BDD sections (test + implement cycles) and Haiku for mechanical tasks (wiring, previews, commands). The parent agent orchestrates, verifies checkbox completion after each section, and handles failures. Steps 2-10 (TODO scan, security review, etc.) are identical to the standard implement command.
+[sdlc_implement_change](sdlc_implement_change.md) implements the current OpenSpec change using sub-agent orchestration with BDD Red/Green cycle (test tasks verified RED before implementation, implementation tasks verified GREEN after). Each task section is delegated to a separate sub-agent with a fresh context window, preventing task checkboxes from being forgotten in long sessions and reducing cost by using cheaper models: Sonnet for BDD sections (test + implement cycles) and Haiku for mechanical tasks (wiring, previews, commands). The parent agent orchestrates, verifies checkbox completion after each section, and handles failures. Then looks for outstanding TODOs, runs a security review, and updates the documentation. Uses `/opsx:apply` and `/security-review`.
 
 4. Verify and Archive: `/sdlc_verify_story <story>`
 
