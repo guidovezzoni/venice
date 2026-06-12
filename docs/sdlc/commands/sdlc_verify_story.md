@@ -38,29 +38,40 @@ Follow these steps:
 
 4. **Run security review.** Execute the `/security-review` command to review pending changes on the current branch for security issues. If the review reports any critical or high-severity findings, stop here: present them to the user and do **not** proceed to the next steps. If no critical or high-severity findings are reported, proceed immediately to step 5.
 
-5. **Run on-device tests.** Apply the **device gate** (see above), then:
+5. **Run clean build and static analysis.** Run `./gradlew clean check`. This catches compilation errors, lint warnings, unused imports, and deprecations. If the build fails or lint reports errors, stop here: present the issues to the user and do **not** proceed to the next steps. If the build succeeds, proceed immediately to step 6.
+
+6. **Run unit tests.** Run `./gradlew test`. If any tests fail, stop here: present the failures to the user and do **not** proceed to the next steps. If all tests pass, proceed immediately to step 7.
+
+7. **Verify test file coverage.** For each new source class introduced or modified by this story (use cases, ViewModels, repositories), check that a corresponding unit test file exists in `app/src/test/`. For each screen composable introduced or modified by this story, check that a corresponding Compose UI test file exists in `app/src/androidTest/`. List any missing test files. If any are missing, stop here: present the list to the user and do **not** proceed to the next steps. If all test files exist, proceed immediately to step 8.
+
+8. **Verify Compose preview coverage.** For each screen composable modified or introduced by this story, check that:
+   - A `@Preview` function exists for the stateless composable.
+   - Every field of the screen's `UiState` appears with a non-default value in at least one preview.
+   - List any composables missing previews and any `UiState` fields without preview coverage. If any are missing, stop here: present the list to the user and do **not** proceed to the next steps. If all previews and fields are covered, proceed immediately to step 9.
+
+9. **Run on-device tests.** Apply the **device gate** (see above), then:
    - Run `./gradlew connectedDebugAndroidTest`. If any tests fail, stop here and present the failures.
    - Install the app (`./gradlew installDebug`) and launch it with `adb shell am start`.
    - **Time-box adb UI exercise to 3 interactions.** If manual adb-based UI exercise (tap/input/screenshot) fails or requires complex multi-step setup (e.g. creating test data through multiple dialogs), stop immediately — do not loop on retries or attempt to fix adb input issues.
    - **If adb exercise is not feasible**, ask the user to perform the manual verification and describe what to check. **BLOCK here** — wait for the user to confirm the result before proceeding. If the user reports a failure, stop and present it.
-   - Only proceed to step 6 once both instrumented tests and manual verification (agent or user) have passed.
+   - Only proceed to step 10 once both instrumented tests and manual verification (agent or user) have passed.
 
-6. **Verify the Definition of Done.** Read the user story file and identify the "Acceptance Criteria" or "Definition of Done" section. For each item listed:
+10. **Verify the Definition of Done.** Read the user story file and identify the "Acceptance Criteria" or "Definition of Done" section. For each item listed:
    - Check the codebase (source files, tests, configuration) to confirm the criterion is met.
    - Report each item as PASS or FAIL with a brief justification.
    - If any item is marked FAIL, stop here: present a summary to the user and do **not** proceed to the next steps.
-   - If all items pass, proceed immediately to step 7.
+   - If all items pass, proceed immediately to step 11.
 
-7. **Close the user story.** Once all verifications pass, perform the **Closing** operation as defined in @docs/guidelines/guidelines-userstories.md.
+11. **Close the user story.** Once all verifications pass, perform the **Closing** operation as defined in @docs/guidelines/guidelines-userstories.md.
 
-8. **Sync delta specs.** Execute the OpenSpec sync command (`/opsx:sync`) to merge any delta specs from this change into the main specs. Ensure that all file moves use `git mv` so that Git tracks the renames.
+12. **Sync delta specs.** Execute the OpenSpec sync command (`/opsx:sync`) to merge any delta specs from this change into the main specs. Ensure that all file moves use `git mv` so that Git tracks the renames.
 
-9. **Archive the OpenSpec change.** Execute the OpenSpec archive command (`/opsx:archive`) to finalise and archive the completed change artefacts. Ensure that all file moves use `git mv` so that Git tracks the renames.
+13. **Archive the OpenSpec change.** Execute the OpenSpec archive command (`/opsx:archive`) to finalise and archive the completed change artefacts. Ensure that all file moves use `git mv` so that Git tracks the renames.
 
-10. **Verify README.md and AGENTS.md are in sync.** Read `README.md` and `AGENTS.md` and verify that they accurately reflect the current state of the codebase and specs after the archived change. If any section is outdated or incomplete, flag it to the user and update it. If everything is already accurate, note that the check passed.
+14. **Verify README.md and AGENTS.md are in sync.** Read `README.md` and `AGENTS.md` and verify that they accurately reflect the current state of the codebase and specs after the archived change. If any section is outdated or incomplete, flag it to the user and update it. If everything is already accurate, note that the check passed.
 
-11. **Add a report.** Append a verification and archive section to the report for this user story following @docs/guidelines/guidelines-reports.md. The section should summarise: date of verification, OpenSpec verify result (pass/fail summary), TODO scan result (list of ACKNOWLEDGED TODOs, or "none found"), security review result (pass/fail with summary of findings, if any), on-device test results (method used — agent via adb or user-confirmed — and outcomes), Definition of Done checklist with each item's PASS/FAIL status and justification, archive location, spec sync status (synced / skipped / no delta specs), README.md and AGENTS.md sync check result (in sync / updated), and final outcome (PASSED / FAILED) with the renamed filename.
+15. **Add a report.** Append a verification and archive section to the report for this user story following @docs/guidelines/guidelines-reports.md. The section should summarise: date of verification, OpenSpec verify result (pass/fail summary), TODO scan result (list of ACKNOWLEDGED TODOs, or "none found"), security review result (pass/fail with summary of findings, if any), clean build and static analysis result (pass/fail with warning count), unit test result (pass/fail with test count), test file coverage result (pass / list of missing files), Compose preview coverage result (pass / list of uncovered fields), on-device test results (method used — agent via adb or user-confirmed — and outcomes), Definition of Done checklist with each item's PASS/FAIL status and justification, archive location, spec sync status (synced / skipped / no delta specs), README.md and AGENTS.md sync check result (in sync / updated), and final outcome (PASSED / FAILED) with the renamed filename.
 
-12. **Display the summary.** Output the same summary on screen so the user can see what was verified and archived.
+16. **Display the summary.** Output the same summary on screen so the user can see what was verified and archived.
 
-13. **Suggest a commit message.** Suggest a commit message following @docs/guidelines/guidelines-git.md.
+17. **Suggest a commit message.** Suggest a commit message following @docs/guidelines/guidelines-git.md.
