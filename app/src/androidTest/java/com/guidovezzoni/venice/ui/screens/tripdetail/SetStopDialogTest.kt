@@ -28,6 +28,8 @@ class SetStopDialogTest {
         isSearchingPlaces: Boolean = false,
         searchError: String? = null,
         selectedPlaceDetail: PlaceDetail? = null,
+        isResolvingPlace: Boolean = false,
+        placeDetailError: String? = null,
         onSuggestionSelected: (PlaceSuggestion) -> Unit = {},
     ) {
         composeTestRule.setContent {
@@ -46,6 +48,8 @@ class SetStopDialogTest {
                     isSearchingPlaces = isSearchingPlaces,
                     searchError = searchError,
                     selectedPlaceDetail = selectedPlaceDetail,
+                    isResolvingPlace = isResolvingPlace,
+                    placeDetailError = placeDetailError,
                     onSuggestionSelected = onSuggestionSelected,
                 )
             }
@@ -148,5 +152,45 @@ class SetStopDialogTest {
         // Verify the coordinate values from PlaceDetail are shown
         composeTestRule.onNodeWithText("41.8902").assertExists()
         composeTestRule.onNodeWithText("12.4922").assertExists()
+    }
+
+    // Task 5.1: GIVEN isResolvingPlace is true THEN the progress indicator with content description "Resolving place" is visible and confirm button is disabled
+    @Test
+    fun GIVEN_isResolvingPlace_is_true_THEN_resolving_indicator_is_visible_and_confirm_button_is_disabled() {
+        setContent(isResolvingPlace = true)
+
+        composeTestRule
+            .onNodeWithContentDescription("Resolving place")
+            .assertExists()
+        composeTestRule
+            .onNodeWithText("Confirm")
+            .assertIsNotEnabled()
+    }
+
+    // Task 5.2: GIVEN placeDetailError is set THEN the error message is displayed inline
+    @Test
+    fun GIVEN_placeDetailError_is_set_THEN_error_message_is_displayed_inline() {
+        val expectedError = "Could not resolve place. Tap a suggestion to try again."
+
+        setContent(placeDetailError = expectedError)
+
+        composeTestRule
+            .onNodeWithText(expectedError)
+            .assertExists()
+    }
+
+    // Task 5.3: GIVEN isResolvingPlace is false and placeDetailError is null THEN no resolving indicator or error is shown
+    @Test
+    fun GIVEN_isResolvingPlace_is_false_and_placeDetailError_is_null_THEN_no_resolving_indicator_or_error_is_shown() {
+        val errorMessage = "Could not resolve place. Tap a suggestion to try again."
+
+        setContent(isResolvingPlace = false, placeDetailError = null)
+
+        composeTestRule
+            .onNodeWithContentDescription("Resolving place")
+            .assertDoesNotExist()
+        composeTestRule
+            .onNodeWithText(errorMessage)
+            .assertDoesNotExist()
     }
 }

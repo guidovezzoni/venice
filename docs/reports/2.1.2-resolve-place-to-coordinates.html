@@ -151,6 +151,51 @@
       <li>Error cleared on new search query, new suggestion selection, and dialog dismiss</li>
     </ul>
   </section>
+  <section class="report-section" data-source="sdlc_implement_changes_with_sub_agents" data-timestamp="2026-06-12T16:00:00Z">
+    <header>
+      <h2>Implementation</h2>
+      <time datetime="2026-06-12T16:00:00Z">12 Jun 2026</time>
+    </header>
+    <p class="section-source">Source: sdlc_implement_changes_with_sub_agents</p>
+
+    <h3>Summary</h3>
+    <p>All 24 tasks across 8 sections were implemented using sub-agent orchestration (1 iteration cycle). Sections 1, 6, 7, 8 used Haiku; sections 2–5 used Sonnet for BDD Red/Green cycles.</p>
+
+    <h3>Tasks Applied</h3>
+    <table>
+      <tr><th>Section</th><th>Description</th><th>Tasks</th><th>Model</th></tr>
+      <tr><td>1</td><td>Prerequisites — state fields &amp; string resources</td><td>3</td><td>Haiku</td></tr>
+      <tr><td>2</td><td>ViewModel resolving state (BDD)</td><td>3</td><td>Sonnet</td></tr>
+      <tr><td>3</td><td>ViewModel inline error (BDD)</td><td>3</td><td>Sonnet</td></tr>
+      <tr><td>4</td><td>ViewModel error clearing (BDD)</td><td>4</td><td>Sonnet</td></tr>
+      <tr><td>5</td><td>SetStopDialog resolving indicator (BDD)</td><td>4</td><td>Sonnet</td></tr>
+      <tr><td>6</td><td>TripDetailScreen wiring</td><td>1</td><td>Haiku</td></tr>
+      <tr><td>7</td><td>Compose previews</td><td>3</td><td>Haiku</td></tr>
+      <tr><td>8</td><td>Verification</td><td>3</td><td>—</td></tr>
+    </table>
+
+    <h3>BDD Cycles</h3>
+    <p>All BDD test pairs confirmed RED before implementation and GREEN after. No section required a retry. 57 unit tests and 85 instrumented Compose UI tests pass.</p>
+
+    <h3>TODOs</h3>
+    <p>4 pre-existing TODOs found — all classified <span class="badge badge-info">ACKNOWLEDGED</span>:</p>
+    <ul>
+      <li><code>TripDetailUiIntent.kt</code> — intent design question (predates this story; design explicitly excludes new intents)</li>
+      <li><code>TripDetailUiState.kt</code> — sealed class refactor (design doc explicitly marks it out of scope)</li>
+      <li><code>EditStopUseCase.kt</code> / <code>RemoveStopUseCase.kt</code> — leg invalidation blocked on Epic 3</li>
+    </ul>
+
+    <h3>Security Review</h3>
+    <p><span class="badge badge-pass">PASS</span> — 0 findings, 0 fix cycles. The <code>error.message</code> propagation to <code>placeDetailError</code> is safe: Compose <code>Text</code> renders plain characters with no injection surface, and the error source (Google Places SDK) is not attacker-controlled.</p>
+
+    <h3>Documentation</h3>
+    <ul>
+      <li><strong>README.md</strong> — Updated app description to mention the resolving indicator and inline error UX.</li>
+      <li><strong>AGENTS.md</strong> — No changes needed (story still WIP; current status section unchanged).</li>
+    </ul>
+
+    <div class="outcome outcome-passed">Implementation complete — 24/24 tasks, all tests green, security review clean.</div>
+  </section>
   </main>
 
 </body>

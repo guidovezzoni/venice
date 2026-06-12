@@ -55,6 +55,8 @@ private const val COORDINATE_FORMAT = "%.${COORDINATE_DECIMAL_PLACES}f"
 fun SetStopDialog(
     modifier: Modifier = Modifier,
     isLoading: Boolean = false,
+    isResolvingPlace: Boolean = false,
+    placeDetailError: String? = null,
     @StringRes dialogTitleRes: Int,
     @StringRes placeNameHintRes: Int,
     @StringRes placeNameErrorRes: Int,
@@ -126,6 +128,8 @@ fun SetStopDialog(
                 suggestions = suggestions,
                 isSearchingPlaces = isSearchingPlaces,
                 searchError = searchError,
+                isResolvingPlace = isResolvingPlace,
+                placeDetailError = placeDetailError,
                 onSuggestionSelected = onSuggestionSelected,
             )
         },
@@ -153,7 +157,7 @@ fun SetStopDialog(
                             onConfirm(placeName, lat, lng)
                         }
                     },
-                    enabled = !isLoading,
+                    enabled = !isLoading && !isResolvingPlace,
                 ) {
                     Text(stringResource(R.string.global_confirm))
                 }
@@ -188,9 +192,12 @@ private fun StopForm(
     suggestions: List<PlaceSuggestion> = emptyList(),
     isSearchingPlaces: Boolean = false,
     searchError: String? = null,
+    isResolvingPlace: Boolean = false,
+    placeDetailError: String? = null,
     onSuggestionSelected: (PlaceSuggestion) -> Unit = {},
 ) {
     val searchingPlacesDescription = stringResource(R.string.global_searching_places)
+    val resolvingPlaceDescription = stringResource(R.string.global_resolving_place)
 
     Column {
         OutlinedTextField(
@@ -246,6 +253,25 @@ private fun StopForm(
                     }
                 }
             }
+        }
+
+        if (isResolvingPlace) {
+            Spacer(modifier = Modifier.height(FIELD_SPACING))
+            CircularProgressIndicator(
+                modifier = Modifier
+                    .size(SEARCH_SPINNER_SIZE)
+                    .semantics { contentDescription = resolvingPlaceDescription },
+                strokeWidth = 2.dp,
+            )
+        }
+
+        if (placeDetailError != null) {
+            Spacer(modifier = Modifier.height(FIELD_SPACING))
+            Text(
+                text = placeDetailError,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error,
+            )
         }
 
         Spacer(modifier = Modifier.height(FIELD_SPACING))
@@ -619,6 +645,70 @@ private fun PreviewSetStopDialogReadOnlyCoordinates() {
                 longitudeHintRes = R.string.trip_detail_starting_point_longitude_hint,
                 longitudeErrorRes = R.string.trip_detail_starting_point_longitude_error,
                 coordinatesReadOnly = true,
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PreviewSetStopDialogResolvingPlace() {
+    HeadingToTheAlpsTheme {
+        Column(modifier = Modifier.padding(PREVIEW_PADDING)) {
+            Text(
+                text = "Resolving place coordinates",
+                style = MaterialTheme.typography.headlineSmall,
+            )
+            Spacer(modifier = Modifier.height(PREVIEW_PADDING))
+            StopForm(
+                placeName = "Colosseum",
+                onPlaceNameChange = {},
+                placeNameError = false,
+                placeNameHintRes = R.string.trip_detail_starting_point_place_name_hint,
+                placeNameErrorRes = R.string.trip_detail_starting_point_place_name_error,
+                latitudeText = "",
+                onLatitudeChange = {},
+                latitudeError = false,
+                latitudeHintRes = R.string.trip_detail_starting_point_latitude_hint,
+                latitudeErrorRes = R.string.trip_detail_starting_point_latitude_error,
+                longitudeText = "",
+                onLongitudeChange = {},
+                longitudeError = false,
+                longitudeHintRes = R.string.trip_detail_starting_point_longitude_hint,
+                longitudeErrorRes = R.string.trip_detail_starting_point_longitude_error,
+                isResolvingPlace = true,
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PreviewSetStopDialogPlaceDetailError() {
+    HeadingToTheAlpsTheme {
+        Column(modifier = Modifier.padding(PREVIEW_PADDING)) {
+            Text(
+                text = "Place detail error",
+                style = MaterialTheme.typography.headlineSmall,
+            )
+            Spacer(modifier = Modifier.height(PREVIEW_PADDING))
+            StopForm(
+                placeName = "Invalid Place",
+                onPlaceNameChange = {},
+                placeNameError = false,
+                placeNameHintRes = R.string.trip_detail_starting_point_place_name_hint,
+                placeNameErrorRes = R.string.trip_detail_starting_point_place_name_error,
+                latitudeText = "",
+                onLatitudeChange = {},
+                latitudeError = false,
+                latitudeHintRes = R.string.trip_detail_starting_point_latitude_hint,
+                latitudeErrorRes = R.string.trip_detail_starting_point_latitude_error,
+                longitudeText = "",
+                onLongitudeChange = {},
+                longitudeError = false,
+                longitudeHintRes = R.string.trip_detail_starting_point_longitude_hint,
+                longitudeErrorRes = R.string.trip_detail_starting_point_longitude_error,
+                placeDetailError = "Could not resolve place. Tap a suggestion to try again.",
             )
         }
     }

@@ -65,4 +65,6 @@
     <string name="trip_detail_search_no_results">No results found</string>
     <string name="trip_detail_search_unavailable">Search unavailable</string>
     <string name="trip_detail_search_loading">Searching…</string>
+    <string name="trip_detail_place_detail_error">Could not resolve place. Tap a suggestion to try again.</string>
+    <string name="global_resolving_place">Resolving place</string>
 </resources>
