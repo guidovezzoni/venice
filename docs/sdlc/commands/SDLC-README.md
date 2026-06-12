@@ -10,17 +10,17 @@ Here is a short description of each of the steps.
 
 [sdlc_open_story.md](sdlc_open_story.md) analyses the next story to open, creates a branch, sets the story open and refines it adding a full and detailed product analysis.
 
-2. Propose change: `/sdlc_propose <story>`
+2. Propose change: `/sdlc_propose_change <story>`
 
-[sdlc_propose.md](sdlc_propose.md) analyses the user story, asks for clarifications if something isn't clear, and finally generates the SDD artifacts: proposal, design, specs, and tasks. Tasks are defined with a BDD approach, based on GIVEN/WHEN/THEN acceptance criteria and test-first approach. Uses `/opsx:explore` and `/opsx:propose`.
+[sdlc_propose_change.md](sdlc_propose_change.md) analyses the user story, asks for clarifications if something isn't clear, and finally generates the SDD artifacts: proposal, design, specs, and tasks. Tasks are defined with a BDD approach, based on GIVEN/WHEN/THEN acceptance criteria and test-first approach. Uses `/opsx:explore` and `/opsx:propose`.
 
-3. Apply change: `/sdlc_apply_changes`
+3. Implement change: `/sdlc_implement_change`
 
-[sdlc_apply_changes](sdlc_apply_changes.md) implements the current OpenSpec change using BDD Red/Green cycle (test tasks verified RED before implementation, implementation tasks verified GREEN after). Then looks for outstanding TODOs, runs a security review, and updates the documentation. Uses `/opsx:apply` and `/security-review`.
+[sdlc_implement_change](sdlc_implement_change.md) implements the current OpenSpec change using BDD Red/Green cycle (test tasks verified RED before implementation, implementation tasks verified GREEN after). Then looks for outstanding TODOs, runs a security review, and updates the documentation. Uses `/opsx:apply` and `/security-review`.
 
-3. (b) Apply change (sub-agents): `/sdlc_apply_changes_with_sub_agents`
+3. (b) Implement change (sub-agents): `/sdlc_implement_changes_with_sub_agents`
 
-[sdlc_apply_changes_with_sub_agents](sdlc_apply_changes_with_sub_agents.md) is an alternative to `/sdlc_apply_changes` that uses sub-agent orchestration. Instead of running all tasks in a single session, it delegates each task section to a separate sub-agent with a fresh context window. This prevents task checkboxes from being forgotten in long sessions. It also reduces cost by using cheaper models: Sonnet for BDD sections (test + implement cycles) and Haiku for mechanical tasks (wiring, previews, commands). The parent agent orchestrates, verifies checkbox completion after each section, and handles failures. Steps 2-10 (TODO scan, security review, etc.) are identical to the standard apply command.
+[sdlc_implement_changes_with_sub_agents](sdlc_implement_changes_with_sub_agents.md) is an alternative to `/sdlc_implement_change` that uses sub-agent orchestration. Instead of running all tasks in a single session, it delegates each task section to a separate sub-agent with a fresh context window. This prevents task checkboxes from being forgotten in long sessions. It also reduces cost by using cheaper models: Sonnet for BDD sections (test + implement cycles) and Haiku for mechanical tasks (wiring, previews, commands). The parent agent orchestrates, verifies checkbox completion after each section, and handles failures. Steps 2-10 (TODO scan, security review, etc.) are identical to the standard implement command.
 
 4. Verify and Archive: `/sdlc_verify_story <story>`
 

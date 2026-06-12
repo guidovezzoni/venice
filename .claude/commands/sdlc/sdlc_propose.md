@@ -1,1 +1,0 @@
-/home/guido/dev/personal/venice/docs/sdlc/commands/sdlc_propose.md
