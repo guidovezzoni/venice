@@ -8,21 +8,21 @@ Here is a short description of each of the steps.
 
 1. Open user story: `/sdlc_open_story <story>` 
 
-[sdlc_open_story.md](sdlc_open_story.md) analyses the next story to open, creates a branch, sets the story open and refines it adding a full and detailed product analysis.
+[sdlc_open_story.md](commands/sdlc_open_story.md) analyses the next story to open, creates a branch, sets the story open and refines it adding a full and detailed product analysis.
 
 2. Propose change: `/sdlc_propose_change <story>`
 
-[sdlc_propose_change.md](sdlc_propose_change.md) analyses the user story, asks for clarifications if something isn't clear, and finally generates the SDD artifacts: proposal, design, specs, and tasks. Tasks are defined with a BDD approach, based on GIVEN/WHEN/THEN acceptance criteria and test-first approach. Uses `/opsx:explore` and `/opsx:propose`.
+[sdlc_propose_change.md](commands/sdlc_propose_change.md) analyses the user story, asks for clarifications if something isn't clear, and finally generates the SDD artifacts: proposal, design, specs, and tasks. Tasks are defined with a BDD approach, based on GIVEN/WHEN/THEN acceptance criteria and test-first approach. Uses `/opsx:explore` and `/opsx:propose`.
 
 3. Implement change: `/sdlc_implement_change`
 
-[sdlc_implement_change](sdlc_implement_change.md) implements the current OpenSpec change using sub-agent orchestration with BDD Red/Green cycle (test tasks verified RED before implementation, implementation tasks verified GREEN after). Each task section is delegated to a separate sub-agent with a fresh context window, preventing task checkboxes from being forgotten in long sessions and reducing cost by using cheaper models: Sonnet for BDD sections (test + implement cycles) and Haiku for mechanical tasks (wiring, previews, commands). The parent agent orchestrates, verifies checkbox completion after each section, and handles failures. Then looks for outstanding TODOs, runs a security review, and updates the documentation. Uses `/opsx:apply` and `/security-review`.
+[sdlc_implement_change](commands/sdlc_implement_change.md) implements the current OpenSpec change using sub-agent orchestration with BDD Red/Green cycle (test tasks verified RED before implementation, implementation tasks verified GREEN after). Each task section is delegated to a separate sub-agent with a fresh context window, preventing task checkboxes from being forgotten in long sessions and reducing cost by using cheaper models: Sonnet for BDD sections (test + implement cycles) and Haiku for mechanical tasks (wiring, previews, commands). The parent agent orchestrates, verifies checkbox completion after each section, and handles failures. Then looks for outstanding TODOs, runs a security review, and updates the documentation. Uses `/opsx:apply` and `/security-review`.
 
 4. Verify and Archive: `/sdlc_verify_story <story>`
 
-[sdlc_verify_story](sdlc_verify_story.md) is an end-to-end verification and archive gate. Runs OpenSpec's verify, scans for unresolved TODOs, runs a security review on pending changes, checks every acceptance criterion in the story against the codebase, closes the story, then archives the OpenSpec change and verifies documentation is in sync. Uses `/opsx:verify`, `/opsx:sync`, `/security-review`, and `/opsx:archive`.
+[sdlc_verify_story](commands/sdlc_verify_story.md) is an end-to-end verification and archive gate. Runs OpenSpec's verify, scans for unresolved TODOs, runs a security review on pending changes, checks every acceptance criterion in the story against the codebase, closes the story, then archives the OpenSpec change and verifies documentation is in sync. Uses `/opsx:verify`, `/opsx:sync`, `/security-review`, and `/opsx:archive`.
 
-Each of the below operations adds a summary of the actions/results into an HTML report in [reports](../../reports)
+Each of the below operations adds a summary of the actions/results into an HTML report in [reports](../reports)
 
 ## Quick start
 
@@ -50,8 +50,8 @@ base project folder
 │   │   └── guidelines-userstories.md
 │   ├── reports/                         # Verification and archive reports (HTML/MD)
 │   ├── sdlc/                            # SDLC framework
+│   │   ├── SDLC-README.md               # This file – SDLC overview and setup
 │   │   ├── commands/                    # Command definitions (source of truth)
-│   │   │   ├── SDLC-README.md
 │   │   │   ├── <sdlc_command>.md
 │   │   ├── sdlc_init.sh                 # Symlink setup script (Linux/macOS)
 │   │   └── sdlc_init.ps1                # Symlink setup script (Windows)

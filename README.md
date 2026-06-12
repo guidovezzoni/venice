@@ -6,7 +6,7 @@ The app is built entirely in Kotlin with Jetpack Compose and Material 3, followi
 
 Development is driven by a Specification-Driven Development (SDD) workflow powered by OpenSpec, where every change moves through a structured lifecycle: explore, propose, apply, verify, sync, and archive. Tasks within each change follow a BDD (Behaviour-Driven Development) structure with test-first ordering, so the test is always written before the production code that makes it pass. Custom commands (`/sdlc_open_story`, `/sdlc_propose_change`, `/sdlc_implement_change`, `/sdlc_verify_story`, `/sdlc_archive`, `/opsx:*`) automate the repetitive steps, from opening and refining user stories to implementing changes, verifying acceptance criteria, and driving the full OpenSpec lifecycle.
 
-See [`docs/sdlc/commands/SDLC-README.md`](docs/sdlc/commands/SDLC-README.md) for full details on each command.
+See [`docs/sdlc/SDLC-README.md`](docs/sdlc/SDLC-README.md) for full details on each command.
 
 ## The App
 
@@ -75,7 +75,7 @@ The workflow is extended with custom commands that wrap the OpenSpec lifecycle i
 | `/sdlc_archive` | Archive the completed change, update project docs (README, AGENTS) if needed, and append an archive section to the report |
 | `/opsx:*` | OpenSpec lifecycle commands (propose, apply, verify, sync, archive, explore, onboard) |
 
-Helper commands (`/refine_user_story`, `/create_branch`) are called internally by `/sdlc_open_story` but can also be run standalone. See [`docs/sdlc/commands/SDLC-README.md`](docs/sdlc/commands/SDLC-README.md) for full details on each command.
+Helper commands (`/refine_user_story`, `/create_branch`) are called internally by `/sdlc_open_story` but can also be run standalone. See [`docs/sdlc/SDLC-README.md`](docs/sdlc/SDLC-README.md) for full details on each command.
 
 ### BDD Task Structure
 

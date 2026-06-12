@@ -41,7 +41,7 @@ Read the following file immediately as it's relevant to all workflows: @docs/gui
 | Path | Contents |
 |------|----------|
 | `docs/userstories/` | User story backlog organised by epic and feature (see `index.md`) |
-| `docs/sdlc/commands/` | SDLC custom command definitions (see `SDLC-README.md`) |
+| `docs/sdlc/commands/` | SDLC custom command definitions |
 | `docs/reports/` | Verification and archive reports |
 | `docs/improvements/` | Improvement proposals |
 | `openspec/specs/` | Living specifications maintained via OpenSpec |
@@ -49,7 +49,7 @@ Read the following file immediately as it's relevant to all workflows: @docs/gui
 
 ### Development Process
 
-Development follows a Specification-Driven Development (SDD) workflow powered by OpenSpec, with BDD test-first task ordering. Custom commands (`/sdlc_open_story`, `/sdlc_propose_change`, `/sdlc_implement_change`, `/sdlc_verify_story`) drive the user-story lifecycle. See @docs/sdlc/commands/SDLC-README.md for details.
+Development follows a Specification-Driven Development (SDD) workflow powered by OpenSpec, with BDD test-first task ordering. Custom commands (`/sdlc_open_story`, `/sdlc_propose_change`, `/sdlc_implement_change`, `/sdlc_verify_story`) drive the user-story lifecycle. See @docs/sdlc/SDLC-README.md for details.
 
 ### Current Status
 

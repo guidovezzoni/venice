@@ -45,7 +45,6 @@ Write-Host "Linking SDLC commands..."
 Write-Host ""
 
 Get-ChildItem -Path $CommandsSrc -Filter "*.md" | ForEach-Object {
-    if ($_.Name -eq "SDLC-README.md") { return }
 
     Link-Command -Src $_.FullName -DstDir $ClaudeDst
     Link-Command -Src $_.FullName -DstDir $CursorDst

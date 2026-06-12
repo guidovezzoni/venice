@@ -49,7 +49,6 @@ echo ""
 
 for file in "$COMMANDS_SRC"/*.md; do
     filename="$(basename "$file")"
-    [ "$filename" = "SDLC-README.md" ] && continue
 
     link_command "$file" "$CLAUDE_DST"
     link_command "$file" "$CURSOR_DST"
