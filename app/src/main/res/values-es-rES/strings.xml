@@ -64,4 +64,6 @@
     <string name="trip_detail_search_no_results">No se encontraron resultados</string>
     <string name="trip_detail_search_unavailable">Búsqueda no disponible</string>
     <string name="trip_detail_search_loading">Buscando…</string>
+    <string name="trip_detail_place_detail_error">No se ha podido resolver el lugar. Toca una sugerencia para reintentar.</string>
+    <string name="global_resolving_place">Resolviendo lugar</string>
 </resources>

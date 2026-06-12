@@ -176,7 +176,7 @@ class TripDetailViewModel @Inject constructor(
                     clearSearchState()
                 } else {
                     searchJob = viewModelScope.launch {
-                        _uiState.update { it.copy(isSearchingPlaces = true) }
+                        _uiState.update { it.copy(isSearchingPlaces = true, placeDetailError = null) }
                         delay(SEARCH_DEBOUNCE_MILLIS)
                         val result = searchPlacesUseCase(intent.query)
                         result.onSuccess { suggestions ->
@@ -190,11 +190,12 @@ class TripDetailViewModel @Inject constructor(
 
             is TripDetailUiIntent.OnSuggestionSelected -> {
                 viewModelScope.launch {
+                    _uiState.update { it.copy(isResolvingPlace = true, placeDetailError = null) }
                     val result = getPlaceDetailUseCase(intent.suggestion.placeId)
                     result.onSuccess { detail ->
-                        _uiState.update { it.copy(selectedPlaceDetail = detail, placeSuggestions = emptyList()) }
+                        _uiState.update { it.copy(isResolvingPlace = false, selectedPlaceDetail = detail, placeSuggestions = emptyList()) }
                     }.onFailure { error ->
-                        _uiEffect.emit(TripDetailUiEffect.ShowError(error.message ?: UNKNOWN_ERROR))
+                        _uiState.update { it.copy(isResolvingPlace = false, placeDetailError = error.message ?: UNKNOWN_ERROR) }
                     }
                 }
             }
@@ -296,6 +297,8 @@ class TripDetailViewModel @Inject constructor(
                 isSearchingPlaces = false,
                 searchError = null,
                 selectedPlaceDetail = null,
+                isResolvingPlace = false,
+                placeDetailError = null,
             )
         }
     }

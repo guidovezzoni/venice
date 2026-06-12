@@ -2,6 +2,8 @@ Please apply the changes for the current OpenSpec change and resolve any outstan
 
 This command uses sub-agent orchestration: each task section is delegated to a separate sub-agent with a fresh context window, using cheaper models (Sonnet/Haiku) where appropriate. This prevents task checkboxes from being forgotten in long sessions and reduces cost.
 
+Sub-agent orchestration is the default execution strategy for this command.
+
 ## Device connectivity
 
 ### Early reminder (non-blocking)

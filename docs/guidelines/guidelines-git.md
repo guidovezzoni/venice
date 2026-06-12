@@ -14,6 +14,9 @@
 ## File Operations
 - Always use `git mv` instead of plain `mv` when renaming or moving tracked files, so git tracks the change
 
+## Branch Verification
+- Always verify the current branch by running `git branch --show-current` before acting on branch state. Do not trust cached or snapshot-based branch information — it may be stale.
+
 ## Branch Strategy
 - `main` for stable releases
 - Feature branches for new development

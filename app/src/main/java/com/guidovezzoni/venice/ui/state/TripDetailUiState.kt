@@ -23,5 +23,7 @@ data class TripDetailUiState(
     val isSearchingPlaces: Boolean = false,
     val searchError: String? = null,
     val selectedPlaceDetail: PlaceDetail? = null,
+    val isResolvingPlace: Boolean = false,
+    val placeDetailError: String? = null,
 )
 

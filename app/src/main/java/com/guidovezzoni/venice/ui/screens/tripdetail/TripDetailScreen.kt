@@ -238,6 +238,8 @@ fun TripDetailScreen(
     if (uiState.isSetStartingPointDialogVisible) {
         SetStopDialog(
             isLoading = uiState.isLoading,
+            isResolvingPlace = uiState.isResolvingPlace,
+            placeDetailError = uiState.placeDetailError,
             dialogTitleRes = R.string.trip_detail_starting_point_dialog_title,
             placeNameHintRes = R.string.trip_detail_starting_point_place_name_hint,
             placeNameErrorRes = R.string.trip_detail_starting_point_place_name_error,
@@ -264,6 +266,8 @@ fun TripDetailScreen(
     if (uiState.isAddStopDialogVisible) {
         SetStopDialog(
             isLoading = uiState.isLoading,
+            isResolvingPlace = uiState.isResolvingPlace,
+            placeDetailError = uiState.placeDetailError,
             dialogTitleRes = R.string.trip_detail_add_stop_dialog_title,
             placeNameHintRes = R.string.trip_detail_add_stop_place_name_hint,
             placeNameErrorRes = R.string.trip_detail_add_stop_place_name_error,
@@ -288,6 +292,8 @@ fun TripDetailScreen(
         val editingStop = uiState.editingStop
         SetStopDialog(
             isLoading = uiState.isLoading,
+            isResolvingPlace = uiState.isResolvingPlace,
+            placeDetailError = uiState.placeDetailError,
             dialogTitleRes = R.string.trip_detail_edit_stop_dialog_title,
             placeNameHintRes = R.string.trip_detail_add_stop_place_name_hint,
             placeNameErrorRes = R.string.trip_detail_add_stop_place_name_error,
@@ -316,6 +322,8 @@ fun TripDetailScreen(
     if (uiState.isSetDestinationDialogVisible) {
         SetStopDialog(
             isLoading = uiState.isLoading,
+            isResolvingPlace = uiState.isResolvingPlace,
+            placeDetailError = uiState.placeDetailError,
             dialogTitleRes = R.string.trip_detail_destination_dialog_title,
             placeNameHintRes = R.string.trip_detail_destination_place_name_hint,
             placeNameErrorRes = R.string.trip_detail_destination_place_name_error,
@@ -868,6 +876,30 @@ private fun PreviewTripDetailScreenSearchError() {
                 ),
                 isSetStartingPointDialogVisible = true,
                 searchError = "Search unavailable",
+                canAddMoreStops = true,
+            ),
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PreviewTripDetailScreenResolvingPlace() {
+    HeadingToTheAlpsTheme {
+        TripDetailScreen(
+            uiState = TripDetailUiState(
+                tripId = "trip-1",
+                startingPoint = Stop(
+                    id = "1",
+                    tripId = "trip-1",
+                    placeName = "Rome, Italy",
+                    latitude = 41.9028,
+                    longitude = 12.4964,
+                    order = 0,
+                    status = StopStatus.PENDING,
+                ),
+                isSetStartingPointDialogVisible = true,
+                isResolvingPlace = true,
                 canAddMoreStops = true,
             ),
         )

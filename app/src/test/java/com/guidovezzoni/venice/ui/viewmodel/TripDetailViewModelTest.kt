@@ -25,6 +25,7 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.verify
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
@@ -771,22 +772,107 @@ class TripDetailViewModelTest {
     }
 
     @Test
-    fun `GIVEN OnSuggestionSelected dispatched WHEN GetPlaceDetailUseCase fails THEN ShowError emitted`() = runTest(testDispatcher) {
+    fun `GIVEN OnSuggestionSelected dispatched WHEN GetPlaceDetailUseCase fails THEN placeDetailError is set`() = runTest(testDispatcher) {
         val suggestion = PlaceSuggestion("place-abc", "Colosseum", "Rome, Italy")
         coEvery { getPlaceDetailUseCase("place-abc") } returns Result.failure(RuntimeException("Network error"))
         val viewModel = createViewModel()
 
-        val effects = mutableListOf<TripDetailUiEffect>()
-        val collectJob = launch {
-            viewModel.uiEffect.collect { effects.add(it) }
-        }
+        viewModel.onIntent(TripDetailUiIntent.OnSuggestionSelected(suggestion))
+        advanceUntilIdle()
+
+        val expectedPlaceDetailError = "Network error"
+        assertEquals(expectedPlaceDetailError, viewModel.uiState.value.placeDetailError)
+        assertNull(viewModel.uiState.value.selectedPlaceDetail)
+    }
+
+    // --- Task 2.1: isResolvingPlace is true while GetPlaceDetailUseCase is in-flight ---
+
+    @Test
+    fun `GIVEN a suggestion is selected WHEN GetPlaceDetailUseCase is in-flight THEN isResolvingPlace is true`() = runTest {
+        val standardDispatcher = StandardTestDispatcher(testScheduler)
+        Dispatchers.setMain(standardDispatcher)
+        val suggestion = PlaceSuggestion("place-abc", "Colosseum", "Rome, Italy")
+        val deferred = CompletableDeferred<Result<PlaceDetail>>()
+        coEvery { getPlaceDetailUseCase("place-abc") } coAnswers { deferred.await() }
+        val viewModel = createViewModel()
+
+        viewModel.onIntent(TripDetailUiIntent.OnSuggestionSelected(suggestion))
+        runCurrent()
+
+        assertTrue(viewModel.uiState.value.isResolvingPlace)
+
+        deferred.complete(Result.success(PlaceDetail("Colosseum", 41.8902, 12.4922)))
+        advanceUntilIdle()
+    }
+
+    // --- Task 2.2: isResolvingPlace is false and selectedPlaceDetail is populated after success ---
+
+    @Test
+    fun `GIVEN a suggestion is selected WHEN GetPlaceDetailUseCase succeeds THEN isResolvingPlace is false and selectedPlaceDetail is populated`() = runTest(testDispatcher) {
+        val suggestion = PlaceSuggestion("place-abc", "Colosseum", "Rome, Italy")
+        val placeDetail = PlaceDetail("Colosseum", 41.8902, 12.4922)
+        coEvery { getPlaceDetailUseCase("place-abc") } returns Result.success(placeDetail)
+        val viewModel = createViewModel()
 
         viewModel.onIntent(TripDetailUiIntent.OnSuggestionSelected(suggestion))
         advanceUntilIdle()
 
-        assertTrue(effects.any { it is TripDetailUiEffect.ShowError })
-        assertNull(viewModel.uiState.value.selectedPlaceDetail)
-        collectJob.cancel()
+        val expectedPlaceDetail = placeDetail
+        assertFalse(viewModel.uiState.value.isResolvingPlace)
+        assertEquals(expectedPlaceDetail, viewModel.uiState.value.selectedPlaceDetail)
+    }
+
+    // --- Task 3.1: isResolvingPlace is false and placeDetailError is set on failure ---
+
+    @Test
+    fun `GIVEN a suggestion is selected WHEN GetPlaceDetailUseCase fails THEN isResolvingPlace is false and placeDetailError contains the error message`() = runTest(testDispatcher) {
+        val suggestion = PlaceSuggestion("place-abc", "Colosseum", "Rome, Italy")
+        coEvery { getPlaceDetailUseCase("place-abc") } returns Result.failure(RuntimeException("Network error"))
+        val viewModel = createViewModel()
+
+        viewModel.onIntent(TripDetailUiIntent.OnSuggestionSelected(suggestion))
+        advanceUntilIdle()
+
+        val expectedPlaceDetailError = "Network error"
+        assertFalse(viewModel.uiState.value.isResolvingPlace)
+        assertEquals(expectedPlaceDetailError, viewModel.uiState.value.placeDetailError)
+    }
+
+    // --- Task 4.1: OnSearchQueryChanged clears placeDetailError when query is non-blank ---
+
+    @Test
+    fun `GIVEN placeDetailError is set WHEN OnSearchQueryChanged is dispatched with a non-blank query THEN placeDetailError is cleared`() = runTest(testDispatcher) {
+        val suggestion = PlaceSuggestion("place-abc", "Colosseum", "Rome, Italy")
+        coEvery { getPlaceDetailUseCase("place-abc") } returns Result.failure(RuntimeException("Network error"))
+        coEvery { searchPlacesUseCase("Rome") } returns Result.success(emptyList())
+        val viewModel = createViewModel()
+
+        viewModel.onIntent(TripDetailUiIntent.OnSuggestionSelected(suggestion))
+        advanceUntilIdle()
+
+        viewModel.onIntent(TripDetailUiIntent.OnSearchQueryChanged("Rome"))
+
+        assertNull(viewModel.uiState.value.placeDetailError)
+    }
+
+    // --- Task 4.2: OnSuggestionSelected clears placeDetailError ---
+
+    @Test
+    fun `GIVEN placeDetailError is set WHEN OnSuggestionSelected is dispatched THEN placeDetailError is cleared`() = runTest(testDispatcher) {
+        val suggestion = PlaceSuggestion("place-abc", "Colosseum", "Rome, Italy")
+        coEvery { getPlaceDetailUseCase("place-abc") } returnsMany listOf(
+            Result.failure(RuntimeException("Network error")),
+            Result.success(PlaceDetail("Colosseum", 41.8902, 12.4922)),
+        )
+        val viewModel = createViewModel()
+
+        viewModel.onIntent(TripDetailUiIntent.OnSuggestionSelected(suggestion))
+        advanceUntilIdle()
+
+        viewModel.onIntent(TripDetailUiIntent.OnSuggestionSelected(suggestion))
+        advanceUntilIdle()
+
+        assertNull(viewModel.uiState.value.placeDetailError)
     }
 
     // --- Task 10.4: Dialog dismiss clears search state ---

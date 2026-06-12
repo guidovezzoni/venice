@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Report: 2.1.2 — Resolve Place Names to Coordinates</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.6;
+      color: #1a1a1a;
+      background: #fafafa;
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+
+    .report-header {
+      border-bottom: 3px solid #2563eb;
+      padding-bottom: 1rem;
+      margin-bottom: 2rem;
+    }
+    .report-header h1 { font-size: 1.75rem; color: #1e293b; }
+    .report-meta {
+      display: flex; gap: 2rem; flex-wrap: wrap;
+      margin-top: 0.5rem; font-size: 0.875rem; color: #64748b;
+    }
+    .report-meta span { display: inline-flex; align-items: center; gap: 0.25rem; }
+
+    .report-section {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .report-section header {
+      display: flex; justify-content: space-between; align-items: baseline;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 0.75rem; margin-bottom: 1rem;
+    }
+    .report-section header h2 { font-size: 1.25rem; color: #1e293b; }
+    .report-section header time { font-size: 0.8rem; color: #94a3b8; white-space: nowrap; }
+    .section-source { font-size: 0.75rem; color: #94a3b8; font-style: italic; margin-bottom: 0.75rem; }
+
+    h3 { font-size: 1.05rem; color: #334155; margin: 1rem 0 0.5rem; }
+    p { margin-bottom: 0.75rem; }
+    ul, ol { margin: 0.5rem 0 0.75rem 1.5rem; }
+    li { margin-bottom: 0.25rem; }
+    code {
+      background: #f1f5f9; padding: 0.15rem 0.35rem; border-radius: 3px;
+      font-size: 0.875em;
+      font-family: "SF Mono", "Fira Code", Menlo, Consolas, monospace;
+    }
+
+    table { width: 100%; border-collapse: collapse; margin: 0.75rem 0; font-size: 0.9rem; }
+    th, td { text-align: left; padding: 0.5rem 0.75rem; border: 1px solid #e2e8f0; }
+    th { background: #f8fafc; font-weight: 600; color: #475569; }
+
+    .badge {
+      display: inline-block; padding: 0.15rem 0.5rem;
+      border-radius: 4px; font-size: 0.8rem; font-weight: 600;
+    }
+    .badge-pass { background: #dcfce7; color: #166534; }
+    .badge-fail { background: #fee2e2; color: #991b1b; }
+    .badge-warn { background: #fef9c3; color: #854d0e; }
+    .badge-info { background: #dbeafe; color: #1e40af; }
+
+    .outcome { margin-top: 1rem; padding: 0.75rem 1rem; border-radius: 6px; font-weight: 600; }
+    .outcome-passed { background: #dcfce7; color: #166534; border-left: 4px solid #22c55e; }
+    .outcome-failed { background: #fee2e2; color: #991b1b; border-left: 4px solid #ef4444; }
+  </style>
+</head>
+<body>
+
+  <div class="report-header">
+    <h1>2.1.2 — Resolve Place Names to Coordinates</h1>
+    <div class="report-meta">
+      <span><strong>Story:</strong> 2.1.2</span>
+      <span><strong>Branch:</strong> feature/2.1.2-resolve-place-to-coordinates</span>
+      <span><strong>Created:</strong> 2026-06-11</span>
+    </div>
+  </div>
+
+  <main id="report-sections">
+  <section class="report-section" data-source="open_user_story" data-timestamp="2026-06-11T20:49:54Z">
+    <header>
+      <h2>Story Opened</h2>
+      <time datetime="2026-06-11T20:49:54Z">11 Jun 2026</time>
+    </header>
+    <p class="section-source">Source: open_user_story</p>
+
+    <h3>Story</h3>
+    <p><strong>2.1.2 — Resolve Place Names to Coordinates</strong></p>
+    <p>As a user, I want the app to resolve place names to coordinates so that routes can be calculated between my stops.</p>
+
+    <h3>Branch</h3>
+    <p><code>feature/2.1.2-resolve-place-to-coordinates</code> (created from <code>main</code> at <code>47e750f</code>)</p>
+
+    <h3>Refinement Summary</h3>
+    <p>Analysis revealed that the core coordinate resolution flow was already implemented in story 2.1.1 (Search Place by Name). The Place Details API call, domain model, ViewModel wiring, dialog auto-fill, and database storage are all in place.</p>
+
+    <p>The refinement re-scoped story 2.1.2 to focus on three remaining UX gaps:</p>
+    <ul>
+      <li><strong>Gap 1 — No loading indicator:</strong> When the user taps an autocomplete suggestion, the Place Details API call fires with no visual feedback. Fix: add <code>isResolvingPlace</code> state, show a progress indicator in the dialog, disable confirm while resolving.</li>
+      <li><strong>Gap 2 — Error shown behind dialog:</strong> Place Details errors emit a Snackbar at screen level, which is hidden behind the open dialog. Fix: add <code>placeDetailError</code> state, show inline error in the dialog (matching the existing <code>searchError</code> pattern).</li>
+      <li><strong>Gap 3 — Retry after failure:</strong> Already adequate — suggestions remain visible after failure so the user can tap again. The inline error message (Gap 2) will inform the user that they can retry.</li>
+    </ul>
+
+    <p>Five acceptance criteria defined, covering the already-satisfied original criteria plus the new UX requirements. Unit and Compose UI test plans included.</p>
+  </section>
+  <section class="report-section" data-source="opsx:propose" data-timestamp="2026-06-12T06:51:36Z">
+    <header>
+      <h2>Change Proposed</h2>
+      <time datetime="2026-06-12T06:51:36Z">12 Jun 2026</time>
+    </header>
+    <p class="section-source">Source: opsx:propose</p>
+
+    <h3>Exploration Findings</h3>
+    <p>Explored the existing codebase to understand integration points for the two UX gaps identified in the story refinement:</p>
+    <ul>
+      <li><strong>OnSuggestionSelected handler</strong> (<code>TripDetailViewModel:191-200</code>): launches a bare coroutine with no loading flag — no feedback until success/failure.</li>
+      <li><strong>Error routing</strong>: On failure, emits <code>TripDetailUiEffect.ShowError</code> which renders as a Snackbar at screen level, hidden behind the open dialog.</li>
+      <li><strong>Existing patterns identified</strong>: <code>isSearchingPlaces</code> + <code>searchError</code> inline display in <code>StopForm</code>; <code>isLoading</code> + confirm button disable in <code>SetStopDialog</code>; <code>clearSearchState()</code> for state cleanup.</li>
+      <li><strong>Distinct concerns</strong>: <code>isResolvingPlace</code> is separate from <code>isLoading</code> — different semantics (no minimum duration, dialog-scoped fetch vs screen-level save).</li>
+    </ul>
+
+    <h3>Questions &amp; Clarifications</h3>
+    <p>No questions needed — the story was comprehensively defined during refinement (Gap 1, Gap 2, Gap 3, acceptance criteria, test plans, file lists).</p>
+
+    <h3>Artefacts Created</h3>
+    <table>
+      <thead>
+        <tr><th>Artefact</th><th>Path</th><th>Description</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Proposal</td><td><code>openspec/changes/resolve-place-to-coordinates/proposal.md</code></td><td>Motivation, what changes, capabilities, impact</td></tr>
+        <tr><td>Design</td><td><code>openspec/changes/resolve-place-to-coordinates/design.md</code></td><td>Key decisions: separate flag, inline error, spinner placement, error clearing triggers</td></tr>
+        <tr><td>Delta Spec</td><td><code>openspec/changes/resolve-place-to-coordinates/specs/trip-detail/spec.md</code></td><td>Modified requirements for UiState, ViewModel, SetStopDialog, TripDetailScreen (9 scenarios)</td></tr>
+        <tr><td>Tasks</td><td><code>openspec/changes/resolve-place-to-coordinates/tasks.md</code></td><td>22 tasks in 8 sections: prerequisites, BDD pairs, wiring, previews, verification</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Key Design Decisions</h3>
+    <ul>
+      <li>Separate <code>isResolvingPlace</code> flag (not reusing <code>isLoading</code>) — different semantics, no minimum duration</li>
+      <li>Inline error via <code>placeDetailError</code> state field — dialog is modal, Snackbar would be hidden</li>
+      <li>Resolving spinner inside <code>StopForm</code> body — consistent with <code>isSearchingPlaces</code> spinner placement</li>
+      <li>Error cleared on new search query, new suggestion selection, and dialog dismiss</li>
+    </ul>
+  </section>
+  <section class="report-section" data-source="sdlc_implement_changes_with_sub_agents" data-timestamp="2026-06-12T16:00:00Z">
+    <header>
+      <h2>Implementation</h2>
+      <time datetime="2026-06-12T16:00:00Z">12 Jun 2026</time>
+    </header>
+    <p class="section-source">Source: sdlc_implement_changes_with_sub_agents</p>
+
+    <h3>Summary</h3>
+    <p>All 24 tasks across 8 sections were implemented using sub-agent orchestration (1 iteration cycle). Sections 1, 6, 7, 8 used Haiku; sections 2–5 used Sonnet for BDD Red/Green cycles.</p>
+
+    <h3>Tasks Applied</h3>
+    <table>
+      <tr><th>Section</th><th>Description</th><th>Tasks</th><th>Model</th></tr>
+      <tr><td>1</td><td>Prerequisites — state fields &amp; string resources</td><td>3</td><td>Haiku</td></tr>
+      <tr><td>2</td><td>ViewModel resolving state (BDD)</td><td>3</td><td>Sonnet</td></tr>
+      <tr><td>3</td><td>ViewModel inline error (BDD)</td><td>3</td><td>Sonnet</td></tr>
+      <tr><td>4</td><td>ViewModel error clearing (BDD)</td><td>4</td><td>Sonnet</td></tr>
+      <tr><td>5</td><td>SetStopDialog resolving indicator (BDD)</td><td>4</td><td>Sonnet</td></tr>
+      <tr><td>6</td><td>TripDetailScreen wiring</td><td>1</td><td>Haiku</td></tr>
+      <tr><td>7</td><td>Compose previews</td><td>3</td><td>Haiku</td></tr>
+      <tr><td>8</td><td>Verification</td><td>3</td><td>—</td></tr>
+    </table>
+
+    <h3>BDD Cycles</h3>
+    <p>All BDD test pairs confirmed RED before implementation and GREEN after. No section required a retry. 57 unit tests and 85 instrumented Compose UI tests pass.</p>
+
+    <h3>TODOs</h3>
+    <p>4 pre-existing TODOs found — all classified <span class="badge badge-info">ACKNOWLEDGED</span>:</p>
+    <ul>
+      <li><code>TripDetailUiIntent.kt</code> — intent design question (predates this story; design explicitly excludes new intents)</li>
+      <li><code>TripDetailUiState.kt</code> — sealed class refactor (design doc explicitly marks it out of scope)</li>
+      <li><code>EditStopUseCase.kt</code> / <code>RemoveStopUseCase.kt</code> — leg invalidation blocked on Epic 3</li>
+    </ul>
+
+    <h3>Security Review</h3>
+    <p><span class="badge badge-pass">PASS</span> — 0 findings, 0 fix cycles. The <code>error.message</code> propagation to <code>placeDetailError</code> is safe: Compose <code>Text</code> renders plain characters with no injection surface, and the error source (Google Places SDK) is not attacker-controlled.</p>
+
+    <h3>Documentation</h3>
+    <ul>
+      <li><strong>README.md</strong> — Updated app description to mention the resolving indicator and inline error UX.</li>
+      <li><strong>AGENTS.md</strong> — No changes needed (story still WIP; current status section unchanged).</li>
+    </ul>
+
+    <div class="outcome outcome-passed">Implementation complete — 24/24 tasks, all tests green, security review clean.</div>
+  </section>
+  <section class="report-section" data-source="sdlc_verify_story" data-timestamp="2026-06-12T14:45:00Z">
+    <header>
+      <h2>Verification &amp; Archive</h2>
+      <time datetime="2026-06-12T14:45:00Z">12 June 2026</time>
+    </header>
+    <p class="section-source">Source: sdlc_verify_story</p>
+
+    <h3>OpenSpec Verify</h3>
+    <p><span class="badge badge-pass">PASS</span> 24/24 tasks complete. All 4 requirements (TripDetailUiState, TripDetailViewModel, SetStopDialog, TripDetailScreen) and their scenarios are implemented. No critical, warning, or suggestion issues found.</p>
+
+    <h3>TODO Scan</h3>
+    <p>4 TODOs found, all ACKNOWLEDGED:</p>
+    <ul>
+      <li><code>TripDetailUiIntent.kt:9</code> — design question about PlaceDetail in intent layer (state-driven story, out of scope)</li>
+      <li><code>TripDetailUiState.kt:7</code> — refactor to sealed class (explicitly out of scope in design.md)</li>
+      <li><code>EditStopUseCase.kt:10</code> — invalidate legs once Epic 3 leg tracking implemented</li>
+      <li><code>RemoveStopUseCase.kt:9</code> — same as above</li>
+    </ul>
+
+    <h3>Security Review</h3>
+    <p><span class="badge badge-pass">PASS</span> No findings. Changes limited to UI state fields, ViewModel logic, Compose UI, and string resources. No new attack surfaces introduced.</p>
+
+    <h3>Clean Build &amp; Static Analysis</h3>
+    <p><span class="badge badge-pass">PASS</span> <code>./gradlew clean check</code> — BUILD SUCCESSFUL. 1 pre-existing warning (Room schema export, unrelated to this story). No lint errors.</p>
+
+    <h3>Unit Tests</h3>
+    <p><span class="badge badge-pass">PASS</span> All unit tests pass as part of <code>./gradlew check</code>.</p>
+
+    <h3>Test File Coverage</h3>
+    <p><span class="badge badge-pass">PASS</span></p>
+    <ul>
+      <li><code>TripDetailViewModelTest.kt</code> — exists, covers all new ViewModel states (18 references to isResolvingPlace/placeDetailError)</li>
+      <li><code>SetStopDialogTest.kt</code> — exists, covers all 3 new Compose UI scenarios</li>
+    </ul>
+
+    <h3>Compose Preview Coverage</h3>
+    <p><span class="badge badge-pass">PASS</span> Both new <code>TripDetailUiState</code> fields have non-default values in previews:</p>
+    <ul>
+      <li><code>PreviewSetStopDialogResolvingPlace</code> — <code>isResolvingPlace = true</code></li>
+      <li><code>PreviewSetStopDialogPlaceDetailError</code> — <code>placeDetailError = "..."</code></li>
+      <li><code>PreviewTripDetailScreenResolvingPlace</code> — <code>isResolvingPlace = true</code></li>
+    </ul>
+
+    <h3>On-Device Tests</h3>
+    <p><span class="badge badge-pass">PASS</span></p>
+    <ul>
+      <li><strong>Instrumented tests</strong> — <code>./gradlew connectedDebugAndroidTest</code> on Pixel 6a (Android 16): 85/85 tests passed (0 failures, 0 skipped). First run failed due to device swap mid-run; resolved by force-installing on second device.</li>
+      <li><strong>Manual adb verification</strong> — App launched on Pixel 6a. Created trip, opened "Set starting point" dialog, typed "Roma", autocomplete suggestions appeared. Tapped "Roma / Metropolitan City of Rome Capital, Italy" suggestion; coordinates resolved to <code>41.8967</code> lat / <code>12.4822</code> lng and auto-filled. Place resolution completed successfully.</li>
+    </ul>
+
+    <h3>Definition of Done</h3>
+    <table>
+      <thead>
+        <tr><th>Criterion</th><th>Status</th><th>Justification</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>AC1: Every stop has valid lat/lon after place selection</td><td><span class="badge badge-pass">PASS</span></td><td>Inherited from 2.1.1; on-device confirmed coordinates auto-filled</td></tr>
+        <tr><td>AC2: Coordinates obtained automatically (no manual input)</td><td><span class="badge badge-pass">PASS</span></td><td>Inherited from 2.1.1; confirmed on-device with suggestion tap</td></tr>
+        <tr><td>AC3: Loading indicator shown and confirm disabled while resolving</td><td><span class="badge badge-pass">PASS</span></td><td><code>CircularProgressIndicator</code> when <code>isResolvingPlace=true</code>; button <code>enabled = !isLoading &amp;&amp; !isResolvingPlace</code></td></tr>
+        <tr><td>AC4: Inline error on resolution failure (not Snackbar behind dialog)</td><td><span class="badge badge-pass">PASS</span></td><td><code>placeDetailError</code> rendered inline; <code>ShowError</code> effect no longer emitted on Place Details failure</td></tr>
+        <tr><td>AC5: User can retry after failure by tapping same/different suggestion</td><td><span class="badge badge-pass">PASS</span></td><td><code>placeSuggestions</code> not cleared on <code>onFailure</code>; only <code>isResolvingPlace=false</code> and <code>placeDetailError</code> set</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Spec Sync</h3>
+    <p><span class="badge badge-pass">SYNCED</span> Delta specs merged into main specs:</p>
+    <ul>
+      <li><code>openspec/specs/trip-detail/spec.md</code> — updated TripDetailUiState (2 new fields), TripDetailViewModel (OnSuggestionSelected behavior, clearSearchState, 5 new scenarios); added TripDetailScreen passes resolving state to dialogs; added Place detail error string resource</li>
+      <li><code>openspec/specs/destination-ui/spec.md</code> — updated SetStopDialog composable (consolidated): added isResolvingPlace &amp; placeDetailError parameters, confirm-button disable condition, 3 new scenarios</li>
+    </ul>
+
+    <h3>Archive</h3>
+    <p><span class="badge badge-pass">ARCHIVED</span> Change archived to <code>openspec/changes/archive/2026-06-12-resolve-place-to-coordinates/</code></p>
+
+    <h3>README.md &amp; AGENTS.md Sync</h3>
+    <p><span class="badge badge-pass">UPDATED</span></p>
+    <ul>
+      <li><strong>README.md</strong> — already described the resolving-place feature; no update needed</li>
+      <li><strong>AGENTS.md</strong> — updated Current Status to include 2.1.2 completion; updated "Next up" to Epic 3</li>
+    </ul>
+
+    <div class="outcome outcome-passed">PASSED — Story 2.1.2-resolve-place-to-coordinates-DONE.md</div>
+  </section>
+  </main>
+
+</body>
+</html>
