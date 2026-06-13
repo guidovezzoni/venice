@@ -6,14 +6,14 @@ Built on top of [OpenSpec](https://github.com/Fission-AI/OpenSpec/) (Spec-Driven
 
 ## Features
 
-| Capability | How SDLC uses it                                                                                                                      |
-|---|---------------------------------------------------------------------------------------------------------------------------------------|
+| Capability                          | How SDLC uses it                                                                                                                      |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
 | **Autonomous multi-step reasoning** | Each command chains 15+ sequential steps, making decisions at each gate without human intervention                                    |
-| **Sub-agent orchestration** | Implementation spawns parallel sub-agents (Sonnet for complex BDD work, Haiku for mechanical tasks), each with a fresh context window |
-| **Tool use** | The agent drives git, Gradle, adb, static analysis, and Claude Code's security scanners directly                                      |
-| **Self-healing loops** | Failed tests or security findings trigger automatic fix-and-retry cycles                                                              |
-| **On-device verification** | The agent installs the app on a physical device, interacts with it via UIAutomator, and verifies behaviour autonomously               |
-| **Specification grounding** | All code generation is anchored to living specs and acceptance criteria — not just free-form prompts                                  |
+| **Sub-agent orchestration**         | Implementation spawns parallel sub-agents (Sonnet for complex BDD work, Haiku for mechanical tasks), each with a fresh context window |
+| **Tool use**                        | The agent drives git, Gradle, adb, static analysis, and Claude Code's security scanners directly                                      |
+| **Self-healing loops**              | Failed tests or security findings trigger automatic fix-and-retry cycles                                                              |
+| **On-device verification**          | The agent installs the app on a physical device, interacts with it via UIAutomator, and verifies behaviour autonomously               |
+| **Specification grounding**         | All code generation is anchored to living specs and acceptance criteria — not just free-form prompts                                  |
 
 ## The Four Commands
 
@@ -24,6 +24,7 @@ Prepares a user story for development.
 **Recommended agent:** Opus — requires deep product analysis and refinement reasoning.
 
 **What the agent does autonomously:**
+
 - Switches to `main`, pulls latest changes, creates a feature branch
 - Locates the next user story from the backlog (or accepts a specific one)
 - Performs a full product analysis as an expert PM/BA: identifies fields, endpoints, files to modify, testing strategy, security/GDPR/performance concerns
@@ -39,6 +40,7 @@ Generates the full technical design and task breakdown.
 **Recommended agent:** Opus — requires architecture exploration and design decisions.
 
 **What the agent does autonomously:**
+
 - Explores the codebase to identify integration points, risks, and dependencies
 - Asks clarifying questions when requirements are ambiguous (the one human-in-the-loop pause)
 - Generates all SDD artefacts: proposal, design document, delta specifications, and a structured task list
@@ -54,6 +56,7 @@ Implements the entire change using multi-agent coordination.
 **Recommended agent:** Sonnet — orchestration is procedural; sub-agents handle the heavy reasoning.
 
 **What the agent does autonomously:**
+
 - Reads the task list and splits it into sections
 - Assigns each section to the cheapest capable model (Sonnet for BDD red/green cycles, Haiku for wiring and previews)
 - Spawns a sub-agent per section with a self-contained prompt — each agent writes code, runs tests, and checks off its tasks
@@ -73,6 +76,7 @@ End-to-end quality gate before a story is considered done.
 **Recommended agent:** Sonnet — verification follows a structured checklist of automated gates.
 
 **What the agent does autonomously:**
+
 - Verifies implementation matches specifications (OpenSpec verify)
 - Scans for unresolved TODOs and classifies them as blocking or acknowledged
 - Runs a security review on all pending changes
@@ -126,12 +130,16 @@ End-to-end quality gate before a story is considered done.
 ## Quick start
 
 1. Download the `docs` folder into your project
-2. Install OpenSpec from https://github.com/Fission-AI/OpenSpec/ and ensure these commands are available: explore, propose, apply, verify, sync, archive
-3. Run the script in `./docs/sdlc`:
-  - **Linux / macOS**: `./docs/sdlc/sdlc_init_claude_code.sh`
-  - **Windows** (PowerShell, Developer Mode or elevated): `.\docs\sdlc\sdlc_init_claude_code.ps1`
 
+2. Install OpenSpec from https://github.com/Fission-AI/OpenSpec/ and ensure these commands are available: explore, propose, apply, verify, sync, archive
+
+3. Run the script in `./docs/sdlc`:
+   
+   - **Linux / macOS**: `./docs/sdlc/sdlc_init_claude_code.sh`
+   - **Windows** (PowerShell, Developer Mode or elevated): `.\docs\sdlc\sdlc_init_claude_code.ps1`
+   
    The script will creates a `CLAUDE.md → AGENTS.md` symlink in the project root and links SDLC command files into `.claude/commands/sdlc/`.
+
 4. Tailor user story management customising guidelines-userstories.md, with an MCP or whatever you use to handle them. By default it's expecting a list of md files.
 
 **Please note** : currently only Claude is supported.
@@ -154,11 +162,13 @@ The initial part of the AGENTS.md instructs the agent how to selectively load so
 There are two type of guidelines files:
 
 #### Loaded by AGENTS.md
+
 Guidelines files collect directions for the agent to handle the project, grouped into specific topics, f.i. Android native, git, etc. These should collect the best practices already in use by the team or the project.
 
 These files can and should be fully customised according to the project, so that the agent knows exactly how to handle it.
 
 Currently we have these three files, but can obviously be extended.
+
 - [guidelines-android](../guidelines/guidelines-android.md) for Android native code style and best practices
 - [guidelines-git](../guidelines/guidelines-git.md) for git operations and commit conventions
 - [guidelines-process](../guidelines/guidelines-process.md) for general guidelines
@@ -166,6 +176,7 @@ Currently we have these three files, but can obviously be extended.
 #### Loaded by SDLC commands
 
 The other guidelines file are primarily used by the SDLC commands and describe how to handle specific inputs and outputs.
+
 - [guidelines-userstories](../guidelines/guidelines-userstories.md) for handling the user story backlog, this currently uses md files, but can use an MCP to access jira or any other tool.
 - [guidelines-reports](../guidelines/guidelines-reports.md) for auditing reports, currently uses an HTML file but can be customised in any way.
 
@@ -184,14 +195,15 @@ The script creates a `CLAUDE.md → AGENTS.md` symlink in the project root and l
 **Please note** : currently only Claude Code is supported.
 
 ## TODOs and improvements
+
 - Multi-agent orchestration for verification
 - Add support for Cursor, OpenCOde
 - Define how to handle changes/fix after propose change: every unexpected change on the code in an open story should update story and specs, or at least check if they are affected
 - Learn a lesson from a failure: the agent should be able to update the structure in case it spots a failure
 - create a guideline for readme
 
-
 ## Guidelines TODO
+
 - async operations should be wrapped in a loading state with a spinner, and if required disabling the button that triggered the operation, to avoid re-trigger. The spinner should have a minimum duration of 0.5 seconds to avoid a flickering UI.
 - step for static checks:
   - unused import directive / deprecation
@@ -203,5 +215,6 @@ The script creates a `CLAUDE.md → AGENTS.md` symlink in the project root and l
 - Check coverage - 100% ???
 
 Not sure what's best yet:
+
 - When both Domain and UI require the same data type, f.i. an enum, where should this be defined? In Domain? Should it be duplicated in UI? Should it be defined in another root package?
 - add PR review - other  LLM provider???
