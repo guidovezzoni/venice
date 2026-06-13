@@ -21,6 +21,8 @@ Built on top of [OpenSpec](https://github.com/Fission-AI/OpenSpec/) (Spec-Driven
 
 Prepares a user story for development.
 
+**Recommended agent:** Opus — requires deep product analysis and refinement reasoning.
+
 **What the agent does autonomously:**
 - Switches to `main`, pulls latest changes, creates a feature branch
 - Locates the next user story from the backlog (or accepts a specific one)
@@ -34,6 +36,8 @@ Prepares a user story for development.
 
 Generates the full technical design and task breakdown.
 
+**Recommended agent:** Opus — requires architecture exploration and design decisions.
+
 **What the agent does autonomously:**
 - Explores the codebase to identify integration points, risks, and dependencies
 - Asks clarifying questions when requirements are ambiguous (the one human-in-the-loop pause)
@@ -46,6 +50,8 @@ Generates the full technical design and task breakdown.
 ### 3. `/sdlc_implement_change` — Build with Sub-Agent Orchestration
 
 Implements the entire change using multi-agent coordination.
+
+**Recommended agent:** Sonnet — orchestration is procedural; sub-agents handle the heavy reasoning.
 
 **What the agent does autonomously:**
 - Reads the task list and splits it into sections
@@ -63,6 +69,8 @@ Implements the entire change using multi-agent coordination.
 ### 4. `/sdlc_verify_story` — Verify and Archive
 
 End-to-end quality gate before a story is considered done.
+
+**Recommended agent:** Sonnet — verification follows a structured checklist of automated gates.
 
 **What the agent does autonomously:**
 - Verifies implementation matches specifications (OpenSpec verify)
