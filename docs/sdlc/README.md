@@ -4,6 +4,8 @@ SDLC is a set of four commands that let an AI coding agent autonomously drive th
 
 Built on top of [OpenSpec](https://github.com/Fission-AI/OpenSpec/) (Spec-Driven Development), SDLC replaces manual task management with agentic orchestration: the AI reads specifications, reasons about architecture, writes and verifies code, and produces auditable reports at every stage.
 
+**Please note**: this is work-in-progress: it needs to be tested and tailored for your own needs. 
+
 ## Features
 
 | Capability                          | How SDLC uses it                                                                                                                      |
@@ -140,7 +142,7 @@ End-to-end quality gate before a story is considered done.
    
    The script will creates a `CLAUDE.md → AGENTS.md` symlink in the project root and links SDLC command files into `.claude/commands/sdlc/`.
 
-4. Tailor user story management customising guidelines-userstories.md, with an MCP or whatever you use to handle them. By default it's expecting a list of md files.
+4. Tailor user story management by customising guidelines-userstories.md, with an MCP or whatever you use to handle them. By default it's expecting a list of md files.
 
 **Please note** : currently only Claude is supported.
 
