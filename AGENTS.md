@@ -49,7 +49,7 @@ Read the following file immediately as it's relevant to all workflows: @docs/gui
 
 ### Development Process
 
-Development follows a Specification-Driven Development (SDD) workflow powered by OpenSpec, with BDD test-first task ordering. Custom commands (`/sdlc_open_story`, `/sdlc_propose_change`, `/sdlc_implement_change`, `/sdlc_verify_story`) drive the user-story lifecycle. See @docs/sdlc/SDLC-README.md for details.
+Development follows a Specification-Driven Development (SDD) workflow powered by OpenSpec, with BDD test-first task ordering. Custom commands (`/sdlc_open_story`, `/sdlc_propose_change`, `/sdlc_implement_change`, `/sdlc_verify_story`) drive the user-story lifecycle. See @docs/sdlc/README.md for details.
 
 ### Current Status
 
