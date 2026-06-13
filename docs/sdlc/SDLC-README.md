@@ -1,28 +1,175 @@
-# SDLC
+# SDLC — Agentic AI Software Development Lifecycle
 
-SDLC is a group of custom commands that wrap and extend the standard OpenSpec (SDD) workflow.
-The standard OpenSpec flow generally follows this sequence: propose → apply → verify → archive
-SDLC commands replace the standard flow with a user-story-centric pipeline. Run them in order for a typical feature lifecycle.
+SDLC is a set of four commands that let an AI coding agent autonomously drive the full lifecycle of a user story — from opening to verified delivery — while keeping the human developer in control of key decisions.
 
-Here is a short description of each of the steps. 
+Built on top of [OpenSpec](https://github.com/Fission-AI/OpenSpec/) (Spec-Driven Development), SDLC replaces manual task management with agentic orchestration: the AI reads specifications, reasons about architecture, writes and verifies code, and produces auditable reports at every stage.
 
-1. Open user story: `/sdlc_open_story <story>` 
+## Features
 
-[sdlc_open_story.md](commands/sdlc_open_story.md) analyses the next story to open, creates a branch, sets the story open and refines it adding a full and detailed product analysis.
+| Capability | How SDLC uses it                                                                                                                      |
+|---|---------------------------------------------------------------------------------------------------------------------------------------|
+| **Autonomous multi-step reasoning** | Each command chains 15+ sequential steps, making decisions at each gate without human intervention                                    |
+| **Sub-agent orchestration** | Implementation spawns parallel sub-agents (Sonnet for complex BDD work, Haiku for mechanical tasks), each with a fresh context window |
+| **Tool use** | The agent drives git, Gradle, adb, static analysis, and Claude Code's security scanners directly                                      |
+| **Self-healing loops** | Failed tests or security findings trigger automatic fix-and-retry cycles                                                              |
+| **On-device verification** | The agent installs the app on a physical device, interacts with it via UIAutomator, and verifies behaviour autonomously               |
+| **Specification grounding** | All code generation is anchored to living specs and acceptance criteria — not just free-form prompts                                  |
 
-2. Propose change: `/sdlc_propose_change <story>`
+## The Four Commands
 
-[sdlc_propose_change.md](commands/sdlc_propose_change.md) analyses the user story, asks for clarifications if something isn't clear, and finally generates the SDD artifacts: proposal, design, specs, and tasks. Tasks are defined with a BDD approach, based on GIVEN/WHEN/THEN acceptance criteria and test-first approach. Uses `/opsx:explore` and `/opsx:propose`.
+### 1. `/sdlc_open_story` — Open and Refine
 
-3. Implement change: `/sdlc_implement_change`
+Prepares a user story for development.
 
-[sdlc_implement_change](commands/sdlc_implement_change.md) implements the current OpenSpec change using sub-agent orchestration with BDD Red/Green cycle (test tasks verified RED before implementation, implementation tasks verified GREEN after). Each task section is delegated to a separate sub-agent with a fresh context window, preventing task checkboxes from being forgotten in long sessions and reducing cost by using cheaper models: Sonnet for BDD sections (test + implement cycles) and Haiku for mechanical tasks (wiring, previews, commands). The parent agent orchestrates, verifies checkbox completion after each section, and handles failures. Then looks for outstanding TODOs, runs a security review, and updates the documentation. Uses `/opsx:apply` and `/security-review`.
+**Recommended agent:** Opus — requires deep product analysis and refinement reasoning.
 
-4. Verify and Archive: `/sdlc_verify_story <story>`
+**What the agent does autonomously:**
+- Switches to `main`, pulls latest changes, creates a feature branch
+- Locates the next user story from the backlog (or accepts a specific one)
+- Performs a full product analysis as an expert PM/BA: identifies fields, endpoints, files to modify, testing strategy, security/GDPR/performance concerns
+- Enriches the story with implementation-ready detail so the developer (or subsequent agent) can work without ambiguity
+- Produces an HTML report summarising decisions made
 
-[sdlc_verify_story](commands/sdlc_verify_story.md) is an end-to-end verification and archive gate. Runs OpenSpec's verify, scans for unresolved TODOs, runs a security review on pending changes, checks every acceptance criterion in the story against the codebase, closes the story, then archives the OpenSpec change and verifies documentation is in sync. Uses `/opsx:verify`, `/opsx:sync`, `/security-review`, and `/opsx:archive`.
+---
 
-Each of the below operations adds a summary of the actions/results into an HTML report in [reports](../reports)
+### 2. `/sdlc_propose_change` — Explore and Design
+
+Generates the full technical design and task breakdown.
+
+**Recommended agent:** Opus — requires architecture exploration and design decisions.
+
+**What the agent does autonomously:**
+- Explores the codebase to identify integration points, risks, and dependencies
+- Asks clarifying questions when requirements are ambiguous (the one human-in-the-loop pause)
+- Generates all SDD artefacts: proposal, design document, delta specifications, and a structured task list
+- Structures tasks using BDD (Behaviour-Driven Development): each testable unit becomes a **test-first pair** — write the failing test, then write the code that makes it pass
+- Classifies tasks by complexity to enable cost-efficient sub-agent assignment later
+
+---
+
+### 3. `/sdlc_implement_change` — Build with Sub-Agent Orchestration
+
+Implements the entire change using multi-agent coordination.
+
+**Recommended agent:** Sonnet — orchestration is procedural; sub-agents handle the heavy reasoning.
+
+**What the agent does autonomously:**
+- Reads the task list and splits it into sections
+- Assigns each section to the cheapest capable model (Sonnet for BDD red/green cycles, Haiku for wiring and previews)
+- Spawns a sub-agent per section with a self-contained prompt — each agent writes code, runs tests, and checks off its tasks
+- Enforces the BDD Red/Green discipline: test must fail before implementation, then pass after
+- Verifies every checkbox after each sub-agent returns; retries or escalates on failure
+- Resolves outstanding TODOs whose preconditions are now met
+- Runs instrumented UI tests on a connected device
+- Executes a security review and fixes any findings
+- Updates project documentation (README, AGENTS.md) if affected
+
+---
+
+### 4. `/sdlc_verify_story` — Verify and Archive
+
+End-to-end quality gate before a story is considered done.
+
+**Recommended agent:** Sonnet — verification follows a structured checklist of automated gates.
+
+**What the agent does autonomously:**
+- Verifies implementation matches specifications (OpenSpec verify)
+- Scans for unresolved TODOs and classifies them as blocking or acknowledged
+- Runs a security review on all pending changes
+- Executes clean build + static analysis (lint, unused imports, deprecations)
+- Runs the full unit test suite
+- Checks that every new class has a corresponding test file
+- Checks that every Compose screen has preview coverage for all UI state fields
+- Runs instrumented tests on a connected device and exercises the app via adb/UIAutomator
+- Validates every acceptance criterion from the user story against the actual codebase
+- Closes the story, syncs specifications, and archives the change artefacts
+- Produces a detailed verification report with pass/fail status for each gate
+
+---
+
+## End-to-End Flow
+
+```
+User Story (backlog)
+         │
+         ▼
+┌─────────────────┐
+│  /open_story    │  Branch, refine, report
+└────────┬────────┘
+         ▼
+┌─────────────────┐
+│  /propose_change│  Explore, design, BDD tasks
+└────────┬────────┘
+         ▼
+┌─────────────────┐
+│  /implement     │  Sub-agents build + test
+└────────┬────────┘
+         ▼
+┌─────────────────┐
+│  /verify_story  │  Quality gates, archive
+└────────┬────────┘
+         ▼
+   Done (merged)
+```
+
+## Key Design Decisions
+
+- **Human stays in control**:
+  - Each of the command stops when the AI has created an output that human should review: refined user story, SDD specifications, code implementation. Detecting an issue earlier on will prevent bigger changes down the line. Apart from this, the agent will try to complete the task autonomously.
+  - By default none of the commands will automatically commit and push, to allow human to review the changes
+  - There are several check points in which the AI will request human intervention if some error condition showa, f.i. creating a new branch with staged changes, doubts requiring clarifications, physical device not connected, etc.
+- **Cost efficiency**: Mechanical tasks (DI wiring, string resources, previews) use cheaper models; only complex reasoning tasks use the full-capability model.
+- **Auditable**: Every command appends to an HTML report, creating a complete audit trail of what was decided, built, and verified.
+- **Spec-grounded**: Code generation is always anchored to explicit specifications and acceptance criteria, reducing hallucination and drift.
+- **Self-correcting**: Failed tests, security findings, and missed checkboxes trigger automatic retry loops rather than silent failures.
+
+## Quick start
+
+1. Download the `docs` folder into your project
+2. Install OpenSpec from https://github.com/Fission-AI/OpenSpec/ and ensure these commands are available: explore, propose, apply, verify, sync, archive
+3. Run the script in `./docs/sdlc`:
+  - **Linux / macOS**: `./docs/sdlc/sdlc_init_claude_code.sh`
+  - **Windows** (PowerShell, Developer Mode or elevated): `.\docs\sdlc\sdlc_init_claude_code.ps1`
+
+   The script will creates a `CLAUDE.md → AGENTS.md` symlink in the project root and links SDLC command files into `.claude/commands/sdlc/`.
+4. Tailor user story management customising guidelines-userstories.md, with an MCP or whatever you use to handle them. By default it's expecting a list of md files.
+
+**Please note** : currently only Claude is supported.
+
+## Additional customisations
+
+The basic recommendation is that these files should be modified directly from the agent, as they reference each other and agents are great in spotting these details. Rather than adding a new guideline, explain the improvement to the agent and ask it where it should go, given the current structure.
+
+### AGENTS.md
+
+Contains basic info about the project for the agent, and it's usually automatically update by the agent when a change affects its content.
+CLAUDE.md is a symlink to AGENTS.md, so it doesn't need any extra change.
+
+Some info usually contained in AGENTS.md will not likely end up in there, as they are already documented in the guidelines files.
+
+The initial part of the AGENTS.md instructs the agent how to selectively load some guidelines files depending on the taskit's working on.
+
+### Guidelines files
+
+There are two type of guidelines files:
+
+#### Loaded by AGENTS.md
+Guidelines files collect directions for the agent to handle the project, grouped into specific topics, f.i. Android native, git, etc. These should collect the best practices already in use by the team or the project.
+
+These files can and should be fully customised according to the project, so that the agent knows exactly how to handle it.
+
+Currently we have these three files, but can obviously be extended.
+- [guidelines-android](../guidelines/guidelines-android.md) for Android native code style and best practices
+- [guidelines-git](../guidelines/guidelines-git.md) for git operations and commit conventions
+- [guidelines-process](../guidelines/guidelines-process.md) for general guidelines
+
+#### Loaded by SDLC commands
+
+The other guidelines file are primarily used by the SDLC commands and describe how to handle specific inputs and outputs.
+- [guidelines-userstories](../guidelines/guidelines-userstories.md) for handling the user story backlog, this currently uses md files, but can use an MCP to access jira or any other tool.
+- [guidelines-reports](../guidelines/guidelines-reports.md) for auditing reports, currently uses an HTML file but can be customised in any way.
+
+(These are a category on their own, so they will likely change name at some point.)
 
 ## Quick start
 
@@ -34,50 +181,17 @@ Each of the below operations adds a summary of the actions/results into an HTML 
 
 The script creates a `CLAUDE.md → AGENTS.md` symlink in the project root and links SDLC command files into `.claude/commands/sdlc/`.
 
-**Please note** : currently only Claude is supported.
+**Please note** : currently only Claude Code is supported.
 
-## Customisation
-
-The folder structure is:
-
-```
-base project folder
-├── openspec/                            # OpenSpec standard folder, managed by OpenSpec commands
-├── docs/                                # Documentation & SDLC folders
-│   ├── guidelines/                      # Development guidelines
-│   │   ├── guidelines-android.md
-│   │   ├── guidelines-git.md
-│   │   ├── guidelines-process.md
-│   │   ├── guidelines-reports.md
-│   │   └── guidelines-userstories.md
-│   ├── reports/                         # Verification and archive reports (HTML/MD)
-│   ├── sdlc/                            # SDLC framework
-│   │   ├── SDLC-README.md               # This file – SDLC overview and setup
-│   │   ├── commands/                    # Command definitions (source of truth)
-│   │   │   ├── <sdlc_command>.md
-│   │   ├── sdlc_init_claude_code.sh      # Symlink setup script (Linux/macOS)
-│   │   └── sdlc_init_claude_code.ps1    # Symlink setup script (Windows)
-│   └── userstories/                     # User story backlog organised by epic/feature
-│       ├── index.md
-│       ├── <id>-<name>-DONE.md          # Completed stories
-│       ├── <id>-<name>-WIP.md           # In-progress stories
-│       └── <id>-<name>.md               # Backlog stories
-├── AGENTS.md                            # Agent instructions (CLAUDE.md symlinks here)
-└── README.md
-```
-
-
-
-## TODO
-
-SDLC:
-- multi-agent orchestration
-- LLM agnostic
-- self-improvement
-- sort different phases in the command list -not sure how
+## TODOs and improvements
+- Multi-agent orchestration for verification
+- Add support for Cursor, OpenCOde
+- Define how to handle changes/fix after propose change: every unexpected change on the code in an open story should update story and specs, or at least check if they are affected
+- Learn a lesson from a failure: the agent should be able to update the structure in case it spots a failure
 - create a guideline for readme
- 
-Guidelines:
+
+
+## Guidelines TODO
 - async operations should be wrapped in a loading state with a spinner, and if required disabling the button that triggered the operation, to avoid re-trigger. The spinner should have a minimum duration of 0.5 seconds to avoid a flickering UI.
 - step for static checks:
   - unused import directive / deprecation
