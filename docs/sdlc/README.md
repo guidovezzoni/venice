@@ -6,7 +6,7 @@ Built on top of [OpenSpec](https://github.com/Fission-AI/OpenSpec/) (Spec-Driven
 
 An example of its usage can be found in [venice](https://github.com/guidovezzoni/venice).
 
-**Please note**: this is work-in-progress: it needs to be tested and tailored for your own needs. 
+**Please note**: this is work-in-progress: it needs to be tested and tailored for your own needs.
 
 ## Features
 
@@ -123,9 +123,9 @@ End-to-end quality gate before a story is considered done.
 ## Key Design Decisions
 
 - **Human stays in control**:
-  - Each of the command stops when the AI has created an output that human should review: refined user story, SDD specifications, code implementation. Detecting an issue earlier on will prevent bigger changes down the line. Apart from this, the agent will try to complete the task autonomously.
-  - By default none of the commands will automatically commit and push, to allow human to review the changes
-  - There are several check points in which the AI will request human intervention if some error condition shows, f.i. creating a new branch with staged changes, doubts requiring clarifications, physical device not connected, etc.
+    - Each of the command stops when the AI has created an output that human should review: refined user story, SDD specifications, code implementation. Detecting an issue earlier on will prevent bigger changes down the line. Apart from this, the agent will try to complete the task autonomously.
+    - By default none of the commands will automatically commit and push, to allow human to review the changes
+    - There are several check points in which the AI will request human intervention if some error condition shows, f.i. creating a new branch with staged changes, doubts requiring clarifications, physical device not connected, etc.
 - **Cost efficiency**: Mechanical tasks (DI wiring, string resources, previews) use cheaper models; only complex reasoning tasks use the full-capability model.
 - **Auditable**: Every command appends to an HTML report, creating a complete audit trail of what was decided, built, and verified.
 - **Spec-grounded**: Code generation is always anchored to explicit specifications and acceptance criteria, reducing hallucination and drift.
@@ -135,14 +135,16 @@ End-to-end quality gate before a story is considered done.
 
 1. Download the `docs` folder into your project
 
-2. Install OpenSpec from https://github.com/Fission-AI/OpenSpec/ and ensure these commands are available: explore, propose, apply, verify, sync, archive
+2. Run the script in `./docs/sdlc`:
 
-3. Run the script in `./docs/sdlc`:
-   
-   - **Linux / macOS**: `./docs/sdlc/sdlc_init_claude_code.sh`
-   - **Windows** (PowerShell, Developer Mode or elevated): `.\docs\sdlc\sdlc_init_claude_code.ps1`
-   
+    - **Linux / macOS**: `./docs/sdlc/sdlc_init_claude_code.sh`
+    - **Windows** (PowerShell, Developer Mode or elevated): `.\docs\sdlc\sdlc_init_claude_code.ps1`
+
    The script will creates a `CLAUDE.md → AGENTS.md` symlink in the project root and links SDLC command files into `.claude/commands/sdlc/`.
+
+3. Install OpenSpec o your machine from https://github.com/Fission-AI/OpenSpec/ and:
+    - Initialise it in your project folder: `openspec init`
+    - Type `openspec config profile`, select "workflows only", and ensure these commands are available: explore, propose, apply, verify, sync, archive
 
 4. Tailor user story management by customising guidelines-userstories.md, with an MCP or whatever you use to handle them. By default it's expecting a list of md files.
 
@@ -173,30 +175,18 @@ These files can and should be fully customised according to the project, so that
 
 Currently we have these three files, but can obviously be extended.
 
-- [guidelines-android](../guidelines/guidelines-android.md) for Android native code style and best practices
-- [guidelines-git](../guidelines/guidelines-git.md) for git operations and commit conventions
-- [guidelines-process](../guidelines/guidelines-process.md) for general guidelines
+- [guidelines-android](docs/guidelines/guidelines-android.md) for Android native code style and best practices
+- [guidelines-git](docs/guidelines/guidelines-git.md) for git operations and commit conventions
+- [guidelines-process](docs/guidelines/guidelines-process.md) for general guidelines
 
 #### Loaded by SDLC commands
 
 The other guidelines file are primarily used by the SDLC commands and describe how to handle specific inputs and outputs.
 
-- [guidelines-userstories](../guidelines/guidelines-userstories.md) for handling the user story backlog, this currently uses md files, but can use an MCP to access jira or any other tool.
-- [guidelines-reports](../guidelines/guidelines-reports.md) for auditing reports, currently uses an HTML file but can be customised in any way.
+- [guidelines-userstories](docs/guidelines/guidelines-userstories.md) for handling the user story backlog, this currently uses md files, but can use an MCP to access jira or any other tool.
+- [guidelines-reports](docs/guidelines/guidelines-reports.md) for auditing reports, currently uses an HTML file but can be customised in any way.
 
 (These are a category on their own, so they will likely change name at some point.)
-
-## Quick start
-
-1. Download the `docs` folder into your project
-2. Install OpenSpec from https://github.com/Fission-AI/OpenSpec/ and ensure these commands are available: explore, propose, apply, verify, sync, archive
-3. Run the script in `./docs/sdlc`:
-- **Linux / macOS**: `./docs/sdlc/sdlc_init_claude_code.sh`
-- **Windows** (PowerShell, Developer Mode or elevated): `.\docs\sdlc\sdlc_init_claude_code.ps1`
-
-The script creates a `CLAUDE.md → AGENTS.md` symlink in the project root and links SDLC command files into `.claude/commands/sdlc/`.
-
-**Please note** : currently only Claude Code is supported.
 
 ## TODOs and improvements
 
