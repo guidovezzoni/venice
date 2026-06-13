@@ -90,26 +90,26 @@ End-to-end quality gate before a story is considered done.
 ## End-to-End Flow
 
 ```
-User Story (backlog)
-         │
-         ▼
-┌─────────────────┐
-│  /open_story    │  Branch, refine, report
-└────────┬────────┘
-         ▼
-┌─────────────────┐
-│  /propose_change│  Explore, design, BDD tasks
-└────────┬────────┘
-         ▼
-┌─────────────────┐
-│  /implement     │  Sub-agents build + test
-└────────┬────────┘
-         ▼
-┌─────────────────┐
-│  /verify_story  │  Quality gates, archive
-└────────┬────────┘
-         ▼
-   Done (merged)
+     User Story (backlog)
+              │
+              ▼
+┌──────────────────────────┐
+│    /open_story           │  Branch, refine, report
+└─────────────┬────────────┘
+              ▼
+┌──────────────────────────┐
+│    /propose_change       │  Explore, design, BDD tasks
+└─────────────┬────────────┘
+              ▼
+┌──────────────────────────┐
+│    /implement_change     │  Sub-agents build + test
+└─────────────┬────────────┘
+              ▼
+┌──────────────────────────┐
+│    /verify_story         │  Quality gates, archive
+└─────────────┬────────────┘
+              ▼
+        Done (merged)
 ```
 
 ## Key Design Decisions
