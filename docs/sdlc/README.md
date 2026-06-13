@@ -4,6 +4,8 @@ SDLC is a set of four commands that let an AI coding agent autonomously drive th
 
 Built on top of [OpenSpec](https://github.com/Fission-AI/OpenSpec/) (Spec-Driven Development), SDLC replaces manual task management with agentic orchestration: the AI reads specifications, reasons about architecture, writes and verifies code, and produces auditable reports at every stage.
 
+An example of its usage can be found in [venice](https://github.com/guidovezzoni/venice).
+
 **Please note**: this is work-in-progress: it needs to be tested and tailored for your own needs. 
 
 ## Features
@@ -123,7 +125,7 @@ End-to-end quality gate before a story is considered done.
 - **Human stays in control**:
   - Each of the command stops when the AI has created an output that human should review: refined user story, SDD specifications, code implementation. Detecting an issue earlier on will prevent bigger changes down the line. Apart from this, the agent will try to complete the task autonomously.
   - By default none of the commands will automatically commit and push, to allow human to review the changes
-  - There are several check points in which the AI will request human intervention if some error condition showa, f.i. creating a new branch with staged changes, doubts requiring clarifications, physical device not connected, etc.
+  - There are several check points in which the AI will request human intervention if some error condition shows, f.i. creating a new branch with staged changes, doubts requiring clarifications, physical device not connected, etc.
 - **Cost efficiency**: Mechanical tasks (DI wiring, string resources, previews) use cheaper models; only complex reasoning tasks use the full-capability model.
 - **Auditable**: Every command appends to an HTML report, creating a complete audit trail of what was decided, built, and verified.
 - **Spec-grounded**: Code generation is always anchored to explicit specifications and acceptance criteria, reducing hallucination and drift.
