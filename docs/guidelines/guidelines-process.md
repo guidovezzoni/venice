@@ -11,6 +11,16 @@
 - After reaching GREEN in a BDD cycle, **re-read the task description and spec** for requirements that mocked unit tests cannot verify — e.g. `@Transaction` annotations, threading constraints, runtime guarantees, database constraints, concurrency behaviour.
 - "Tests pass" is necessary but not sufficient. The spec is the source of truth, not the test suite.
 
+## Artifact-First Change Discipline
+
+When a change is requested during development — whether by the user, discovered during implementation, or surfaced by a review — it must flow through the artifact chain in order:
+
+1. **User story first.** Check if the user story needs updating (acceptance criteria added/removed/modified, description clarified, DoD adjusted). Update if needed.
+2. **OpenSpec artifacts second.** Check and update the relevant OpenSpec artifacts: proposal, design, delta specs, and task list. Ensure the tasks.md reflects the change.
+3. **Code last — and only via tasks.** Code is never implemented directly. All implementation work corresponds to an unchecked task in `tasks.md`. If no task exists for the work, add one first.
+
+This prevents drift between documentation and implementation. The artifacts are the source of truth — code is their output, not the other way around.
+
 ## Data Modelling Discipline
 - When modelling values from external data sources (APIs, JSON snapshots, protocols), only include
   values that are **confirmed to exist** in the available data or documentation.
