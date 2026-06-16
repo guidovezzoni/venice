@@ -109,6 +109,52 @@
       <li>Definition of Done checklist (10 items)</li>
     </ul>
   </section>
+  <section class="report-section" data-source="opsx:propose" data-timestamp="2026-06-15T00:00:00Z">
+    <header>
+      <h2>Change Proposed</h2>
+      <time datetime="2026-06-15T00:00:00Z">15 Jun 2026</time>
+    </header>
+    <p class="section-source">Source: opsx:propose</p>
+
+    <h3>Exploration Findings</h3>
+    <p>Investigated the codebase to identify integration points for route calculation:</p>
+    <ul>
+      <li><strong>API key:</strong> Already configured via <code>BuildConfig.MAPS_API_KEY</code> from <code>local.properties</code></li>
+      <li><strong>No HTTP client:</strong> Project uses Google Places SDK (not HTTP-based). OkHttp needed for Directions API REST calls</li>
+      <li><strong>Database:</strong> Currently at version 2 (<code>TripEntity</code>, <code>StopEntity</code>). Requires <code>MIGRATION_2_3</code> for <code>legs</code> table</li>
+      <li><strong>Stop mutations:</strong> All go through use cases (<code>SetStopUseCase</code>, <code>MoveStopUseCase</code>, <code>EditStopUseCase</code>, <code>RemoveStopUseCase</code>). Two already have TODO comments for leg invalidation (Epic 3)</li>
+      <li><strong><code>withMinimumDuration</code>:</strong> Already exists for 500ms minimum loading pattern — reusable</li>
+      <li><strong>MVI pattern:</strong> Clean <code>UiState</code>/<code>UiIntent</code>/<code>UiEffect</code> contract in place</li>
+    </ul>
+
+    <h3>Design Decisions</h3>
+    <table>
+      <tr><th>Decision</th><th>Choice</th><th>Rationale</th></tr>
+      <tr><td>HTTP client</td><td>OkHttp + <code>org.json</code></td><td>Industry standard; <code>org.json</code> built into Android — no extra dependency for single response type</td></tr>
+      <tr><td>Invalidation strategy</td><td>Domain-level (use case injection)</td><td>Enforces invariant regardless of caller; existing TODOs anticipate this pattern</td></tr>
+      <tr><td>Leg display</td><td>Inline distance/duration between stops</td><td>Provides immediate value without map rendering</td></tr>
+    </table>
+
+    <h3>Questions &amp; Answers</h3>
+    <table>
+      <tr><th>Question</th><th>Answer</th></tr>
+      <tr><td>HTTP client choice (OkHttp vs HttpURLConnection vs Retrofit)</td><td>OkHttp — accepted recommendation</td></tr>
+      <tr><td>Invalidation strategy (domain vs ViewModel vs DB trigger)</td><td>Domain-level via use cases — accepted recommendation</td></tr>
+      <tr><td>Leg display format</td><td>Render simple distance/duration summary between stops — user confirmed</td></tr>
+    </table>
+
+    <h3>Artifacts Created</h3>
+    <ul>
+      <li><span class="badge badge-pass">proposal.md</span> — Motivation, scope, capabilities, and impact</li>
+      <li><span class="badge badge-pass">design.md</span> — Technical decisions: OkHttp, domain-level invalidation, single API call, Room storage</li>
+      <li><span class="badge badge-pass">specs/route-calculation</span> — New: Leg model, LegEntity, LegDao, DirectionsApiService, RouteRepository, use cases, DI</li>
+      <li><span class="badge badge-pass">specs/route-display</span> — New: LegSummary composable, string resources</li>
+      <li><span class="badge badge-pass">specs/trip-detail</span> — Modified: UiState (+legs, isCalculatingRoute, routeError), UiIntent (+OnCalculateRouteClicked), ViewModel route handling, screen rendering</li>
+      <li><span class="badge badge-pass">specs/stop-management</span> — Modified: SetStopUseCase, MoveStopUseCase, EditStopUseCase — add InvalidateRouteUseCase calls</li>
+      <li><span class="badge badge-pass">specs/stop-removal</span> — Modified: RemoveStopUseCase — add InvalidateRouteUseCase call</li>
+      <li><span class="badge badge-pass">tasks.md</span> — 14 sections, 53 tasks, BDD test-first ordering</li>
+    </ul>
+  </section>
   </main>
 
 </body>
