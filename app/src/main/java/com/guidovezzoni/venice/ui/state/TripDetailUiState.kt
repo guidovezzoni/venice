@@ -1,5 +1,6 @@
 package com.guidovezzoni.venice.ui.state
 
+import com.guidovezzoni.venice.domain.model.Leg
 import com.guidovezzoni.venice.domain.model.PlaceDetail
 import com.guidovezzoni.venice.domain.model.PlaceSuggestion
 import com.guidovezzoni.venice.domain.model.Stop
@@ -25,5 +26,8 @@ data class TripDetailUiState(
     val selectedPlaceDetail: PlaceDetail? = null,
     val isResolvingPlace: Boolean = false,
     val placeDetailError: String? = null,
+    val legs: List<Leg> = emptyList(),
+    val isCalculatingRoute: Boolean = false,
+    val routeError: String? = null,
 )
 

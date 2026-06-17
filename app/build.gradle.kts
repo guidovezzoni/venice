@@ -78,9 +78,11 @@ dependencies {
         exclude(group = "androidx.vectordrawable", module = "vectordrawable-animated")
     }
     implementation(libs.kotlinx.coroutines.play.services)
+    implementation(libs.okhttp)
     testImplementation(libs.junit)
     testImplementation(libs.mockk)
     testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.org.json)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))

@@ -9,6 +9,7 @@ private const val MAX_STOP_COUNT = 25
 
 class SetStopUseCase @Inject constructor(
     private val stopRepository: StopRepository,
+    private val invalidateRouteUseCase: InvalidateRouteUseCase,
 ) {
     suspend operator fun invoke(
         tripId: String,
@@ -18,7 +19,7 @@ class SetStopUseCase @Inject constructor(
         stopType: StopType,
     ): Result<Stop> {
         val trimmedName = placeName.trim()
-        return when (stopType) {
+        val result = when (stopType) {
             StopType.STARTING_POINT ->
                 stopRepository.upsertStartingPoint(tripId, trimmedName, latitude, longitude)
 
@@ -34,5 +35,9 @@ class SetStopUseCase @Inject constructor(
                 }
             }
         }
+        if (result.isSuccess) {
+            invalidateRouteUseCase(tripId)
+        }
+        return result
     }
 }

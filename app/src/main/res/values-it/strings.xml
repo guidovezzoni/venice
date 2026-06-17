@@ -66,4 +66,11 @@
     <string name="trip_detail_search_loading">Ricerca in corso…</string>
     <string name="trip_detail_place_detail_error">Impossibile risolvere il luogo. Tocca un suggerimento per riprovare.</string>
     <string name="global_resolving_place">Risoluzione del luogo</string>
+    <string name="trip_detail_calculate_route">Calcola percorso</string>
+    <string name="trip_detail_calculating_route">Calcolo percorso in corso…</string>
+    <string name="trip_detail_route_error">Impossibile calcolare il percorso. Verifica la connessione e riprova.</string>
+    <string name="trip_detail_leg_distance_metres">%1$d m</string>
+    <string name="trip_detail_leg_distance_kilometres">%.1f km</string>
+    <string name="trip_detail_leg_duration_minutes">%1$d min</string>
+    <string name="trip_detail_leg_duration_hours_minutes">%1$dh %2$dmin</string>
 </resources>

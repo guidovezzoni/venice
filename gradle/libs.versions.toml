@@ -17,6 +17,8 @@ mockk = "1.14.9"
 coroutinesTest = "1.10.2"
 googlePlaces = "4.1.0"
 coroutinesPlayServices = "1.10.2"
+okhttp = "4.12.0"
+orgJson = "20250107"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -46,6 +48,8 @@ mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutinesTest" }
 google-places = { group = "com.google.android.libraries.places", name = "places", version.ref = "googlePlaces" }
 kotlinx-coroutines-play-services = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-play-services", version.ref = "coroutinesPlayServices" }
+okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
+org-json = { group = "org.json", name = "json", version.ref = "orgJson" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

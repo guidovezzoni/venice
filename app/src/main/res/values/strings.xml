@@ -67,4 +67,11 @@
     <string name="trip_detail_search_loading">Searching…</string>
     <string name="trip_detail_place_detail_error">Could not resolve place. Tap a suggestion to try again.</string>
     <string name="global_resolving_place">Resolving place</string>
+    <string name="trip_detail_calculate_route">Calculate route</string>
+    <string name="trip_detail_calculating_route">Calculating route…</string>
+    <string name="trip_detail_route_error">Could not calculate route. Please check your connection and try again.</string>
+    <string name="trip_detail_leg_distance_metres">%1$d m</string>
+    <string name="trip_detail_leg_distance_kilometres">%.1f km</string>
+    <string name="trip_detail_leg_duration_minutes">%1$d min</string>
+    <string name="trip_detail_leg_duration_hours_minutes">%1$dh %2$dmin</string>
 </resources>

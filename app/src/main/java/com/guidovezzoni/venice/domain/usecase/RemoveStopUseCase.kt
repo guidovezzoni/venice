@@ -5,8 +5,13 @@ import javax.inject.Inject
 
 class RemoveStopUseCase @Inject constructor(
     private val stopRepository: StopRepository,
+    private val invalidateRouteUseCase: InvalidateRouteUseCase,
 ) {
-    // TODO: invalidate affected legs once leg tracking is implemented (Epic 3)
-    suspend operator fun invoke(tripId: String, stopId: String): Result<Unit> =
-        stopRepository.deleteStop(tripId, stopId)
+    suspend operator fun invoke(tripId: String, stopId: String): Result<Unit> {
+        val result = stopRepository.deleteStop(tripId, stopId)
+        if (result.isSuccess) {
+            invalidateRouteUseCase(tripId)
+        }
+        return result
+    }
 }

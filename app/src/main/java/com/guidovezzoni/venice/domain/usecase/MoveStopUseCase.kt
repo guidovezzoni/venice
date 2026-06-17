@@ -5,10 +5,17 @@ import javax.inject.Inject
 
 class MoveStopUseCase @Inject constructor(
     private val stopRepository: StopRepository,
+    private val invalidateRouteUseCase: InvalidateRouteUseCase,
 ) {
     suspend operator fun invoke(
         tripId: String,
         fromOrder: Int,
         toOrder: Int,
-    ): Result<Unit> = stopRepository.swapStopOrder(tripId, fromOrder, toOrder)
+    ): Result<Unit> {
+        val result = stopRepository.swapStopOrder(tripId, fromOrder, toOrder)
+        if (result.isSuccess) {
+            invalidateRouteUseCase(tripId)
+        }
+        return result
+    }
 }
