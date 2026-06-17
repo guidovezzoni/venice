@@ -204,6 +204,62 @@
       <li><code>AGENTS.md</code> — Added Epic 3 / Feature 3.1 to completed stories</li>
     </ul>
   </section>
+  <section class="report-section" data-source="sdlc_verify_story" data-timestamp="2026-06-17T00:00:00Z">
+    <header>
+      <h2>Verification &amp; Archive</h2>
+      <time datetime="2026-06-17T00:00:00Z">17 Jun 2026</time>
+    </header>
+    <p class="section-source">Source: sdlc_verify_story</p>
+
+    <h3>Verification Gates</h3>
+    <table>
+      <tr><th>Gate</th><th>Result</th><th>Details</th></tr>
+      <tr><td>OpenSpec verify</td><td><span class="badge badge-pass">PASS</span></td><td>69/69 tasks complete, all artifacts done</td></tr>
+      <tr><td>TODO scan</td><td><span class="badge badge-pass">PASS</span></td><td>4 ACKNOWLEDGED (none blocking): <code>TripDetailUiIntent.kt:9</code>, <code>DirectionsApiService.kt:24</code>, <code>TripDetailUiState.kt:8</code>, <code>NetworkModule.kt:18</code></td></tr>
+      <tr><td>Security review</td><td><span class="badge badge-pass">PASS</span></td><td>No critical or high-severity findings</td></tr>
+      <tr><td>Clean build &amp; static analysis (<code>./gradlew clean check</code>)</td><td><span class="badge badge-pass">PASS</span></td><td>Build succeeded, no lint errors</td></tr>
+      <tr><td>Unit tests (<code>./gradlew test</code>)</td><td><span class="badge badge-pass">PASS</span></td><td>All tests passed</td></tr>
+      <tr><td>Test file coverage</td><td><span class="badge badge-pass">PASS</span></td><td>All new/modified classes have corresponding test files</td></tr>
+      <tr><td>Compose preview coverage</td><td><span class="badge badge-pass">PASS</span></td><td>All UiState fields covered in at least one preview with non-default values</td></tr>
+      <tr><td>Instrumented tests (<code>connectedDebugAndroidTest</code>)</td><td><span class="badge badge-pass">PASS</span></td><td>90/90 tests passed</td></tr>
+    </table>
+
+    <h3>On-Device Verification</h3>
+    <p><strong>Method:</strong> Agent via adb/UIAutomator</p>
+    <table>
+      <tr><th>Scenario</th><th>Result</th><th>Details</th></tr>
+      <tr><td>Trip creation</td><td><span class="badge badge-pass">PASS</span></td><td>Created trip, set starting point (Rome) and destination (Milan) via place search</td></tr>
+      <tr><td>Route calculation (2 stops)</td><td><span class="badge badge-pass">PASS</span></td><td>Rome &rarr; Milan: 578.8 km displayed between stops</td></tr>
+      <tr><td>Add intermediate stop</td><td><span class="badge badge-pass">PASS</span></td><td>Added Florence; legs invalidated (cleared from UI)</td></tr>
+      <tr><td>Route recalculation (3 stops)</td><td><span class="badge badge-pass">PASS</span></td><td>Rome &rarr; Florence: 275.0 km, Florence &rarr; Milan: distance displayed</td></tr>
+      <tr><td>Stop removal &amp; invalidation</td><td><span class="badge badge-pass">PASS</span></td><td>Removed stop; legs cleared, calculate route button reappeared</td></tr>
+    </table>
+
+    <h3>Definition of Done</h3>
+    <table>
+      <tr><th>#</th><th>Criterion</th><th>Result</th><th>Justification</th></tr>
+      <tr><td>1</td><td>Route calculated via Google Routes API</td><td><span class="badge badge-pass">PASS</span></td><td><code>DirectionsApiService</code> sends POST to Routes API endpoint</td></tr>
+      <tr><td>2</td><td>Legs persist in local Room DB</td><td><span class="badge badge-pass">PASS</span></td><td><code>LegEntity</code>, <code>LegDao</code>, <code>MIGRATION_2_3</code> in place</td></tr>
+      <tr><td>3</td><td>Distance/duration displayed between stops</td><td><span class="badge badge-pass">PASS</span></td><td><code>LegSummary</code> composable renders formatted distance/duration</td></tr>
+      <tr><td>4</td><td>Automatic invalidation on stop mutation</td><td><span class="badge badge-pass">PASS</span></td><td><code>InvalidateRouteUseCase</code> injected into all 4 mutation use cases</td></tr>
+      <tr><td>5</td><td>Loading state with minimum 500ms duration</td><td><span class="badge badge-pass">PASS</span></td><td><code>withMinimumDuration</code> wraps calculate route operation</td></tr>
+      <tr><td>6</td><td>Error displayed on failure</td><td><span class="badge badge-pass">PASS</span></td><td><code>routeError</code> field in UiState, rendered near calculate button</td></tr>
+      <tr><td>7</td><td>Unit tests with 80%+ coverage</td><td><span class="badge badge-pass">PASS</span></td><td>Tests for all use cases, repository, DTO, mapper, ViewModel</td></tr>
+      <tr><td>8</td><td>Compose UI tests for screen</td><td><span class="badge badge-pass">PASS</span></td><td><code>TripDetailScreenTest</code> covers route-related UI</td></tr>
+      <tr><td>9</td><td>On-device verification</td><td><span class="badge badge-pass">PASS</span></td><td>Full flow verified via adb/UIAutomator</td></tr>
+    </table>
+
+    <h3>Archive</h3>
+    <table>
+      <tr><th>Item</th><th>Value</th></tr>
+      <tr><td>Story file</td><td><code>3.1.1-calculate-route-between-stops-DONE.md</code></td></tr>
+      <tr><td>Archive location</td><td><code>openspec/changes/archive/2026-06-17-calculate-route-between-stops/</code></td></tr>
+      <tr><td>Spec sync</td><td><span class="badge badge-pass">Synced</span> — 2 new specs (route-calculation, route-display), 3 updated (stop-management, stop-removal, trip-detail)</td></tr>
+      <tr><td>README.md &amp; AGENTS.md</td><td><span class="badge badge-pass">In sync</span></td></tr>
+    </table>
+
+    <div class="outcome outcome-passed">OUTCOME: PASSED &mdash; All verification gates passed. Story closed, specs synced, change archived.</div>
+  </section>
   </main>
 
 </body>

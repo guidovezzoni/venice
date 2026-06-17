@@ -27,10 +27,13 @@ Defines the requirements for the trip detail screen, covering the MVI contract (
 - `selectedPlaceDetail: PlaceDetail?` (default `null`)
 - `isResolvingPlace: Boolean` (default `false`)
 - `placeDetailError: String?` (default `null`)
+- `legs: List<Leg>` (default `emptyList()`)
+- `isCalculatingRoute: Boolean` (default `false`)
+- `routeError: String?` (default `null`)
 
 #### Scenario: Default initial state
 - **WHEN** `TripDetailUiState()` is created with defaults
-- **THEN** `tripId` is `""`, `startingPoint` is `null`, `destination` is `null`, `intermediateStops` is empty, `isLoading` is `false`, `isSetStartingPointDialogVisible` is `false`, `isSetDestinationDialogVisible` is `false`, `isAddStopDialogVisible` is `false`, `isEditStopDialogVisible` is `false`, `editingStop` is `null`, `canAddMoreStops` is `false`, `isRemoveStopDialogVisible` is `false`, `stopToRemove` is `null`, `placeSuggestions` is empty, `isSearchingPlaces` is `false`, `searchError` is `null`, `selectedPlaceDetail` is `null`, `isResolvingPlace` is `false`, `placeDetailError` is `null`
+- **THEN** `tripId` is `""`, `startingPoint` is `null`, `destination` is `null`, `intermediateStops` is empty, `isLoading` is `false`, `isSetStartingPointDialogVisible` is `false`, `isSetDestinationDialogVisible` is `false`, `isAddStopDialogVisible` is `false`, `isEditStopDialogVisible` is `false`, `editingStop` is `null`, `canAddMoreStops` is `false`, `isRemoveStopDialogVisible` is `false`, `stopToRemove` is `null`, `placeSuggestions` is empty, `isSearchingPlaces` is `false`, `searchError` is `null`, `selectedPlaceDetail` is `null`, `isResolvingPlace` is `false`, `placeDetailError` is `null`, `legs` is empty, `isCalculatingRoute` is `false`, `routeError` is `null`
 
 ### Requirement: TripDetailUiIntent models user actions
 `TripDetailUiIntent` SHALL be a sealed class with:
@@ -55,6 +58,7 @@ Defines the requirements for the trip detail screen, covering the MVI contract (
 - `OnUndoMarkStopDepartedClicked(stopId: String)` — user taps "Undo" on the last departed stop
 - `OnSearchQueryChanged(query: String)` — user types in the place name field during a stop dialog
 - `OnSuggestionSelected(suggestion: PlaceSuggestion)` — user taps an autocomplete suggestion
+- `OnCalculateRouteClicked` — user taps the "Calculate route" button
 
 #### Scenario: All intents are representable
 - **WHEN** a user action occurs on the trip detail screen
@@ -75,6 +79,10 @@ Defines the requirements for the trip detail screen, covering the MVI contract (
 #### Scenario: Suggestion selected intent carries suggestion
 - **WHEN** the user taps a suggestion with `placeId = "abc"`, `primaryText = "Rome"`, `secondaryText = "Italy"`
 - **THEN** `OnSuggestionSelected(PlaceSuggestion("abc", "Rome", "Italy"))` is dispatched
+
+#### Scenario: Calculate route intent
+- **WHEN** the user taps the "Calculate route" button
+- **THEN** `OnCalculateRouteClicked` is dispatched
 
 ### Requirement: TripDetailUiEffect models one-shot side effects
 `TripDetailUiEffect` SHALL be a sealed class with:
@@ -116,6 +124,32 @@ Defines the requirements for the trip detail screen, covering the MVI contract (
 - On `OnUndoMarkStopDepartedClicked`: set `isLoading = true`; call `UndoMarkStopDepartedUseCase(tripId)`; on success set `isLoading = false`; on failure set `isLoading = false` and emit `ShowError`.
 - On `OnSearchQueryChanged(query)`: cancel any pending search job; if query is blank, call `clearSearchState()`; otherwise set `isSearchingPlaces = true`, clear `placeDetailError`, debounce 300ms, call `SearchPlacesUseCase`; on success update `placeSuggestions`, clear `searchError`, set `isSearchingPlaces = false`; on failure set `searchError`, clear `placeSuggestions`, set `isSearchingPlaces = false`.
 - On `OnSuggestionSelected(suggestion)`: set `isResolvingPlace = true` and clear `placeDetailError`; call `GetPlaceDetailUseCase(suggestion.placeId)`; on success set `selectedPlaceDetail`, clear `placeSuggestions`, set `isResolvingPlace = false`; on failure set `placeDetailError` with the error message, set `isResolvingPlace = false`. SHALL NOT emit `ShowError` effect on Place Details failure.
+- On initialisation, collect `ObserveLegsUseCase(tripId)` and update `legs` in the UI state.
+- On `OnCalculateRouteClicked`: set `isCalculatingRoute = true` and clear `routeError`; build the ordered list of all stops (starting point + intermediate + destination); call `CalculateRouteUseCase(tripId, stops)` with `withMinimumDuration`; on success set `isCalculatingRoute = false` (legs update via `ObserveLegsUseCase` Flow); on failure set `isCalculatingRoute = false` and set `routeError` to the error message.
+
+#### Scenario: Calculate route — success
+- **WHEN** `OnCalculateRouteClicked` is dispatched and `CalculateRouteUseCase` succeeds
+- **THEN** `isCalculatingRoute` becomes `false`, `routeError` is `null`, and `legs` updates via Flow observation
+
+#### Scenario: Calculate route — failure
+- **WHEN** `OnCalculateRouteClicked` is dispatched and `CalculateRouteUseCase` fails with message "Network error"
+- **THEN** `isCalculatingRoute` becomes `false` and `routeError` is "Network error"
+
+#### Scenario: Calculate route — loading state
+- **WHEN** `OnCalculateRouteClicked` is dispatched and the API call is in-flight
+- **THEN** `isCalculatingRoute` is `true` and `routeError` is `null`
+
+#### Scenario: Calculate route — minimum loading duration
+- **WHEN** `OnCalculateRouteClicked` is dispatched and `CalculateRouteUseCase` completes in less than 500 ms
+- **THEN** `isCalculatingRoute` remains `true` until at least 500 ms have elapsed
+
+#### Scenario: Legs updated via observation
+- **WHEN** the ViewModel initialises and legs exist in the database for the trip
+- **THEN** `uiState.legs` contains the persisted legs
+
+#### Scenario: Legs cleared after stop mutation
+- **WHEN** a stop is added, removed, reordered, or edited (triggering leg invalidation via the use case)
+- **THEN** `uiState.legs` becomes empty via Flow observation
 
 #### Scenario: Search query debounced at 300 ms
 - **WHEN** `OnSearchQueryChanged("R")` is dispatched, then `OnSearchQueryChanged("Ro")` 100 ms later, then `OnSearchQueryChanged("Rom")` 100 ms later
@@ -619,3 +653,58 @@ The app SHALL include the following string resources in EN, IT, and ES:
 #### Scenario: Spanish strings present
 - **WHEN** the app locale is Spanish
 - **THEN** all search-related string resources resolve to their Spanish values
+
+### Requirement: TripDetailScreen renders calculate route button
+The trip detail screen SHALL display a "Calculate route" button when at least 2 stops exist (starting point and destination both non-null). The button SHALL:
+- Be disabled when `isCalculatingRoute` is `true` or `isLoading` is `true`.
+- Show a `CircularProgressIndicator` when `isCalculatingRoute` is `true`.
+- Dispatch `OnCalculateRouteClicked` when tapped.
+- Be placed after the destination section and before any other content.
+
+#### Scenario: Button visible with 2+ stops
+- **WHEN** the screen has a starting point and a destination
+- **THEN** the "Calculate route" button is visible
+
+#### Scenario: Button hidden with fewer than 2 stops
+- **WHEN** the screen has only a starting point (no destination)
+- **THEN** the "Calculate route" button is not visible
+
+#### Scenario: Button disabled while calculating
+- **WHEN** `isCalculatingRoute` is `true`
+- **THEN** the button is disabled and shows a loading indicator
+
+#### Scenario: Button tap dispatches intent
+- **WHEN** the user taps the "Calculate route" button
+- **THEN** `OnCalculateRouteClicked` is dispatched
+
+### Requirement: TripDetailScreen renders route error
+The trip detail screen SHALL display an inline error message when `routeError` is not null. The error SHALL be displayed near the calculate route button.
+
+#### Scenario: Error displayed
+- **WHEN** `routeError` is "Network error"
+- **THEN** the text "Route calculation failed: Network error" is displayed
+
+#### Scenario: No error
+- **WHEN** `routeError` is `null`
+- **THEN** no error message is displayed
+
+### Requirement: TripDetailScreen renders leg summaries between stops
+The trip detail screen SHALL render a `LegSummary` composable between each pair of consecutive stops when legs are available. The leg for a given pair is matched by `fromStopId` and `toStopId`.
+
+#### Scenario: Legs displayed between stops
+- **WHEN** 3 stops exist and 2 legs are available
+- **THEN** a `LegSummary` is rendered between stop 1 and stop 2, and between stop 2 and stop 3
+
+#### Scenario: No legs available
+- **WHEN** 3 stops exist but no legs are available
+- **THEN** no `LegSummary` composables are rendered
+
+### Requirement: TripDetailScreen route preview coverage
+The trip detail screen previews SHALL include:
+- A preview with legs displayed between stops
+- A preview with `isCalculatingRoute = true`
+- A preview with `routeError` set
+
+#### Scenario: Route previews exist
+- **WHEN** the composable is inspected in Android Studio
+- **THEN** preview variants for legs, calculating state, and error state are visible
