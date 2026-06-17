@@ -140,7 +140,7 @@ fun TripDetailScreen(
                 )
                 startingPoint?.let { stop ->
                     legByFromStopId[stop.id]?.let { leg ->
-                        LegSummary(leg = leg)
+                            LegSummary(leg = leg)
                     }
                 }
             }

@@ -68,32 +68,29 @@ The data layer SHALL define extension functions in `data/database/mapper/LegEnti
 - **WHEN** the database is upgraded from version 2 to version 3
 - **THEN** the `legs` table exists with columns `id`, `tripId`, `fromStopId`, `toStopId`, `distanceMetres`, `durationSeconds`, `encodedPolyline`, a foreign key on `tripId` referencing `trips(id)` with ON DELETE CASCADE, and an index on `tripId`
 
-### Requirement: DirectionsApiService calls Google Directions API
+### Requirement: DirectionsApiService calls Google Routes API
 The data layer SHALL define a `DirectionsApiService` class in `data/network/DirectionsApiService.kt` that:
 - Accepts an `OkHttpClient` and the API key via constructor injection.
-- Provides `suspend fun getDirections(origin: String, destination: String, waypoints: List<String>): Result<DirectionsResponse>`.
-- Constructs a GET request to `https://maps.googleapis.com/maps/api/directions/json` with query parameters `origin`, `destination`, `waypoints` (pipe-separated), and `key`.
+- Provides `suspend fun fetchRoute(stops: List<Stop>): Result<DirectionsResponse>`.
+- Constructs a POST request to `https://routes.googleapis.com/directions/v2:computeRoutes` with a JSON body containing `origin`, `destination`, `intermediates` (if any), and `travelMode: "DRIVE"`.
+- Sets headers: `Content-Type: application/json`, `X-Goog-Api-Key: {apiKey}`, `X-Goog-FieldMask: routes.legs.distanceMeters,routes.legs.duration,routes.legs.polyline.encodedPolyline`.
 - Parses the JSON response using `org.json` into a `DirectionsResponse`.
-- Returns `Result.failure` if the HTTP status is not 200, if the API response status is not `"OK"`, or if parsing fails.
-- Executes the OkHttp call using `execute()` (synchronous) within the caller's coroutine context.
+- Returns `Result.failure` if the HTTP status is not 200 or if parsing fails.
+- Executes the OkHttp call using `execute()` (synchronous) within the caller's coroutine context (`Dispatchers.IO`).
 - SHALL be the only class that imports or references OkHttp types. All OkHttp usage is isolated here so the HTTP layer can be replaced with Retrofit when additional endpoints are added.
 - SHALL include a TODO comment: `// TODO: Replace with Retrofit when additional API endpoints are added`
 
-#### Scenario: Successful API call with waypoints
-- **WHEN** `getDirections` is called with origin `"41.9,12.5"`, destination `"41.4,2.2"`, and waypoints `["43.8,11.3", "43.7,7.3"]`
-- **THEN** a GET request is made with `origin=41.9,12.5&destination=41.4,2.2&waypoints=43.8,11.3|43.7,7.3&key=<API_KEY>` and a `Result.success(DirectionsResponse)` is returned
+#### Scenario: Successful API call with intermediates
+- **WHEN** `fetchRoute` is called with 4 stops
+- **THEN** a POST request is made with origin (first stop), destination (last stop), and intermediates (middle stops), and a `Result.success(DirectionsResponse)` is returned
 
-#### Scenario: Successful API call without waypoints
-- **WHEN** `getDirections` is called with origin and destination but an empty waypoints list
-- **THEN** the request omits the `waypoints` parameter and returns a `Result.success(DirectionsResponse)`
+#### Scenario: Successful API call without intermediates
+- **WHEN** `fetchRoute` is called with 2 stops (origin and destination only)
+- **THEN** the request omits the `intermediates` field and returns a `Result.success(DirectionsResponse)`
 
 #### Scenario: HTTP error
 - **WHEN** the API returns a non-200 HTTP status code
-- **THEN** `Result.failure` is returned with an appropriate error message
-
-#### Scenario: API error status
-- **WHEN** the API returns HTTP 200 but the JSON `status` field is not `"OK"` (e.g., `"ZERO_RESULTS"`, `"REQUEST_DENIED"`)
-- **THEN** `Result.failure` is returned with the API status as the error message
+- **THEN** `Result.failure` is returned with an appropriate error message including the response body
 
 #### Scenario: Network failure
 - **WHEN** the OkHttp call throws an `IOException`
@@ -101,23 +98,26 @@ The data layer SHALL define a `DirectionsApiService` class in `data/network/Dire
 
 ### Requirement: DirectionsResponse DTO
 The data layer SHALL define `DirectionsResponse` in `data/network/dto/DirectionsResponse.kt` as a data class with:
-- `status: String` — API response status
 - `legs: List<DirectionsLeg>` — list of leg results
 
-And `DirectionsLeg` as a data class with:
-- `distanceMetres: Int` — `routes[0].legs[n].distance.value`
-- `durationSeconds: Int` — `routes[0].legs[n].duration.value`
-- `encodedPolyline: String` — `routes[0].legs[n].overview_polyline.points`
+And `DirectionsLeg` as a data class with nullable fields:
+- `distanceMetres: Int?` — `routes[0].legs[n].distanceMeters`
+- `durationSeconds: Int?` — parsed from `routes[0].legs[n].duration` (string format like "89s")
+- `encodedPolyline: String?` — `routes[0].legs[n].polyline.encodedPolyline`
 
-And a companion `fromJson(jsonString: String): DirectionsResponse` factory that parses the raw JSON.
+And a companion `fromJson(jsonString: String): DirectionsResponse` factory that parses the raw Routes API JSON. If the response contains an `error` object, the factory SHALL throw an `IllegalStateException` with the error message and status.
 
 #### Scenario: Parse valid API response
-- **WHEN** `fromJson` is called with a valid Directions API JSON string containing 2 legs
-- **THEN** a `DirectionsResponse` is returned with `status = "OK"` and 2 `DirectionsLeg` entries with correct values
+- **WHEN** `fromJson` is called with a valid Routes API JSON string containing 2 legs
+- **THEN** a `DirectionsResponse` is returned with 2 `DirectionsLeg` entries with correct values
 
 #### Scenario: Parse response with missing routes
 - **WHEN** `fromJson` is called with a JSON string where `routes` is empty
 - **THEN** a `DirectionsResponse` is returned with an empty `legs` list
+
+#### Scenario: Parse response with API error
+- **WHEN** `fromJson` is called with a JSON string containing an `error` object
+- **THEN** an `IllegalStateException` is thrown containing the error message
 
 ### Requirement: LegMapper maps DTO to domain
 The data layer SHALL define a `LegMapper` class in `data/mapper/LegMapper.kt` that maps a `DirectionsLeg` to a domain `Leg`, accepting `tripId`, `fromStopId`, and `toStopId` as additional parameters. A new UUID SHALL be generated for each mapped leg.

@@ -155,6 +155,55 @@
       <li><span class="badge badge-pass">tasks.md</span> — 14 sections, 53 tasks, BDD test-first ordering</li>
     </ul>
   </section>
+  <section class="report-section" data-source="apply_changes" data-timestamp="2026-06-17T10:10:00Z">
+    <header>
+      <h2>Changes Applied</h2>
+      <time datetime="2026-06-17T10:10:00Z">17 Jun 2026</time>
+    </header>
+    <p class="section-source">Source: sdlc_implement_change</p>
+
+    <h3>Summary</h3>
+    <p>Implemented the full route calculation feature across 14 task sections (66 tasks total), then migrated from the legacy Google Directions API to the Google Routes API after discovering the Directions API was not enabled for the project.</p>
+
+    <h3>Implementation</h3>
+    <ul>
+      <li><strong>Tasks completed:</strong> 66/66 (all checked)</li>
+      <li><strong>Iteration cycles:</strong> 2 — initial implementation (sections 1–13), then API migration (section 14)</li>
+      <li><strong>Sub-agent orchestration:</strong> Sections 1–13 implemented via sub-agents (Sonnet for BDD, Haiku for mechanical tasks)</li>
+      <li><strong>API migration:</strong> Switched from Google Directions API (Legacy) to Google Routes API after discovering the legacy API returned <code>REQUEST_DENIED</code>. Updated <code>DirectionsApiService</code> (GET → POST, JSON body, field mask headers), <code>DirectionsResponse</code> (new response format), and all test fixtures.</li>
+    </ul>
+
+    <h3>Artifact Updates (API Migration)</h3>
+    <ul>
+      <li>User story, proposal, design, delta specs, and tasks updated to reference Routes API</li>
+      <li>7 new tasks added to section 14 for migration work</li>
+    </ul>
+
+    <h3>Test Results</h3>
+    <table>
+      <tr><th>Gate</th><th>Result</th></tr>
+      <tr><td>Unit tests (<code>./gradlew test</code>)</td><td><span class="badge badge-pass">PASS</span></td></tr>
+      <tr><td>Lint (<code>./gradlew check</code>)</td><td><span class="badge badge-pass">PASS</span></td></tr>
+      <tr><td>Instrumented tests (<code>connectedDebugAndroidTest</code>)</td><td><span class="badge badge-pass">PASS</span> (90/90)</td></tr>
+      <tr><td>On-device: route calculation (London → Paris)</td><td><span class="badge badge-pass">PASS</span> — 459.1 km · 5h 55min</td></tr>
+      <tr><td>On-device: invalidation after stop edit (London → Birmingham)</td><td><span class="badge badge-pass">PASS</span> — legs cleared, button reappeared</td></tr>
+    </table>
+
+    <h3>TODO Scan</h3>
+    <p>4 TODOs found — all classified as <span class="badge badge-info">ACKNOWLEDGED</span> (unrelated to this story):</p>
+    <ul>
+      <li><code>TripDetailUiIntent.kt:9</code> — PlaceDetail usage question</li>
+      <li><code>DirectionsApiService.kt:24</code> — Retrofit migration reminder (intentional)</li>
+      <li><code>TripDetailUiState.kt:8</code> — UiState refactoring idea</li>
+      <li><code>NetworkModule.kt:18</code> — Retrofit migration reminder (intentional)</li>
+    </ul>
+
+    <h3>Documentation Updates</h3>
+    <ul>
+      <li><code>README.md</code> — Updated feature description (route calculation added), tech stack table (Routes API + OkHttp), removed Directions API from roadmap</li>
+      <li><code>AGENTS.md</code> — Added Epic 3 / Feature 3.1 to completed stories</li>
+    </ul>
+  </section>
   </main>
 
 </body>

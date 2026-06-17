@@ -8,19 +8,20 @@ import org.junit.Test
 class DirectionsResponseTest {
 
     @Test
-    fun `GIVEN valid Directions API JSON WHEN fromJson is called THEN DirectionsResponse with correct legs is returned`() {
+    fun `GIVEN valid Routes API JSON WHEN fromJson is called THEN DirectionsResponse with correct legs is returned`() {
         val json = """
             {
-              "status": "OK",
               "routes": [{
                 "legs": [
                   {
-                    "distance": {"value": 12345},
-                    "duration": {"value": 678}
+                    "distanceMeters": 12345,
+                    "duration": "678s",
+                    "polyline": {"encodedPolyline": "abc123"}
                   },
                   {
-                    "distance": {"value": 5000},
-                    "duration": {"value": 300}
+                    "distanceMeters": 5000,
+                    "duration": "300s",
+                    "polyline": {"encodedPolyline": "def456"}
                   }
                 ]
               }]
@@ -36,16 +37,18 @@ class DirectionsResponseTest {
         val expectedFirstDurationSeconds = 678
         assertEquals(expectedFirstDistanceMetres, result.legs[0].distanceMetres)
         assertEquals(expectedFirstDurationSeconds, result.legs[0].durationSeconds)
+        assertEquals("abc123", result.legs[0].encodedPolyline)
 
         val expectedSecondDistanceMetres = 5000
         val expectedSecondDurationSeconds = 300
         assertEquals(expectedSecondDistanceMetres, result.legs[1].distanceMetres)
         assertEquals(expectedSecondDurationSeconds, result.legs[1].durationSeconds)
+        assertEquals("def456", result.legs[1].encodedPolyline)
     }
 
     @Test
     fun `GIVEN JSON with empty routes WHEN fromJson is called THEN DirectionsResponse with empty legs is returned`() {
-        val json = """{"status": "OK", "routes": []}"""
+        val json = """{"routes": []}"""
 
         val result = DirectionsResponse.fromJson(json)
 
@@ -53,12 +56,14 @@ class DirectionsResponseTest {
     }
 
     @Test
-    fun `GIVEN JSON with REQUEST_DENIED status WHEN fromJson is called THEN IllegalStateException is thrown`() {
+    fun `GIVEN JSON with API error WHEN fromJson is called THEN IllegalStateException is thrown`() {
         val json = """
             {
-              "status": "REQUEST_DENIED",
-              "error_message": "API not enabled",
-              "routes": []
+              "error": {
+                "code": 403,
+                "message": "Routes API is not enabled",
+                "status": "PERMISSION_DENIED"
+              }
             }
         """.trimIndent()
 
@@ -66,7 +71,8 @@ class DirectionsResponseTest {
             DirectionsResponse.fromJson(json)
             fail("Expected IllegalStateException")
         } catch (exception: IllegalStateException) {
-            assertTrue(exception.message!!.contains("REQUEST_DENIED"))
+            assertTrue(exception.message!!.contains("PERMISSION_DENIED"))
+            assertTrue(exception.message!!.contains("Routes API is not enabled"))
         }
     }
 }

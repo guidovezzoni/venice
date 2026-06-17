@@ -99,9 +99,12 @@
 - [x] 13.4 Write Compose UI test: GIVEN routeError is set WHEN screen renders THEN error message is displayed — in `TripDetailScreenTest`
 - [x] 13.5 Write Compose UI test: GIVEN button is tapped WHEN screen is interactive THEN OnCalculateRouteClicked intent is dispatched — in `TripDetailScreenTest`
 
-## 14. Final Verification
+## 14. Migrate from Legacy Directions API to Routes API
 
-- [x] 14.1 Run `./gradlew clean check` — all tests pass, no lint errors
-- [x] 14.2 Run `./gradlew connectedDebugAndroidTest` — Compose UI tests pass on device
-- [ ] 14.3 Verify on device: create trip with ≥2 stops, tap "Calculate route", verify distance/duration appears between stops
-- [ ] 14.4 Verify on device: edit a stop after calculation, verify legs are cleared and button reappears
+- [x] 14.1 Update `DirectionsApiService.kt` — change from GET to POST, new endpoint `https://routes.googleapis.com/directions/v2:computeRoutes`, JSON body with `origin`/`destination`/`intermediates`/`travelMode`, headers `X-Goog-Api-Key` and `X-Goog-FieldMask`
+- [x] 14.2 Update `DirectionsResponse.fromJson` — parse Routes API response format (`routes[0].legs[].distanceMeters`, `duration` as string like "89s", `polyline.encodedPolyline`), handle `error` object in response
+- [x] 14.3 Update `DirectionsResponseTest` — update test JSON fixtures to Routes API format, add error response test
+- [x] 14.4 Run `./gradlew clean check` — all tests pass, no lint errors
+- [x] 14.5 Run `./gradlew connectedDebugAndroidTest` — Compose UI tests pass on device (90/90)
+- [x] 14.6 Verify on device: create trip with ≥2 stops, tap "Calculate route", verify distance/duration appears between stops
+- [x] 14.7 Verify on device: edit a stop after calculation, verify legs are cleared and button reappears
