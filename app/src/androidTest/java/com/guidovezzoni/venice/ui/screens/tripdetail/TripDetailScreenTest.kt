@@ -720,6 +720,78 @@ class TripDetailScreenTest {
 
     // endregion
 
+    // region Calculate route
+
+    @Test
+    fun calculateRoute_withTwoOrMoreStops_buttonIsVisible() {
+        setContent(
+            uiState = TripDetailUiState(
+                tripId = TRIP_ID,
+                startingPoint = STARTING_POINT,
+                destination = DESTINATION,
+            ),
+        )
+        composeTestRule.onNodeWithText("Calculate route").performScrollTo().assertIsDisplayed()
+    }
+
+    @Test
+    fun calculateRoute_withFewerThanTwoStops_buttonIsNotVisible() {
+        setContent(
+            uiState = TripDetailUiState(
+                tripId = TRIP_ID,
+                startingPoint = STARTING_POINT,
+            ),
+        )
+        composeTestRule.onNodeWithText("Calculate route").assertDoesNotExist()
+    }
+
+    @Test
+    fun calculateRoute_whileCalculating_buttonIsDisabled() {
+        setContent(
+            uiState = TripDetailUiState(
+                tripId = TRIP_ID,
+                startingPoint = STARTING_POINT,
+                destination = DESTINATION,
+                isCalculatingRoute = true,
+            ),
+        )
+        composeTestRule.onNodeWithText("Calculating route…")
+            .performScrollTo()
+            .assertIsDisplayed()
+        composeTestRule.onNodeWithText("Calculating route…").assertIsNotEnabled()
+    }
+
+    @Test
+    fun calculateRoute_withRouteError_errorMessageIsDisplayed() {
+        val errorMessage = "Network error"
+        setContent(
+            uiState = TripDetailUiState(
+                tripId = TRIP_ID,
+                startingPoint = STARTING_POINT,
+                destination = DESTINATION,
+                routeError = errorMessage,
+            ),
+        )
+        composeTestRule.onNodeWithText(errorMessage).performScrollTo().assertIsDisplayed()
+    }
+
+    @Test
+    fun calculateRoute_onButtonTap_intentIsDispatched() {
+        val capturedIntents = mutableListOf<TripDetailUiIntent>()
+        setContent(
+            uiState = TripDetailUiState(
+                tripId = TRIP_ID,
+                startingPoint = STARTING_POINT,
+                destination = DESTINATION,
+            ),
+            onIntent = { capturedIntents.add(it) },
+        )
+        composeTestRule.onNodeWithText("Calculate route").performScrollTo().performClick()
+        assertTrue(capturedIntents.any { it is TripDetailUiIntent.OnCalculateRouteClicked })
+    }
+
+    // endregion
+
     // region Loading state
 
     @Test

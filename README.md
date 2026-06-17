@@ -6,11 +6,11 @@ The app is built entirely in Kotlin with Jetpack Compose and Material 3, followi
 
 Development is driven by a Specification-Driven Development (SDD) workflow powered by OpenSpec, where every change moves through a structured lifecycle: explore, propose, apply, verify, sync, and archive. Tasks within each change follow a BDD (Behaviour-Driven Development) structure with test-first ordering, so the test is always written before the production code that makes it pass. Custom commands (`/sdlc_open_story`, `/sdlc_propose_change`, `/sdlc_implement_change`, `/sdlc_verify_story`, `/sdlc_archive`, `/opsx:*`) automate the repetitive steps, from opening and refining user stories to implementing changes, verifying acceptance criteria, and driving the full OpenSpec lifecycle.
 
-See [`docs/sdlc/commands/SDLC-README.md`](docs/sdlc/commands/SDLC-README.md) for full details on each command.
+See [`docs/sdlc/README.md`](docs/sdlc/README.md) for full details on each command.
 
 ## The App
 
-Venice helps users plan multi-stop road trips. The current version supports creating trips, viewing them in a list, navigating to trip details, and managing stops: setting a starting point and destination, adding up to 25 intermediate stops, reordering stops, editing any stop's location, removing stops, and tracking trip progress by marking stops as departed (with undo support). Stop states are visually distinct — departed stops show a checkmark icon with reduced opacity, the current stop has a highlighted border, and a progress summary at the top of the trip detail screen shows how many stops have been completed. When adding or editing a stop, users can search for a place by name using Google Places autocomplete — selecting a suggestion auto-fills the coordinates and locks the latitude/longitude fields. While the place details are being resolved a progress indicator is shown inside the dialog and the confirm button is disabled; if resolution fails, an inline error message is displayed so the user can tap another suggestion to retry. The roadmap includes route calculation with Google Directions API, live GPS-based ETA, and Android Auto integration.
+Venice helps users plan multi-stop road trips. The current version supports creating trips, viewing them in a list, navigating to trip details, and managing stops: setting a starting point and destination, adding up to 25 intermediate stops, reordering stops, editing any stop's location, removing stops, and tracking trip progress by marking stops as departed (with undo support). Stop states are visually distinct — departed stops show a checkmark icon with reduced opacity, the current stop has a highlighted border, and a progress summary at the top of the trip detail screen shows how many stops have been completed. When adding or editing a stop, users can search for a place by name using Google Places autocomplete — selecting a suggestion auto-fills the coordinates and locks the latitude/longitude fields. While the place details are being resolved a progress indicator is shown inside the dialog and the confirm button is disabled; if resolution fails, an inline error message is displayed so the user can tap another suggestion to retry. Once at least two stops are set, users can calculate the route between all consecutive stops via the Google Routes API — distance and duration are displayed inline between each pair of stops. Route data is persisted locally and automatically invalidated when stops are added, removed, reordered, or edited. The roadmap includes live GPS-based ETA and Android Auto integration.
 
 ### Architecture & Tech Stack
 
@@ -22,6 +22,7 @@ Venice helps users plan multi-stop road trips. The current version supports crea
 | **Database** | Room |
 | **Async** | Kotlin Coroutines, Flow |
 | **Places** | Google Places SDK (autocomplete) |
+| **Routes** | Google Routes API (OkHttp) |
 | **Testing** | JUnit 4, MockK, Compose UI Test |
 
 The codebase follows Clean Architecture with three layers:
@@ -75,7 +76,7 @@ The workflow is extended with custom commands that wrap the OpenSpec lifecycle i
 | `/sdlc_archive` | Archive the completed change, update project docs (README, AGENTS) if needed, and append an archive section to the report |
 | `/opsx:*` | OpenSpec lifecycle commands (propose, apply, verify, sync, archive, explore, onboard) |
 
-Helper commands (`/refine_user_story`, `/create_branch`) are called internally by `/sdlc_open_story` but can also be run standalone. See [`docs/sdlc/commands/SDLC-README.md`](docs/sdlc/commands/SDLC-README.md) for full details on each command.
+Helper commands (`/refine_user_story`, `/create_branch`) are called internally by `/sdlc_open_story` but can also be run standalone. See [`docs/sdlc/README.md`](docs/sdlc/README.md) for full details on each command.
 
 ### BDD Task Structure
 

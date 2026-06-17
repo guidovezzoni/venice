@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Report: 3.1.1 — Calculate Route Between Consecutive Stops</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.6;
+      color: #1a1a1a;
+      background: #fafafa;
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+
+    .report-header {
+      border-bottom: 3px solid #2563eb;
+      padding-bottom: 1rem;
+      margin-bottom: 2rem;
+    }
+    .report-header h1 { font-size: 1.75rem; color: #1e293b; }
+    .report-meta {
+      display: flex; gap: 2rem; flex-wrap: wrap;
+      margin-top: 0.5rem; font-size: 0.875rem; color: #64748b;
+    }
+    .report-meta span { display: inline-flex; align-items: center; gap: 0.25rem; }
+
+    .report-section {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .report-section header {
+      display: flex; justify-content: space-between; align-items: baseline;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 0.75rem; margin-bottom: 1rem;
+    }
+    .report-section header h2 { font-size: 1.25rem; color: #1e293b; }
+    .report-section header time { font-size: 0.8rem; color: #94a3b8; white-space: nowrap; }
+    .section-source { font-size: 0.75rem; color: #94a3b8; font-style: italic; margin-bottom: 0.75rem; }
+
+    h3 { font-size: 1.05rem; color: #334155; margin: 1rem 0 0.5rem; }
+    p { margin-bottom: 0.75rem; }
+    ul, ol { margin: 0.5rem 0 0.75rem 1.5rem; }
+    li { margin-bottom: 0.25rem; }
+    code {
+      background: #f1f5f9; padding: 0.15rem 0.35rem; border-radius: 3px;
+      font-size: 0.875em;
+      font-family: "SF Mono", "Fira Code", Menlo, Consolas, monospace;
+    }
+
+    table { width: 100%; border-collapse: collapse; margin: 0.75rem 0; font-size: 0.9rem; }
+    th, td { text-align: left; padding: 0.5rem 0.75rem; border: 1px solid #e2e8f0; }
+    th { background: #f8fafc; font-weight: 600; color: #475569; }
+
+    .badge {
+      display: inline-block; padding: 0.15rem 0.5rem;
+      border-radius: 4px; font-size: 0.8rem; font-weight: 600;
+    }
+    .badge-pass { background: #dcfce7; color: #166534; }
+    .badge-fail { background: #fee2e2; color: #991b1b; }
+    .badge-warn { background: #fef9c3; color: #854d0e; }
+    .badge-info { background: #dbeafe; color: #1e40af; }
+
+    .outcome { margin-top: 1rem; padding: 0.75rem 1rem; border-radius: 6px; font-weight: 600; }
+    .outcome-passed { background: #dcfce7; color: #166534; border-left: 4px solid #22c55e; }
+    .outcome-failed { background: #fee2e2; color: #991b1b; border-left: 4px solid #ef4444; }
+  </style>
+</head>
+<body>
+
+  <div class="report-header">
+    <h1>3.1.1 — Calculate Route Between Consecutive Stops</h1>
+    <div class="report-meta">
+      <span><strong>Story:</strong> 3.1.1</span>
+      <span><strong>Branch:</strong> feature/3.1.1-calculate-route-between-stops</span>
+      <span><strong>Created:</strong> 2026-06-12</span>
+    </div>
+  </div>
+
+  <main id="report-sections">
+  <section class="report-section" data-source="open_user_story" data-timestamp="2026-06-12T00:00:00Z">
+    <header>
+      <h2>Story Opened</h2>
+      <time datetime="2026-06-12T00:00:00Z">12 Jun 2026</time>
+    </header>
+    <p class="section-source">Source: open_user_story</p>
+    <h3>Summary</h3>
+    <p>Opened user story <strong>3.1.1 — Calculate Route Between Consecutive Stops</strong> for development.</p>
+    <ul>
+      <li><strong>Branch created:</strong> <code>feature/3.1.1-calculate-route-between-stops</code></li>
+      <li><strong>Story file:</strong> renamed to <code>3.1.1-calculate-route-between-stops-WIP.md</code></li>
+    </ul>
+    <h3>Refinement</h3>
+    <p>The original story was expanded with full product analysis including:</p>
+    <ul>
+      <li>Detailed acceptance criteria (9 items) covering button states, loading, error handling, and route invalidation</li>
+      <li>Complete data model specification for <code>Leg</code> domain model and <code>LegEntity</code> database entity</li>
+      <li>Google Directions API endpoint documentation with request/response format</li>
+      <li>Full architecture breakdown: 7 new files (data layer), 3 new domain files, modifications to 6 existing files</li>
+      <li>Unit test and Compose UI test plan</li>
+      <li>Security, performance, GDPR, and non-functional requirement analysis</li>
+      <li>Definition of Done checklist (10 items)</li>
+    </ul>
+  </section>
+  <section class="report-section" data-source="opsx:propose" data-timestamp="2026-06-15T00:00:00Z">
+    <header>
+      <h2>Change Proposed</h2>
+      <time datetime="2026-06-15T00:00:00Z">15 Jun 2026</time>
+    </header>
+    <p class="section-source">Source: opsx:propose</p>
+
+    <h3>Exploration Findings</h3>
+    <p>Investigated the codebase to identify integration points for route calculation:</p>
+    <ul>
+      <li><strong>API key:</strong> Already configured via <code>BuildConfig.MAPS_API_KEY</code> from <code>local.properties</code></li>
+      <li><strong>No HTTP client:</strong> Project uses Google Places SDK (not HTTP-based). OkHttp needed for Directions API REST calls</li>
+      <li><strong>Database:</strong> Currently at version 2 (<code>TripEntity</code>, <code>StopEntity</code>). Requires <code>MIGRATION_2_3</code> for <code>legs</code> table</li>
+      <li><strong>Stop mutations:</strong> All go through use cases (<code>SetStopUseCase</code>, <code>MoveStopUseCase</code>, <code>EditStopUseCase</code>, <code>RemoveStopUseCase</code>). Two already have TODO comments for leg invalidation (Epic 3)</li>
+      <li><strong><code>withMinimumDuration</code>:</strong> Already exists for 500ms minimum loading pattern — reusable</li>
+      <li><strong>MVI pattern:</strong> Clean <code>UiState</code>/<code>UiIntent</code>/<code>UiEffect</code> contract in place</li>
+    </ul>
+
+    <h3>Design Decisions</h3>
+    <table>
+      <tr><th>Decision</th><th>Choice</th><th>Rationale</th></tr>
+      <tr><td>HTTP client</td><td>OkHttp + <code>org.json</code></td><td>Industry standard; <code>org.json</code> built into Android — no extra dependency for single response type</td></tr>
+      <tr><td>Invalidation strategy</td><td>Domain-level (use case injection)</td><td>Enforces invariant regardless of caller; existing TODOs anticipate this pattern</td></tr>
+      <tr><td>Leg display</td><td>Inline distance/duration between stops</td><td>Provides immediate value without map rendering</td></tr>
+    </table>
+
+    <h3>Questions &amp; Answers</h3>
+    <table>
+      <tr><th>Question</th><th>Answer</th></tr>
+      <tr><td>HTTP client choice (OkHttp vs HttpURLConnection vs Retrofit)</td><td>OkHttp — accepted recommendation</td></tr>
+      <tr><td>Invalidation strategy (domain vs ViewModel vs DB trigger)</td><td>Domain-level via use cases — accepted recommendation</td></tr>
+      <tr><td>Leg display format</td><td>Render simple distance/duration summary between stops — user confirmed</td></tr>
+    </table>
+
+    <h3>Artifacts Created</h3>
+    <ul>
+      <li><span class="badge badge-pass">proposal.md</span> — Motivation, scope, capabilities, and impact</li>
+      <li><span class="badge badge-pass">design.md</span> — Technical decisions: OkHttp, domain-level invalidation, single API call, Room storage</li>
+      <li><span class="badge badge-pass">specs/route-calculation</span> — New: Leg model, LegEntity, LegDao, DirectionsApiService, RouteRepository, use cases, DI</li>
+      <li><span class="badge badge-pass">specs/route-display</span> — New: LegSummary composable, string resources</li>
+      <li><span class="badge badge-pass">specs/trip-detail</span> — Modified: UiState (+legs, isCalculatingRoute, routeError), UiIntent (+OnCalculateRouteClicked), ViewModel route handling, screen rendering</li>
+      <li><span class="badge badge-pass">specs/stop-management</span> — Modified: SetStopUseCase, MoveStopUseCase, EditStopUseCase — add InvalidateRouteUseCase calls</li>
+      <li><span class="badge badge-pass">specs/stop-removal</span> — Modified: RemoveStopUseCase — add InvalidateRouteUseCase call</li>
+      <li><span class="badge badge-pass">tasks.md</span> — 14 sections, 53 tasks, BDD test-first ordering</li>
+    </ul>
+  </section>
+  <section class="report-section" data-source="apply_changes" data-timestamp="2026-06-17T10:10:00Z">
+    <header>
+      <h2>Changes Applied</h2>
+      <time datetime="2026-06-17T10:10:00Z">17 Jun 2026</time>
+    </header>
+    <p class="section-source">Source: sdlc_implement_change</p>
+
+    <h3>Summary</h3>
+    <p>Implemented the full route calculation feature across 14 task sections (66 tasks total), then migrated from the legacy Google Directions API to the Google Routes API after discovering the Directions API was not enabled for the project.</p>
+
+    <h3>Implementation</h3>
+    <ul>
+      <li><strong>Tasks completed:</strong> 66/66 (all checked)</li>
+      <li><strong>Iteration cycles:</strong> 2 — initial implementation (sections 1–13), then API migration (section 14)</li>
+      <li><strong>Sub-agent orchestration:</strong> Sections 1–13 implemented via sub-agents (Sonnet for BDD, Haiku for mechanical tasks)</li>
+      <li><strong>API migration:</strong> Switched from Google Directions API (Legacy) to Google Routes API after discovering the legacy API returned <code>REQUEST_DENIED</code>. Updated <code>DirectionsApiService</code> (GET → POST, JSON body, field mask headers), <code>DirectionsResponse</code> (new response format), and all test fixtures.</li>
+    </ul>
+
+    <h3>Artifact Updates (API Migration)</h3>
+    <ul>
+      <li>User story, proposal, design, delta specs, and tasks updated to reference Routes API</li>
+      <li>7 new tasks added to section 14 for migration work</li>
+    </ul>
+
+    <h3>Test Results</h3>
+    <table>
+      <tr><th>Gate</th><th>Result</th></tr>
+      <tr><td>Unit tests (<code>./gradlew test</code>)</td><td><span class="badge badge-pass">PASS</span></td></tr>
+      <tr><td>Lint (<code>./gradlew check</code>)</td><td><span class="badge badge-pass">PASS</span></td></tr>
+      <tr><td>Instrumented tests (<code>connectedDebugAndroidTest</code>)</td><td><span class="badge badge-pass">PASS</span> (90/90)</td></tr>
+      <tr><td>On-device: route calculation (London → Paris)</td><td><span class="badge badge-pass">PASS</span> — 459.1 km · 5h 55min</td></tr>
+      <tr><td>On-device: invalidation after stop edit (London → Birmingham)</td><td><span class="badge badge-pass">PASS</span> — legs cleared, button reappeared</td></tr>
+    </table>
+
+    <h3>TODO Scan</h3>
+    <p>4 TODOs found — all classified as <span class="badge badge-info">ACKNOWLEDGED</span> (unrelated to this story):</p>
+    <ul>
+      <li><code>TripDetailUiIntent.kt:9</code> — PlaceDetail usage question</li>
+      <li><code>DirectionsApiService.kt:24</code> — Retrofit migration reminder (intentional)</li>
+      <li><code>TripDetailUiState.kt:8</code> — UiState refactoring idea</li>
+      <li><code>NetworkModule.kt:18</code> — Retrofit migration reminder (intentional)</li>
+    </ul>
+
+    <h3>Documentation Updates</h3>
+    <ul>
+      <li><code>README.md</code> — Updated feature description (route calculation added), tech stack table (Routes API + OkHttp), removed Directions API from roadmap</li>
+      <li><code>AGENTS.md</code> — Added Epic 3 / Feature 3.1 to completed stories</li>
+    </ul>
+  </section>
+  <section class="report-section" data-source="sdlc_verify_story" data-timestamp="2026-06-17T00:00:00Z">
+    <header>
+      <h2>Verification &amp; Archive</h2>
+      <time datetime="2026-06-17T00:00:00Z">17 Jun 2026</time>
+    </header>
+    <p class="section-source">Source: sdlc_verify_story</p>
+
+    <h3>Verification Gates</h3>
+    <table>
+      <tr><th>Gate</th><th>Result</th><th>Details</th></tr>
+      <tr><td>OpenSpec verify</td><td><span class="badge badge-pass">PASS</span></td><td>69/69 tasks complete, all artifacts done</td></tr>
+      <tr><td>TODO scan</td><td><span class="badge badge-pass">PASS</span></td><td>4 ACKNOWLEDGED (none blocking): <code>TripDetailUiIntent.kt:9</code>, <code>DirectionsApiService.kt:24</code>, <code>TripDetailUiState.kt:8</code>, <code>NetworkModule.kt:18</code></td></tr>
+      <tr><td>Security review</td><td><span class="badge badge-pass">PASS</span></td><td>No critical or high-severity findings</td></tr>
+      <tr><td>Clean build &amp; static analysis (<code>./gradlew clean check</code>)</td><td><span class="badge badge-pass">PASS</span></td><td>Build succeeded, no lint errors</td></tr>
+      <tr><td>Unit tests (<code>./gradlew test</code>)</td><td><span class="badge badge-pass">PASS</span></td><td>All tests passed</td></tr>
+      <tr><td>Test file coverage</td><td><span class="badge badge-pass">PASS</span></td><td>All new/modified classes have corresponding test files</td></tr>
+      <tr><td>Compose preview coverage</td><td><span class="badge badge-pass">PASS</span></td><td>All UiState fields covered in at least one preview with non-default values</td></tr>
+      <tr><td>Instrumented tests (<code>connectedDebugAndroidTest</code>)</td><td><span class="badge badge-pass">PASS</span></td><td>90/90 tests passed</td></tr>
+    </table>
+
+    <h3>On-Device Verification</h3>
+    <p><strong>Method:</strong> Agent via adb/UIAutomator</p>
+    <table>
+      <tr><th>Scenario</th><th>Result</th><th>Details</th></tr>
+      <tr><td>Trip creation</td><td><span class="badge badge-pass">PASS</span></td><td>Created trip, set starting point (Rome) and destination (Milan) via place search</td></tr>
+      <tr><td>Route calculation (2 stops)</td><td><span class="badge badge-pass">PASS</span></td><td>Rome &rarr; Milan: 578.8 km displayed between stops</td></tr>
+      <tr><td>Add intermediate stop</td><td><span class="badge badge-pass">PASS</span></td><td>Added Florence; legs invalidated (cleared from UI)</td></tr>
+      <tr><td>Route recalculation (3 stops)</td><td><span class="badge badge-pass">PASS</span></td><td>Rome &rarr; Florence: 275.0 km, Florence &rarr; Milan: distance displayed</td></tr>
+      <tr><td>Stop removal &amp; invalidation</td><td><span class="badge badge-pass">PASS</span></td><td>Removed stop; legs cleared, calculate route button reappeared</td></tr>
+    </table>
+
+    <h3>Definition of Done</h3>
+    <table>
+      <tr><th>#</th><th>Criterion</th><th>Result</th><th>Justification</th></tr>
+      <tr><td>1</td><td>Route calculated via Google Routes API</td><td><span class="badge badge-pass">PASS</span></td><td><code>DirectionsApiService</code> sends POST to Routes API endpoint</td></tr>
+      <tr><td>2</td><td>Legs persist in local Room DB</td><td><span class="badge badge-pass">PASS</span></td><td><code>LegEntity</code>, <code>LegDao</code>, <code>MIGRATION_2_3</code> in place</td></tr>
+      <tr><td>3</td><td>Distance/duration displayed between stops</td><td><span class="badge badge-pass">PASS</span></td><td><code>LegSummary</code> composable renders formatted distance/duration</td></tr>
+      <tr><td>4</td><td>Automatic invalidation on stop mutation</td><td><span class="badge badge-pass">PASS</span></td><td><code>InvalidateRouteUseCase</code> injected into all 4 mutation use cases</td></tr>
+      <tr><td>5</td><td>Loading state with minimum 500ms duration</td><td><span class="badge badge-pass">PASS</span></td><td><code>withMinimumDuration</code> wraps calculate route operation</td></tr>
+      <tr><td>6</td><td>Error displayed on failure</td><td><span class="badge badge-pass">PASS</span></td><td><code>routeError</code> field in UiState, rendered near calculate button</td></tr>
+      <tr><td>7</td><td>Unit tests with 80%+ coverage</td><td><span class="badge badge-pass">PASS</span></td><td>Tests for all use cases, repository, DTO, mapper, ViewModel</td></tr>
+      <tr><td>8</td><td>Compose UI tests for screen</td><td><span class="badge badge-pass">PASS</span></td><td><code>TripDetailScreenTest</code> covers route-related UI</td></tr>
+      <tr><td>9</td><td>On-device verification</td><td><span class="badge badge-pass">PASS</span></td><td>Full flow verified via adb/UIAutomator</td></tr>
+    </table>
+
+    <h3>Archive</h3>
+    <table>
+      <tr><th>Item</th><th>Value</th></tr>
+      <tr><td>Story file</td><td><code>3.1.1-calculate-route-between-stops-DONE.md</code></td></tr>
+      <tr><td>Archive location</td><td><code>openspec/changes/archive/2026-06-17-calculate-route-between-stops/</code></td></tr>
+      <tr><td>Spec sync</td><td><span class="badge badge-pass">Synced</span> — 2 new specs (route-calculation, route-display), 3 updated (stop-management, stop-removal, trip-detail)</td></tr>
+      <tr><td>README.md &amp; AGENTS.md</td><td><span class="badge badge-pass">In sync</span></td></tr>
+    </table>
+
+    <div class="outcome outcome-passed">OUTCOME: PASSED &mdash; All verification gates passed. Story closed, specs synced, change archived.</div>
+  </section>
+  </main>
+
+</body>
+</html>

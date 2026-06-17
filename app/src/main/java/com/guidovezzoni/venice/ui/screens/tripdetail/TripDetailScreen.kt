@@ -1,6 +1,7 @@
 package com.guidovezzoni.venice.ui.screens.tripdetail
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -17,10 +18,12 @@ import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.TripOrigin
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -38,6 +41,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.guidovezzoni.venice.R
+import com.guidovezzoni.venice.domain.model.Leg
 import com.guidovezzoni.venice.domain.model.PlaceDetail
 import com.guidovezzoni.venice.domain.model.PlaceSuggestion
 import com.guidovezzoni.venice.domain.model.Stop
@@ -91,6 +95,7 @@ fun TripDetailScreen(
         val totalCount = allStops.size
         val departedCount = allStops.count { it.status == StopStatus.VISITED }
 
+        val legByFromStopId = uiState.legs.associateBy { it.fromStopId }
         val loadingDescription = stringResource(R.string.global_loading)
         Box(
             modifier = Modifier
@@ -133,6 +138,11 @@ fun TripDetailScreen(
                         { onIntent(TripDetailUiIntent.OnUndoMarkStopDepartedClicked(it.id)) }
                     },
                 )
+                startingPoint?.let { stop ->
+                    legByFromStopId[stop.id]?.let { leg ->
+                            LegSummary(leg = leg)
+                    }
+                }
             }
             items(uiState.intermediateStops.size) { index ->
                 val stop = uiState.intermediateStops[index]
@@ -173,6 +183,9 @@ fun TripDetailScreen(
                         null
                     },
                 )
+                legByFromStopId[stop.id]?.let { leg ->
+                    LegSummary(leg = leg)
+                }
             }
             if (uiState.canAddMoreStops) {
                 item {
@@ -223,6 +236,42 @@ fun TripDetailScreen(
                         { onIntent(TripDetailUiIntent.OnUndoMarkStopDepartedClicked(it.id)) }
                     },
                 )
+            }
+            if (allStops.size >= 2) {
+                item {
+                    Spacer(modifier = Modifier.height(CONTENT_SPACING))
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = BUTTON_PADDING),
+                    ) {
+                        Button(
+                            onClick = { onIntent(TripDetailUiIntent.OnCalculateRouteClicked) },
+                            enabled = !uiState.isCalculatingRoute && !uiState.isLoading,
+                            modifier = Modifier.fillMaxWidth(),
+                        ) {
+                            if (uiState.isCalculatingRoute) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(ICON_SIZE),
+                                    strokeWidth = 2.dp,
+                                    color = MaterialTheme.colorScheme.onPrimary,
+                                )
+                                Spacer(modifier = Modifier.width(ICON_SPACING))
+                                Text(stringResource(R.string.trip_detail_calculating_route))
+                            } else {
+                                Text(stringResource(R.string.trip_detail_calculate_route))
+                            }
+                        }
+                        uiState.routeError?.let { error ->
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = error,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.error,
+                            )
+                        }
+                    }
+                }
             }
         }
             if (uiState.isLoading) {
@@ -901,6 +950,112 @@ private fun PreviewTripDetailScreenResolvingPlace() {
                 isSetStartingPointDialogVisible = true,
                 isResolvingPlace = true,
                 canAddMoreStops = true,
+            ),
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PreviewTripDetailScreenWithLegs() {
+    HeadingToTheAlpsTheme {
+        TripDetailScreen(
+            uiState = TripDetailUiState(
+                tripId = "trip-1",
+                startingPoint = Stop(
+                    id = "stop-1",
+                    tripId = "trip-1",
+                    placeName = "Rome, Italy",
+                    latitude = 41.9028,
+                    longitude = 12.4964,
+                    order = 0,
+                    status = StopStatus.PENDING,
+                ),
+                destination = Stop(
+                    id = "stop-2",
+                    tripId = "trip-1",
+                    placeName = "Barcelona, Spain",
+                    latitude = 41.3851,
+                    longitude = 2.1734,
+                    order = 1,
+                    status = StopStatus.PENDING,
+                ),
+                canAddMoreStops = true,
+                legs = listOf(
+                    Leg(
+                        id = "leg-1",
+                        tripId = "trip-1",
+                        fromStopId = "stop-1",
+                        toStopId = "stop-2",
+                        distanceMetres = 12500,
+                        durationSeconds = 900,
+                        encodedPolyline = "",
+                    ),
+                ),
+            ),
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PreviewTripDetailScreenCalculatingRoute() {
+    HeadingToTheAlpsTheme {
+        TripDetailScreen(
+            uiState = TripDetailUiState(
+                tripId = "trip-1",
+                startingPoint = Stop(
+                    id = "stop-1",
+                    tripId = "trip-1",
+                    placeName = "Rome, Italy",
+                    latitude = 41.9028,
+                    longitude = 12.4964,
+                    order = 0,
+                    status = StopStatus.PENDING,
+                ),
+                destination = Stop(
+                    id = "stop-2",
+                    tripId = "trip-1",
+                    placeName = "Barcelona, Spain",
+                    latitude = 41.3851,
+                    longitude = 2.1734,
+                    order = 1,
+                    status = StopStatus.PENDING,
+                ),
+                canAddMoreStops = true,
+                isCalculatingRoute = true,
+            ),
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PreviewTripDetailScreenWithRouteError() {
+    HeadingToTheAlpsTheme {
+        TripDetailScreen(
+            uiState = TripDetailUiState(
+                tripId = "trip-1",
+                startingPoint = Stop(
+                    id = "stop-1",
+                    tripId = "trip-1",
+                    placeName = "Rome, Italy",
+                    latitude = 41.9028,
+                    longitude = 12.4964,
+                    order = 0,
+                    status = StopStatus.PENDING,
+                ),
+                destination = Stop(
+                    id = "stop-2",
+                    tripId = "trip-1",
+                    placeName = "Barcelona, Spain",
+                    latitude = 41.3851,
+                    longitude = 2.1734,
+                    order = 1,
+                    status = StopStatus.PENDING,
+                ),
+                canAddMoreStops = true,
+                routeError = "Network error",
             ),
         )
     }

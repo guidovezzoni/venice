@@ -5,10 +5,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.guidovezzoni.venice.domain.model.StopType
 import com.guidovezzoni.venice.domain.repository.PlaceSearchRepository
+import com.guidovezzoni.venice.domain.usecase.CalculateRouteUseCase
 import com.guidovezzoni.venice.domain.usecase.EditStopUseCase
 import com.guidovezzoni.venice.domain.usecase.GetPlaceDetailUseCase
 import com.guidovezzoni.venice.domain.usecase.MarkStopDepartedUseCase
 import com.guidovezzoni.venice.domain.usecase.MoveStopUseCase
+import com.guidovezzoni.venice.domain.usecase.ObserveLegsUseCase
 import com.guidovezzoni.venice.domain.usecase.ObserveStopsUseCase
 import com.guidovezzoni.venice.domain.usecase.RemoveStopUseCase
 import com.guidovezzoni.venice.domain.usecase.SearchPlacesUseCase
@@ -47,7 +49,9 @@ class TripDetailViewModel @Inject constructor(
     private val removeStopUseCase: RemoveStopUseCase,
     private val markStopDepartedUseCase: MarkStopDepartedUseCase,
     private val undoMarkStopDepartedUseCase: UndoMarkStopDepartedUseCase,
+    private val calculateRouteUseCase: CalculateRouteUseCase,
     observeStopsUseCase: ObserveStopsUseCase,
+    observeLegsUseCase: ObserveLegsUseCase,
     private val searchPlacesUseCase: SearchPlacesUseCase,
     private val getPlaceDetailUseCase: GetPlaceDetailUseCase,
     private val placeSearchRepository: PlaceSearchRepository,
@@ -86,6 +90,10 @@ class TripDetailViewModel @Inject constructor(
                     )
                 }
             }
+            .launchIn(viewModelScope)
+
+        observeLegsUseCase(tripId)
+            .onEach { legs -> _uiState.update { it.copy(legs = legs) } }
             .launchIn(viewModelScope)
     }
 
@@ -199,6 +207,8 @@ class TripDetailViewModel @Inject constructor(
                     }
                 }
             }
+
+            TripDetailUiIntent.OnCalculateRouteClicked -> calculateRoute()
         }
     }
 
@@ -287,6 +297,24 @@ class TripDetailViewModel @Inject constructor(
                     _uiState.update { it.copy(isLoading = false) }
                     _uiEffect.emit(TripDetailUiEffect.ShowError(error.message ?: UNKNOWN_ERROR))
                 }
+        }
+    }
+
+    private fun calculateRoute() {
+        val state = _uiState.value
+        val stops = buildList {
+            state.startingPoint?.let { add(it) }
+            addAll(state.intermediateStops)
+            state.destination?.let { add(it) }
+        }
+        viewModelScope.launch {
+            _uiState.update { it.copy(isCalculatingRoute = true, routeError = null) }
+            val result = withMinimumDuration { calculateRouteUseCase(tripId, stops) }
+            result.onSuccess {
+                _uiState.update { it.copy(isCalculatingRoute = false) }
+            }.onFailure { error ->
+                _uiState.update { it.copy(isCalculatingRoute = false, routeError = error.message ?: UNKNOWN_ERROR) }
+            }
         }
     }
 

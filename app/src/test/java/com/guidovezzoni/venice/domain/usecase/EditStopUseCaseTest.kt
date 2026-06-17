@@ -21,18 +21,21 @@ private const val LONGITUDE = 11.2558
 class EditStopUseCaseTest {
 
     private lateinit var stopRepository: StopRepository
+    private lateinit var invalidateRouteUseCase: InvalidateRouteUseCase
     private lateinit var editStopUseCase: EditStopUseCase
 
     @Before
     fun setUp() {
         stopRepository = mockk()
-        editStopUseCase = EditStopUseCase(stopRepository)
+        invalidateRouteUseCase = mockk()
+        editStopUseCase = EditStopUseCase(stopRepository, invalidateRouteUseCase)
     }
 
     @Test
     fun `GIVEN valid parameters WHEN invoke is called THEN repository updateStop is called with trimmed placeName and Result success is returned`() = runTest {
         val updatedStop = Stop(STOP_ID, TRIP_ID, PLACE_NAME, LATITUDE, LONGITUDE, 2, StopStatus.PENDING)
         coEvery { stopRepository.updateStop(STOP_ID, PLACE_NAME, LATITUDE, LONGITUDE) } returns Result.success(updatedStop)
+        coEvery { invalidateRouteUseCase(TRIP_ID) } returns Result.success(Unit)
 
         val result = editStopUseCase(STOP_ID, PLACE_NAME, LATITUDE, LONGITUDE)
 
@@ -45,6 +48,7 @@ class EditStopUseCaseTest {
     fun `GIVEN placeName with whitespace WHEN invoke is called THEN repository receives trimmed placeName`() = runTest {
         val updatedStop = Stop(STOP_ID, TRIP_ID, PLACE_NAME, LATITUDE, LONGITUDE, 2, StopStatus.PENDING)
         coEvery { stopRepository.updateStop(STOP_ID, PLACE_NAME, LATITUDE, LONGITUDE) } returns Result.success(updatedStop)
+        coEvery { invalidateRouteUseCase(TRIP_ID) } returns Result.success(Unit)
 
         val result = editStopUseCase(STOP_ID, "  $PLACE_NAME  ", LATITUDE, LONGITUDE)
 
@@ -61,5 +65,26 @@ class EditStopUseCaseTest {
 
         assertTrue(result.isFailure)
         assertEquals(exception, result.exceptionOrNull())
+    }
+
+    @Test
+    fun `GIVEN a successful edit WHEN EditStopUseCase is invoked THEN InvalidateRouteUseCase is called with stop's tripId`() = runTest {
+        val updatedStop = Stop(STOP_ID, TRIP_ID, PLACE_NAME, LATITUDE, LONGITUDE, 2, StopStatus.PENDING)
+        coEvery { stopRepository.updateStop(STOP_ID, PLACE_NAME, LATITUDE, LONGITUDE) } returns Result.success(updatedStop)
+        coEvery { invalidateRouteUseCase(TRIP_ID) } returns Result.success(Unit)
+
+        editStopUseCase(STOP_ID, PLACE_NAME, LATITUDE, LONGITUDE)
+
+        coVerify(exactly = 1) { invalidateRouteUseCase(TRIP_ID) }
+    }
+
+    @Test
+    fun `GIVEN a failed edit WHEN EditStopUseCase is invoked THEN InvalidateRouteUseCase is NOT called`() = runTest {
+        val exception = IllegalStateException("Stop not found")
+        coEvery { stopRepository.updateStop(STOP_ID, PLACE_NAME, LATITUDE, LONGITUDE) } returns Result.failure(exception)
+
+        editStopUseCase(STOP_ID, PLACE_NAME, LATITUDE, LONGITUDE)
+
+        coVerify(exactly = 0) { invalidateRouteUseCase(any()) }
     }
 }

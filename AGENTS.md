@@ -41,7 +41,7 @@ Read the following file immediately as it's relevant to all workflows: @docs/gui
 | Path | Contents |
 |------|----------|
 | `docs/userstories/` | User story backlog organised by epic and feature (see `index.md`) |
-| `docs/sdlc/commands/` | SDLC custom command definitions (see `SDLC-README.md`) |
+| `docs/sdlc/commands/` | SDLC custom command definitions |
 | `docs/reports/` | Verification and archive reports |
 | `docs/improvements/` | Improvement proposals |
 | `openspec/specs/` | Living specifications maintained via OpenSpec |
@@ -49,7 +49,7 @@ Read the following file immediately as it's relevant to all workflows: @docs/gui
 
 ### Development Process
 
-Development follows a Specification-Driven Development (SDD) workflow powered by OpenSpec, with BDD test-first task ordering. Custom commands (`/sdlc_open_story`, `/sdlc_propose_change`, `/sdlc_implement_change`, `/sdlc_verify_story`) drive the user-story lifecycle. See @docs/sdlc/commands/SDLC-README.md for details.
+Development follows a Specification-Driven Development (SDD) workflow powered by OpenSpec, with BDD test-first task ordering. Custom commands (`/sdlc_open_story`, `/sdlc_propose_change`, `/sdlc_implement_change`, `/sdlc_verify_story`) drive the user-story lifecycle. See @docs/sdlc/README.md for details.
 
 ### Current Status
 
@@ -59,5 +59,4 @@ Completed stories (see `docs/userstories/index.md` for full backlog):
 - Epic 1 / Feature 1.3: Stop progress tracking — 1.3.1 (mark stop as departed), 1.3.2 (see stop progress: checkmark icon, current border, progress summary)
 - Epic 1 / Feature 1.4: UI feedback — 1.4.1 (dialog loading feedback: spinner in dialogs, disabled buttons during async ops, 500ms minimum duration)
 - Epic 2 / Feature 2.1: Place search — 2.1.1 (search place by name: Google Places autocomplete in stop dialogs, auto-fill coordinates, read-only lat/lon after selection), 2.1.2 (resolve place to coordinates: resolving progress indicator in dialog, disabled confirm button while resolving, inline error on failure)
-
-Next up: Epic 3 route calculation stories.
+- Epic 3 / Feature 3.1: Route calculation — 3.1.1 (calculate route between stops: Google Routes API, distance/duration per leg, local persistence, automatic invalidation on stop mutation)

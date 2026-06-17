@@ -22,18 +22,21 @@ private const val MAX_STOP_COUNT = 25
 class SetStopUseCaseTest {
 
     private lateinit var stopRepository: StopRepository
+    private lateinit var invalidateRouteUseCase: InvalidateRouteUseCase
     private lateinit var useCase: SetStopUseCase
 
     @Before
     fun setUp() {
         stopRepository = mockk()
-        useCase = SetStopUseCase(stopRepository)
+        invalidateRouteUseCase = mockk()
+        useCase = SetStopUseCase(stopRepository, invalidateRouteUseCase)
     }
 
     @Test
     fun `GIVEN a valid starting point WHEN invoke is called THEN repository upsertStartingPoint is called with trimmed name`() = runTest {
         val expectedStop = Stop("stop-1", TRIP_ID, PLACE_NAME, LATITUDE, LONGITUDE, 0, StopStatus.PENDING)
         coEvery { stopRepository.upsertStartingPoint(TRIP_ID, PLACE_NAME, LATITUDE, LONGITUDE) } returns Result.success(expectedStop)
+        coEvery { invalidateRouteUseCase(TRIP_ID) } returns Result.success(Unit)
 
         val result = useCase(TRIP_ID, PLACE_NAME, LATITUDE, LONGITUDE, StopType.STARTING_POINT)
 
@@ -46,6 +49,7 @@ class SetStopUseCaseTest {
     fun `GIVEN a valid destination WHEN invoke is called THEN repository upsertDestination is called with trimmed name`() = runTest {
         val expectedStop = Stop("stop-1", TRIP_ID, PLACE_NAME, LATITUDE, LONGITUDE, 1, StopStatus.PENDING)
         coEvery { stopRepository.upsertDestination(TRIP_ID, PLACE_NAME, LATITUDE, LONGITUDE) } returns Result.success(expectedStop)
+        coEvery { invalidateRouteUseCase(TRIP_ID) } returns Result.success(Unit)
 
         val result = useCase(TRIP_ID, PLACE_NAME, LATITUDE, LONGITUDE, StopType.DESTINATION)
 
@@ -60,6 +64,7 @@ class SetStopUseCaseTest {
         val expectedCount = 3
         coEvery { stopRepository.getStopCount(TRIP_ID) } returns expectedCount
         coEvery { stopRepository.addIntermediateStop(TRIP_ID, PLACE_NAME, LATITUDE, LONGITUDE) } returns Result.success(expectedStop)
+        coEvery { invalidateRouteUseCase(TRIP_ID) } returns Result.success(Unit)
 
         val result = useCase(TRIP_ID, PLACE_NAME, LATITUDE, LONGITUDE, StopType.INTERMEDIATE)
 
@@ -124,6 +129,7 @@ class SetStopUseCaseTest {
         coEvery { stopRepository.upsertDestination(TRIP_ID, PLACE_NAME, LATITUDE, LONGITUDE) } returns Result.success(destStop)
         coEvery { stopRepository.getStopCount(TRIP_ID) } returns 3
         coEvery { stopRepository.addIntermediateStop(TRIP_ID, PLACE_NAME, LATITUDE, LONGITUDE) } returns Result.success(interStop)
+        coEvery { invalidateRouteUseCase(TRIP_ID) } returns Result.success(Unit)
 
         useCase(TRIP_ID, paddedName, LATITUDE, LONGITUDE, StopType.STARTING_POINT)
         useCase(TRIP_ID, paddedName, LATITUDE, LONGITUDE, StopType.DESTINATION)
@@ -133,5 +139,26 @@ class SetStopUseCaseTest {
         coVerify { stopRepository.upsertStartingPoint(TRIP_ID, expectedTrimmedName, LATITUDE, LONGITUDE) }
         coVerify { stopRepository.upsertDestination(TRIP_ID, expectedTrimmedName, LATITUDE, LONGITUDE) }
         coVerify { stopRepository.addIntermediateStop(TRIP_ID, expectedTrimmedName, LATITUDE, LONGITUDE) }
+    }
+
+    @Test
+    fun `GIVEN a successful stop set WHEN SetStopUseCase is invoked THEN InvalidateRouteUseCase is called`() = runTest {
+        val expectedStop = Stop("stop-1", TRIP_ID, PLACE_NAME, LATITUDE, LONGITUDE, 0, StopStatus.PENDING)
+        coEvery { stopRepository.upsertStartingPoint(TRIP_ID, PLACE_NAME, LATITUDE, LONGITUDE) } returns Result.success(expectedStop)
+        coEvery { invalidateRouteUseCase(TRIP_ID) } returns Result.success(Unit)
+
+        useCase(TRIP_ID, PLACE_NAME, LATITUDE, LONGITUDE, StopType.STARTING_POINT)
+
+        coVerify(exactly = 1) { invalidateRouteUseCase(TRIP_ID) }
+    }
+
+    @Test
+    fun `GIVEN a failed stop set WHEN SetStopUseCase is invoked THEN InvalidateRouteUseCase is NOT called`() = runTest {
+        val exception = RuntimeException("DB error")
+        coEvery { stopRepository.upsertStartingPoint(any(), any(), any(), any()) } returns Result.failure(exception)
+
+        useCase(TRIP_ID, PLACE_NAME, LATITUDE, LONGITUDE, StopType.STARTING_POINT)
+
+        coVerify(exactly = 0) { invalidateRouteUseCase(any()) }
     }
 }

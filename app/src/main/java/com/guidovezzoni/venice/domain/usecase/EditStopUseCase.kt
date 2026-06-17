@@ -6,8 +6,8 @@ import javax.inject.Inject
 
 class EditStopUseCase @Inject constructor(
     private val stopRepository: StopRepository,
+    private val invalidateRouteUseCase: InvalidateRouteUseCase,
 ) {
-    // TODO: invalidate affected legs once leg tracking is implemented (Epic 3)
     suspend operator fun invoke(
         stopId: String,
         placeName: String,
@@ -15,6 +15,10 @@ class EditStopUseCase @Inject constructor(
         longitude: Double,
     ): Result<Stop> {
         val trimmedName = placeName.trim()
-        return stopRepository.updateStop(stopId, trimmedName, latitude, longitude)
+        val result = stopRepository.updateStop(stopId, trimmedName, latitude, longitude)
+        result.onSuccess { stop ->
+            invalidateRouteUseCase(stop.tripId)
+        }
+        return result
     }
 }
