@@ -155,6 +155,52 @@
     <h3>OpenSpec Change</h3>
     <p>Change <code>see-leg-distance</code> created at <code>openspec/changes/see-leg-distance/</code> — all 4 artifacts complete, ready for implementation.</p>
   </section>
+  <section class="report-section" data-source="sdlc_implement_change" data-timestamp="2026-06-18T15:00:00Z">
+    <header>
+      <h2>Change Implemented</h2>
+      <time datetime="2026-06-18T15:00:00Z">18 Jun 2026</time>
+    </header>
+    <p class="section-source">Source: sdlc_implement_change</p>
+
+    <h3>Implementation Summary</h3>
+    <p>All 11 tasks completed across 3 sections. This was a test-only change — no production code was modified.</p>
+
+    <h3>Sections Executed</h3>
+    <table>
+      <tr><th>Section</th><th>Tasks</th><th>Tier</th><th>Result</th></tr>
+      <tr><td>1. LegSummary Compose UI Tests</td><td>5</td><td>standard</td><td><span class="badge badge-pass">Pass</span></td></tr>
+      <tr><td>2. TripDetailScreen Leg Display Tests</td><td>3</td><td>standard</td><td><span class="badge badge-pass">Pass</span></td></tr>
+      <tr><td>3. Verification</td><td>3</td><td>inline</td><td><span class="badge badge-pass">Pass</span></td></tr>
+    </table>
+
+    <h3>Files Created/Modified</h3>
+    <ul>
+      <li><strong>New:</strong> <code>app/src/androidTest/.../tripdetail/LegSummaryTest.kt</code> — 4 Compose UI tests for distance formatting (750 m, 1.0 km, 12.5 km, combined distance+duration)</li>
+      <li><strong>Modified:</strong> <code>app/src/androidTest/.../tripdetail/TripDetailScreenTest.kt</code> — 2 tests added in new "Leg display" region (legs shown with route data, legs absent without)</li>
+    </ul>
+
+    <h3>Issue Encountered &amp; Resolved</h3>
+    <p>Section 1 sub-agent created <code>LegSummaryTest</code> with backtick test names containing spaces (e.g. <code>`GIVEN a leg with distance 750m WHEN...`</code>). This caused DEX compilation failure at <code>minSdk 24</code> — space characters in method names are not allowed prior to DEX version 040. Fixed by converting to camelCase names matching the existing <code>TripDetailScreenTest</code> convention.</p>
+
+    <h3>Iteration Cycles</h3>
+    <p>1 cycle. The LegSummaryTest naming fix was applied between section 1 and section 3 execution.</p>
+
+    <h3>Test Results</h3>
+    <ul>
+      <li><span class="badge badge-pass">Pass</span> Unit tests: <code>./gradlew test</code> — all passed, no regressions</li>
+      <li><span class="badge badge-pass">Pass</span> Instrumented tests: <code>./gradlew connectedDebugAndroidTest</code> — 96/96 passed (0 skipped, 0 failed)</li>
+      <li><span class="badge badge-pass">Pass</span> On-device verification: leg distance "275.0 km · 3h 11min" displayed between Rome and Florence after route calculation; absent when no route calculated</li>
+    </ul>
+
+    <h3>TODO Review</h3>
+    <p>4 TODOs found in <code>app/src/</code> — all classified as <span class="badge badge-info">Acknowledged</span> (unrelated to story 3.1.2, preconditions not met by this change).</p>
+
+    <h3>Security Review</h3>
+    <p><span class="badge badge-pass">Clean</span> — no findings. All changes are test files and documentation only.</p>
+
+    <h3>Documentation Updates</h3>
+    <p><code>README.md</code> and <code>AGENTS.md</code> reviewed — no updates needed (test-only change).</p>
+  </section>
   </main>
 
 </body>

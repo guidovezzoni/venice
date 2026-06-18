@@ -8,6 +8,7 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import com.guidovezzoni.venice.domain.model.Leg
 import com.guidovezzoni.venice.domain.model.Stop
 import com.guidovezzoni.venice.domain.model.StopStatus
 import com.guidovezzoni.venice.ui.intent.TripDetailUiIntent
@@ -843,6 +844,51 @@ class TripDetailScreenTest {
         composeTestRule
             .onNodeWithContentDescription("Loading")
             .assertExists()
+    }
+
+    // endregion
+
+    // region Leg display
+
+    @Test
+    fun withStopsAndCorrespondingLeg_showsLegDistanceBetweenStops() {
+        val leg = Leg(
+            id = "leg-1",
+            tripId = TRIP_ID,
+            fromStopId = STARTING_POINT.id,
+            toStopId = DESTINATION.id,
+            distanceMetres = 12500,
+            durationSeconds = 900,
+            encodedPolyline = "",
+        )
+        setContent(
+            uiState = TripDetailUiState(
+                tripId = TRIP_ID,
+                startingPoint = STARTING_POINT,
+                destination = DESTINATION.copy(order = 1),
+                legs = listOf(leg),
+            ),
+        )
+
+        composeTestRule
+            .onNodeWithText("12.5 km", substring = true)
+            .assertIsDisplayed()
+    }
+
+    @Test
+    fun withStopsAndEmptyLegsList_doesNotShowLegDistance() {
+        setContent(
+            uiState = TripDetailUiState(
+                tripId = TRIP_ID,
+                startingPoint = STARTING_POINT,
+                destination = DESTINATION.copy(order = 1),
+                legs = emptyList(),
+            ),
+        )
+
+        composeTestRule
+            .onNodeWithText("·", substring = true)
+            .assertDoesNotExist()
     }
 
     // endregion
