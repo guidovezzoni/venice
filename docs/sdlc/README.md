@@ -13,8 +13,8 @@ An example of its usage can be found in [venice](https://github.com/guidovezzoni
 | Capability                          | How SDLC uses it                                                                                                                      |
 | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
 | **Autonomous multi-step reasoning** | Each command chains 15+ sequential steps, making decisions at each gate without human intervention                                    |
-| **Sub-agent orchestration**         | Implementation spawns parallel sub-agents (Sonnet for complex BDD work, Haiku for mechanical tasks), each with a fresh context window |
-| **Tool use**                        | The agent drives git, Gradle, adb, static analysis, and Claude Code's security scanners directly                                      |
+| **Sub-agent orchestration**         | Implementation spawns parallel sub-agents (standard tier for complex BDD work, fast tier for mechanical tasks), each with a fresh context window |
+| **Tool use**                        | The agent drives git, Gradle, adb, static analysis, and security scanners directly                                                    |
 | **Self-healing loops**              | Failed tests or security findings trigger automatic fix-and-retry cycles                                                              |
 | **On-device verification**          | The agent installs the app on a physical device, interacts with it via UIAutomator, and verifies behaviour autonomously               |
 | **Specification grounding**         | All code generation is anchored to living specs and acceptance criteria — not just free-form prompts                                  |
@@ -25,7 +25,7 @@ An example of its usage can be found in [venice](https://github.com/guidovezzoni
 
 Prepares a user story for development.
 
-**Recommended agent:** Opus — requires deep product analysis and refinement reasoning.
+**Recommended model tier:** reasoning — requires deep product analysis and refinement reasoning.
 
 **What the agent does autonomously:**
 
@@ -41,7 +41,7 @@ Prepares a user story for development.
 
 Generates the full technical design and task breakdown.
 
-**Recommended agent:** Opus — requires architecture exploration and design decisions.
+**Recommended model tier:** reasoning — requires architecture exploration and design decisions.
 
 **What the agent does autonomously:**
 
@@ -57,12 +57,12 @@ Generates the full technical design and task breakdown.
 
 Implements the entire change using multi-agent coordination.
 
-**Recommended agent:** Sonnet — orchestration is procedural; sub-agents handle the heavy reasoning.
+**Recommended model tier:** standard — orchestration is procedural; sub-agents handle the heavy reasoning.
 
 **What the agent does autonomously:**
 
 - Reads the task list and splits it into sections
-- Assigns each section to the cheapest capable model (Sonnet for BDD red/green cycles, Haiku for wiring and previews)
+- Assigns each section to the cheapest capable model tier (standard for BDD red/green cycles, fast for wiring and previews)
 - Spawns a sub-agent per section with a self-contained prompt — each agent writes code, runs tests, and checks off its tasks
 - Enforces the BDD Red/Green discipline: test must fail before implementation, then pass after
 - Verifies every checkbox after each sub-agent returns; retries or escalates on failure
@@ -77,7 +77,7 @@ Implements the entire change using multi-agent coordination.
 
 End-to-end quality gate before a story is considered done.
 
-**Recommended agent:** Sonnet — verification follows a structured checklist of automated gates.
+**Recommended model tier:** standard — verification follows a structured checklist of automated gates.
 
 **What the agent does autonomously:**
 
@@ -126,7 +126,7 @@ End-to-end quality gate before a story is considered done.
     - Each of the command stops when the AI has created an output that human should review: refined user story, SDD specifications, code implementation. Detecting an issue earlier on will prevent bigger changes down the line. Apart from this, the agent will try to complete the task autonomously.
     - By default none of the commands will automatically commit and push, to allow human to review the changes
     - There are several check points in which the AI will request human intervention if some error condition shows, f.i. creating a new branch with staged changes, doubts requiring clarifications, physical device not connected, etc.
-- **Cost efficiency**: Mechanical tasks (DI wiring, string resources, previews) use cheaper models; only complex reasoning tasks use the full-capability model.
+- **Cost efficiency**: Mechanical tasks (DI wiring, string resources, previews) use cheaper model tiers (fast); only complex reasoning tasks use the full-capability tier (standard/reasoning).
 - **Auditable**: Every command appends to an HTML report, creating a complete audit trail of what was decided, built, and verified.
 - **Spec-grounded**: Code generation is always anchored to explicit specifications and acceptance criteria, reducing hallucination and drift.
 - **Self-correcting**: Failed tests, security findings, and missed checkboxes trigger automatic retry loops rather than silent failures.
@@ -135,20 +135,25 @@ End-to-end quality gate before a story is considered done.
 
 1. Download the `docs` folder into your project
 
-2. Run the script in `./docs/sdlc`:
+2. Run the init script for your AI coding agent:
 
+    **Claude Code:**
     - **Linux / macOS**: `./docs/sdlc/sdlc_init_claude_code.sh`
     - **Windows** (PowerShell, Developer Mode or elevated): `.\docs\sdlc\sdlc_init_claude_code.ps1`
 
-   The script will creates a `CLAUDE.md → AGENTS.md` symlink in the project root and links SDLC command files into `.claude/commands/sdlc/`.
+    This creates a `CLAUDE.md → AGENTS.md` symlink in the project root and links SDLC command files into `.claude/commands/sdlc/`.
 
-3. Install OpenSpec o your machine from https://github.com/Fission-AI/OpenSpec/ and:
+    **Codex CLI:**
+    - **Linux / macOS**: `./docs/sdlc/sdlc_init_codex.sh`
+    - **Windows** (PowerShell, Developer Mode or elevated): `.\docs\sdlc\sdlc_init_codex.ps1`
+
+    This links SDLC command files as skills into `.codex/skills/` (Codex reads `AGENTS.md` directly, so no extra symlink is needed).
+
+3. Install OpenSpec on your machine from https://github.com/Fission-AI/OpenSpec/ and:
     - Initialise it in your project folder: `openspec init`
     - Type `openspec config profile`, select "workflows only", and ensure these commands are available: explore, propose, apply, verify, sync, archive
 
 4. Tailor user story management by customising guidelines-userstories.md, with an MCP or whatever you use to handle them. By default it's expecting a list of md files.
-
-**Please note** : currently only Claude is supported.
 
 ## Additional customisations
 
@@ -156,8 +161,8 @@ The basic recommendation is that these files should be modified directly from th
 
 ### AGENTS.md
 
-Contains basic info about the project for the agent, and it's usually automatically update by the agent when a change affects its content.
-CLAUDE.md is a symlink to AGENTS.md, so it doesn't need any extra change.
+Contains basic info about the project for the agent, and it's usually automatically updated by the agent when a change affects its content.
+Tools that use a different filename (e.g. Claude Code uses `CLAUDE.md`) should symlink it to `AGENTS.md` — the init scripts handle this automatically.
 
 Some info usually contained in AGENTS.md will not likely end up in there, as they are already documented in the guidelines files.
 
@@ -191,7 +196,7 @@ The other guidelines file are primarily used by the SDLC commands and describe h
 ## TODOs and improvements
 
 - Multi-agent orchestration for verification
-- Add support for Cursor, OpenCOde
+- Add support for Cursor, OpenCode
 - Define how to handle changes/fix after propose change: every unexpected change on the code in an open story should update story and specs, or at least check if they are affected
 - Learn a lesson from a failure: the agent should be able to update the structure in case it spots a failure
 - create a guideline for readme

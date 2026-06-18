@@ -25,7 +25,7 @@ Follow these steps:
 
 1. **Locate the user story.** Match `$ARGUMENTS` against the user story files by number or partial name. If no match is found, ask the user which user story to verify. Validate the **preconditions for Closing** as defined in @docs/guidelines/guidelines-userstories.md. If they are not met, inform the user and stop.
 
-2. **Run OpenSpec verify.** Execute the OpenSpec verify command (`/opsx:verify`) to check that the implementation matches the change artefacts. If the verification reports any issues, stop here: present the issues clearly to the user and do **not** proceed to the next steps. If no issues are reported, proceed immediately to step 3.
+2. **Run OpenSpec verify.** Execute the OpenSpec verify skill available in your environment to check that the implementation matches the change artefacts. If the verification reports any issues, stop here: present the issues clearly to the user and do **not** proceed to the next steps. If no issues are reported, proceed immediately to step 3.
 
 3. **Review unresolved TODOs.** Scan all source files under `app/src/` for TODO comments (`// TODO`, `/* TODO`, `# TODO`). For each TODO found:
    - Determine if it is **related to the current story** (references the story number, touches a feature area modified by this story, or was introduced/should have been resolved by this story).
@@ -36,7 +36,7 @@ Follow these steps:
    - If any TODOs are classified as RESOLVE NOW, stop here: present them to the user and do **not** proceed to the next steps.
    - If all TODOs are ACKNOWLEDGED (or none exist), proceed immediately to step 4.
 
-4. **Run security review.** Execute the `/security-review` command to review pending changes on the current branch for security issues. If the review reports any critical or high-severity findings, stop here: present them to the user and do **not** proceed to the next steps. If no critical or high-severity findings are reported, proceed immediately to step 5.
+4. **Run security review.** Execute the security-review skill available in your environment to review pending changes on the current branch for security issues. If the review reports any critical or high-severity findings, stop here: present them to the user and do **not** proceed to the next steps. If no critical or high-severity findings are reported, proceed immediately to step 5.
 
 5. **Run clean build and static analysis.** Run `./gradlew clean check`. This catches compilation errors, lint warnings, unused imports, and deprecations. If the build fails or lint reports errors, stop here: present the issues to the user and do **not** proceed to the next steps. If the build succeeds, proceed immediately to step 6.
 
@@ -64,9 +64,9 @@ Follow these steps:
 
 11. **Close the user story.** Once all verifications pass, perform the **Closing** operation as defined in @docs/guidelines/guidelines-userstories.md.
 
-12. **Sync delta specs.** Execute the OpenSpec sync command (`/opsx:sync`) to merge any delta specs from this change into the main specs. Ensure that all file moves use `git mv` so that Git tracks the renames.
+12. **Sync delta specs.** Execute the OpenSpec sync skill available in your environment to merge any delta specs from this change into the main specs. Ensure that all file moves use `git mv` so that Git tracks the renames.
 
-13. **Archive the OpenSpec change.** Execute the OpenSpec archive command (`/opsx:archive`) to finalise and archive the completed change artefacts. Ensure that all file moves use `git mv` so that Git tracks the renames.
+13. **Archive the OpenSpec change.** Execute the OpenSpec archive skill available in your environment to finalise and archive the completed change artefacts. Ensure that all file moves use `git mv` so that Git tracks the renames.
 
 14. **Verify README.md and AGENTS.md are in sync.** Read `README.md` and `AGENTS.md` and verify that they accurately reflect the current state of the codebase and specs after the archived change. If any section is outdated or incomplete, flag it to the user and update it. If everything is already accurate, note that the check passed.
 

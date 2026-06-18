@@ -1,6 +1,6 @@
 Please apply the changes for the current OpenSpec change and resolve any outstanding TODOs.
 
-This command uses sub-agent orchestration: each task section is delegated to a separate sub-agent with a fresh context window, using cheaper models (Sonnet/Haiku) where appropriate. This prevents task checkboxes from being forgotten in long sessions and reduces cost.
+This command uses sub-agent orchestration: each task section is delegated to a separate sub-agent with a fresh context window, using cheaper model tiers (standard/fast) where appropriate. This prevents task checkboxes from being forgotten in long sessions and reduces cost.
 
 Sub-agent orchestration is the default execution strategy for this command.
 
@@ -54,25 +54,25 @@ Follow these steps:
 
    Skip any section where all tasks are already `[x]`.
 
-   ### 1c. Classify each section and assign a model
+   ### 1c. Classify each section and assign a model tier
 
    For each section with pending tasks, determine the model tier by examining the task descriptions:
 
-   | Section pattern | Model |
+   | Section pattern | Tier |
    |---|---|
-   | Contains tasks matching "Write test:" or "Add test:" paired with "Implement:" tasks | **Sonnet** (`sonnet`) |
-   | ALL tasks are mechanical — matching patterns like "Pass", "Wire", "Wrap existing", "Disable" | **Haiku** (`haiku`) |
-   | ALL tasks are Compose previews or read-only verification ("Add preview", "Verify existing") | **Haiku** (`haiku`) |
-   | ALL tasks are command execution ("Run ./gradlew", "Update via /opsx:sync") | **Haiku** (`haiku`) |
-   | Unclear or mixed task types | **Sonnet** (`sonnet`) — safe default |
+   | Contains tasks matching "Write test:" or "Add test:" paired with "Implement:" tasks | **standard** |
+   | ALL tasks are mechanical — matching patterns like "Pass", "Wire", "Wrap existing", "Disable" | **fast** |
+   | ALL tasks are Compose previews or read-only verification ("Add preview", "Verify existing") | **fast** |
+   | ALL tasks are command execution ("Run ./gradlew", "Update via openspec sync") | **fast** |
+   | Unclear or mixed task types | **standard** — safe default |
 
    Display the execution plan before proceeding:
    ```
    ## Execution Plan
    
-   Section 0: Minimum Duration Utility (3 tasks) → Sonnet
-   Section 1: ViewModel isLoading Wrapping (17 tasks) → Sonnet
-   Section 5: Screen Wiring TripDetailScreen (4 tasks) → Haiku
+   Section 0: Minimum Duration Utility (3 tasks) → standard
+   Section 1: ViewModel isLoading Wrapping (17 tasks) → standard
+   Section 5: Screen Wiring TripDetailScreen (4 tasks) → fast
    ...
    ```
 
@@ -88,14 +88,10 @@ Follow these steps:
 
    **ii. Build the sub-agent prompt.** Construct a self-contained prompt using the template below.
 
-   **iii. Spawn the sub-agent.** Use the `Agent` tool with the assigned `model` parameter:
-   ```
-   Agent(
-     description: "Section N: <title>",
-     model: "<sonnet|haiku>",
-     prompt: "<constructed prompt>"
-   )
-   ```
+   **iii. Spawn the sub-agent.** Use whatever sub-agent spawning mechanism is available in your environment (e.g. the Agent tool in Claude Code, or spawn_agent in Codex CLI). Provide:
+   - A description: `"Section N: <title>"`
+   - The model tier assigned in step 1c (standard or fast)
+   - The constructed prompt from step ii
 
    **iv. Verify completion.** After the sub-agent returns:
    - Read the tasks file
@@ -104,8 +100,8 @@ Follow these steps:
 
    **v. Handle verification results:**
    - **All tasks checked**: Display `Section N complete (N/N tasks)` and proceed to next section
-   - **Some tasks unchecked but sub-agent reported no errors**: Spawn a Haiku sub-agent with a narrow prompt to check off the missing boxes (the implementation exists but the checkboxes were missed)
-   - **Sub-agent reported an error or blocker**: Retry the section once. If the original model was Haiku, upgrade to Sonnet for the retry. If still failing after retry, PAUSE and report the issue to the user
+   - **Some tasks unchecked but sub-agent reported no errors**: Spawn a fast-tier sub-agent with a narrow prompt to check off the missing boxes (the implementation exists but the checkboxes were missed)
+   - **Sub-agent reported an error or blocker**: Retry the section once. If the original tier was fast, upgrade to standard for the retry. If still failing after retry, PAUSE and report the issue to the user
 
    ### 1e. Final verification
 
@@ -114,7 +110,7 @@ Follow these steps:
    ## All Sections Complete
    
    Progress: N/N tasks complete
-   Sections processed: M (X with Sonnet, Y with Haiku)
+   Sections processed: M (X with standard, Y with fast)
    ```
 
    ### Sub-agent prompt template
@@ -218,10 +214,10 @@ Follow these steps:
    3. Re-run the tests to confirm the fixes.
    4. Repeat until all tests pass.
 
-5. **Run security review.** Once all tests pass, execute the `/security-review` command to review pending changes on the current branch for security issues. If the review reports any findings:
+5. **Run security review.** Once all tests pass, execute the security-review skill available in your environment to review pending changes on the current branch for security issues. If the review reports any findings:
    1. Present the findings to the user for awareness.
    2. Fix all reported issues in the codebase.
-   3. Re-run `/security-review` to confirm the fixes are effective.
+   3. Re-run the security-review skill to confirm the fixes are effective.
    4. Repeat this cycle until the security review comes back clean.
 
 6. **Update README.md if required.** Read `README.md` and check whether the changes delivered by this story affect any section of the file (e.g. feature list, architecture table, tech stack, build instructions). If any section is now outdated or incomplete, update it to reflect the current state of the project. If everything is already accurate, skip this step.

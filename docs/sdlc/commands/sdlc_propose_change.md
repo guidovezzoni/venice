@@ -4,11 +4,11 @@ Follow these steps:
 
 1. **Locate the user story.** Match `$ARGUMENTS` against the user story files by number or partial name. If no match is found, ask the user which user story to design a change for. The story should be in WIP status (opened for development). If it is not, inform the user and stop.
 
-2. **Explore the user story.** Execute the OpenSpec explore command (`/opsx:explore`) with the user story content as input. Use this phase to think through the requirements, investigate the codebase, identify integration points, and surface any ambiguities or risks. DO NOT MAKE ASSUMPTIONS — if anything is unclear, ask the user for clarification before proceeding.
+2. **Explore the user story.** Execute the OpenSpec explore skill available in your environment with the user story content as input. Use this phase to think through the requirements, investigate the codebase, identify integration points, and surface any ambiguities or risks. DO NOT MAKE ASSUMPTIONS — if anything is unclear, ask the user for clarification before proceeding.
 
 3. **Clarify all doubts.** Before moving to the proposal phase, ensure all questions and ambiguities have been resolved. Ask the user additional questions if required. No assumptions or unresolved doubts should be carried forward into the proposal.
 
-4. **Propose the change with BDD task structure.** Execute the OpenSpec propose command (`/opsx:propose`) to create all SDD artefacts (proposal, design, delta specs, and tasks) based on the explored and clarified requirements.
+4. **Propose the change with BDD task structure.** Execute the OpenSpec propose skill available in your environment to create all SDD artefacts (proposal, design, delta specs, and tasks) based on the explored and clarified requirements.
 
    **IMPORTANT — BDD task-structuring rules.** When generating the tasks artefact, apply these rules in addition to any rules returned by the openspec CLI:
 
