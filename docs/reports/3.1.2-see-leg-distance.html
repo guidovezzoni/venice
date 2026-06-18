@@ -115,6 +115,46 @@
       <li><span class="badge badge-info">NOTED</span> Implementation is largely complete from story 3.1.1; remaining work is primarily verification and any missing test coverage</li>
     </ul>
   </section>
+  <section class="report-section" data-source="opsx:propose" data-timestamp="2026-06-18T12:00:00Z">
+    <header>
+      <h2>Change Proposed</h2>
+      <time datetime="2026-06-18T12:00:00Z">18 Jun 2026</time>
+    </header>
+    <p class="section-source">Source: opsx:propose</p>
+
+    <h3>Exploration Findings</h3>
+    <p>Codebase exploration confirmed that all production code for leg distance display was delivered in story 3.1.1. The following components are complete and functional:</p>
+    <table>
+      <tr><th>Component</th><th>Status</th><th>Location</th></tr>
+      <tr><td>Domain model <code>distanceMetres</code></td><td><span class="badge badge-pass">Done</span></td><td><code>domain/model/Leg.kt</code></td></tr>
+      <tr><td>Database entity</td><td><span class="badge badge-pass">Done</span></td><td><code>data/database/entity/LegEntity.kt</code></td></tr>
+      <tr><td>API mapper + tests</td><td><span class="badge badge-pass">Done</span></td><td><code>data/mapper/LegMapper.kt</code></td></tr>
+      <tr><td><code>formatDistance()</code></td><td><span class="badge badge-pass">Done</span></td><td><code>ui/screens/tripdetail/LegSummary.kt</code></td></tr>
+      <tr><td>String resources</td><td><span class="badge badge-pass">Done</span></td><td><code>strings.xml</code></td></tr>
+      <tr><td>LegSummary composable</td><td><span class="badge badge-pass">Done</span></td><td><code>ui/screens/tripdetail/LegSummary.kt</code></td></tr>
+      <tr><td>Previews (short + long)</td><td><span class="badge badge-pass">Done</span></td><td><code>LegSummary.kt</code></td></tr>
+      <tr><td>TripDetailScreen integration</td><td><span class="badge badge-pass">Done</span></td><td><code>TripDetailScreen.kt</code></td></tr>
+    </table>
+
+    <h3>Gaps Identified</h3>
+    <ul>
+      <li><span class="badge badge-fail">Missing</span> No <code>LegSummaryTest</code> Compose UI test file exists</li>
+      <li><span class="badge badge-fail">Missing</span> <code>TripDetailScreenTest</code> has no tests for leg display (present or absent)</li>
+    </ul>
+    <p>No questions were needed — the scope is clear: test-only change to close the coverage gap required by the Definition of Done.</p>
+
+    <h3>Artifacts Created</h3>
+    <table>
+      <tr><th>Artifact</th><th>Description</th></tr>
+      <tr><td><code>proposal.md</code></td><td>Motivation and scope — test-only change, no production code</td></tr>
+      <tr><td><code>design.md</code></td><td>Technical approach — Compose UI tests for LegSummary and TripDetailScreen</td></tr>
+      <tr><td><code>specs/route-display/spec.md</code></td><td>Delta spec adding test coverage requirements to route-display capability</td></tr>
+      <tr><td><code>tasks.md</code></td><td>10 tasks: 4 LegSummary tests, 3 TripDetailScreen tests, 3 verification steps</td></tr>
+    </table>
+
+    <h3>OpenSpec Change</h3>
+    <p>Change <code>see-leg-distance</code> created at <code>openspec/changes/see-leg-distance/</code> — all 4 artifacts complete, ready for implementation.</p>
+  </section>
   </main>
 
 </body>
