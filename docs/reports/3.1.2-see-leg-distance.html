@@ -201,6 +201,46 @@
     <h3>Documentation Updates</h3>
     <p><code>README.md</code> and <code>AGENTS.md</code> reviewed — no updates needed (test-only change).</p>
   </section>
+  <section class="report-section" data-source="sdlc_verify_story" data-timestamp="2026-06-18T16:30:00Z">
+    <header>
+      <h2>Verification &amp; Archive</h2>
+      <time datetime="2026-06-18T16:30:00Z">18 Jun 2026</time>
+    </header>
+    <p class="section-source">Source: sdlc_verify_story</p>
+
+    <h3>Verification Summary</h3>
+    <table>
+      <tr><th>Gate</th><th>Result</th><th>Details</th></tr>
+      <tr><td>OpenSpec verify</td><td><span class="badge badge-pass">Pass</span></td><td>11/11 tasks complete, 2/2 requirements covered, 6/6 scenarios implemented, design followed</td></tr>
+      <tr><td>TODO scan</td><td><span class="badge badge-pass">Pass</span></td><td>4 TODOs found — all ACKNOWLEDGED (unrelated to story 3.1.2, preconditions not met)</td></tr>
+      <tr><td>Security review</td><td><span class="badge badge-pass">Pass</span></td><td>No findings — test files and documentation only</td></tr>
+      <tr><td>Clean build &amp; static analysis</td><td><span class="badge badge-pass">Pass</span></td><td><code>./gradlew clean check</code> successful; 1 pre-existing Room schema warning (unrelated)</td></tr>
+      <tr><td>Unit tests</td><td><span class="badge badge-pass">Pass</span></td><td><code>./gradlew test</code> — all passed</td></tr>
+      <tr><td>Test file coverage</td><td><span class="badge badge-pass">Pass</span></td><td>No production files changed; <code>LegSummaryTest.kt</code> (new) and <code>TripDetailScreenTest.kt</code> (modified) exist</td></tr>
+      <tr><td>Compose preview coverage</td><td><span class="badge badge-pass">Pass</span></td><td><code>LegSummary</code> has 2 previews covering all Leg fields (short distance + long distance)</td></tr>
+      <tr><td>Instrumented tests</td><td><span class="badge badge-pass">Pass</span></td><td><code>connectedDebugAndroidTest</code> — 96/96 passed on Pixel 6a (0 skipped, 0 failed)</td></tr>
+      <tr><td>On-device verification</td><td><span class="badge badge-pass">Pass</span></td><td>Agent via adb: "274.0 km · 2h 54min" displayed between Rome and Florence after route calculation; absent when no route calculated</td></tr>
+    </table>
+
+    <h3>Definition of Done</h3>
+    <table>
+      <tr><th>#</th><th>Criterion</th><th>Result</th><th>Justification</th></tr>
+      <tr><td>1</td><td>All acceptance criteria met</td><td><span class="badge badge-pass">Pass</span></td><td>AC #1–4 confirmed via on-device testing and code review</td></tr>
+      <tr><td>2</td><td>Unit tests confirm correct distance formatting</td><td><span class="badge badge-pass">Pass</span></td><td><code>LegSummaryTest</code>: 4 Compose UI tests covering &lt;1km, =1km, &gt;1km, combined</td></tr>
+      <tr><td>3</td><td>Compose UI tests confirm LegSummary appearance</td><td><span class="badge badge-pass">Pass</span></td><td><code>LegSummaryTest</code> + <code>TripDetailScreenTest</code> leg display region (2 tests)</td></tr>
+      <tr><td>4</td><td>No regressions in existing trip detail functionality</td><td><span class="badge badge-pass">Pass</span></td><td>Full test suite: unit + 96/96 instrumented tests passed</td></tr>
+      <tr><td>5</td><td>User story updated and closed</td><td><span class="badge badge-pass">Pass</span></td><td>Renamed to <code>3.1.2-see-leg-distance-DONE.md</code>, index updated</td></tr>
+    </table>
+
+    <h3>Archive</h3>
+    <ul>
+      <li><strong>Archive location:</strong> <code>openspec/changes/archive/2026-06-18-see-leg-distance/</code></li>
+      <li><strong>Spec sync:</strong> Synced — 2 requirements added to <code>route-display</code> main spec</li>
+      <li><strong>README.md &amp; AGENTS.md:</strong> AGENTS.md updated with 3.1.2 in completed stories; README.md already accurate</li>
+    </ul>
+
+    <div class="outcome outcome-passed">PASSED — Story 3.1.2 verified and archived. Renamed to <code>3.1.2-see-leg-distance-DONE.md</code>.</div>
+  </section>
   </main>
 
 </body>
