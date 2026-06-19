@@ -91,3 +91,19 @@ telecine/com.crashlytics.settings.json
 /build
 /captures
 .cxx
+
+# Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots
+fastlane/test_output
+
+# Ruby / Bundler
+vendor/bundle/
+.bundle/
+
+# Play Store service account key
+play-store-key.json
+
+# Release artifacts
+app/release/
