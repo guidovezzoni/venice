@@ -22,7 +22,7 @@ if (keystorePropertiesFile.exists()) {
 
 val versionMajor = 0
 val versionMinor = 1
-val versionPatch = 1
+val versionPatch = 2
 
 android {
     namespace = "com.guidovezzoni.venice"

@@ -14,7 +14,6 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            BROKEN
             HeadingToTheAlpsTheme {
                 MainScreen()
             }
