@@ -196,6 +196,12 @@ The other guidelines file are primarily used by the SDLC commands and describe h
 - Learn a lesson from a failure: the agent should be able to update the structure in case it spots a failure
 - create a guideline for readme
 
+## Repeating errors to fix
+- opsx new change: Change name can only contain lowercase letters, numbers, and hyphens
+- openspec status --json 2>&1 -> ✖ Error: Missing required option --change. Available changes: see-leg-distance
+- verification: Error: Refusing to write through symlink: CLAUDE.md. Resolve the symlink and pass the real target path explicitly.
+
+
 ## Guidelines TODO
 
 - async operations should be wrapped in a loading state with a spinner, and if required disabling the button that triggered the operation, to avoid re-trigger. The spinner should have a minimum duration of 0.5 seconds to avoid a flickering UI.

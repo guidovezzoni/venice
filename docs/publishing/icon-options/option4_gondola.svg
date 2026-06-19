@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 108 108">
+  <!-- Background: Azure Blue -->
+  <rect width="108" height="108" fill="#0277BD"/>
+  <!-- Water waves (subtle) -->
+  <path d="M18,68 Q30,64 42,68 Q54,72 66,68 Q78,64 90,68" fill="none" stroke="white" stroke-width="1.2" opacity="0.3"/>
+  <path d="M18,74 Q30,70 42,74 Q54,78 66,74 Q78,70 90,74" fill="none" stroke="white" stroke-width="1.2" opacity="0.2"/>
+  <!-- Gondola hull -->
+  <path d="M24,60 Q28,56 36,55 L76,55 Q84,55 86,58 L88,60 Q86,64 78,65 L30,65 Q24,64 24,60 Z" fill="white"/>
+  <!-- Gondola ferro (prow ornament) -->
+  <path d="M26,56 L22,30 L24,30 L28,38 L24,38 L28,42 L24,42 L28,46 L24,46 L28,50 L24,50 L28,54 L30,56" fill="white" stroke="white" stroke-width="0.5" stroke-linejoin="round"/>
+  <!-- Gondolier pole -->
+  <line x1="78" y1="24" x2="82" y2="55" stroke="white" stroke-width="2" stroke-linecap="round"/>
+  <!-- Small location pin on gondola -->
+  <path d="M54,48 C54,48 47,40 47,36 C47,32.1 50.1,29 54,29 C57.9,29 61,32.1 61,36 C61,40 54,48 54,48 Z" fill="#FF5252"/>
+  <circle cx="54" cy="36" r="2.5" fill="white"/>
+</svg>

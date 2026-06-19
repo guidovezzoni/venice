@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="500" viewBox="0 0 1024 500">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1A237E"/>
+      <stop offset="100%" stop-color="#0D47A1"/>
+    </linearGradient>
+  </defs>
+  <!-- Background -->
+  <rect width="1024" height="500" fill="url(#bg)"/>
+  <!-- Grid lines (subtle map feel) -->
+  <line x1="0" y1="100" x2="1024" y2="100" stroke="white" stroke-width="0.5" opacity="0.06"/>
+  <line x1="0" y1="200" x2="1024" y2="200" stroke="white" stroke-width="0.5" opacity="0.06"/>
+  <line x1="0" y1="300" x2="1024" y2="300" stroke="white" stroke-width="0.5" opacity="0.06"/>
+  <line x1="0" y1="400" x2="1024" y2="400" stroke="white" stroke-width="0.5" opacity="0.06"/>
+  <line x1="200" y1="0" x2="200" y2="500" stroke="white" stroke-width="0.5" opacity="0.06"/>
+  <line x1="400" y1="0" x2="400" y2="500" stroke="white" stroke-width="0.5" opacity="0.06"/>
+  <line x1="600" y1="0" x2="600" y2="500" stroke="white" stroke-width="0.5" opacity="0.06"/>
+  <line x1="800" y1="0" x2="800" y2="500" stroke="white" stroke-width="0.5" opacity="0.06"/>
+  <!-- Route path -->
+  <path d="M140,380 C200,380 220,300 280,280 C340,260 360,320 420,300 C480,280 500,200 560,200 C620,200 640,260 700,240 C760,220 780,160 840,140" fill="none" stroke="#FF5252" stroke-width="4" stroke-dasharray="12,6" opacity="0.8"/>
+  <!-- Route solid overlay -->
+  <path d="M140,380 C200,380 220,300 280,280 C340,260 360,320 420,300 C480,280 500,200 560,200 C620,200 640,260 700,240 C760,220 780,160 840,140" fill="none" stroke="#FF5252" stroke-width="3"/>
+  <!-- Stop pins -->
+  <!-- Pin 1 - Start -->
+  <circle cx="140" cy="380" r="12" fill="#FF5252"/>
+  <circle cx="140" cy="380" r="5" fill="white"/>
+  <!-- Pin 2 -->
+  <circle cx="280" cy="280" r="8" fill="white" opacity="0.9"/>
+  <circle cx="280" cy="280" r="3.5" fill="#FF5252"/>
+  <!-- Pin 3 -->
+  <circle cx="420" cy="300" r="8" fill="white" opacity="0.9"/>
+  <circle cx="420" cy="300" r="3.5" fill="#FF5252"/>
+  <!-- Pin 4 -->
+  <circle cx="560" cy="200" r="8" fill="white" opacity="0.9"/>
+  <circle cx="560" cy="200" r="3.5" fill="#FF5252"/>
+  <!-- Pin 5 -->
+  <circle cx="700" cy="240" r="8" fill="white" opacity="0.9"/>
+  <circle cx="700" cy="240" r="3.5" fill="#FF5252"/>
+  <!-- Pin 6 - Destination -->
+  <circle cx="840" cy="140" r="12" fill="#FF5252"/>
+  <circle cx="840" cy="140" r="5" fill="white"/>
+  <!-- Destination flag -->
+  <line x1="840" y1="140" x2="840" y2="110" stroke="white" stroke-width="2"/>
+  <polygon points="840,110 862,117 840,124" fill="white" opacity="0.9"/>
+  <!-- App name -->
+  <text x="512" y="460" text-anchor="middle" fill="white" font-size="64" font-family="Arial, Helvetica, sans-serif" font-weight="bold" letter-spacing="10">VENICE</text>
+  <!-- Tagline -->
+  <text x="512" y="490" text-anchor="middle" fill="white" font-size="18" font-family="Arial, Helvetica, sans-serif" opacity="0.6" letter-spacing="3">PLAN YOUR ROAD TRIP</text>
+</svg>

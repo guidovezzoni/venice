@@ -1,0 +1,51 @@
+default_platform(:android)
+
+platform :android do
+  desc "Run unit tests, detekt, and lint"
+  lane :test do
+    gradle(
+      task: "check",
+      flags: "--console=plain --stacktrace"
+    )
+  end
+
+  desc "Build debug APK"
+  lane :build do
+    gradle(
+      task: "assembleDebug",
+      flags: "--console=plain --stacktrace"
+    )
+  end
+
+  desc "Build release AAB and upload to Play Store internal track"
+  lane :beta do
+    gradle(
+      task: "bundleRelease",
+      flags: "--console=plain --stacktrace"
+    )
+    upload_to_play_store(
+      track: "internal",
+      aab: "app/build/outputs/bundle/release/app-release.aab",
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+      skip_upload_apk: true
+    )
+  end
+
+  desc "Build release AAB and upload to Play Store production track"
+  lane :deploy do
+    gradle(
+      task: "bundleRelease",
+      flags: "--console=plain --stacktrace"
+    )
+    upload_to_play_store(
+      track: "production",
+      aab: "app/build/outputs/bundle/release/app-release.aab",
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+      skip_upload_apk: true
+    )
+  end
+end

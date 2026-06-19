@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 108 108">
+  <!-- Background: Teal -->
+  <rect width="108" height="108" fill="#00897B"/>
+  <!-- Teardrop map pin -->
+  <path d="M54,76 C54,76 34,54 34,42 C34,30.95 42.95,22 54,22 C65.05,22 74,30.95 74,42 C74,54 54,76 54,76 Z" fill="white"/>
+  <!-- Inner circle cutout -->
+  <circle cx="54" cy="42" r="8" fill="#00897B"/>
+</svg>

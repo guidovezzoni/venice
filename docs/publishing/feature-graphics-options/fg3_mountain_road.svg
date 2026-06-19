@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="500" viewBox="0 0 1024 500">
+  <defs>
+    <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#4A148C"/>
+      <stop offset="60%" stop-color="#E65100"/>
+      <stop offset="100%" stop-color="#FF8F00"/>
+    </linearGradient>
+  </defs>
+  <!-- Sky -->
+  <rect width="1024" height="500" fill="url(#skyGrad)"/>
+  <!-- Stars (top area) -->
+  <circle cx="80" cy="40" r="1.5" fill="white" opacity="0.6"/>
+  <circle cx="200" cy="70" r="1" fill="white" opacity="0.4"/>
+  <circle cx="350" cy="30" r="1.5" fill="white" opacity="0.5"/>
+  <circle cx="500" cy="55" r="1" fill="white" opacity="0.3"/>
+  <circle cx="680" cy="25" r="1.5" fill="white" opacity="0.6"/>
+  <circle cx="820" cy="60" r="1" fill="white" opacity="0.4"/>
+  <circle cx="950" cy="35" r="1.5" fill="white" opacity="0.5"/>
+  <circle cx="150" cy="90" r="1" fill="white" opacity="0.3"/>
+  <circle cx="750" cy="80" r="1" fill="white" opacity="0.3"/>
+  <!-- Far mountains (darker) -->
+  <polygon points="0,300 120,180 240,260 360,160 500,240 600,180 720,220 850,140 1024,250 1024,500 0,500" fill="#1A0033" opacity="0.4"/>
+  <!-- Near mountains -->
+  <polygon points="0,350 100,250 220,310 380,200 500,280 650,220 780,270 900,190 1024,300 1024,500 0,500" fill="#1A0033" opacity="0.5"/>
+  <!-- Ground -->
+  <rect x="0" y="340" width="1024" height="160" fill="#1A0033" opacity="0.3"/>
+  <!-- Road left edge -->
+  <line x1="512" y1="280" x2="280" y2="500" stroke="white" stroke-width="4" stroke-linecap="round"/>
+  <!-- Road right edge -->
+  <line x1="512" y1="280" x2="744" y2="500" stroke="white" stroke-width="4" stroke-linecap="round"/>
+  <!-- Center dashes -->
+  <line x1="512" y1="295" x2="512" y2="320" stroke="white" stroke-width="2.5" opacity="0.7" stroke-linecap="round"/>
+  <line x1="511" y1="340" x2="510" y2="375" stroke="white" stroke-width="3" opacity="0.7" stroke-linecap="round"/>
+  <line x1="509" y1="395" x2="507" y2="440" stroke="white" stroke-width="3.5" opacity="0.7" stroke-linecap="round"/>
+  <line x1="506" y1="460" x2="504" y2="500" stroke="white" stroke-width="4" opacity="0.7" stroke-linecap="round"/>
+  <!-- App name -->
+  <text x="512" y="140" text-anchor="middle" fill="white" font-size="72" font-family="Arial, Helvetica, sans-serif" font-weight="bold" letter-spacing="12">VENICE</text>
+  <!-- Tagline -->
+  <text x="512" y="175" text-anchor="middle" fill="white" font-size="20" font-family="Arial, Helvetica, sans-serif" opacity="0.7" letter-spacing="4">PLAN YOUR ROAD TRIP</text>
+</svg>

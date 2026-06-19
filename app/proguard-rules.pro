@@ -1,21 +1,43 @@
-# Add project specific ProGuard rules here.
-# You can control the set of applied configuration files using the
-# proguardFiles setting in build.gradle.
-#
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
+# Preserve line numbers for crash reporting
+-keepattributes SourceFile,LineNumberTable
+-renamesourcefileattribute SourceFile
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+# Hilt — the library ships its own consumer rules; only keep annotated entry points
+-keep @dagger.hilt.android.HiltAndroidApp class * { *; }
+-keep @dagger.hilt.android.AndroidEntryPoint class * { *; }
+-keep @dagger.hilt.InstallIn class * { *; }
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+# Room
+-keep class * extends androidx.room.RoomDatabase { *; }
+-keep @androidx.room.Entity class * { *; }
+-keep @androidx.room.Dao class * { *; }
 
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+# OkHttp
+-dontwarn okhttp3.internal.platform.**
+-dontwarn org.conscrypt.**
+-dontwarn org.bouncycastle.**
+-dontwarn org.openjsse.**
+
+# Google Places SDK — keep only the classes the app references directly
+-keep class com.google.android.libraries.places.api.Places { *; }
+-keep class com.google.android.libraries.places.api.model.AutocompletePrediction { *; }
+-keep class com.google.android.libraries.places.api.model.AutocompleteSessionToken { *; }
+-keep class com.google.android.libraries.places.api.model.Place { *; }
+-keep class com.google.android.libraries.places.api.net.FetchPlaceRequest { *; }
+-keep class com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest { *; }
+-keep class com.google.android.libraries.places.api.net.PlacesClient { *; }
+
+# Kotlin Coroutines
+-keepnames class kotlinx.coroutines.internal.MainDispatcherFactory {}
+-keepnames class kotlinx.coroutines.CoroutineExceptionHandler {}
+-keepclassmembers class kotlinx.coroutines.** {
+    volatile <fields>;
+}
+
+# Kotlin serialization (if used in the future)
+-keepattributes *Annotation*, InnerClasses
+
+# Keep data classes used by Room or as API models
+-keepclassmembers class * {
+    @com.google.gson.annotations.SerializedName <fields>;
+}

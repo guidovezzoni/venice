@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 108 108">
+  <!-- Background: Dark Navy -->
+  <rect width="108" height="108" fill="#1A237E"/>
+  <!-- Outer circle -->
+  <circle cx="54" cy="54" r="28" fill="none" stroke="white" stroke-width="2.5"/>
+  <!-- Compass rose - 4 pointed star -->
+  <!-- North pointer (red/warm) -->
+  <polygon points="54,24 48,54 54,50 60,54" fill="#FF5252"/>
+  <!-- South pointer (white) -->
+  <polygon points="54,84 48,54 54,58 60,54" fill="white"/>
+  <!-- East pointer (white) -->
+  <polygon points="84,54 54,48 58,54 54,60" fill="white"/>
+  <!-- West pointer (white) -->
+  <polygon points="24,54 54,48 50,54 54,60" fill="white"/>
+  <!-- Center circle -->
+  <circle cx="54" cy="54" r="4" fill="white"/>
+  <!-- N letter -->
+  <text x="54" y="21" text-anchor="middle" fill="white" font-size="7" font-family="Arial, sans-serif" font-weight="bold">N</text>
+</svg>

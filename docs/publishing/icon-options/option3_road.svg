@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 108 108">
+  <!-- Background: Sunset Orange gradient -->
+  <defs>
+    <linearGradient id="sunset" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FF6F00"/>
+      <stop offset="100%" stop-color="#E65100"/>
+    </linearGradient>
+  </defs>
+  <rect width="108" height="108" fill="url(#sunset)"/>
+  <!-- Horizon line -->
+  <line x1="20" y1="44" x2="88" y2="44" stroke="white" stroke-width="1.5" opacity="0.5"/>
+  <!-- Road - left edge -->
+  <line x1="54" y1="44" x2="22" y2="88" stroke="white" stroke-width="3"/>
+  <!-- Road - right edge -->
+  <line x1="54" y1="44" x2="86" y2="88" stroke="white" stroke-width="3"/>
+  <!-- Center dashes -->
+  <line x1="54" y1="48" x2="54" y2="55" stroke="white" stroke-width="2" opacity="0.8"/>
+  <line x1="54" y1="59" x2="53.5" y2="68" stroke="white" stroke-width="2" opacity="0.8"/>
+  <line x1="53.5" y1="72" x2="53" y2="83" stroke="white" stroke-width="2.5" opacity="0.8"/>
+  <!-- Sun circle at vanishing point -->
+  <circle cx="54" cy="38" r="8" fill="white" opacity="0.9"/>
+</svg>
