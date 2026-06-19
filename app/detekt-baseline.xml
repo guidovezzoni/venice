@@ -1,0 +1,40 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>ComplexCondition:SetStopDialog.kt$placeName.isNotBlank() &amp;&amp; lat != null &amp;&amp; lat in MIN_LATITUDE..MAX_LATITUDE &amp;&amp; lng != null &amp;&amp; lng in MIN_LONGITUDE..MAX_LONGITUDE</ID>
+    <ID>CyclomaticComplexMethod:TripDetailViewModel.kt$TripDetailViewModel$fun onIntent(intent: TripDetailUiIntent)</ID>
+    <ID>LargeClass:TripDetailViewModelTest.kt$TripDetailViewModelTest</ID>
+    <ID>LongMethod:TripDetailViewModel.kt$TripDetailViewModel$fun onIntent(intent: TripDetailUiIntent)</ID>
+    <ID>LongParameterList:TripDetailViewModel.kt$TripDetailViewModel$( private val setStopUseCase: SetStopUseCase, private val moveStopUseCase: MoveStopUseCase, private val editStopUseCase: EditStopUseCase, private val removeStopUseCase: RemoveStopUseCase, private val markStopDepartedUseCase: MarkStopDepartedUseCase, private val undoMarkStopDepartedUseCase: UndoMarkStopDepartedUseCase, private val calculateRouteUseCase: CalculateRouteUseCase, observeStopsUseCase: ObserveStopsUseCase, observeLegsUseCase: ObserveLegsUseCase, private val searchPlacesUseCase: SearchPlacesUseCase, private val getPlaceDetailUseCase: GetPlaceDetailUseCase, private val placeSearchRepository: PlaceSearchRepository, savedStateHandle: SavedStateHandle, )</ID>
+    <ID>MaxLineLength:PlaceSearchRepositoryImpl.kt$PlaceSearchRepositoryImpl$/* The session token lifecycle in this implementation follows the correct Google Places API billing pattern 1. Created lazily — on the first getAutocompleteSuggestions call, a new AutocompleteSessionToken is created (line 33-35). 2. Reused across keystrokes — subsequent autocomplete calls reuse the same token, grouping them into one billing session (line 38). 3. Consumed on place selection — getPlaceDetails attaches the token to the fetch request (line 48), then nulls it (line 52). This tells Google "this autocomplete session ended with a selection," and you're billed for one session instead of per-keystroke. 4. Reset on cancellation — resetSession() clears the token when the user dismisses without selecting, so the next search starts a fresh session. Thread safety — sessionToken is a mutable var with no synchronization. If two coroutines called getAutocompleteSuggestions concurrently, they could race on the null check and create two tokens. In practice this is fine because the ViewModel likely serializes calls, but if you ever wanted to harden it, you could use a Mutex or ensure single-threaded access via the dispatcher. Not urgent for this codebase. */</ID>
+    <ID>MaxLineLength:SetStopDialog.kt$val longitudeError = hasAttemptedSubmit &amp;&amp; (longitude == null || longitude &lt; MIN_LONGITUDE || longitude &gt; MAX_LONGITUDE)</ID>
+    <ID>MaxLineLength:TripDetailViewModel.kt$TripDetailViewModel$_uiState.update { it.copy(isResolvingPlace = false, placeDetailError = error.message ?: UNKNOWN_ERROR) }</ID>
+    <ID>MaxLineLength:TripDetailViewModel.kt$TripDetailViewModel$_uiState.update { it.copy(isResolvingPlace = false, selectedPlaceDetail = detail, placeSuggestions = emptyList()) }</ID>
+    <ID>MaxLineLength:TripDetailViewModel.kt$TripDetailViewModel$_uiState.update { it.copy(isSearchingPlaces = false, searchError = error.message, placeSuggestions = emptyList()) }</ID>
+    <ID>MaxLineLength:TripDetailViewModel.kt$TripDetailViewModel$_uiState.update { it.copy(placeSuggestions = suggestions, isSearchingPlaces = false, searchError = null) }</ID>
+    <ID>MaxLineLength:TripDetailViewModel.kt$TripDetailViewModel$_uiState.update { it.copy(stopToRemove = null, isRemoveStopDialogVisible = false, isLoading = false) }</ID>
+    <ID>NewLineAtEndOfFile:Color.kt$com.guidovezzoni.venice.ui.theme.Color.kt</ID>
+    <ID>NewLineAtEndOfFile:ExampleUnitTest.kt$com.guidovezzoni.venice.ExampleUnitTest.kt</ID>
+    <ID>NewLineAtEndOfFile:Theme.kt$com.guidovezzoni.venice.ui.theme.Theme.kt</ID>
+    <ID>NewLineAtEndOfFile:Type.kt$com.guidovezzoni.venice.ui.theme.Type.kt</ID>
+    <ID>ReturnCount:DirectionsResponse.kt$DirectionsResponse.Companion$fun fromJson(json: String): DirectionsResponse</ID>
+    <ID>ReturnCount:MarkStopDepartedUseCase.kt$MarkStopDepartedUseCase$suspend operator fun invoke(tripId: String, stopId: String): Result&lt;Unit&gt;</ID>
+    <ID>TooManyFunctions:StopDao.kt$StopDao</ID>
+    <ID>UnusedImports:PlaceSearchRepositoryImplTest.kt$import org.junit.Assert.assertNull</ID>
+    <ID>UnusedImports:StopDaoTest.kt$import io.mockk.coVerify</ID>
+    <ID>UnusedImports:Theme.kt$import android.app.Activity</ID>
+    <ID>UnusedPrivateProperty:MainScreen.kt$private const val ARG_TRIP_ID = "tripId"</ID>
+    <ID>UnusedPrivateProperty:PlaceSearchRepositoryImplTest.kt$PlaceSearchRepositoryImplTest$val tokenBefore = firstRequestSlot.captured.sessionToken</ID>
+    <ID>UseCheckOrError:DirectionsApiService.kt$DirectionsApiService$throw IllegalStateException("Empty response body from Routes API")</ID>
+    <ID>UseCheckOrError:DirectionsApiService.kt$DirectionsApiService$throw IllegalStateException("Routes API request failed with status ${response.code}: $responseBody")</ID>
+    <ID>UseCheckOrError:DirectionsResponse.kt$DirectionsResponse.Companion$throw IllegalStateException("Routes API error: $status — $message")</ID>
+    <ID>UseCheckOrError:PlaceDetailMapper.kt$PlaceDetailMapper$throw IllegalStateException("Place displayName is null")</ID>
+    <ID>UseCheckOrError:PlaceDetailMapper.kt$PlaceDetailMapper$throw IllegalStateException("Place location is null")</ID>
+    <ID>UseCheckOrError:StopDao.kt$StopDao$throw IllegalStateException("No stop found at order $fromOrder")</ID>
+    <ID>UseCheckOrError:StopDao.kt$StopDao$throw IllegalStateException("No stop found at order $toOrder")</ID>
+    <ID>UseCheckOrError:StopDao.kt$StopDao$throw IllegalStateException("Stop not found: $stopId")</ID>
+    <ID>UseCheckOrError:StopRepositoryImpl.kt$StopRepositoryImpl$throw IllegalStateException("Stop not found: $stopId")</ID>
+    <ID>WildcardImport:ExampleUnitTest.kt$import org.junit.Assert.*</ID>
+  </CurrentIssues>
+</SmellBaseline>
