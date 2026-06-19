@@ -34,5 +34,8 @@ jobs:
       - name: Run checks
         run: ./gradlew check --console=plain --stacktrace
 
+      - name: Verify test coverage
+        run: ./gradlew koverVerify --console=plain --stacktrace
+
       - name: Build debug and release APKs
         run: ./gradlew assembleDebug assembleRelease --console=plain --stacktrace
