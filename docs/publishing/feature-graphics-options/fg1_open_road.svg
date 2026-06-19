@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="500" viewBox="0 0 1024 500">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FF8F00"/>
+      <stop offset="50%" stop-color="#FF6F00"/>
+      <stop offset="100%" stop-color="#E65100"/>
+    </linearGradient>
+  </defs>
+  <!-- Sky gradient -->
+  <rect width="1024" height="500" fill="url(#sky)"/>
+  <!-- Sun glow -->
+  <circle cx="512" cy="180" r="120" fill="#FFAB00" opacity="0.25"/>
+  <circle cx="512" cy="180" r="60" fill="white" opacity="0.85"/>
+  <!-- Horizon line -->
+  <line x1="0" y1="240" x2="1024" y2="240" stroke="white" stroke-width="2" opacity="0.4"/>
+  <!-- Road left edge -->
+  <line x1="512" y1="240" x2="200" y2="500" stroke="white" stroke-width="6" stroke-linecap="round"/>
+  <!-- Road right edge -->
+  <line x1="512" y1="240" x2="824" y2="500" stroke="white" stroke-width="6" stroke-linecap="round"/>
+  <!-- Road surface (subtle) -->
+  <polygon points="512,240 200,500 824,500" fill="white" opacity="0.08"/>
+  <!-- Center dashes -->
+  <line x1="512" y1="260" x2="512" y2="290" stroke="white" stroke-width="3.5" opacity="0.7" stroke-linecap="round"/>
+  <line x1="511" y1="310" x2="510" y2="350" stroke="white" stroke-width="4" opacity="0.7" stroke-linecap="round"/>
+  <line x1="509" y1="374" x2="507" y2="430" stroke="white" stroke-width="4.5" opacity="0.7" stroke-linecap="round"/>
+  <line x1="506" y1="454" x2="504" y2="500" stroke="white" stroke-width="5" opacity="0.7" stroke-linecap="round"/>
+  <!-- App name -->
+  <text x="512" y="160" text-anchor="middle" fill="white" font-size="72" font-family="Arial, Helvetica, sans-serif" font-weight="bold" letter-spacing="12">VENICE</text>
+  <!-- Tagline -->
+  <text x="512" y="195" text-anchor="middle" fill="white" font-size="20" font-family="Arial, Helvetica, sans-serif" opacity="0.8" letter-spacing="4">PLAN YOUR ROAD TRIP</text>
+</svg>

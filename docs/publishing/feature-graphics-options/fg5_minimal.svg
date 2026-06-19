@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="500" viewBox="0 0 1024 500">
+  <!-- Background: Deep warm -->
+  <rect width="1024" height="500" fill="#BF360C"/>
+  <!-- Large V as road -->
+  <path d="M262,80 L512,420 L762,80" fill="none" stroke="white" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" opacity="0.15"/>
+  <!-- Inner V as road -->
+  <path d="M312,80 L512,370 L712,80" fill="none" stroke="white" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" opacity="0.1"/>
+  <!-- Center line of road (left arm) -->
+  <line x1="346" y1="140" x2="380" y2="200" stroke="white" stroke-width="2" opacity="0.12" stroke-linecap="round"/>
+  <line x1="400" y1="234" x2="430" y2="290" stroke="white" stroke-width="2" opacity="0.12" stroke-linecap="round"/>
+  <!-- Center line of road (right arm) -->
+  <line x1="678" y1="140" x2="644" y2="200" stroke="white" stroke-width="2" opacity="0.12" stroke-linecap="round"/>
+  <line x1="624" y1="234" x2="594" y2="290" stroke="white" stroke-width="2" opacity="0.12" stroke-linecap="round"/>
+  <!-- Pin at vertex -->
+  <circle cx="512" cy="400" r="10" fill="#FF5252" opacity="0.3"/>
+  <!-- App name - large, centered -->
+  <text x="512" y="230" text-anchor="middle" fill="white" font-size="96" font-family="Arial, Helvetica, sans-serif" font-weight="bold" letter-spacing="20">VENICE</text>
+  <!-- Thin line -->
+  <line x1="362" y1="252" x2="662" y2="252" stroke="white" stroke-width="1.5" opacity="0.4"/>
+  <!-- Tagline -->
+  <text x="512" y="285" text-anchor="middle" fill="white" font-size="22" font-family="Arial, Helvetica, sans-serif" font-weight="300" opacity="0.7" letter-spacing="8">PLAN YOUR ROAD TRIP</text>
+</svg>

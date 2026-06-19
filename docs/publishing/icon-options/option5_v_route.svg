@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 108 108">
+  <!-- Background: Deep Purple -->
+  <defs>
+    <linearGradient id="purpleGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#6A1B9A"/>
+      <stop offset="100%" stop-color="#4A148C"/>
+    </linearGradient>
+  </defs>
+  <rect width="108" height="108" fill="url(#purpleGrad)"/>
+  <!-- V shape as two road lines -->
+  <path d="M30,26 L54,74 L78,26" fill="none" stroke="white" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Dashes along left arm -->
+  <line x1="36" y1="38" x2="40" y2="46" stroke="white" stroke-width="1.5" opacity="0.5"/>
+  <line x1="43" y1="52" x2="47" y2="60" stroke="white" stroke-width="1.5" opacity="0.5"/>
+  <!-- Dashes along right arm -->
+  <line x1="72" y1="38" x2="68" y2="46" stroke="white" stroke-width="1.5" opacity="0.5"/>
+  <line x1="65" y1="52" x2="61" y2="60" stroke="white" stroke-width="1.5" opacity="0.5"/>
+  <!-- Location pin at the bottom vertex -->
+  <circle cx="54" cy="74" r="6" fill="#FF5252"/>
+  <circle cx="54" cy="74" r="2.5" fill="white"/>
+  <!-- Small dots at endpoints -->
+  <circle cx="30" cy="26" r="3" fill="white" opacity="0.7"/>
+  <circle cx="78" cy="26" r="3" fill="white" opacity="0.7"/>
+</svg>
