@@ -2,10 +2,14 @@ package com.guidovezzoni.venice.data.repository
 
 import com.guidovezzoni.venice.data.database.dao.TripDao
 import com.guidovezzoni.venice.data.database.entity.TripEntity
+import com.guidovezzoni.venice.data.database.entity.TripWithStopCount
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -48,5 +52,30 @@ class TripRepositoryImplTest {
 
         assertTrue(result.isFailure)
         assertEquals(exception, result.exceptionOrNull())
+    }
+
+    @Test
+    fun `GIVEN DAO emits trip entities WHEN observeTrips is called THEN mapped domain trips are emitted`() = runTest {
+        val entity1 = TripWithStopCount(
+            trip = TripEntity(id = "t1", name = "Trip One", createdAt = 1000L, updatedAt = 2000L),
+            stopCount = 3,
+        )
+        val entity2 = TripWithStopCount(
+            trip = TripEntity(id = "t2", name = "Trip Two", createdAt = 3000L, updatedAt = 4000L),
+            stopCount = 0,
+        )
+        every { tripDao.observeAll() } returns flowOf(listOf(entity1, entity2))
+
+        val trips = repository.observeTrips().first()
+
+        val expectedTripCount = 2
+        assertEquals(expectedTripCount, trips.size)
+        assertEquals("t1", trips[0].id)
+        assertEquals("Trip One", trips[0].name)
+        val expectedStopCount = 3
+        assertEquals(expectedStopCount, trips[0].stopCount)
+        assertEquals("t2", trips[1].id)
+        val expectedSecondStopCount = 0
+        assertEquals(expectedSecondStopCount, trips[1].stopCount)
     }
 }

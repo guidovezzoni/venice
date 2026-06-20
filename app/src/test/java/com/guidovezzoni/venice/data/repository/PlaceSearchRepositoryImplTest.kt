@@ -71,6 +71,29 @@ class PlaceSearchRepositoryImplTest {
         }
 
     @Test
+    fun `GIVEN session token already exists WHEN getAutocompleteSuggestions called again THEN same token is reused`() =
+        runTest {
+            val firstRequestSlot = slot<FindAutocompletePredictionsRequest>()
+            val mockResponse1 = mockk<FindAutocompletePredictionsResponse>(relaxed = true)
+            every { mockResponse1.autocompletePredictions } returns emptyList()
+            every {
+                placesClient.findAutocompletePredictions(capture(firstRequestSlot))
+            } returns Tasks.forResult(mockResponse1)
+            repository.getAutocompleteSuggestions(QUERY)
+            val firstToken = firstRequestSlot.captured.sessionToken
+
+            val secondRequestSlot = slot<FindAutocompletePredictionsRequest>()
+            val mockResponse2 = mockk<FindAutocompletePredictionsResponse>(relaxed = true)
+            every { mockResponse2.autocompletePredictions } returns emptyList()
+            every {
+                placesClient.findAutocompletePredictions(capture(secondRequestSlot))
+            } returns Tasks.forResult(mockResponse2)
+            repository.getAutocompleteSuggestions("Roma")
+
+            assertEquals(firstToken, secondRequestSlot.captured.sessionToken)
+        }
+
+    @Test
     fun `GIVEN valid query WHEN API succeeds THEN returns mapped suggestions`() =
         runTest {
             val mockPrediction1 = mockk<AutocompletePrediction>(relaxed = true)

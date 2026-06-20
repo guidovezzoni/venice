@@ -1,6 +1,7 @@
 package com.guidovezzoni.venice.data.network.dto
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
 import org.junit.Test
@@ -53,6 +54,90 @@ class DirectionsResponseTest {
         val result = DirectionsResponse.fromJson(json)
 
         assertTrue(result.legs.isEmpty())
+    }
+
+    @Test
+    fun `GIVEN JSON with no routes key WHEN fromJson is called THEN DirectionsResponse with empty legs is returned`() {
+        val json = """{}"""
+
+        val result = DirectionsResponse.fromJson(json)
+
+        assertTrue(result.legs.isEmpty())
+    }
+
+    @Test
+    fun `GIVEN JSON with null legs array WHEN fromJson is called THEN DirectionsResponse with empty legs is returned`() {
+        val json = """{"routes": [{}]}"""
+
+        val result = DirectionsResponse.fromJson(json)
+
+        assertTrue(result.legs.isEmpty())
+    }
+
+    @Test
+    fun `GIVEN leg with blank duration WHEN fromJson is called THEN durationSeconds is null`() {
+        val json = """
+            {
+              "routes": [{
+                "legs": [
+                  {
+                    "distanceMeters": 100,
+                    "duration": "",
+                    "polyline": {"encodedPolyline": "xyz"}
+                  }
+                ]
+              }]
+            }
+        """.trimIndent()
+
+        val result = DirectionsResponse.fromJson(json)
+
+        val expectedLegCount = 1
+        assertEquals(expectedLegCount, result.legs.size)
+        assertNull(result.legs[0].durationSeconds)
+    }
+
+    @Test
+    fun `GIVEN leg with non-numeric duration WHEN fromJson is called THEN durationSeconds is null`() {
+        val json = """
+            {
+              "routes": [{
+                "legs": [
+                  {
+                    "distanceMeters": 100,
+                    "duration": "notanumber",
+                    "polyline": {"encodedPolyline": "xyz"}
+                  }
+                ]
+              }]
+            }
+        """.trimIndent()
+
+        val result = DirectionsResponse.fromJson(json)
+
+        assertNull(result.legs[0].durationSeconds)
+    }
+
+    @Test
+    fun `GIVEN leg without polyline object WHEN fromJson is called THEN encodedPolyline is null`() {
+        val json = """
+            {
+              "routes": [{
+                "legs": [
+                  {
+                    "distanceMeters": 100,
+                    "duration": "60s"
+                  }
+                ]
+              }]
+            }
+        """.trimIndent()
+
+        val result = DirectionsResponse.fromJson(json)
+
+        val expectedLegCount = 1
+        assertEquals(expectedLegCount, result.legs.size)
+        assertNull(result.legs[0].encodedPolyline)
     }
 
     @Test

@@ -5,8 +5,11 @@ import com.guidovezzoni.venice.data.database.entity.StopEntity
 import com.guidovezzoni.venice.domain.model.StopStatus
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -311,5 +314,37 @@ class StopRepositoryImplTest {
 
         assertTrue(result.isFailure)
         assertTrue(result.exceptionOrNull() is IllegalStateException)
+    }
+
+    @Test
+    fun `GIVEN DAO emits stop entities WHEN observeStopsForTrip is called THEN mapped domain stops are emitted`() = runTest {
+        val entity1 = StopEntity(
+            id = "stop-1",
+            tripId = TRIP_ID,
+            placeName = "Rome",
+            latitude = 41.9028,
+            longitude = 12.4964,
+            order = 0,
+            status = "PENDING",
+        )
+        val entity2 = StopEntity(
+            id = "stop-2",
+            tripId = TRIP_ID,
+            placeName = PLACE_NAME,
+            latitude = LATITUDE,
+            longitude = LONGITUDE,
+            order = 1,
+            status = "VISITED",
+        )
+        every { stopDao.observeByTripId(TRIP_ID) } returns flowOf(listOf(entity1, entity2))
+
+        val stops = repository.observeStopsForTrip(TRIP_ID).first()
+
+        val expectedStopCount = 2
+        assertEquals(expectedStopCount, stops.size)
+        assertEquals("stop-1", stops[0].id)
+        assertEquals(StopStatus.PENDING, stops[0].status)
+        assertEquals("stop-2", stops[1].id)
+        assertEquals(StopStatus.VISITED, stops[1].status)
     }
 }
