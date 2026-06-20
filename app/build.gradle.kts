@@ -136,7 +136,7 @@ kover {
                 classes(
                     "*.BuildConfig",
                     "*.ComposableSingletons*",
-                    "*_Factory",
+                    "*_Factory*",
                     "*_HiltModules*",
                     "*_Impl",
                     "*_MembersInjector",
@@ -145,7 +145,7 @@ kover {
                     "*.Hilt_*",
                     "*.di.*",
                     "*.database.*Dao_Impl*",
-                    "*.database.AppDatabase",
+                    "*.database.AppDatabase*",
                     "*.ui.theme.*",
                     "*.ui.screens.*",
                     "*.VeniceApplication",

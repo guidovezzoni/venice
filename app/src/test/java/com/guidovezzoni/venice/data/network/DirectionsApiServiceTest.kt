@@ -173,6 +173,19 @@ class DirectionsApiServiceTest {
         assertTrue(result.exceptionOrNull() is IllegalStateException)
     }
 
+    @Test
+    fun `GIVEN network throws IOException WHEN fetchRoute is called THEN Result failure is returned`() = runTest {
+        val call = mockk<Call>()
+        every { okHttpClient.newCall(any()) } returns call
+        every { call.execute() } throws java.io.IOException("Connection refused")
+
+        val stops = createTwoStops()
+        val result = sut.fetchRoute(stops)
+
+        assertTrue(result.isFailure)
+        assertTrue(result.exceptionOrNull() is java.io.IOException)
+    }
+
     private fun stubOkHttpResponse(code: Int, body: String) {
         val call = mockk<Call>()
         every { okHttpClient.newCall(any()) } returns call
