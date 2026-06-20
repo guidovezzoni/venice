@@ -1,1 +1,1 @@
-/home/guido/orca/workspaces/venice/doctor-command/AGENTS.md
+AGENTS.md

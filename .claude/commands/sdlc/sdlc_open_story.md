@@ -1,1 +1,1 @@
-/home/guido/orca/workspaces/venice/doctor-command/docs/sdlc/commands/sdlc_open_story.md
+../../../docs/sdlc/commands/sdlc_open_story.md

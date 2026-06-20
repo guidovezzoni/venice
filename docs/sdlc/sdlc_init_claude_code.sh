@@ -18,23 +18,25 @@ updated=0
 link_file() {
     local src="$1"
     local target="$2"
+    local rel_src
+    rel_src="$(realpath --relative-to="$(dirname "$target")" "$src")"
 
     if [ -L "$target" ]; then
         local existing
         existing="$(readlink "$target")"
-        if [ "$existing" = "$src" ]; then
+        if [ "$existing" = "$rel_src" ]; then
             echo "  skip  $target (already correct)"
             skipped=$((skipped + 1))
             return
         fi
         rm "$target"
-        ln -s "$src" "$target"
-        echo "  update $target -> $src"
+        ln -s "$rel_src" "$target"
+        echo "  update $target -> $rel_src"
         updated=$((updated + 1))
     else
         [ -e "$target" ] && rm "$target"
-        ln -s "$src" "$target"
-        echo "  create $target -> $src"
+        ln -s "$rel_src" "$target"
+        echo "  create $target -> $rel_src"
         created=$((created + 1))
     fi
 }
