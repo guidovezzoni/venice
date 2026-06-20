@@ -145,6 +145,11 @@ kover {
                     "*.Hilt_*",
                     "*.di.*",
                     "*.database.*Dao_Impl*",
+                    "*.database.AppDatabase",
+                    "*.ui.theme.*",
+                    "*.ui.screens.*",
+                    "*.VeniceApplication",
+                    "*.MainActivity",
                 )
                 annotatedBy(
                     "androidx.compose.ui.tooling.preview.Preview",
