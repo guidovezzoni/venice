@@ -1,5 +1,16 @@
 Please verify and archive the user story: $ARGUMENTS.
 
+This command uses sub-agent orchestration: each verification gate is delegated to a separate sub-agent with a fresh context window, using cheaper models (Sonnet/Haiku) where appropriate. The orchestrator handles user interaction, device gates, and pass/fail decisions between gates.
+
+Sub-agent orchestration is the default execution strategy for this command.
+
+## Blocking gate protocol
+
+Most steps in this command are **blocking gates**. After each gate sub-agent returns, the orchestrator reads the result:
+- **PASS** → proceed to next gate
+- **FAIL** → STOP immediately, present findings to user, do NOT proceed to subsequent gates
+- **NOT_FEASIBLE** → handle per step-specific instructions (usually ask user)
+
 ## Device connectivity
 
 ### Early reminder (non-blocking)
@@ -19,59 +30,647 @@ Whenever any step in this command requires a connected Android device (instrumen
 
 This gate applies everywhere a device is needed — it is not limited to a specific step.
 
+## Orchestrator pre-work
+
+Before spawning any sub-agents, the orchestrator gathers context needed by multiple gates:
+
+1. Run `git diff --name-only main...HEAD` to get the list of files modified by this story.
+2. Read the user story file to extract story ID, title, and acceptance criteria.
+3. Run `openspec status --json` to get the active change name.
+
+Store this information for inclusion in sub-agent prompts.
+
 ## Steps
 
 Follow these steps:
 
 1. **Locate the user story.** Match `$ARGUMENTS` against the user story files by number or partial name. If no match is found, ask the user which user story to verify. Validate the **preconditions for Closing** as defined in @docs/guidelines/guidelines-userstories.md. If they are not met, inform the user and stop.
 
-2. **Run OpenSpec verify.** Execute the OpenSpec verify command (`/opsx:verify`) to check that the implementation matches the change artefacts. If the verification reports any issues, stop here: present the issues clearly to the user and do **not** proceed to the next steps. If no issues are reported, proceed immediately to step 3.
+2. **Run OpenSpec verify (sub-agent).** — BLOCKING GATE
 
-3. **Review unresolved TODOs.** Scan all source files under `app/src/` for TODO comments (`// TODO`, `/* TODO`, `# TODO`). For each TODO found:
-   - Determine if it is **related to the current story** (references the story number, touches a feature area modified by this story, or was introduced/should have been resolved by this story).
-   - Additionally, check whether the **precondition or blocker described in the TODO has been satisfied by this story's implementation** (e.g. a TODO that says "do X once table Y exists" becomes actionable if this story created table Y). A TODO whose precondition is now met should be classified as RESOLVE NOW regardless of which story number it references.
-   - Classify each as:
-      - **RESOLVE NOW** — directly related to this story, should have been implemented as part of this story, **or its stated precondition has been fulfilled by this story**. These block verification.
-      - **ACKNOWLEDGED** — genuinely unrelated to this story and its precondition is not yet met. These are listed for awareness but do not block.
-   - If any TODOs are classified as RESOLVE NOW, stop here: present them to the user and do **not** proceed to the next steps.
-   - If all TODOs are ACKNOWLEDGED (or none exist), proceed immediately to step 4.
+   ```
+   Agent(
+     description: "OpenSpec verify",
+     model: "sonnet",
+     prompt: "<constructed prompt>"
+   )
+   ```
 
-4. **Run security review.** Execute the `/security-review` command to review pending changes on the current branch for security issues. If the review reports any critical or high-severity findings, stop here: present them to the user and do **not** proceed to the next steps. If no critical or high-severity findings are reported, proceed immediately to step 5.
+   **Sub-agent prompt:**
+   ```
+   You are running an OpenSpec verification to check that implementation matches change artefacts.
 
-5. **Run clean build and static analysis.** Run `./gradlew clean check`. This catches compilation errors, lint warnings, unused imports, and deprecations. If the build fails or lint reports errors, stop here: present the issues to the user and do **not** proceed to the next steps. If the build succeeds, proceed immediately to step 6.
+   ## Change Name
+   {CHANGE_NAME}
 
-6. **Run unit tests.** Run `./gradlew test`. If any tests fail, stop here: present the failures to the user and do **not** proceed to the next steps. If all tests pass, proceed immediately to step 7.
+   ## Task
 
-7. **Verify test file coverage.** For each new source class introduced or modified by this story (use cases, ViewModels, repositories), check that a corresponding unit test file exists in `app/src/test/`. For each screen composable introduced or modified by this story, check that a corresponding Compose UI test file exists in `app/src/androidTest/`. List any missing test files. If any are missing, stop here: present the list to the user and do **not** proceed to the next steps. If all test files exist, proceed immediately to step 8.
+   Execute the OpenSpec verify command (`/opsx:verify`) to check that the implementation
+   matches the change artefacts. Parse and report the results.
 
-8. **Verify Compose preview coverage.** For each screen composable modified or introduced by this story, check that:
-   - A `@Preview` function exists for the stateless composable.
-   - Every field of the screen's `UiState` appears with a non-default value in at least one preview.
-   - List any composables missing previews and any `UiState` fields without preview coverage. If any are missing, stop here: present the list to the user and do **not** proceed to the next steps. If all previews and fields are covered, proceed immediately to step 9.
+   ## Output Format — CRITICAL
 
-9. **Run on-device tests.** Apply the **device gate** (see above), then:
-   - Run `./gradlew connectedDebugAndroidTest`. If any tests fail, stop here and present the failures.
-   - Install the app (`./gradlew installDebug`) and launch it with `adb shell am start`.
-   - **Time-box adb UI exercise to 3 interactions.** If manual adb-based UI exercise (tap/input/screenshot) fails or requires complex multi-step setup (e.g. creating test data through multiple dialogs), stop immediately — do not loop on retries or attempt to fix adb input issues.
-   - **If adb exercise is not feasible**, ask the user to perform the manual verification and describe what to check. **BLOCK here** — wait for the user to confirm the result before proceeding. If the user reports a failure, stop and present it.
-   - Only proceed to step 10 once both instrumented tests and manual verification (agent or user) have passed.
+   ### RESULT: PASS or FAIL
 
-10. **Verify the Definition of Done.** Read the user story file and identify the "Acceptance Criteria" or "Definition of Done" section. For each item listed:
-   - Check the codebase (source files, tests, configuration) to confirm the criterion is met.
-   - Report each item as PASS or FAIL with a brief justification.
-   - If any item is marked FAIL, stop here: present a summary to the user and do **not** proceed to the next steps.
-   - If all items pass, proceed immediately to step 11.
+   PASS if no critical issues are reported.
+   FAIL if the verification reports any critical issues.
 
-11. **Close the user story.** Once all verifications pass, perform the **Closing** operation as defined in @docs/guidelines/guidelines-userstories.md.
+   ### Summary
+   - Total checks performed
+   - Issues found (by severity)
 
-12. **Sync delta specs.** Execute the OpenSpec sync command (`/opsx:sync`) to merge any delta specs from this change into the main specs. Ensure that all file moves use `git mv` so that Git tracks the renames.
+   ### Issues (if any)
+   - CRITICAL: [list with file references]
+   - WARNING: [list]
+   - SUGGESTION: [list]
+   ```
 
-13. **Archive the OpenSpec change.** Execute the OpenSpec archive command (`/opsx:archive`) to finalise and archive the completed change artefacts. Ensure that all file moves use `git mv` so that Git tracks the renames.
+   **Gate decision:** If RESULT is FAIL, STOP — present the issues clearly to the user and do NOT proceed.
 
-14. **Verify README.md and AGENTS.md are in sync.** Read `README.md` and `AGENTS.md` and verify that they accurately reflect the current state of the codebase and specs after the archived change. If any section is outdated or incomplete, flag it to the user and update it. If everything is already accurate, note that the check passed.
+   **Failure handling:** If the sub-agent itself fails (not the verification), retry once with Sonnet.
 
-15. **Add a report.** Append a verification and archive section to the report for this user story following @docs/guidelines/guidelines-reports.md. The section should summarise: date of verification, OpenSpec verify result (pass/fail summary), TODO scan result (list of ACKNOWLEDGED TODOs, or "none found"), security review result (pass/fail with summary of findings, if any), clean build and static analysis result (pass/fail with warning count), unit test result (pass/fail with test count), test file coverage result (pass / list of missing files), Compose preview coverage result (pass / list of uncovered fields), on-device test results (method used — agent via adb or user-confirmed — and outcomes), Definition of Done checklist with each item's PASS/FAIL status and justification, archive location, spec sync status (synced / skipped / no delta specs), README.md and AGENTS.md sync check result (in sync / updated), and final outcome (PASSED / FAILED) with the renamed filename.
+3. **Review unresolved TODOs (sub-agent).** — BLOCKING GATE
 
-16. **Display the summary.** Output the same summary on screen so the user can see what was verified and archived.
+   ```
+   Agent(
+     description: "TODO scan and classification",
+     model: "sonnet",
+     prompt: "<constructed prompt>"
+   )
+   ```
+
+   **Sub-agent prompt:**
+   ```
+   You are scanning the codebase for unresolved TODO comments and classifying them.
+
+   ## User Story Context
+   - Story ID: {STORY_ID}
+   - Story title: {STORY_TITLE}
+   - Files modified by this story: {MODIFIED_FILES_LIST}
+
+   ## Task
+
+   Scan all files under `app/src/` for TODO comments (// TODO, /* TODO, # TODO).
+   For each TODO found, classify it as:
+
+   - **RESOLVE NOW** — directly related to this story, should have been implemented as part
+     of this story, OR its stated precondition has been fulfilled by this story's implementation.
+     A TODO whose precondition is now met should be classified as RESOLVE NOW regardless of
+     which story number it references.
+   - **ACKNOWLEDGED** — genuinely unrelated to this story and its precondition is not yet met.
+
+   ## Output Format — CRITICAL
+
+   ### RESULT: PASS or FAIL
+
+   PASS if all TODOs are ACKNOWLEDGED (or none exist).
+   FAIL if any TODOs are classified as RESOLVE NOW.
+
+   ### RESOLVE NOW (blocking)
+   - File:line — TODO text — reason it must be resolved
+
+   ### ACKNOWLEDGED (non-blocking)
+   - File:line — TODO text — reason it's unrelated
+   ```
+
+   **Gate decision:** If RESULT is FAIL, STOP — present RESOLVE NOW TODOs to the user and do NOT proceed.
+
+   **Failure handling:** If the sub-agent fails, retry once with Sonnet.
+
+4. **Run security review (sub-agent).** — BLOCKING GATE
+
+   ```
+   Agent(
+     description: "Security review",
+     model: "sonnet",
+     prompt: "<constructed prompt>"
+   )
+   ```
+
+   **Sub-agent prompt:**
+   ```
+   You are running a security review on the pending changes on the current branch.
+
+   ## Task
+
+   Execute the `/security-review` skill to review all pending changes on the current branch
+   for security issues. Use the Skill tool to invoke the "security-review" skill.
+
+   ## Output Format — CRITICAL
+
+   ### RESULT: PASS or FAIL
+
+   PASS if no critical or high-severity findings.
+   FAIL if any critical or high-severity findings exist.
+
+   ### Findings (if any)
+   - Severity: [CRITICAL/HIGH/MEDIUM/LOW]
+   - Description: [what the issue is]
+   - Location: [file:line]
+   - Recommendation: [how to fix]
+   ```
+
+   **Gate decision:** If RESULT is FAIL (critical or high-severity findings), STOP — present findings to the user and do NOT proceed.
+
+   **Failure handling:** If the sub-agent fails, retry once with Sonnet.
+
+5. **Run clean build and static analysis (sub-agent).** — BLOCKING GATE
+
+   ```
+   Agent(
+     description: "Clean build and static analysis",
+     model: "haiku",
+     prompt: "<constructed prompt>"
+   )
+   ```
+
+   **Sub-agent prompt:**
+   ```
+   You are running a clean build and static analysis check.
+
+   ## Task
+
+   Run the following command and wait for it to complete:
+   ```
+   ./gradlew clean check
+   ```
+
+   Report the result.
+
+   ## Output Format — CRITICAL
+
+   ### RESULT: PASS or FAIL
+
+   PASS if the build succeeds (exit code 0).
+   FAIL if the build fails or lint reports errors.
+
+   ### Details
+   - Exit code: [0 or non-zero]
+   - If FAIL: paste the relevant error output (compilation errors, lint errors)
+   - If PASS: note any warnings (non-blocking)
+   ```
+
+   **Gate decision:** If RESULT is FAIL, STOP — present the build errors to the user and do NOT proceed.
+
+   **Failure handling:** If the sub-agent fails, retry once. If Haiku, escalate to Sonnet on retry.
+
+6. **Run unit tests (sub-agent).** — BLOCKING GATE
+
+   ```
+   Agent(
+     description: "Unit tests",
+     model: "haiku",
+     prompt: "<constructed prompt>"
+   )
+   ```
+
+   **Sub-agent prompt:**
+   ```
+   You are running the unit test suite.
+
+   ## Task
+
+   Run the following command and wait for it to complete:
+   ```
+   ./gradlew test
+   ```
+
+   Report the result.
+
+   ## Output Format — CRITICAL
+
+   ### RESULT: PASS or FAIL
+
+   PASS if all tests pass (exit code 0).
+   FAIL if any tests fail.
+
+   ### Details
+   - Exit code: [0 or non-zero]
+   - Total tests run: [count if available from output]
+   - If FAIL: list failing test classes and failure messages
+   - If PASS: confirm all tests passed
+   ```
+
+   **Gate decision:** If RESULT is FAIL, STOP — present the failing tests to the user and do NOT proceed.
+
+   **Failure handling:** If the sub-agent fails, retry once. If Haiku, escalate to Sonnet on retry.
+
+7. **Verify test file coverage (sub-agent).** — BLOCKING GATE
+
+   ```
+   Agent(
+     description: "Test file coverage check",
+     model: "sonnet",
+     prompt: "<constructed prompt>"
+   )
+   ```
+
+   **Sub-agent prompt:**
+   ```
+   You are verifying that all new/modified source classes have corresponding test files.
+
+   ## Context
+   - Story ID: {STORY_ID}
+   - Files modified/introduced by this story:
+   {MODIFIED_FILES_LIST}
+
+   ## Task
+
+   1. For each new or modified use case, ViewModel, or repository class under `app/src/main/`:
+      - Check that a corresponding unit test file exists in `app/src/test/`
+      - Naming convention: `FooClass.kt` → `FooClassTest.kt`
+
+   2. For each new or modified screen composable under `app/src/main/`:
+      - Check that a corresponding Compose UI test file exists in `app/src/androidTest/`
+
+   ## Output Format — CRITICAL
+
+   ### RESULT: PASS or FAIL
+
+   PASS if all classes have corresponding test files.
+   FAIL if any are missing.
+
+   ### Coverage Check
+   | Source class | Test file | Status |
+   |---|---|---|
+   | path/to/Foo.kt | path/to/FooTest.kt | FOUND/MISSING |
+
+   ### Missing Test Files (if any)
+   - [list of source files without corresponding tests]
+   ```
+
+   **Gate decision:** If RESULT is FAIL, STOP — present the list of missing test files to the user and do NOT proceed.
+
+   **Failure handling:** If the sub-agent fails, retry once with Sonnet.
+
+8. **Verify Compose preview coverage (sub-agent).** — BLOCKING GATE
+
+   ```
+   Agent(
+     description: "Compose preview coverage check",
+     model: "sonnet",
+     prompt: "<constructed prompt>"
+   )
+   ```
+
+   **Sub-agent prompt:**
+   ```
+   You are verifying that all screen composables have adequate preview coverage.
+
+   ## Context
+   - Files modified/introduced by this story:
+   {MODIFIED_FILES_LIST}
+
+   ## Task
+
+   For each screen composable modified or introduced by this story:
+   1. Check that a `@Preview` function exists for the stateless composable
+   2. Parse the screen's `UiState` data class to identify all fields
+   3. Verify that every field appears with a non-default value in at least one preview
+
+   ## Output Format — CRITICAL
+
+   ### RESULT: PASS or FAIL
+
+   PASS if all composables have previews and all UiState fields are covered.
+   FAIL if any are missing.
+
+   ### Preview Coverage
+   | Composable | @Preview exists | UiState fields covered |
+   |---|---|---|
+   | FooScreen | YES/NO | 5/5 or 3/5 (missing: field1, field2) |
+
+   ### Missing (if any)
+   - Composables without previews: [list]
+   - UiState fields without preview coverage: [list]
+   ```
+
+   **Gate decision:** If RESULT is FAIL, STOP — present the list of missing previews/fields to the user and do NOT proceed.
+
+   **Failure handling:** If the sub-agent fails, retry once with Sonnet.
+
+9. **Run on-device tests (orchestrator + sub-agent).** — BLOCKING GATE
+
+   Apply the **device gate** (see above) BEFORE spawning the sub-agent. Only proceed once a device is confirmed connected.
+
+   ```
+   Agent(
+     description: "On-device tests",
+     model: "haiku",
+     prompt: "<constructed prompt>"
+   )
+   ```
+
+   **Sub-agent prompt:**
+   ```
+   You are running on-device tests and exercising the app via adb.
+
+   ## Task
+
+   1. Run instrumented tests:
+      ```
+      ./gradlew connectedDebugAndroidTest
+      ```
+
+   2. If tests pass, install the app:
+      ```
+      ./gradlew installDebug
+      ```
+
+   3. Launch the app:
+      ```
+      adb shell am start -n com.guidovezzoni.venice/.ui.MainActivity
+      ```
+
+   4. Exercise the feature under test via adb:
+      - Dump UI hierarchy and identify targets
+      - Perform up to 3 interactions to verify the feature
+      - TIME-BOX: Maximum 3 interactions. If exercise fails or requires complex
+        multi-step setup, STOP immediately.
+
+   ## Feature to Verify
+   {DESCRIPTION_OF_WHAT_TO_CHECK — derived from user story acceptance criteria}
+
+   ## Output Format — CRITICAL
+
+   ### RESULT: PASS or FAIL or NOT_FEASIBLE
+
+   PASS if instrumented tests pass AND app exercise confirmed the feature works.
+   FAIL if instrumented tests fail OR app exercise shows a defect.
+   NOT_FEASIBLE if adb-based exercise cannot verify the feature (too complex, requires
+   multi-step setup that exceeds 3 interactions).
+
+   ### Instrumented Tests
+   - Result: PASS/FAIL
+   - Test count: [N]
+   - Failures (if any): [list]
+
+   ### App Exercise
+   - Method: adb (or NOT_FEASIBLE)
+   - Interactions performed: [list]
+   - Verification: [what was confirmed or why it's not feasible]
+   ```
+
+   **Gate decision:**
+   - If RESULT is PASS: proceed to next step.
+   - If RESULT is FAIL: STOP — present failures to user and do NOT proceed.
+   - If RESULT is NOT_FEASIBLE: ask the user to perform the manual verification. Describe what to check. **BLOCK** — wait for the user to confirm the result. If the user reports a failure, STOP.
+
+   **Failure handling:** If the sub-agent fails, retry once. If Haiku, escalate to Sonnet on retry.
+
+10. **Verify the Definition of Done (sub-agent).** — BLOCKING GATE
+
+    ```
+    Agent(
+      description: "Definition of Done verification",
+      model: "sonnet",
+      prompt: "<constructed prompt>"
+    )
+    ```
+
+    **Sub-agent prompt:**
+    ```
+    You are verifying that all acceptance criteria from the user story are met.
+
+    ## User Story
+    {PASTE ACCEPTANCE CRITERIA / DEFINITION OF DONE SECTION FROM USER STORY}
+
+    ## Files Modified by This Story
+    {MODIFIED_FILES_LIST}
+
+    ## Task
+
+    For each item in the "Acceptance Criteria" or "Definition of Done" section:
+    1. Search the codebase (source files, tests, configuration) for evidence that the
+       criterion is met
+    2. Report each item as PASS or FAIL with a brief justification referencing specific
+       files or tests
+
+    ## Output Format — CRITICAL
+
+    ### RESULT: PASS or FAIL
+
+    PASS if all items are confirmed met.
+    FAIL if any item cannot be confirmed.
+
+    ### Definition of Done Checklist
+    | # | Criterion | Status | Justification |
+    |---|---|---|---|
+    | 1 | [criterion text] | PASS/FAIL | [evidence: file path, test name, etc.] |
+    | 2 | ... | ... | ... |
+    ```
+
+    **Gate decision:** If RESULT is FAIL, STOP — present the failing criteria to the user and do NOT proceed.
+
+    **Failure handling:** If the sub-agent fails, retry once with Sonnet.
+
+11. **Close the user story (sub-agent).**
+
+    ```
+    Agent(
+      description: "Close user story",
+      model: "haiku",
+      prompt: "<constructed prompt>"
+    )
+    ```
+
+    **Sub-agent prompt:**
+    ```
+    You are closing a user story by performing the Closing operation.
+
+    ## Task
+
+    Perform the Closing operation as defined in the user story guidelines.
+
+    Read the guidelines at: docs/guidelines/guidelines-userstories.md
+
+    Then apply the Closing operation to the user story file at:
+      {USER_STORY_FILE_PATH}
+
+    Update the index file at: docs/userstories/index.md to reflect the new status/filename.
+
+    ## Rules
+    - Use `git mv` (not plain mv) so git tracks any renames
+    - Follow the exact Closing procedure from the guidelines
+    - Update the index link to match the new filename
+
+    ## When Done
+    Report:
+    1. What operation was performed
+    2. New file path
+    3. Confirm the index was updated
+    ```
+
+    **Verification:** Confirm the user story file is at its new path and the index is updated.
+
+    **Failure handling:** Retry once. If Haiku, escalate to Sonnet on retry.
+
+12. **Sync delta specs (sub-agent).**
+
+    ```
+    Agent(
+      description: "Sync delta specs",
+      model: "sonnet",
+      prompt: "<constructed prompt>"
+    )
+    ```
+
+    **Sub-agent prompt:**
+    ```
+    You are syncing delta specs from an OpenSpec change to main specs.
+
+    ## Change Name
+    {CHANGE_NAME}
+
+    ## Task
+
+    Execute the OpenSpec sync command (`/opsx:sync`) to merge any delta specs from this
+    change into the main specs. Ensure that all file moves use `git mv` so that Git
+    tracks the renames.
+
+    ## When Done
+    Report:
+    1. Which capabilities were synced (or "no delta specs to sync")
+    2. What changes were made (added/modified/removed)
+    3. Any issues encountered
+    ```
+
+    **Verification:** Confirm the sync completed without errors.
+
+    **Failure handling:** Retry once with Sonnet.
+
+13. **Archive the OpenSpec change (sub-agent).**
+
+    ```
+    Agent(
+      description: "Archive change",
+      model: "haiku",
+      prompt: "<constructed prompt>"
+    )
+    ```
+
+    **Sub-agent prompt:**
+    ```
+    You are archiving a completed OpenSpec change.
+
+    ## Change Name
+    {CHANGE_NAME}
+
+    ## Task
+
+    Execute the OpenSpec archive command (`/opsx:archive`) to finalise and archive the
+    completed change artefacts. Ensure that all file moves use `git mv` so that Git
+    tracks the renames.
+
+    ## When Done
+    Report:
+    1. Archive location
+    2. Confirm the move was successful
+    3. Any issues encountered
+    ```
+
+    **Verification:** Confirm the change directory has been moved to the archive.
+
+    **Failure handling:** Retry once. If Haiku, escalate to Sonnet on retry.
+
+14. **Verify README.md and AGENTS.md are in sync (sub-agent).**
+
+    ```
+    Agent(
+      description: "Verify docs sync",
+      model: "sonnet",
+      prompt: "<constructed prompt>"
+    )
+    ```
+
+    **Sub-agent prompt:**
+    ```
+    You are checking whether README.md and AGENTS.md accurately reflect the current
+    codebase state after a completed user story.
+
+    ## Context
+    - Change name: {CHANGE_NAME}
+    - Story title: {STORY_TITLE}
+    - Summary of changes: {BRIEF_SUMMARY_OF_WHAT_THE_STORY_DELIVERED}
+
+    ## Task
+
+    1. Read README.md
+    2. Read AGENTS.md (NOT CLAUDE.md — it may be a symlink)
+    3. Check whether the changes delivered by this story affect any section:
+       - Feature list, architecture table, tech stack, build instructions
+       - Project overview, folder structure, workflow descriptions
+       - Current status section
+    4. If any section is outdated or incomplete, update it
+    5. If everything is accurate, note that the check passed
+
+    ## Important
+    - Do NOT write through symlinks. If CLAUDE.md is a symlink to AGENTS.md,
+      edit AGENTS.md directly.
+    - Only update sections that are actually affected by this story's changes
+
+    ## When Done
+    Report:
+    1. README.md: in sync / updated (what changed)
+    2. AGENTS.md: in sync / updated (what changed)
+    ```
+
+    **Verification:** Confirm README.md and AGENTS.md are up to date.
+
+    **Failure handling:** Retry once with Sonnet.
+
+15. **Add a report (sub-agent).**
+
+    ```
+    Agent(
+      description: "Add verification report",
+      model: "haiku",
+      prompt: "<constructed prompt>"
+    )
+    ```
+
+    **Sub-agent prompt:**
+    ```
+    You are generating the final verification and archive report section.
+
+    ## Task
+
+    Append a verification and archive section to the report for this user story.
+
+    ## Report Data
+    - Date: {ISO_DATE}
+    - OpenSpec verify: {RESULT_FROM_STEP_2}
+    - TODO scan: {RESULT_FROM_STEP_3}
+    - Security review: {RESULT_FROM_STEP_4}
+    - Clean build: {RESULT_FROM_STEP_5}
+    - Unit tests: {RESULT_FROM_STEP_6}
+    - Test file coverage: {RESULT_FROM_STEP_7}
+    - Compose preview coverage: {RESULT_FROM_STEP_8}
+    - On-device tests: {RESULT_FROM_STEP_9}
+    - Definition of Done: {RESULT_FROM_STEP_10}
+    - Archive location: {RESULT_FROM_STEP_13}
+    - Spec sync status: {RESULT_FROM_STEP_12}
+    - README/AGENTS sync: {RESULT_FROM_STEP_14}
+    - Final outcome: PASSED
+    - Renamed filename: {NEW_STORY_FILENAME}
+
+    ## Guidelines
+    Read the report guidelines at: docs/guidelines/guidelines-reports.md
+
+    ## Instructions
+    The section should summarise all the data above in a structured format following
+    the report guidelines. Include each gate's PASS/FAIL status with details.
+
+    ## When Done
+    Report:
+    1. Confirm the section was appended
+    2. Any issues encountered
+    ```
+
+    **Verification:** Confirm the report file contains the new verification section.
+
+    **Failure handling:** Retry once. If still failing, the orchestrator generates the report inline.
+
+16. **Display the summary.** Output the summary on screen so the user can see what was verified and archived.
 
 17. **Suggest a commit message.** Suggest a commit message following @docs/guidelines/guidelines-git.md.

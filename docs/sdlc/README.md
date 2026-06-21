@@ -13,7 +13,7 @@ An example of its usage can be found in [venice](https://github.com/guidovezzoni
 | Capability                          | How SDLC uses it                                                                                                                      |
 | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
 | **Autonomous multi-step reasoning** | Each command chains 15+ sequential steps, making decisions at each gate without human intervention                                    |
-| **Sub-agent orchestration**         | Implementation spawns parallel sub-agents (Sonnet for complex BDD work, Haiku for mechanical tasks), each with a fresh context window |
+| **Sub-agent orchestration**         | All four commands delegate self-contained steps to cheaper sub-agents (Sonnet for reasoning, Haiku for mechanical tasks), each with a fresh context window |
 | **Tool use**                        | The agent drives git, Gradle, adb, static analysis, and Claude Code's security scanners directly                                      |
 | **Self-healing loops**              | Failed tests or security findings trigger automatic fix-and-retry cycles                                                              |
 | **On-device verification**          | The agent installs the app on a physical device, interacts with it via UIAutomator, and verifies behaviour autonomously               |
@@ -25,15 +25,15 @@ An example of its usage can be found in [venice](https://github.com/guidovezzoni
 
 Prepares a user story for development.
 
-**Recommended agent:** Opus — requires deep product analysis and refinement reasoning.
+**Recommended agent:** Opus (orchestrator) — handles interactive git operations and user decisions; delegates refinement to Opus sub-agent (fresh context window).
 
 **What the agent does autonomously:**
 
 - Switches to `main`, pulls latest changes, creates a feature branch
 - Locates the next user story from the backlog (or accepts a specific one)
-- Performs a full product analysis as an expert PM/BA: identifies fields, endpoints, files to modify, testing strategy, security/GDPR/performance concerns
+- Spawns an Opus sub-agent for full product analysis as an expert PM/BA: identifies fields, endpoints, files to modify, testing strategy, security/GDPR/performance concerns
 - Enriches the story with implementation-ready detail so the developer (or subsequent agent) can work without ambiguity
-- Produces an HTML report summarising decisions made
+- Spawns a Haiku sub-agent for report generation
 
 ---
 
@@ -41,15 +41,15 @@ Prepares a user story for development.
 
 Generates the full technical design and task breakdown.
 
-**Recommended agent:** Opus — requires architecture exploration and design decisions.
+**Recommended agent:** Opus (orchestrator) — handles story location and user Q&A; delegates exploration and proposal generation to Sonnet sub-agents.
 
 **What the agent does autonomously:**
 
-- Explores the codebase to identify integration points, risks, and dependencies
-- Asks clarifying questions when requirements are ambiguous (the one human-in-the-loop pause)
-- Generates all SDD artefacts: proposal, design document, delta specifications, and a structured task list
+- Spawns a Sonnet sub-agent to explore the codebase: identifies integration points, risks, and dependencies
+- Presents surfaced questions to the user for clarification (the human-in-the-loop pause)
+- Spawns a Sonnet sub-agent to generate all SDD artefacts: proposal, design document, delta specifications, and a structured task list
 - Structures tasks using BDD (Behaviour-Driven Development): each testable unit becomes a **test-first pair** — write the failing test, then write the code that makes it pass
-- Classifies tasks by complexity to enable cost-efficient sub-agent assignment later
+- Classifies tasks by complexity to enable cost-efficient sub-agent assignment in implementation
 
 ---
 
@@ -57,7 +57,7 @@ Generates the full technical design and task breakdown.
 
 Implements the entire change using multi-agent coordination.
 
-**Recommended agent:** Sonnet — orchestration is procedural; sub-agents handle the heavy reasoning.
+**Recommended agent:** Sonnet (orchestrator) — orchestration is procedural; sub-agents handle the heavy reasoning.
 
 **What the agent does autonomously:**
 
@@ -77,20 +77,14 @@ Implements the entire change using multi-agent coordination.
 
 End-to-end quality gate before a story is considered done.
 
-**Recommended agent:** Sonnet — verification follows a structured checklist of automated gates.
+**Recommended agent:** Sonnet (orchestrator) — orchestrates 14 sub-agents through a sequential blocking-gate pipeline.
 
 **What the agent does autonomously:**
 
-- Verifies implementation matches specifications (OpenSpec verify)
-- Scans for unresolved TODOs and classifies them as blocking or acknowledged
-- Runs a security review on all pending changes
-- Executes clean build + static analysis (lint, unused imports, deprecations)
-- Runs the full unit test suite
-- Checks that every new class has a corresponding test file
-- Checks that every Compose screen has preview coverage for all UI state fields
-- Runs instrumented tests on a connected device and exercises the app via adb/UIAutomator
-- Validates every acceptance criterion from the user story against the actual codebase
-- Closes the story, syncs specifications, and archives the change artefacts
+- Spawns sub-agents for each verification gate (Sonnet for reasoning-heavy checks, Haiku for mechanical commands)
+- After each gate: reads PASS/FAIL result, stops and reports to user on failure
+- Verification gates: OpenSpec verify, TODO scan, security review, build, unit tests, test file coverage, Compose preview coverage, on-device tests, Definition of Done
+- Post-verification: closes story, syncs specs, archives change, updates documentation
 - Produces a detailed verification report with pass/fail status for each gate
 
 ---
@@ -211,7 +205,6 @@ The other guidelines file are primarily used by the SDLC commands and describe h
 
 ## TODOs and improvements
 
-- Multi-agent orchestration for verification
 - Add support for Cursor, OpenCOde
 - Define how to handle changes/fix after propose change: every unexpected change on the code in an open story should update story and specs, or at least check if they are affected
 - Learn a lesson from a failure: the agent should be able to update the structure in case it spots a failure
