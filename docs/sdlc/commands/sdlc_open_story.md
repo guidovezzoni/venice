@@ -1,5 +1,11 @@
 Please open the user story for development: $ARGUMENTS.
 
+This command uses sub-agent orchestration: self-contained steps are delegated to separate sub-agents with fresh context windows, using cheaper models (Sonnet/Haiku) where appropriate. Interactive steps (git operations, user questions) remain with the orchestrator.
+
+Sub-agent orchestration is the default execution strategy for this command.
+
+## Steps
+
 Follow these steps:
 
 1. **Ensure main is up-to-date.** If the current branch is not main, check for active changes and inform the user about the current branch and changes, then ask what they want to do: DO NOT MAKE ASSUMPTIONS and DO NOT DELETE DATA. Once on main, fetch and pull the latest changes. If the pull fails or there are conflicts, inform the user and ask how to proceed: DO NOT MAKE ASSUMPTIONS.
@@ -12,30 +18,157 @@ Follow these steps:
    1. The new branch should live under the "feature" folder.
    2. The new branch should start with the ticket number or reference of the user story.
 
-5. **Open the user story.** Perform the **Opening** operation as defined in @docs/guidelines/guidelines-userstories.md.
+5. **Open the user story (sub-agent).** Spawn a sub-agent to perform the **Opening** operation.
 
-6. **Refine the user story.** Analyse and refine the resolved user story following these steps:
-   1. You are now an expert Product Manager, Business Analyst, with a strong engineering background, and a special expertise in GDPR, sensitive information, and security.
-   2. Read the user story from @docs/userstories. If you cannot find it ask the user what user story should be used.
-   3. Understand the problem described in the ticket.
-   4. Analyse the User Story and decide whether it's a well-defined User Story. It is so when it's fully defined according to product's best practices, it should include:
-      1. A full description of the functionality
-      2. A comprehensive list of fields to be updated
-      3. The structure and URLs of the necessary endpoints
-      4. The files to be modified according to the architecture and best practices
-      5. How to create Unit Tests
-      6. How to update any relevant documentation
-      7. Highlight any security potential issue and how the suggested solution addresses them
-      8. Highlight any performance potential issue and how the suggested solution addresses them
-      9. Highlight any GDPR and sensitive information potential issue and how the suggested solution addresses them
-      10. Highlight any other concern related to non-functional requirement and how the suggested solution addresses them
-      11. The steps required for the task to be considered complete
-   5. **Stay at the "what" level, not the "how."** The refinement should focus on requirements, acceptance criteria, data models, and the external-facing behaviour. Do NOT prescribe architecture decisions (e.g. which HTTP library to use, where invalidation logic should live, specific design patterns) — those belong in the propose_change phase where they can be explored against the real codebase. Acceptance criteria should describe observable outcomes without implying hidden complexity (e.g. state-tracking flags, extra DB columns) that hasn't been validated against the actual cost. When listing files to modify, describe the intent (e.g. "persist legs locally") not the solution (e.g. "use HttpURLConnection").
-   6. If the current user story lacks the technical and specific detail required to allow the developer to be fully autonomous when completing it, provide an improved story that is clearer, more specific, and more in line with product best practices described in step 4. Use the technical context you will find in @docs/guidelines. Return it in markdown format.
-   7. Update the user story file, adding the new content at the top of the file, and leaving the old user story at the end. Prepend the old user story with an h2 tag "Original user story" and update the old story's titles accordingly - if there was a "## Title" it would become "### Title" and so on. Apply proper formatting to make it readable and visually clear, using appropriate text types (lists, code snippets...).
+   ```
+   Agent(
+     description: "Open user story",
+     model: "haiku",
+     prompt: "<constructed prompt>"
+   )
+   ```
 
-7. **Add a report.** Create or update the report for this user story following @docs/guidelines/guidelines-reports.md. The section should summarise: the user story name, the branch created, and a brief summary of the story refinement.
+   **Sub-agent prompt:**
+   ```
+   You are performing a file-management operation to open a user story for development.
 
-8. **Display the summary.** Output the same summary on screen so the user can see what was done.
+   ## Task
+
+   Perform the Opening operation as defined in the user story guidelines.
+
+   Read the guidelines at: docs/guidelines/guidelines-userstories.md
+
+   Then apply the Opening operation to the user story file at:
+     {USER_STORY_FILE_PATH}
+
+   Update the index file at: docs/userstories/index.md to reflect the new status/filename.
+
+   ## Rules
+   - Use `git mv` (not plain mv) so git tracks any renames
+   - Follow the exact Opening procedure from the guidelines
+   - Update the index link to match the new filename
+
+   ## When Done
+   Report:
+   1. What operation was performed (rename, status change, etc.)
+   2. Confirm the index was updated
+   3. Any issues encountered
+   ```
+
+   **Verification:** After the sub-agent returns, confirm the user story file is in the expected state and the index is updated.
+
+   **Failure handling:** If the sub-agent fails, retry once with Sonnet. If still failing, perform the operation inline.
+
+6. **Refine the user story (sub-agent).** Spawn a sub-agent to analyse and refine the user story.
+
+   ```
+   Agent(
+     description: "Refine user story",
+     model: "opus",
+     prompt: "<constructed prompt>"
+   )
+   ```
+
+   **Sub-agent prompt:**
+   ```
+   You are an expert Product Manager, Business Analyst, with a strong engineering background,
+   and a special expertise in GDPR, sensitive information, and security.
+
+   ## Task
+
+   Analyse and refine the user story at: {USER_STORY_FILE_PATH}
+
+   ## Context Files
+   - User story: {USER_STORY_FILE_PATH}
+   - Android guidelines: docs/guidelines/guidelines-android.md
+   - Process guidelines: docs/guidelines/guidelines-process.md
+
+   ## Refinement Requirements
+
+   Analyse the user story and enrich it so it is fully defined. The refined story must include:
+   1. A full description of the functionality
+   2. A comprehensive list of fields to be updated
+   3. The structure and URLs of the necessary endpoints
+   4. The files to be modified according to the architecture and best practices
+   5. How to create Unit Tests
+   6. How to update any relevant documentation
+   7. Security potential issues and mitigations
+   8. Performance potential issues and mitigations
+   9. GDPR and sensitive information potential issues and mitigations
+   10. Other non-functional requirement concerns and mitigations
+   11. The steps required for the task to be considered complete
+
+   ## Critical Constraint
+   Stay at the "what" level, not the "how." Focus on requirements, acceptance criteria,
+   data models, and external-facing behaviour. Do NOT prescribe architecture decisions
+   (e.g. which HTTP library to use, where invalidation logic should live, specific design
+   patterns) — those belong in the propose_change phase where they can be explored against
+   the real codebase. Acceptance criteria should describe observable outcomes without implying
+   hidden complexity that hasn't been validated against the actual cost. When listing files to
+   modify, describe the intent (e.g. "persist legs locally") not the solution.
+
+   ## Output Format
+   Update the user story file:
+   - Add the refined content at the TOP of the file
+   - Leave the original story at the bottom, prepended with "## Original user story"
+   - Downgrade original headings by one level (## becomes ###, etc.)
+   - Apply proper formatting (lists, code snippets, etc.)
+
+   ## When Done
+   Report:
+   1. Summary of refinements made (bullet points)
+   2. Key concerns identified (security, performance, GDPR)
+   3. Confirm the file was updated with new content at top and original at bottom
+   4. Any assumptions made (these will be reviewed by the orchestrator)
+   ```
+
+   **Verification:** After the sub-agent returns, read the user story file and confirm it contains refined content at the top and the original story at the bottom under "## Original user story".
+
+   **Failure handling:** If the sub-agent fails or produces incomplete output, retry once with Opus. If still failing, the orchestrator performs the refinement itself.
+
+7. **Add a report (sub-agent).** Spawn a sub-agent to create or update the report.
+
+   ```
+   Agent(
+     description: "Add opening report",
+     model: "haiku",
+     prompt: "<constructed prompt>"
+   )
+   ```
+
+   **Sub-agent prompt:**
+   ```
+   You are generating a report section for a user story lifecycle event.
+
+   ## Task
+
+   Create or update the report for this user story following the report guidelines.
+
+   ## Report Data
+   - Story ID: {STORY_ID}
+   - Story title: {STORY_TITLE}
+   - Branch: {BRANCH_NAME}
+   - Date: {ISO_DATE}
+   - Refinement summary: {REFINEMENT_SUMMARY_FROM_STEP_6}
+
+   ## Guidelines
+   Read the report guidelines at: docs/guidelines/guidelines-reports.md
+
+   ## Instructions
+   The section should summarise: the user story name, the branch created, and a brief
+   summary of the story refinement.
+
+   ## When Done
+   Report:
+   1. Whether the file was created or updated
+   2. Confirm the section was appended correctly
+   3. Any issues encountered
+   ```
+
+   **Verification:** After the sub-agent returns, confirm the report file exists and contains the new section.
+
+   **Failure handling:** If the sub-agent fails, retry once. If still failing, the orchestrator generates the report inline.
+
+8. **Display the summary.** Output the summary on screen so the user can see what was done: the user story opened, branch created, and key points from the refinement.
 
 9. **Suggest a commit message.** Suggest a commit message following @docs/guidelines/guidelines-git.md.
