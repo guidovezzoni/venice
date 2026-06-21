@@ -5,10 +5,11 @@ The UI layer SHALL define a `LegSummary` composable in `ui/screens/tripdetail/Le
 - Accepts `modifier: Modifier = Modifier` and `leg: Leg`.
 - Displays a formatted distance, derived from `leg.distanceMetres` and the device locale:
   - For metric-unit locales: metres if < 1000, otherwise kilometres with one decimal place (e.g., "450 m" or "12.3 km").
-  - For imperial-unit locales (device locale country code `US`, `GB`, `LR`, or `MM`): miles with one decimal place, regardless of distance magnitude (e.g., "7.8 mi" or "0.3 mi").
+  - For imperial-unit locales: miles with one decimal place, regardless of distance magnitude (e.g., "7.8 mi" or "0.3 mi"). Imperial detection uses `android.icu.util.LocaleData.getMeasurementSystem()` on API 28+, with a hardcoded country-code fallback (`US`, `GB`, `LR`, `MM`) on API 24-27.
 - Displays a formatted duration derived from `leg.durationSeconds`: minutes if < 60 minutes, otherwise hours and minutes (e.g., "5 min" or "1h 30min").
 - Uses a compact, visually lightweight style (smaller text, secondary colour) to sit naturally between stop cards.
 - Delegates distance formatting to an internal, non-`@Composable` function that accepts `distanceMetres: Int` and `locale: Locale` so it is unit-testable without a Compose test rule.
+- Delegates imperial locale detection to an internal `isImperialLocale(locale: Locale): Boolean` function that uses `android.icu.util.LocaleData.getMeasurementSystem()` on API 28+ and falls back to a hardcoded country-code set (`US`, `GB`, `LR`, `MM`) on API 24-27.
 
 #### Scenario: Short distance display (metric)
 - **WHEN** `LegSummary` is rendered with a `leg.distanceMetres = 450`, `leg.durationSeconds = 300`, and a metric-unit device locale
@@ -19,11 +20,11 @@ The UI layer SHALL define a `LegSummary` composable in `ui/screens/tripdetail/Le
 - **THEN** the distance is displayed as "12.3 km" and the duration as "1h 30min"
 
 #### Scenario: Imperial-locale distance display
-- **WHEN** `LegSummary` is rendered with `leg.distanceMetres = 12545` and the device locale country code is `US`, `GB`, `LR`, or `MM`
+- **WHEN** `LegSummary` is rendered with `leg.distanceMetres = 12545` and `isImperialLocale` returns `true` for the device locale
 - **THEN** the distance is displayed as "7.8 mi"
 
 #### Scenario: Imperial-locale short distance display
-- **WHEN** `LegSummary` is rendered with `leg.distanceMetres = 483` (sub-mile) and the device locale country code is `US`, `GB`, `LR`, or `MM`
+- **WHEN** `LegSummary` is rendered with `leg.distanceMetres = 483` (sub-mile) and `isImperialLocale` returns `true` for the device locale
 - **THEN** the distance is displayed as "0.3 mi" (miles are always used for imperial locales; no feet-based formatting)
 
 #### Scenario: Distance rounding

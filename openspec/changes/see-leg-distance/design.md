@@ -21,13 +21,13 @@ There is no locale-detection utility anywhere in the codebase; this is a green-f
 
 ## Decisions
 
-### 1. Imperial locale detection: hardcoded country-code set
+### 1. Imperial locale detection: dual-strategy with API-level gating
 
-**Decision**: Define `private val IMPERIAL_UNIT_COUNTRY_CODES = setOf("US", "GB", "LR", "MM")` in `LegSummary.kt` and check `locale.country` against it.
+**Decision**: Use `android.icu.util.LocaleData.getMeasurementSystem()` on API 28+ to detect imperial measurement systems. On API 24-27, fall back to a hardcoded country-code set `setOf("US", "GB", "LR", "MM")` checked against `locale.country`. Encapsulate this in an `internal fun isImperialLocale(locale: Locale): Boolean` function in `LegSummary.kt`.
 
-**Rationale**: Simple, deterministic, works from API 24 onward (no dependency on `LocaleData`/`UnitSystem` APIs that require higher API levels). Matches the four countries explicitly named in the acceptance criteria (US, UK, Liberia, Myanmar).
+**Rationale**: `getMeasurementSystem()` is the platform-canonical way to detect measurement systems and handles edge cases (e.g. user-overridden locale settings) that a static country list cannot. However, it requires API 28, while the app's minSdk is 24. The hardcoded fallback covers the gap for older devices, matching the four countries explicitly named in the acceptance criteria.
 
-**Alternative considered**: `android.icu.util.LocaleData.getMeasurementSystem()` — rejected because it requires API 28+ and the app's min SDK is 24.
+**Alternative considered**: Hardcoded country-code set only — simpler but ignores the system API when it is available, missing user-level locale overrides on API 28+ devices.
 
 ### 2. Formatter becomes a plain function taking `Locale`, not `@Composable`
 
@@ -58,6 +58,6 @@ There is no locale-detection utility anywhere in the codebase; this is a green-f
 ## Risks / Trade-offs
 
 - **[Risk] `internal` visibility on `formatDistance` slightly widens its accessibility beyond the file** → Acceptable: `internal` is module-scoped, not public API, and is the minimum visibility needed for direct unit testing without Compose.
-- **[Risk] Hardcoded 4-country imperial set may miss other imperial-leaning locales (e.g. Caribbean nations)** → Acceptable per explicit acceptance criteria scope (US, UK, Liberia, Myanmar only); documented as a hardcoded set so future maintainers can extend it deliberately.
+- **[Risk] Hardcoded 4-country fallback (API 24-27) may miss other imperial-leaning locales** → Mitigated: on API 28+ the platform API handles this correctly. The hardcoded set only applies to the shrinking population of API 24-27 devices and covers the four most significant imperial countries.
 - **[Trade-off] No feet-based sub-mile formatting** → Simpler implementation and consistent unit display; acceptable per user clarification (always show miles, e.g. "0.3 mi").
 - **[Trade-off] Passing `Resources` instead of relying on `stringResource()`** → Slightly more verbose call site inside the composable, but unlocks fast JUnit coverage for all rounding/threshold cases.

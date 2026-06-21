@@ -4,7 +4,7 @@
 
 ## What Changes
 
-- `LegSummary.kt` gains a locale-aware distance formatter: imperial-unit locales (country code `US`, `GB`, `LR`, `MM`) display distance in miles with one decimal place (e.g. "7.8 mi"); all other locales keep the existing metric behaviour (metres below 1000 m, kilometres with one decimal place at or above 1000 m).
+- `LegSummary.kt` gains a locale-aware distance formatter: imperial-unit locales display distance in miles with one decimal place (e.g. "7.8 mi"); all other locales keep the existing metric behaviour (metres below 1000 m, kilometres with one decimal place at or above 1000 m). Imperial detection uses `android.icu.util.LocaleData.getMeasurementSystem()` on API 28+, with a hardcoded country-code fallback (`US`, `GB`, `LR`, `MM`) on API 24-27.
 - The formatter becomes a plain (non-`@Composable`) top-level internal function taking `distanceMetres: Int` and `locale: Locale`, so it is unit-testable without a Compose test rule. The composable passes `Locale.getDefault()`.
 - New string resource `trip_detail_leg_distance_miles` ("%.1f mi") added to `values/`, `values-it/`, `values-es-rES/` `strings.xml`.
 - `LegSummary` previews extended with an imperial-locale variant.

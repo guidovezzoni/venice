@@ -148,7 +148,7 @@
           </tr>
           <tr>
             <td>Imperial locale detection API?</td>
-            <td>Hardcoded country set (<code>US</code>, <code>GB</code>, <code>LR</code>, <code>MM</code>) checked against <code>Locale.getDefault().country</code>.</td>
+            <td>Dual strategy: <code>LocaleData.getMeasurementSystem()</code> on API 28+, hardcoded country set (<code>US</code>, <code>GB</code>, <code>LR</code>, <code>MM</code>) fallback on API 24-27.</td>
           </tr>
           <tr>
             <td>Where should the testable formatting function live?</td>
@@ -175,10 +175,10 @@
       </table>
 
       <h3>Task Structure</h3>
-      <p>21 tasks across 5 sections:</p>
+      <p>23 tasks across 5 sections:</p>
       <ul>
         <li><strong>Prerequisites</strong> (4 tasks): string resources, constants setup</li>
-        <li><strong>Locale-Aware Distance Formatting — BDD</strong> (10 tasks): 8 test tasks + 2 implementation tasks</li>
+        <li><strong>Locale-Aware Distance Formatting — BDD</strong> (12 tasks): 10 test tasks (incl. <code>isImperialLocale</code>) + 2 implementation tasks</li>
         <li><strong>LegSummary Compose UI Coverage — BDD</strong> (3 tasks): 2 test tasks + 1 implementation/confirmation</li>
         <li><strong>Preview Coverage</strong> (1 task): imperial-locale preview</li>
         <li><strong>Verification</strong> (3 tasks): build check, instrumented tests, on-device verification</li>
@@ -186,7 +186,7 @@
 
       <h3>Key Design Decisions</h3>
       <ul>
-        <li>Imperial detection via hardcoded <code>setOf("US", "GB", "LR", "MM")</code> — works at minSdk 24</li>
+        <li>Imperial detection via <code>LocaleData.getMeasurementSystem()</code> on API 28+, hardcoded <code>setOf("US", "GB", "LR", "MM")</code> fallback on API 24-27</li>
         <li><code>formatDistance</code> extracted to non-<code>@Composable</code> <code>internal</code> function taking <code>Locale</code> parameter for unit testability</li>
         <li>Conversion constant: <code>METRES_PER_MILE = 1609.344</code></li>
         <li>Spec drift in <code>route-display</code> reconciled: composable signature, duration format, and new imperial requirement</li>
