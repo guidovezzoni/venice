@@ -68,7 +68,7 @@ Follow these steps:
    Checks to include in the sub-agent prompt (for compliance with @docs/guidelines/guidelines-android.md):
    1. Verify `gradle/libs.versions.toml` declares a plugin with id `org.jetbrains.kotlinx.kover` in the `[plugins]` section.
    2. Verify `app/build.gradle.kts` applies the kover plugin (look for `alias(libs.plugins.kover)` or equivalent).
-   3. Read `app/build.gradle.kts` and verify a kover verify rule enforces a minimum bound of 80 (look for `minBound(80)` or equivalent in the `kover` configuration block).
+   3. Read `app/build.gradle.kts` and verify a kover verify rule enforces a minimum bound of 95 (look for `minBound(95)` or equivalent in the `kover` configuration block).
 
    ### Category: Unit Tests
 

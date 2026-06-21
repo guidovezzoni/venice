@@ -83,7 +83,7 @@ End-to-end quality gate before a story is considered done.
 
 - Spawns sub-agents for each verification gate (Sonnet for reasoning-heavy checks, Haiku for mechanical commands)
 - After each gate: reads PASS/FAIL result, stops and reports to user on failure
-- Verification gates: OpenSpec verify, TODO scan, security review, build, unit tests, test file coverage, Compose preview coverage, on-device tests, Definition of Done
+- Verification gates: OpenSpec verify, TODO scan, security review, build, unit tests, coverage comparison (before/after), test file coverage, Compose preview coverage, on-device tests, Definition of Done
 - Post-verification: closes story, syncs specs, archives change, updates documentation
 - Produces a detailed verification report with pass/fail status for each gate
 
@@ -226,7 +226,6 @@ The other guidelines file are primarily used by the SDLC commands and describe h
   - do not use for the expected value, the same internal function being tested -> this however conflicts with BDD's black box behaviour
   - insert a comment with the AAA?
 - There are several decisions that have been taken just "because it's a small project": that should not happen: all the projects I start are small and they will likely  become bigger, so they should use the expected architecture and structures.
-- Check coverage - 100% ???
 
 Not sure what's best yet:
 

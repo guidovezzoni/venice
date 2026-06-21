@@ -255,7 +255,82 @@ Follow these steps:
 
    **Failure handling:** If the sub-agent fails, retry once. If Haiku, escalate to Sonnet on retry.
 
-7. **Verify test file coverage (sub-agent).** — BLOCKING GATE
+7. **Generate coverage comparison (sub-agent).** — NON-BLOCKING (informational)
+
+   ```
+   Agent(
+     description: "Coverage comparison before/after",
+     model: "sonnet",
+     prompt: "<constructed prompt>"
+   )
+   ```
+
+   **Sub-agent prompt:**
+   ```
+   You are generating a code coverage comparison between the base of this story's
+   branch and its current state (HEAD), broken down by Kover coverage category.
+
+   ## Context
+   - Current branch: {CURRENT_BRANCH}
+   - Base branch: main
+
+   ## Task
+
+   1. Determine the merge-base commit:
+      ```
+      git merge-base main HEAD
+      ```
+
+   2. Generate the "after" report at HEAD:
+      ```
+      ./gradlew koverXmlReport
+      ```
+      Parse `app/build/reports/kover/report.xml` and, for each `<counter type="...">`
+      element (INSTRUCTION, BRANCH, LINE, METHOD, CLASS), compute:
+      `percentage = covered / (covered + missed) * 100`
+
+   3. Generate the "before" report at the merge-base, without disturbing the current
+      working tree — use an isolated git worktree rather than checking out the branch in place:
+      ```
+      git worktree add /tmp/venice-coverage-baseline <merge-base-sha>
+      cd /tmp/venice-coverage-baseline && ./gradlew koverXmlReport
+      ```
+      Parse the resulting `report.xml` the same way.
+
+   4. Remove the temporary worktree once finished:
+      ```
+      git worktree remove /tmp/venice-coverage-baseline --force
+      ```
+
+   5. Compute the delta (after − before) for each category, in percentage points (pp).
+
+   ## Output Format — CRITICAL
+
+   ### RESULT: PASS or FAIL
+
+   PASS once the comparison table is produced. FAIL only if a Gradle command itself
+   errors out (not if coverage simply went down — this step never blocks on coverage
+   regressing, it only reports it).
+
+   ### Coverage Comparison
+   | Category | Before | After | Delta |
+   |---|---|---|---|
+   | Instructions | XX.XX% | XX.XX% | +X.XX pp / -X.XX pp |
+   | Branches | XX.XX% | XX.XX% | +X.XX pp / -X.XX pp |
+   | Lines | XX.XX% | XX.XX% | +X.XX pp / -X.XX pp |
+   | Methods | XX.XX% | XX.XX% | +X.XX pp / -X.XX pp |
+   | Classes | XX.XX% | XX.XX% | +X.XX pp / -X.XX pp |
+   ```
+
+   **Gate decision:** Informational only — never blocks subsequent steps, even if
+   coverage decreased. If the baseline build itself cannot be produced (e.g. the
+   merge-base predates the Kover setup), note this in the report and proceed with the
+   "after" figures only.
+
+   **Failure handling:** If the sub-agent fails, retry once with Sonnet. If it still
+   fails, proceed without the comparison and note its absence in the report.
+
+8. **Verify test file coverage (sub-agent).** — BLOCKING GATE
 
    ```
    Agent(
@@ -303,7 +378,7 @@ Follow these steps:
 
    **Failure handling:** If the sub-agent fails, retry once with Sonnet.
 
-8. **Verify Compose preview coverage (sub-agent).** — BLOCKING GATE
+9. **Verify Compose preview coverage (sub-agent).** — BLOCKING GATE
 
    ```
    Agent(
@@ -349,7 +424,7 @@ Follow these steps:
 
    **Failure handling:** If the sub-agent fails, retry once with Sonnet.
 
-9. **Run on-device tests (orchestrator + sub-agent).** — BLOCKING GATE
+10. **Run on-device tests (orchestrator + sub-agent).** — BLOCKING GATE
 
    Apply the **device gate** (see above) BEFORE spawning the sub-agent. Only proceed once a device is confirmed connected.
 
@@ -418,7 +493,7 @@ Follow these steps:
 
    **Failure handling:** If the sub-agent fails, retry once. If Haiku, escalate to Sonnet on retry.
 
-10. **Verify the Definition of Done (sub-agent).** — BLOCKING GATE
+11. **Verify the Definition of Done (sub-agent).** — BLOCKING GATE
 
     ```
     Agent(
@@ -464,7 +539,7 @@ Follow these steps:
 
     **Failure handling:** If the sub-agent fails, retry once with Sonnet.
 
-11. **Close the user story (sub-agent).**
+12. **Close the user story (sub-agent).**
 
     ```
     Agent(
@@ -505,7 +580,7 @@ Follow these steps:
 
     **Failure handling:** Retry once. If Haiku, escalate to Sonnet on retry.
 
-12. **Sync delta specs (sub-agent).**
+13. **Sync delta specs (sub-agent).**
 
     ```
     Agent(
@@ -539,7 +614,7 @@ Follow these steps:
 
     **Failure handling:** Retry once with Sonnet.
 
-13. **Archive the OpenSpec change (sub-agent).**
+14. **Archive the OpenSpec change (sub-agent).**
 
     ```
     Agent(
@@ -573,7 +648,7 @@ Follow these steps:
 
     **Failure handling:** Retry once. If Haiku, escalate to Sonnet on retry.
 
-14. **Verify README.md and AGENTS.md are in sync (sub-agent).**
+15. **Verify README.md and AGENTS.md are in sync (sub-agent).**
 
     ```
     Agent(
@@ -619,7 +694,7 @@ Follow these steps:
 
     **Failure handling:** Retry once with Sonnet.
 
-15. **Add a report (sub-agent).**
+16. **Add a report (sub-agent).**
 
     ```
     Agent(
@@ -644,13 +719,14 @@ Follow these steps:
     - Security review: {RESULT_FROM_STEP_4}
     - Clean build: {RESULT_FROM_STEP_5}
     - Unit tests: {RESULT_FROM_STEP_6}
-    - Test file coverage: {RESULT_FROM_STEP_7}
-    - Compose preview coverage: {RESULT_FROM_STEP_8}
-    - On-device tests: {RESULT_FROM_STEP_9}
-    - Definition of Done: {RESULT_FROM_STEP_10}
-    - Archive location: {RESULT_FROM_STEP_13}
-    - Spec sync status: {RESULT_FROM_STEP_12}
-    - README/AGENTS sync: {RESULT_FROM_STEP_14}
+    - Coverage comparison table: {COVERAGE_TABLE_FROM_STEP_7}
+    - Test file coverage: {RESULT_FROM_STEP_8}
+    - Compose preview coverage: {RESULT_FROM_STEP_9}
+    - On-device tests: {RESULT_FROM_STEP_10}
+    - Definition of Done: {RESULT_FROM_STEP_11}
+    - Archive location: {RESULT_FROM_STEP_14}
+    - Spec sync status: {RESULT_FROM_STEP_13}
+    - README/AGENTS sync: {RESULT_FROM_STEP_15}
     - Final outcome: PASSED
     - Renamed filename: {NEW_STORY_FILENAME}
 
@@ -660,6 +736,11 @@ Follow these steps:
     ## Instructions
     The section should summarise all the data above in a structured format following
     the report guidelines. Include each gate's PASS/FAIL status with details.
+
+    Render the Coverage Comparison table from step 7 as an HTML `<table>` inside this
+    section, using the existing `table`/`th`/`td` styles from the report skeleton —
+    columns: Category, Before, After, Delta. Do this even if some gates failed, as
+    long as the coverage comparison data is available.
 
     ## When Done
     Report:
@@ -671,6 +752,6 @@ Follow these steps:
 
     **Failure handling:** Retry once. If still failing, the orchestrator generates the report inline.
 
-16. **Display the summary.** Output the summary on screen so the user can see what was verified and archived.
+17. **Display the summary.** Output the summary on screen so the user can see what was verified and archived, including the Coverage Comparison table from step 7 (Category | Before | After | Delta), rendered as a markdown table.
 
-17. **Suggest a commit message.** Suggest a commit message following @docs/guidelines/guidelines-git.md.
+18. **Suggest a commit message.** Suggest a commit message following @docs/guidelines/guidelines-git.md.

@@ -252,8 +252,8 @@ Unit tests should follow these criteria:
 - use UnconfinedTestDispatcher if required
 - use @MockK notation if required
 - extract in a variable the expected value before asserting
-- cover all reasonable cases, but keeps the coverage over 80%
-- Target 80%+ coverage
+- cover all reasonable cases, but keeps the coverage over 95%
+- Target 95%+ coverage
 - **MVI ViewModel tests**: Test by dispatching `UiIntent` values via `onIntent()` and asserting the resulting `uiState` and any emitted `uiEffect`. Never test internal ViewModel methods directly.
 - **Consolidate test setup**: When a ViewModel (or any SUT) is instantiated in multiple tests, use a single `createViewModel(...)` factory method with default parameters for varied inputs (e.g. `stops: List<Stop> = emptyList()`, `legs: List<Leg> = emptyList()`). Tests should never inline the full constructor call — extend the factory helper instead.
 
