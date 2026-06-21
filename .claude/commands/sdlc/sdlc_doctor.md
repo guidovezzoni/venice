@@ -1,0 +1,1 @@
+../../../docs/sdlc/commands/sdlc_doctor.md

@@ -17,21 +17,26 @@ $updated = 0
 function Link-File {
     param([string]$Src, [string]$Target)
 
+    $targetDir = Split-Path -Parent $Target
+    Push-Location $targetDir
+    $relSrc = Resolve-Path -Relative $Src
+    Pop-Location
+
     if (Test-Path $Target) {
         $item = Get-Item $Target -Force
-        if ($item.LinkType -eq "SymbolicLink" -and $item.Target -eq $Src) {
+        if ($item.LinkType -eq "SymbolicLink" -and $item.Target -eq $relSrc) {
             Write-Host "  skip  $Target (already correct)"
             $script:skipped++
             return
         }
         Remove-Item $Target -Force
-        New-Item -ItemType SymbolicLink -Path $Target -Target $Src | Out-Null
-        Write-Host "  update $Target -> $Src"
+        New-Item -ItemType SymbolicLink -Path $Target -Target $relSrc | Out-Null
+        Write-Host "  update $Target -> $relSrc"
         $script:updated++
     }
     else {
-        New-Item -ItemType SymbolicLink -Path $Target -Target $Src | Out-Null
-        Write-Host "  create $Target -> $Src"
+        New-Item -ItemType SymbolicLink -Path $Target -Target $relSrc | Out-Null
+        Write-Host "  create $Target -> $relSrc"
         $script:created++
     }
 }

@@ -1,1 +1,1 @@
-/home/guido/dev/personal/venice/docs/sdlc/commands/sdlc_verify_story.md
+../../../docs/sdlc/commands/sdlc_verify_story.md

@@ -1,6 +1,6 @@
 # SDLC — Agentic AI Software Development Lifecycle
 
-SDLC is a set of four commands that let an AI coding agent autonomously drive the full lifecycle of a user story — from opening to verified delivery — while keeping the human developer in control of key decisions.
+SDLC is a set of five commands that let an AI coding agent autonomously drive the full lifecycle of a user story — from opening to verified delivery — while keeping the human developer in control of key decisions.
 
 Built on top of [OpenSpec](https://github.com/Fission-AI/OpenSpec/) (Spec-Driven Development), SDLC replaces manual task management with agentic orchestration: the AI reads specifications, reasons about architecture, writes and verifies code, and produces auditable reports at every stage.
 
@@ -19,7 +19,7 @@ An example of its usage can be found in [venice](https://github.com/guidovezzoni
 | **On-device verification**          | The agent installs the app on a physical device, interacts with it via UIAutomator, and verifies behaviour autonomously               |
 | **Specification grounding**         | All code generation is anchored to living specs and acceptance criteria — not just free-form prompts                                  |
 
-## The Four Commands
+## The Five Commands
 
 ### 1. `/sdlc_open_story` — Open and Refine
 
@@ -89,6 +89,22 @@ End-to-end quality gate before a story is considered done.
 
 ---
 
+### 5. `/sdlc_doctor` — Project Health Check
+
+Validates that the project is correctly configured for the SDLC workflow.
+
+**Recommended agent:** Sonnet — orchestration is procedural; Haiku sub-agents run the checks.
+
+**What the agent does autonomously:**
+
+- Spawns parallel Haiku sub-agents, one per check category, for maximum speed
+- All checks are read-only — no files are modified, no builds are run (except a lightweight `./gradlew tasks`)
+- Checks cover: OpenSpec configuration, security review plugin, Detekt static analysis, Kover code coverage, unit test dependencies, Fastlane, CI/CD pipeline, and Gradle project health
+- Aggregates results into a summary report with `[PASS]`/`[FAIL]` status per check
+- Reports which items need attention for full SDLC workflow compatibility
+
+---
+
 ## End-to-End Flow
 
 ```
@@ -112,6 +128,11 @@ End-to-end quality gate before a story is considered done.
 └─────────────┬────────────┘
               ▼
         Done (merged)
+
+
+┌──────────────────────────┐
+│    /doctor               │  Project health check (run anytime)
+└──────────────────────────┘
 ```
 
 ## Key Design Decisions

@@ -1,1 +1,1 @@
-/home/guido/dev/personal/venice/docs/sdlc/commands/sdlc_implement_change.md
+../../../docs/sdlc/commands/sdlc_implement_change.md
