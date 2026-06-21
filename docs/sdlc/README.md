@@ -83,7 +83,7 @@ End-to-end quality gate before a story is considered done.
 
 - Spawns sub-agents for each verification gate (Sonnet for reasoning-heavy checks, Haiku for mechanical commands)
 - After each gate: reads PASS/FAIL result, stops and reports to user on failure
-- Verification gates: OpenSpec verify, TODO scan, security review, build, unit tests, coverage comparison (before/after), test file coverage, Compose preview coverage, on-device tests, Definition of Done
+- Verification gates: OpenSpec verify, TODO scan, security review, build, unit tests, coverage report, test file coverage, Compose preview coverage, on-device tests, Definition of Done
 - Post-verification: closes story, syncs specs, archives change, updates documentation
 - Produces a detailed verification report with pass/fail status for each gate
 

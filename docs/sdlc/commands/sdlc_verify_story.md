@@ -255,11 +255,11 @@ Follow these steps:
 
    **Failure handling:** If the sub-agent fails, retry once. If Haiku, escalate to Sonnet on retry.
 
-7. **Generate coverage comparison (sub-agent).** — NON-BLOCKING (informational)
+7. **Generate coverage report (sub-agent).** — NON-BLOCKING (informational)
 
    ```
    Agent(
-     description: "Coverage comparison before/after",
+     description: "Coverage report",
      model: "sonnet",
      prompt: "<constructed prompt>"
    )
@@ -267,68 +267,43 @@ Follow these steps:
 
    **Sub-agent prompt:**
    ```
-   You are generating a code coverage comparison between the base of this story's
-   branch and its current state (HEAD), broken down by Kover coverage category.
-
-   ## Context
-   - Current branch: {CURRENT_BRANCH}
-   - Base branch: main
+   You are generating a code coverage report for the current state of the branch
+   (HEAD), broken down by Kover coverage category.
 
    ## Task
 
-   1. Determine the merge-base commit:
-      ```
-      git merge-base main HEAD
-      ```
-
-   2. Generate the "after" report at HEAD:
+   1. Generate the coverage report:
       ```
       ./gradlew koverXmlReport
       ```
-      Parse `app/build/reports/kover/report.xml` and, for each `<counter type="...">`
+
+   2. Parse `app/build/reports/kover/report.xml` and, for each `<counter type="...">`
       element (INSTRUCTION, BRANCH, LINE, METHOD, CLASS), compute:
       `percentage = covered / (covered + missed) * 100`
-
-   3. Generate the "before" report at the merge-base, without disturbing the current
-      working tree — use an isolated git worktree rather than checking out the branch in place:
-      ```
-      git worktree add /tmp/venice-coverage-baseline <merge-base-sha>
-      cd /tmp/venice-coverage-baseline && ./gradlew koverXmlReport
-      ```
-      Parse the resulting `report.xml` the same way.
-
-   4. Remove the temporary worktree once finished:
-      ```
-      git worktree remove /tmp/venice-coverage-baseline --force
-      ```
-
-   5. Compute the delta (after − before) for each category, in percentage points (pp).
 
    ## Output Format — CRITICAL
 
    ### RESULT: PASS or FAIL
 
-   PASS once the comparison table is produced. FAIL only if a Gradle command itself
-   errors out (not if coverage simply went down — this step never blocks on coverage
-   regressing, it only reports it).
+   PASS once the coverage table is produced. FAIL only if the Gradle command itself
+   errors out (not if coverage is below target — this step never blocks on coverage,
+   it only reports it; the 95% minimum is already enforced separately by
+   `koverVerify` as part of `./gradlew check` in step 5).
 
-   ### Coverage Comparison
-   | Category | Before | After | Delta |
-   |---|---|---|---|
-   | Instructions | XX.XX% | XX.XX% | +X.XX pp / -X.XX pp |
-   | Branches | XX.XX% | XX.XX% | +X.XX pp / -X.XX pp |
-   | Lines | XX.XX% | XX.XX% | +X.XX pp / -X.XX pp |
-   | Methods | XX.XX% | XX.XX% | +X.XX pp / -X.XX pp |
-   | Classes | XX.XX% | XX.XX% | +X.XX pp / -X.XX pp |
+   ### Coverage Report
+   | Category | Coverage |
+   |---|---|
+   | Instructions | XX.XX% |
+   | Branches | XX.XX% |
+   | Lines | XX.XX% |
+   | Methods | XX.XX% |
+   | Classes | XX.XX% |
    ```
 
-   **Gate decision:** Informational only — never blocks subsequent steps, even if
-   coverage decreased. If the baseline build itself cannot be produced (e.g. the
-   merge-base predates the Kover setup), note this in the report and proceed with the
-   "after" figures only.
+   **Gate decision:** Informational only — never blocks subsequent steps.
 
    **Failure handling:** If the sub-agent fails, retry once with Sonnet. If it still
-   fails, proceed without the comparison and note its absence in the report.
+   fails, proceed without the report and note its absence in the report.
 
 8. **Verify test file coverage (sub-agent).** — BLOCKING GATE
 
@@ -719,7 +694,7 @@ Follow these steps:
     - Security review: {RESULT_FROM_STEP_4}
     - Clean build: {RESULT_FROM_STEP_5}
     - Unit tests: {RESULT_FROM_STEP_6}
-    - Coverage comparison table: {COVERAGE_TABLE_FROM_STEP_7}
+    - Coverage report table: {COVERAGE_TABLE_FROM_STEP_7}
     - Test file coverage: {RESULT_FROM_STEP_8}
     - Compose preview coverage: {RESULT_FROM_STEP_9}
     - On-device tests: {RESULT_FROM_STEP_10}
@@ -737,10 +712,10 @@ Follow these steps:
     The section should summarise all the data above in a structured format following
     the report guidelines. Include each gate's PASS/FAIL status with details.
 
-    Render the Coverage Comparison table from step 7 as an HTML `<table>` inside this
+    Render the Coverage Report table from step 7 as an HTML `<table>` inside this
     section, using the existing `table`/`th`/`td` styles from the report skeleton —
-    columns: Category, Before, After, Delta. Do this even if some gates failed, as
-    long as the coverage comparison data is available.
+    columns: Category, Coverage. Do this even if some gates failed, as long as the
+    coverage data is available.
 
     ## When Done
     Report:
@@ -752,6 +727,6 @@ Follow these steps:
 
     **Failure handling:** Retry once. If still failing, the orchestrator generates the report inline.
 
-17. **Display the summary.** Output the summary on screen so the user can see what was verified and archived, including the Coverage Comparison table from step 7 (Category | Before | After | Delta), rendered as a markdown table.
+17. **Display the summary.** Output the summary on screen so the user can see what was verified and archived, including the Coverage Report table from step 7 (Category | Coverage), rendered as a markdown table.
 
 18. **Suggest a commit message.** Suggest a commit message following @docs/guidelines/guidelines-git.md.
