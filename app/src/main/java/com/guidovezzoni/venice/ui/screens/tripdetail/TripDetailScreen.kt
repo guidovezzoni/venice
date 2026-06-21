@@ -140,7 +140,10 @@ fun TripDetailScreen(
                 )
                 startingPoint?.let { stop ->
                     legByFromStopId[stop.id]?.let { leg ->
-                            LegSummary(leg = leg)
+                        LegSummary(
+                            leg = leg,
+                            formattedDistance = uiState.formattedLegDistances[stop.id] ?: "",
+                        )
                     }
                 }
             }
@@ -184,7 +187,10 @@ fun TripDetailScreen(
                     },
                 )
                 legByFromStopId[stop.id]?.let { leg ->
-                    LegSummary(leg = leg)
+                    LegSummary(
+                        leg = leg,
+                        formattedDistance = uiState.formattedLegDistances[stop.id] ?: "",
+                    )
                 }
             }
             if (uiState.canAddMoreStops) {

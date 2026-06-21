@@ -1,6 +1,9 @@
 package com.guidovezzoni.venice.ui.viewmodel
 
+import android.app.Application
+import android.content.res.Resources
 import androidx.lifecycle.SavedStateHandle
+import com.guidovezzoni.venice.R
 import com.guidovezzoni.venice.domain.model.Leg
 import com.guidovezzoni.venice.domain.model.PlaceDetail
 import com.guidovezzoni.venice.domain.model.PlaceSuggestion
@@ -60,6 +63,7 @@ class TripDetailViewModelTest {
 
     private val testDispatcher = UnconfinedTestDispatcher()
 
+    private lateinit var application: Application
     private lateinit var setStopUseCase: SetStopUseCase
     private lateinit var moveStopUseCase: MoveStopUseCase
     private lateinit var editStopUseCase: EditStopUseCase
@@ -77,6 +81,12 @@ class TripDetailViewModelTest {
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
+        val mockResources = mockk<Resources>()
+        every { mockResources.getString(R.string.trip_detail_leg_distance_metres, any()) } returns "0 m"
+        every { mockResources.getString(R.string.trip_detail_leg_distance_kilometres, any()) } returns "0.0 km"
+        every { mockResources.getString(R.string.trip_detail_leg_distance_miles, any()) } returns "0.0 mi"
+        application = mockk()
+        every { application.resources } returns mockResources
         setStopUseCase = mockk()
         moveStopUseCase = mockk()
         editStopUseCase = mockk()
@@ -100,7 +110,7 @@ class TripDetailViewModelTest {
     private fun createViewModel(): TripDetailViewModel {
         every { observeStopsUseCase(TRIP_ID) } returns flowOf(emptyList())
         every { observeLegsUseCase(TRIP_ID) } returns flowOf(emptyList())
-        return TripDetailViewModel(setStopUseCase, moveStopUseCase, editStopUseCase, removeStopUseCase, markStopDepartedUseCase, undoMarkStopDepartedUseCase, calculateRouteUseCase, observeStopsUseCase, observeLegsUseCase, searchPlacesUseCase, getPlaceDetailUseCase, placeSearchRepository, savedStateHandle)
+        return TripDetailViewModel(application, setStopUseCase, moveStopUseCase, editStopUseCase, removeStopUseCase, markStopDepartedUseCase, undoMarkStopDepartedUseCase, calculateRouteUseCase, observeStopsUseCase, observeLegsUseCase, searchPlacesUseCase, getPlaceDetailUseCase, placeSearchRepository, savedStateHandle)
     }
 
     @Test
@@ -137,7 +147,7 @@ class TripDetailViewModelTest {
         every { observeLegsUseCase(TRIP_ID) } returns flowOf(emptyList())
         coEvery { setStopUseCase(TRIP_ID, PLACE_NAME, LATITUDE, LONGITUDE, StopType.STARTING_POINT) } returns Result.success(stop)
 
-        val viewModel = TripDetailViewModel(setStopUseCase, moveStopUseCase, editStopUseCase, removeStopUseCase, markStopDepartedUseCase, undoMarkStopDepartedUseCase, calculateRouteUseCase, observeStopsUseCase, observeLegsUseCase, searchPlacesUseCase, getPlaceDetailUseCase, placeSearchRepository, savedStateHandle)
+        val viewModel = TripDetailViewModel(application, setStopUseCase, moveStopUseCase, editStopUseCase, removeStopUseCase, markStopDepartedUseCase, undoMarkStopDepartedUseCase, calculateRouteUseCase, observeStopsUseCase, observeLegsUseCase, searchPlacesUseCase, getPlaceDetailUseCase, placeSearchRepository, savedStateHandle)
         viewModel.onIntent(TripDetailUiIntent.OnSetStartingPointClicked)
         viewModel.onIntent(TripDetailUiIntent.OnStartingPointConfirmed(PLACE_NAME, LATITUDE, LONGITUDE))
         advanceUntilIdle()
@@ -176,7 +186,7 @@ class TripDetailViewModelTest {
         every { observeStopsUseCase(TRIP_ID) } returns flowOf(listOf(expectedStop))
         every { observeLegsUseCase(TRIP_ID) } returns flowOf(emptyList())
 
-        val viewModel = TripDetailViewModel(setStopUseCase, moveStopUseCase, editStopUseCase, removeStopUseCase, markStopDepartedUseCase, undoMarkStopDepartedUseCase, calculateRouteUseCase, observeStopsUseCase, observeLegsUseCase, searchPlacesUseCase, getPlaceDetailUseCase, placeSearchRepository, savedStateHandle)
+        val viewModel = TripDetailViewModel(application, setStopUseCase, moveStopUseCase, editStopUseCase, removeStopUseCase, markStopDepartedUseCase, undoMarkStopDepartedUseCase, calculateRouteUseCase, observeStopsUseCase, observeLegsUseCase, searchPlacesUseCase, getPlaceDetailUseCase, placeSearchRepository, savedStateHandle)
 
         assertEquals(expectedStop, viewModel.uiState.value.startingPoint)
     }
@@ -222,7 +232,7 @@ class TripDetailViewModelTest {
         every { observeLegsUseCase(TRIP_ID) } returns flowOf(emptyList())
         coEvery { setStopUseCase(TRIP_ID, PLACE_NAME, LATITUDE, LONGITUDE, StopType.DESTINATION) } returns Result.success(destinationStop)
 
-        val viewModel = TripDetailViewModel(setStopUseCase, moveStopUseCase, editStopUseCase, removeStopUseCase, markStopDepartedUseCase, undoMarkStopDepartedUseCase, calculateRouteUseCase, observeStopsUseCase, observeLegsUseCase, searchPlacesUseCase, getPlaceDetailUseCase, placeSearchRepository, savedStateHandle)
+        val viewModel = TripDetailViewModel(application, setStopUseCase, moveStopUseCase, editStopUseCase, removeStopUseCase, markStopDepartedUseCase, undoMarkStopDepartedUseCase, calculateRouteUseCase, observeStopsUseCase, observeLegsUseCase, searchPlacesUseCase, getPlaceDetailUseCase, placeSearchRepository, savedStateHandle)
         viewModel.onIntent(TripDetailUiIntent.OnSetDestinationClicked)
         viewModel.onIntent(TripDetailUiIntent.OnDestinationConfirmed(PLACE_NAME, LATITUDE, LONGITUDE))
         advanceUntilIdle()
@@ -261,7 +271,7 @@ class TripDetailViewModelTest {
         every { observeStopsUseCase(TRIP_ID) } returns flowOf(listOf(expectedDestination))
         every { observeLegsUseCase(TRIP_ID) } returns flowOf(emptyList())
 
-        val viewModel = TripDetailViewModel(setStopUseCase, moveStopUseCase, editStopUseCase, removeStopUseCase, markStopDepartedUseCase, undoMarkStopDepartedUseCase, calculateRouteUseCase, observeStopsUseCase, observeLegsUseCase, searchPlacesUseCase, getPlaceDetailUseCase, placeSearchRepository, savedStateHandle)
+        val viewModel = TripDetailViewModel(application, setStopUseCase, moveStopUseCase, editStopUseCase, removeStopUseCase, markStopDepartedUseCase, undoMarkStopDepartedUseCase, calculateRouteUseCase, observeStopsUseCase, observeLegsUseCase, searchPlacesUseCase, getPlaceDetailUseCase, placeSearchRepository, savedStateHandle)
 
         assertEquals(expectedDestination, viewModel.uiState.value.destination)
     }
@@ -280,7 +290,7 @@ class TripDetailViewModelTest {
         every { observeStopsUseCase(TRIP_ID) } returns flowOf(listOf(startingPoint))
         every { observeLegsUseCase(TRIP_ID) } returns flowOf(emptyList())
 
-        val viewModel = TripDetailViewModel(setStopUseCase, moveStopUseCase, editStopUseCase, removeStopUseCase, markStopDepartedUseCase, undoMarkStopDepartedUseCase, calculateRouteUseCase, observeStopsUseCase, observeLegsUseCase, searchPlacesUseCase, getPlaceDetailUseCase, placeSearchRepository, savedStateHandle)
+        val viewModel = TripDetailViewModel(application, setStopUseCase, moveStopUseCase, editStopUseCase, removeStopUseCase, markStopDepartedUseCase, undoMarkStopDepartedUseCase, calculateRouteUseCase, observeStopsUseCase, observeLegsUseCase, searchPlacesUseCase, getPlaceDetailUseCase, placeSearchRepository, savedStateHandle)
 
         assertNull(viewModel.uiState.value.destination)
     }
@@ -294,7 +304,7 @@ class TripDetailViewModelTest {
         every { observeStopsUseCase(TRIP_ID) } returns flowOf(listOf(startingPoint, intermediate1, intermediate2, destination))
         every { observeLegsUseCase(TRIP_ID) } returns flowOf(emptyList())
 
-        val viewModel = TripDetailViewModel(setStopUseCase, moveStopUseCase, editStopUseCase, removeStopUseCase, markStopDepartedUseCase, undoMarkStopDepartedUseCase, calculateRouteUseCase, observeStopsUseCase, observeLegsUseCase, searchPlacesUseCase, getPlaceDetailUseCase, placeSearchRepository, savedStateHandle)
+        val viewModel = TripDetailViewModel(application, setStopUseCase, moveStopUseCase, editStopUseCase, removeStopUseCase, markStopDepartedUseCase, undoMarkStopDepartedUseCase, calculateRouteUseCase, observeStopsUseCase, observeLegsUseCase, searchPlacesUseCase, getPlaceDetailUseCase, placeSearchRepository, savedStateHandle)
 
         val expectedIntermediateStops = listOf(intermediate1, intermediate2)
         assertEquals(expectedIntermediateStops, viewModel.uiState.value.intermediateStops)
@@ -359,7 +369,7 @@ class TripDetailViewModelTest {
         every { observeStopsUseCase(TRIP_ID) } returns flowOf(stops)
         every { observeLegsUseCase(TRIP_ID) } returns flowOf(emptyList())
 
-        val viewModel = TripDetailViewModel(setStopUseCase, moveStopUseCase, editStopUseCase, removeStopUseCase, markStopDepartedUseCase, undoMarkStopDepartedUseCase, calculateRouteUseCase, observeStopsUseCase, observeLegsUseCase, searchPlacesUseCase, getPlaceDetailUseCase, placeSearchRepository, savedStateHandle)
+        val viewModel = TripDetailViewModel(application, setStopUseCase, moveStopUseCase, editStopUseCase, removeStopUseCase, markStopDepartedUseCase, undoMarkStopDepartedUseCase, calculateRouteUseCase, observeStopsUseCase, observeLegsUseCase, searchPlacesUseCase, getPlaceDetailUseCase, placeSearchRepository, savedStateHandle)
 
         assertFalse(viewModel.uiState.value.canAddMoreStops)
     }
@@ -376,7 +386,7 @@ class TripDetailViewModelTest {
         every { observeLegsUseCase(TRIP_ID) } returns flowOf(emptyList())
         coEvery { moveStopUseCase(TRIP_ID, 2, 1) } returns Result.success(Unit)
 
-        val viewModel = TripDetailViewModel(setStopUseCase, moveStopUseCase, editStopUseCase, removeStopUseCase, markStopDepartedUseCase, undoMarkStopDepartedUseCase, calculateRouteUseCase, observeStopsUseCase, observeLegsUseCase, searchPlacesUseCase, getPlaceDetailUseCase, placeSearchRepository, savedStateHandle)
+        val viewModel = TripDetailViewModel(application, setStopUseCase, moveStopUseCase, editStopUseCase, removeStopUseCase, markStopDepartedUseCase, undoMarkStopDepartedUseCase, calculateRouteUseCase, observeStopsUseCase, observeLegsUseCase, searchPlacesUseCase, getPlaceDetailUseCase, placeSearchRepository, savedStateHandle)
         viewModel.onIntent(TripDetailUiIntent.OnMoveStopUp("s2", 2))
 
         coVerify(exactly = 1) { moveStopUseCase(TRIP_ID, 2, 1) }
@@ -394,7 +404,7 @@ class TripDetailViewModelTest {
         every { observeLegsUseCase(TRIP_ID) } returns flowOf(emptyList())
         coEvery { moveStopUseCase(TRIP_ID, 1, 2) } returns Result.success(Unit)
 
-        val viewModel = TripDetailViewModel(setStopUseCase, moveStopUseCase, editStopUseCase, removeStopUseCase, markStopDepartedUseCase, undoMarkStopDepartedUseCase, calculateRouteUseCase, observeStopsUseCase, observeLegsUseCase, searchPlacesUseCase, getPlaceDetailUseCase, placeSearchRepository, savedStateHandle)
+        val viewModel = TripDetailViewModel(application, setStopUseCase, moveStopUseCase, editStopUseCase, removeStopUseCase, markStopDepartedUseCase, undoMarkStopDepartedUseCase, calculateRouteUseCase, observeStopsUseCase, observeLegsUseCase, searchPlacesUseCase, getPlaceDetailUseCase, placeSearchRepository, savedStateHandle)
         viewModel.onIntent(TripDetailUiIntent.OnMoveStopDown("s1", 1))
 
         coVerify(exactly = 1) { moveStopUseCase(TRIP_ID, 1, 2) }
@@ -962,7 +972,7 @@ class TripDetailViewModelTest {
         every { observeStopsUseCase(TRIP_ID) } returns flowOf(emptyList())
         every { observeLegsUseCase(TRIP_ID) } returns flowOf(legs)
 
-        val viewModel = TripDetailViewModel(setStopUseCase, moveStopUseCase, editStopUseCase, removeStopUseCase, markStopDepartedUseCase, undoMarkStopDepartedUseCase, calculateRouteUseCase, observeStopsUseCase, observeLegsUseCase, searchPlacesUseCase, getPlaceDetailUseCase, placeSearchRepository, savedStateHandle)
+        val viewModel = TripDetailViewModel(application, setStopUseCase, moveStopUseCase, editStopUseCase, removeStopUseCase, markStopDepartedUseCase, undoMarkStopDepartedUseCase, calculateRouteUseCase, observeStopsUseCase, observeLegsUseCase, searchPlacesUseCase, getPlaceDetailUseCase, placeSearchRepository, savedStateHandle)
 
         val expectedLegs = legs
         assertEquals(expectedLegs, viewModel.uiState.value.legs)

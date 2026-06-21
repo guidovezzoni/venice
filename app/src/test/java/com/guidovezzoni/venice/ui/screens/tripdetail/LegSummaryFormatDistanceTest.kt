@@ -2,6 +2,8 @@ package com.guidovezzoni.venice.ui.screens.tripdetail
 
 import android.content.res.Resources
 import com.guidovezzoni.venice.R
+import com.guidovezzoni.venice.ui.util.formatDistance
+import com.guidovezzoni.venice.ui.util.isImperialLocale
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.Assert.assertEquals

@@ -15,10 +15,10 @@ class LegSummaryTest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
-    private fun setContent(leg: Leg) {
+    private fun setContent(leg: Leg, formattedDistance: String) {
         composeTestRule.setContent {
             HeadingToTheAlpsTheme {
-                LegSummary(leg = leg)
+                LegSummary(leg = leg, formattedDistance = formattedDistance)
             }
         }
     }
@@ -37,12 +37,10 @@ class LegSummaryTest {
             encodedPolyline = "",
         )
 
-        setContent(leg)
+        setContent(leg, formattedDistance = "750 m")
 
-        // The device is configured with en-GB locale (imperial), so distance is formatted in miles.
-        // 750 metres ≈ 0.5 miles
         composeTestRule
-            .onNodeWithText("0.5 mi · 9 min", substring = true)
+            .onNodeWithText("750 m · 9 min", substring = true)
             .assertIsDisplayed()
     }
 
@@ -62,7 +60,7 @@ class LegSummaryTest {
             encodedPolyline = "",
         )
 
-        setContent(leg)
+        setContent(leg, formattedDistance = "750 m")
 
         composeTestRule
             .onAllNodes(hasClickAction())

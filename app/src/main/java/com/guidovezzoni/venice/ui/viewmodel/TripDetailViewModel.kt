@@ -1,8 +1,10 @@
 package com.guidovezzoni.venice.ui.viewmodel
 
+import android.app.Application
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.guidovezzoni.venice.domain.model.Leg
 import com.guidovezzoni.venice.domain.model.StopType
 import com.guidovezzoni.venice.domain.repository.PlaceSearchRepository
 import com.guidovezzoni.venice.domain.usecase.CalculateRouteUseCase
@@ -19,6 +21,7 @@ import com.guidovezzoni.venice.domain.usecase.UndoMarkStopDepartedUseCase
 import com.guidovezzoni.venice.ui.effect.TripDetailUiEffect
 import com.guidovezzoni.venice.ui.intent.TripDetailUiIntent
 import com.guidovezzoni.venice.ui.state.TripDetailUiState
+import com.guidovezzoni.venice.ui.util.formatDistance
 import com.guidovezzoni.venice.ui.util.withMinimumDuration
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
@@ -33,6 +36,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.util.Locale
 import javax.inject.Inject
 
 private const val ARG_TRIP_ID = "tripId"
@@ -42,7 +46,9 @@ private const val UNKNOWN_ERROR = "Unknown error"
 private const val SEARCH_DEBOUNCE_MILLIS = 300L
 
 @HiltViewModel
+@Suppress("LongParameterList")
 class TripDetailViewModel @Inject constructor(
+    private val application: Application,
     private val setStopUseCase: SetStopUseCase,
     private val moveStopUseCase: MoveStopUseCase,
     private val editStopUseCase: EditStopUseCase,
@@ -93,7 +99,14 @@ class TripDetailViewModel @Inject constructor(
             .launchIn(viewModelScope)
 
         observeLegsUseCase(tripId)
-            .onEach { legs -> _uiState.update { it.copy(legs = legs) } }
+            .onEach { legs ->
+                _uiState.update {
+                    it.copy(
+                        legs = legs,
+                        formattedLegDistances = buildFormattedDistances(legs),
+                    )
+                }
+            }
             .launchIn(viewModelScope)
     }
 
@@ -328,6 +341,14 @@ class TripDetailViewModel @Inject constructor(
                 isResolvingPlace = false,
                 placeDetailError = null,
             )
+        }
+    }
+
+    private fun buildFormattedDistances(legs: List<Leg>): Map<String, String> {
+        val locale = Locale.getDefault()
+        val resources = application.resources
+        return legs.associate { leg ->
+            leg.fromStopId to formatDistance(leg.distanceMetres, locale, resources)
         }
     }
 }
