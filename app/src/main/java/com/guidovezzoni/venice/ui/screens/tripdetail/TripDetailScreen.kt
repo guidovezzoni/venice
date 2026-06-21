@@ -939,6 +939,30 @@ private fun PreviewTripDetailScreenSearchError() {
 
 @Preview(showBackground = true)
 @Composable
+private fun PreviewTripDetailScreenPlaceDetailError() {
+    HeadingToTheAlpsTheme {
+        TripDetailScreen(
+            uiState = TripDetailUiState(
+                tripId = "trip-1",
+                startingPoint = Stop(
+                    id = "1",
+                    tripId = "trip-1",
+                    placeName = "Rome, Italy",
+                    latitude = 41.9028,
+                    longitude = 12.4964,
+                    order = 0,
+                    status = StopStatus.PENDING,
+                ),
+                isSetStartingPointDialogVisible = true,
+                placeDetailError = "Unable to resolve location",
+                canAddMoreStops = true,
+            ),
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
 private fun PreviewTripDetailScreenResolvingPlace() {
     HeadingToTheAlpsTheme {
         TripDetailScreen(
@@ -998,6 +1022,7 @@ private fun PreviewTripDetailScreenWithLegs() {
                         encodedPolyline = "",
                     ),
                 ),
+                formattedLegDistances = mapOf("stop-1" to "12.5 km"),
             ),
         )
     }

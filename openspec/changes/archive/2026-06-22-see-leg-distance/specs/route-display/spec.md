@@ -1,10 +1,4 @@
-# Route Display
-
-## Purpose
-
-Defines the UI composables and string resources for displaying route calculation results (distance and duration) between consecutive stops on the trip detail screen.
-
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: LegSummary composable displays leg information
 The UI layer SHALL define a `LegSummary` composable in `ui/screens/tripdetail/LegSummary.kt` that:

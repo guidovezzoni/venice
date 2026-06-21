@@ -250,6 +250,105 @@
 
       <div class="outcome outcome-passed">All 23/23 tasks complete. Implementation verified on-device for both metric and imperial locales.</div>
     </section>
+    <section class="report-section" data-source="sdlc_verify_story" data-timestamp="2026-06-22T00:00:00Z">
+      <header>
+        <h2>Verification and Archive</h2>
+        <time datetime="2026-06-22T00:00:00Z">22 Jun 2026</time>
+      </header>
+      <p class="section-source">Source: sdlc_verify_story</p>
+
+      <h3>Verification Gates</h3>
+
+      <h4>1. OpenSpec Verification <span class="badge badge-pass">PASS</span></h4>
+      <p>Artifact drift detected and reconciled:</p>
+      <ul>
+        <li><code>design.md</code> — Updated to describe DistanceFormatter.kt-based architecture (not inline LegSummary.kt formatter)</li>
+        <li><code>specs/route-display/spec.md</code> — Updated requirement: ViewModel now owns locale detection and pre-formatted distances via <code>formattedLegDistances</code> state field</li>
+        <li><code>proposal.md</code> — Clarified DistanceFormatter utility extraction and usage in ViewModel</li>
+        <li><code>tasks.md</code> — All 23 tasks verified complete and reflect actual implementation</li>
+      </ul>
+
+      <h4>2. TODO Scan <span class="badge badge-pass">PASS</span></h4>
+      <p>4 pre-existing TODOs identified and classified <span class="badge badge-info">ACKNOWLEDGED</span> — all unrelated to this story:</p>
+      <ul>
+        <li><code>TripDetailUiState.kt</code> — Sealed class refactor (future epic)</li>
+        <li><code>TripDetailUiIntent.kt</code> — PlaceDetail feature question (unrelated feature)</li>
+        <li><code>NetworkModule.kt</code> — Retrofit migration (future infrastructure)</li>
+        <li><code>DirectionsApiService.kt</code> — Retrofit migration (future infrastructure)</li>
+      </ul>
+
+      <h4>3. Security Review <span class="badge badge-pass">PASS</span></h4>
+      <p>Zero findings. Pure UI formatting change with no trust boundary transitions, injection surfaces, secrets, or authentication logic.</p>
+
+      <h4>4. Clean Build <span class="badge badge-pass">PASS</span></h4>
+      <p><code>./gradlew clean check</code> — Exit 0. All Detekt static analysis, Android lint, and Kover coverage checks passed.</p>
+
+      <h4>5. Unit Tests <span class="badge badge-pass">PASS</span></h4>
+      <p><code>./gradlew test</code> — Exit 0. All unit tests passed.</p>
+
+      <h4>6. Test File Coverage <span class="badge badge-pass">PASS</span></h4>
+      <ul>
+        <li><code>DistanceFormatter.kt</code> — Covered by <code>LegSummaryFormatDistanceTest.kt</code> (note: test file name does not follow <code>DistanceFormatterTest.kt</code> convention, but logic is fully covered)</li>
+        <li><code>TripDetailViewModel.kt</code> — Covered by <code>TripDetailViewModelTest.kt</code> (includes new <code>formattedLegDistances</code> state assertions)</li>
+        <li><code>LegSummary.kt</code> — Covered by <code>LegSummaryTest.kt</code></li>
+        <li><code>TripDetailScreen.kt</code> — Covered by <code>TripDetailScreenTest.kt</code></li>
+      </ul>
+
+      <h4>7. Compose Preview Coverage <span class="badge badge-pass">PASS</span></h4>
+      <p>Two fixes applied to achieve full coverage:</p>
+      <ul>
+        <li>Added <code>formattedLegDistances</code> field to <code>PreviewTripDetailScreenWithLegs</code> preview</li>
+        <li>Created new <code>PreviewTripDetailScreenPlaceDetailError</code> preview to cover pre-existing <code>placeDetailError</code> state gap (unrelated to this story but discovered during coverage audit)</li>
+      </ul>
+      <p>All 7 <code>UiState</code> fields now appear in non-default form across previews.</p>
+
+      <h4>8. On-Device Tests <span class="badge badge-pass">PASS</span></h4>
+      <p><code>./gradlew connectedDebugAndroidTest</code> on Pixel 6a — 92/92 instrumented tests passed.</p>
+      <p>Additional on-device verification via adb confirmed:</p>
+      <ul>
+        <li>Imperial locale (en-GB system): distance renders as "199.1 mi"</li>
+        <li>Metric locale (it-IT per-app override): distance renders as "320,5 km"</li>
+        <li>No-legs path: distance section absent (expected behaviour)</li>
+      </ul>
+      <p>Side note: Fixed unrelated pre-existing bug in <code>ExampleInstrumentedTest.kt</code> — expected package name was missing <code>.debug</code> suffix, preventing test suite from running. Corrected during this verification cycle.</p>
+
+      <h4>9. Definition of Done <span class="badge badge-pass">PASS</span></h4>
+      <p>All 7 acceptance criteria and 9 DoD checklist items verified via source inspection, unit tests, instrumented tests, and clean build:</p>
+      <ul>
+        <li>Distance displays metric (km/m) by default — verified in unit tests and on-device</li>
+        <li>Distance displays imperial (miles) for en-US and en-GB locales — verified in unit tests and on-device (en-GB tested)</li>
+        <li>Unavailable indicator (hide LegSummary) when distance absent — verified in unit tests</li>
+        <li>All strings extracted to <code>strings.xml</code> with i18n keys — verified in source</li>
+        <li>Secondary language files updated — verified in source</li>
+        <li>Unit and Compose UI tests cover all states (metric, imperial, unavailable) — verified in test files and test execution</li>
+        <li>Build succeeds with no warnings — verified via <code>./gradlew clean check</code></li>
+        <li>Architecture follows Clean Architecture boundaries — verified: DistanceFormatter in UI layer, no domain/data cross-contamination</li>
+        <li>MVI contract satisfied — ViewModel exposes <code>formattedLegDistances</code> in UiState, LegSummary purely presentational</li>
+      </ul>
+
+      <h3>Spec Sync Status</h3>
+      <p>Route-display capability spec updated in place — 3 requirements modified (no additions/removals):</p>
+      <ul>
+        <li>LegSummary composable signature and locale-aware formatting responsibility</li>
+        <li>Compose preview coverage expectations</li>
+        <li>String resource structure and localization</li>
+      </ul>
+
+      <h3>Documentation Sync</h3>
+      <ul>
+        <li><code>README.md</code> — Updated with sentence on locale-aware distance formatting</li>
+        <li><code>AGENTS.md</code> — Already in sync (no further changes needed)</li>
+      </ul>
+
+      <h3>Archive and Story Closure</h3>
+      <ul>
+        <li>Change archived at: <code>openspec/changes/archive/2026-06-22-see-leg-distance/</code></li>
+        <li>User story renamed: <code>docs/userstories/3.1.2-see-leg-distance-DONE.md</code></li>
+        <li>Branch: <code>feature/3.1.2-see-leg-distance</code></li>
+      </ul>
+
+      <div class="outcome outcome-passed">PASSED — All 9 verification gates confirmed. Story ready for merge.</div>
+    </section>
   </main>
 
 </body>

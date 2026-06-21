@@ -23,25 +23,25 @@ There is no locale-detection utility anywhere in the codebase; this is a green-f
 
 ### 1. Imperial locale detection: dual-strategy with API-level gating
 
-**Decision**: Use `android.icu.util.LocaleData.getMeasurementSystem()` on API 28+ to detect imperial measurement systems. On API 24-27, fall back to a hardcoded country-code set `setOf("US", "GB", "LR", "MM")` checked against `locale.country`. Encapsulate this in an `internal fun isImperialLocale(locale: Locale): Boolean` function in `LegSummary.kt`.
+**Decision**: Use `android.icu.util.LocaleData.getMeasurementSystem()` on API 28+ to detect imperial measurement systems. On API 24-27, fall back to a hardcoded country-code set `setOf("US", "GB", "LR", "MM")` checked against `locale.country`. Encapsulate this in a `fun isImperialLocale(locale: Locale): Boolean` function in `LegSummary.kt` (superseded by Decision 3 below, which relocates this function to `ui/util/DistanceFormatter.kt`).
 
 **Rationale**: `getMeasurementSystem()` is the platform-canonical way to detect measurement systems and handles edge cases (e.g. user-overridden locale settings) that a static country list cannot. However, it requires API 28, while the app's minSdk is 24. The hardcoded fallback covers the gap for older devices, matching the four countries explicitly named in the acceptance criteria.
 
 **Alternative considered**: Hardcoded country-code set only — simpler but ignores the system API when it is available, missing user-level locale overrides on API 28+ devices.
 
-### 2. Formatter becomes a plain function taking `Locale`, not `@Composable`
+### 2. Formatter becomes a plain function taking `Locale`, owned by the ViewModel
 
-**Decision**: Replace the private `@Composable fun formatDistance(distanceMetres: Int): String` with `internal fun formatDistance(distanceMetres: Int, locale: Locale, resources: Resources): String`, resolving strings via `Resources.getString(...)` instead of `stringResource()`. The composable calls it with `LocalContext.current.resources` and `Locale.getDefault()`.
+**Decision**: Replace the private `@Composable fun formatDistance(distanceMetres: Int): String` with a top-level `fun formatDistance(distanceMetres: Int, locale: Locale, resources: Resources): String`, resolving strings via `Resources.getString(...)` instead of `stringResource()`. `TripDetailViewModel.buildFormattedDistances()` calls it with `application.resources` and `Locale.getDefault()`, producing a `Map<fromStopId, String>` that `TripDetailUiState` exposes; `LegSummary` receives the pre-computed `formattedDistance: String` as a plain parameter and performs no formatting or locale logic itself.
 
-**Rationale**: Removing the `@Composable` annotation and the `stringResource()` call lets the function be unit-tested directly with JUnit (no Compose test rule, no Robolectric). This matches the project's general preference for testable, side-effect-light functions and the user's clarification that the function should take `Locale` as a parameter for testability.
+**Rationale**: Removing the `@Composable` annotation and the `stringResource()` call lets the function be unit-tested directly with JUnit (no Compose test rule, no Robolectric). Moving the call site into the ViewModel (rather than the composable) is required by the project's "composables are purely presentational" guideline (`docs/guidelines/guidelines-android.md`), which forbids locale detection and formatting computations inside composables — the original plan of calling `formatDistance` from inside `LegSummary` via `LocalContext.current.resources` would have violated that rule.
 
 **Alternative considered**: Keep it `@Composable` and rely on Compose UI tests only. Rejected because it would push all boundary/rounding cases (metres/km/mi thresholds) into slower instrumented tests instead of fast JUnit unit tests, contradicting the project's unit-test-first testing guidelines.
 
-### 3. Formatting function stays in `LegSummary.kt`, not a separate utility file
+### 3. Formatting function extracted to `ui/util/DistanceFormatter.kt`
 
-**Decision**: Keep `formatDistance` as a top-level `internal` function in `LegSummary.kt` (per user clarification), rather than extracting a `DistanceFormatter` utility class/file.
+**Decision**: Extract `formatDistance` and `isImperialLocale` into a new top-level utility file `app/src/main/java/com/guidovezzoni/venice/ui/util/DistanceFormatter.kt`, as public (non-`internal`) top-level functions, rather than keeping them in `LegSummary.kt`.
 
-**Rationale**: The function is small, has a single call site, and extracting it would add an extra file/abstraction for no current reuse benefit. `internal` visibility (instead of `private`) is required so the new unit test class — which lives in the same module but a different file — can call it directly.
+**Rationale**: Once the call site moved from the composable to `TripDetailViewModel` (Decision #2), the functions could no longer live in `LegSummary.kt` as file-private/internal helpers — they needed to be called from `ui/viewmodel/TripDetailViewModel.kt`, a different package. The project's "testable helper functions get their own file under `ui/util/`" guideline applies directly once the function has a call site outside the composable file. Visibility is left as the Kotlin default (public) since the single `:app` module has no module boundary requiring `internal`; this is a relaxation of the original `internal`-only intent, tracked as a non-blocking follow-up.
 
 ### 4. Miles conversion constant
 
@@ -57,7 +57,7 @@ There is no locale-detection utility anywhere in the codebase; this is a green-f
 
 ## Risks / Trade-offs
 
-- **[Risk] `internal` visibility on `formatDistance` slightly widens its accessibility beyond the file** → Acceptable: `internal` is module-scoped, not public API, and is the minimum visibility needed for direct unit testing without Compose.
+- **[Risk] Public (non-`internal`) visibility on `formatDistance`/`isImperialLocale` widens accessibility beyond the original `internal`-only intent** → Acceptable for now: the single `:app` module has no module boundary to protect; tracked as a follow-up to revisit `internal` visibility once the formatter has a stable single call site in `TripDetailViewModel`.
 - **[Risk] Hardcoded 4-country fallback (API 24-27) may miss other imperial-leaning locales** → Mitigated: on API 28+ the platform API handles this correctly. The hardcoded set only applies to the shrinking population of API 24-27 devices and covers the four most significant imperial countries.
 - **[Trade-off] No feet-based sub-mile formatting** → Simpler implementation and consistent unit display; acceptable per user clarification (always show miles, e.g. "0.3 mi").
 - **[Trade-off] Passing `Resources` instead of relying on `stringResource()`** → Slightly more verbose call site inside the composable, but unlocks fast JUnit coverage for all rounding/threshold cases.
