@@ -120,6 +120,78 @@
         <li>Build completes successfully with no warnings</li>
       </ul>
     </section>
+    <section class="report-section" data-source="propose_change" data-timestamp="2026-06-21T00:00:00Z">
+      <header>
+        <h2>Proposal</h2>
+        <time datetime="2026-06-21T00:00:00Z">21 Jun 2026</time>
+      </header>
+      <p class="section-source">Source: propose_change</p>
+
+      <h3>Exploration Summary</h3>
+      <ul>
+        <li><code>LegSummary.kt</code> contains a private <code>@Composable formatDistance()</code> function with metric-only logic (metres/km). No imperial branch exists.</li>
+        <li><code>Leg.distanceMetres: Int</code> is non-nullable — no concept of "unavailable distance" at the domain level.</li>
+        <li><code>TripDetailScreen</code> conditionally renders <code>LegSummary</code> only when a <code>Leg</code> exists for a <code>fromStopId</code>.</li>
+        <li>No locale-detection utility exists anywhere in the codebase — this is the first locale-aware feature.</li>
+        <li>Spec drift found: <code>route-display/spec.md</code> documents a stale composable signature and duration format.</li>
+      </ul>
+
+      <h3>Questions and Answers</h3>
+      <table>
+        <thead>
+          <tr><th>Question</th><th>Answer</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Unavailable distance: show "---" placeholder or keep current hide behaviour?</td>
+            <td>Keep current behaviour — hide <code>LegSummary</code> when no <code>Leg</code> exists. No domain model change.</td>
+          </tr>
+          <tr>
+            <td>Imperial locale detection API?</td>
+            <td>Hardcoded country set (<code>US</code>, <code>GB</code>, <code>LR</code>, <code>MM</code>) checked against <code>Locale.getDefault().country</code>.</td>
+          </tr>
+          <tr>
+            <td>Where should the testable formatting function live?</td>
+            <td>Same file (<code>LegSummary.kt</code>) as a top-level <code>internal</code> function.</td>
+          </tr>
+          <tr>
+            <td>Short imperial distances: feet or always miles?</td>
+            <td>Always miles (e.g. "0.3 mi"). No feet threshold.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Artifacts Created</h3>
+      <table>
+        <thead>
+          <tr><th>Artifact</th><th>Path</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Proposal</td><td><code>openspec/changes/see-leg-distance/proposal.md</code></td></tr>
+          <tr><td>Design</td><td><code>openspec/changes/see-leg-distance/design.md</code></td></tr>
+          <tr><td>Delta Spec</td><td><code>openspec/changes/see-leg-distance/specs/route-display/spec.md</code></td></tr>
+          <tr><td>Tasks</td><td><code>openspec/changes/see-leg-distance/tasks.md</code></td></tr>
+        </tbody>
+      </table>
+
+      <h3>Task Structure</h3>
+      <p>21 tasks across 5 sections:</p>
+      <ul>
+        <li><strong>Prerequisites</strong> (4 tasks): string resources, constants setup</li>
+        <li><strong>Locale-Aware Distance Formatting — BDD</strong> (10 tasks): 8 test tasks + 2 implementation tasks</li>
+        <li><strong>LegSummary Compose UI Coverage — BDD</strong> (3 tasks): 2 test tasks + 1 implementation/confirmation</li>
+        <li><strong>Preview Coverage</strong> (1 task): imperial-locale preview</li>
+        <li><strong>Verification</strong> (3 tasks): build check, instrumented tests, on-device verification</li>
+      </ul>
+
+      <h3>Key Design Decisions</h3>
+      <ul>
+        <li>Imperial detection via hardcoded <code>setOf("US", "GB", "LR", "MM")</code> — works at minSdk 24</li>
+        <li><code>formatDistance</code> extracted to non-<code>@Composable</code> <code>internal</code> function taking <code>Locale</code> parameter for unit testability</li>
+        <li>Conversion constant: <code>METRES_PER_MILE = 1609.344</code></li>
+        <li>Spec drift in <code>route-display</code> reconciled: composable signature, duration format, and new imperial requirement</li>
+      </ul>
+    </section>
   </main>
 
 </body>
