@@ -192,6 +192,64 @@
         <li>Spec drift in <code>route-display</code> reconciled: composable signature, duration format, and new imperial requirement</li>
       </ul>
     </section>
+    <section class="report-section" data-source="apply_changes" data-timestamp="2026-06-21T20:00:00Z">
+      <header>
+        <h2>Implementation</h2>
+        <time datetime="2026-06-21T20:00:00Z">21 Jun 2026</time>
+      </header>
+      <p class="section-source">Source: apply_changes</p>
+
+      <h3>Summary</h3>
+      <p>Implemented locale-aware distance formatting for <code>LegSummary</code> via sub-agent orchestration (5 sections, 23 tasks total).</p>
+
+      <h3>Sections Executed</h3>
+      <table>
+        <thead>
+          <tr><th>Section</th><th>Tasks</th><th>Model</th><th>Result</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>1. Prerequisites</td><td>4</td><td>Sonnet</td><td><span class="badge badge-pass">PASS</span></td></tr>
+          <tr><td>2. Locale-Aware Distance Formatting (BDD)</td><td>12</td><td>Sonnet</td><td><span class="badge badge-pass">PASS</span></td></tr>
+          <tr><td>3. LegSummary Compose UI Coverage (BDD)</td><td>3</td><td>Sonnet</td><td><span class="badge badge-pass">PASS</span></td></tr>
+          <tr><td>4. Preview Coverage</td><td>1</td><td>Haiku</td><td><span class="badge badge-pass">PASS</span></td></tr>
+          <tr><td>5. Verification</td><td>3</td><td>Sonnet</td><td><span class="badge badge-pass">PASS</span></td></tr>
+        </tbody>
+      </table>
+
+      <h3>Iteration Cycles</h3>
+      <ul>
+        <li>Section 2: one retry cycle — MockK <code>secondArg</code> cast fix for varargs (test infrastructure, not production code)</li>
+        <li>Section 3: one retry cycle — test 3.1 initially failed due to device locale (en-GB = imperial); fixed by pinning <code>Locale.ITALY</code> in test <code>@Before/@After</code></li>
+        <li>All other sections: first-pass success</li>
+      </ul>
+
+      <h3>TODO Scan</h3>
+      <p>4 pre-existing TODOs found in <code>app/src/</code> — all classified as <span class="badge badge-info">ACKNOWLEDGED</span> (unrelated to this story, preconditions not met):</p>
+      <ul>
+        <li><code>DirectionsApiService.kt:24</code> — Replace with Retrofit (future)</li>
+        <li><code>TripDetailUiIntent.kt:9</code> — PlaceDetail usage (unrelated feature)</li>
+        <li><code>TripDetailUiState.kt:8</code> — Sealed class decomposition (future)</li>
+        <li><code>NetworkModule.kt:18</code> — Replace with Retrofit (future)</li>
+      </ul>
+
+      <h3>Security Review</h3>
+      <p><span class="badge badge-pass">PASS</span> — zero findings. Purely UI-layer formatting change with no injection surfaces, network calls, or authentication logic.</p>
+
+      <h3>Documentation Updates</h3>
+      <ul>
+        <li><code>README.md</code>: No update needed (existing description already covers distance display)</li>
+        <li><code>AGENTS.md</code>: Updated "Current Status" to include 3.1.2</li>
+      </ul>
+
+      <h3>On-Device Verification</h3>
+      <ul>
+        <li>Imperial (en-GB system locale): rendered "199.1 mi · 3h 53min" — confirmed correct</li>
+        <li>Metric (it-IT per-app locale override): rendered "320,5 km · 3h 53min" — confirmed correct</li>
+        <li>Device: Pixel 6a (2C091JEGR07097)</li>
+      </ul>
+
+      <div class="outcome outcome-passed">All 23/23 tasks complete. Implementation verified on-device for both metric and imperial locales.</div>
+    </section>
   </main>
 
 </body>
