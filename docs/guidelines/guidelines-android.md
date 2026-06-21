@@ -109,6 +109,10 @@ class Feature01ViewModel(...) : ViewModel() {
 }
 ```
 
+- **Composables are purely presentational**: Composables must only render pre-computed data received via parameters (typically from `UiState`). They must not contain logic such as locale detection, API-level gating, formatting computations, or conditional business branching. All such logic belongs in the ViewModel, which computes display-ready values and exposes them through `UiState` fields.
+
+- **Utility functions in their own file**: Testable helper functions (formatters, validators, converters) must live in their own dedicated file under `ui/util/` (or the appropriate layer), never co-located inside a composable file. Even if there is only a single call site, a function marked `internal` for testability belongs in a separate utility file.
+
 - **Dependency Injection**: Ask the user if Hilt should be used or manual di. Typically manual di should be replaced by Hilt when the project is growing.
 - **Async Operations**: Use Coroutines and Flow for asynchronous operations
 
@@ -251,6 +255,7 @@ Unit tests should follow these criteria:
 - cover all reasonable cases, but keeps the coverage over 80%
 - Target 80%+ coverage
 - **MVI ViewModel tests**: Test by dispatching `UiIntent` values via `onIntent()` and asserting the resulting `uiState` and any emitted `uiEffect`. Never test internal ViewModel methods directly.
+- **Consolidate test setup**: When a ViewModel (or any SUT) is instantiated in multiple tests, use a single `createViewModel(...)` factory method with default parameters for varied inputs (e.g. `stops: List<Stop> = emptyList()`, `legs: List<Leg> = emptyList()`). Tests should never inline the full constructor call — extend the factory helper instead.
 
 
 ### Compose UI Tests
