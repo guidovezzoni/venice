@@ -1,6 +1,6 @@
 Please run the project configuration health check.
 
-This command verifies that the project's quality tooling (static analysis, coverage, tests, CI/CD, deployment) is properly configured. For SDLC framework checks (OpenSpec, security plugin, Gradle wrapper), use `/sdlc_doctor` instead.
+This command verifies that the project's quality tooling (static analysis, coverage, tests, CI/CD, deployment, Gradle wrapper) is properly configured. For SDLC framework checks (OpenSpec, security plugin, SDLC commands), use `/sdlc_doctor` instead.
 
 This command uses sub-agent orchestration: each check category is delegated to a Haiku sub-agent running in parallel. All checks are read-only — sub-agents must not modify any files, run builds, or install anything.
 
@@ -32,8 +32,8 @@ Follow these steps:
    ## Output Format — CRITICAL
 
    Return ONLY a structured list of results. Each line must follow this exact format:
-     [PASS] <check description>
-     [FAIL] <check description> — <one-liner explanation>
+     ✅ <check description>
+     ❌ <check description> — <one-liner explanation>
 
    Do not include any other text, commentary, or markdown headings.
    ```
@@ -77,7 +77,12 @@ Follow these steps:
    2. Read `.github/workflows/ci.yml` and verify it contains a step that runs `./gradlew check` (look for the string `gradlew check` in a `run:` value).
    3. Read `.github/workflows/ci.yml` and verify it contains a step that runs `./gradlew koverVerify` (look for the string `gradlew koverVerify` in a `run:` value).
 
-2. **Collect results.** After all sub-agents complete, gather their output. Each sub-agent returns a list of `[PASS]`/`[FAIL]` lines.
+   ### Category: Gradle
+
+   Checks to include in the sub-agent prompt:
+   1. Run `./gradlew tasks --quiet` to verify the Gradle wrapper is working and the project configuration resolves without errors. If the command exits with a non-zero status, record FAIL with the first line of stderr as the explanation. Note: this is the only check that executes a build tool; `tasks --quiet` is lightweight and does not compile code.
+
+2. **Collect results.** After all sub-agents complete, gather their output. Each sub-agent returns a list of `✅`/`❌` lines.
 
 3. **Display the results.** Output the collected results grouped by category. Use this format:
 
@@ -85,21 +90,22 @@ Follow these steps:
     ## Project Doctor Results
 
     ### Detekt
-      [PASS] Detekt plugin declared in gradle/libs.versions.toml
-      **[FAIL] Detekt config file exists — config/detekt/detekt.yml not found**
+      ✅ Detekt plugin declared in gradle/libs.versions.toml
+      ❌ Detekt config file exists — config/detekt/detekt.yml not found
       ...
 
     ### Kover
-      [PASS] Kover plugin declared in gradle/libs.versions.toml
+      ✅ Kover plugin declared in gradle/libs.versions.toml
       ...
+
+    ### Gradle
+      ✅ Gradle wrapper resolves without errors
 
     (remaining categories)
 
     ---
     Summary: N/M checks passed, K failed.
     ```
-
-    IMPORTANT: every `[FAIL]` line must be wrapped in bold markdown (`**...**`) so it stands out visually.
 
     If all checks pass, add a closing line: `All checks passed. The project is properly configured.`
 
