@@ -1,4 +1,6 @@
-Please run the SDLC project health check.
+Please run the SDLC framework health check.
+
+This command verifies that the SDLC tooling (OpenSpec, security plugin, Gradle wrapper) is properly installed and configured. For project-specific quality checks (Detekt, Kover, tests, CI/CD, Fastlane), use `/sdlc_project_doctor` instead.
 
 This command uses sub-agent orchestration: each check category is delegated to a Haiku sub-agent running in parallel. All checks are read-only — sub-agents must not modify any files, run builds, or install anything.
 
@@ -21,7 +23,7 @@ Follow these steps:
 
    ```
    You are running read-only health checks for the "{CATEGORY}" category of an
-   SDLC project doctor command. Do NOT modify any files or run builds.
+   SDLC framework doctor command. Do NOT modify any files or run builds.
 
    ## Checks
 
@@ -54,45 +56,6 @@ Follow these steps:
    Checks to include in the sub-agent prompt:
    1. Read `.claude/settings.json` and verify that `enabledPlugins` contains the key `security-guidance@claude-plugins-official` set to `true`.
 
-   ### Category: Detekt
-
-   Checks to include in the sub-agent prompt (for compliance with @docs/guidelines/guidelines-android.md):
-   1. Verify `gradle/libs.versions.toml` declares a plugin with id `io.gitlab.arturbosch.detekt` in the `[plugins]` section.
-   2. Verify `app/build.gradle.kts` applies the detekt plugin (look for `alias(libs.plugins.detekt)` or equivalent).
-   3. Verify the config file `config/detekt/detekt.yml` exists.
-   4. Read `config/detekt/detekt.yml` and verify `maxIssues` is set to `0` under the `build:` key.
-   5. Verify `gradle/libs.versions.toml` declares a library referencing `io.nlopez.compose.rules` (Compose detekt rules).
-
-   ### Category: Kover
-
-   Checks to include in the sub-agent prompt (for compliance with @docs/guidelines/guidelines-android.md):
-   1. Verify `gradle/libs.versions.toml` declares a plugin with id `org.jetbrains.kotlinx.kover` in the `[plugins]` section.
-   2. Verify `app/build.gradle.kts` applies the kover plugin (look for `alias(libs.plugins.kover)` or equivalent).
-   3. Read `app/build.gradle.kts` and verify a kover verify rule enforces a minimum bound of 95 (look for `minBound(95)` or equivalent in the `kover` configuration block).
-
-   ### Category: Unit Tests
-
-   Checks to include in the sub-agent prompt (for compliance with @docs/guidelines/guidelines-android.md):
-   1. Verify `gradle/libs.versions.toml` declares a JUnit 4 library (`junit`).
-   2. Verify `gradle/libs.versions.toml` declares a MockK library (`io.mockk`).
-   3. Verify `gradle/libs.versions.toml` declares a kotlinx-coroutines-test library (`kotlinx-coroutines-test`).
-   4. Verify the directory `app/src/test/` exists and contains at least one `.kt` file (search recursively).
-
-   ### Category: Fastlane
-
-   Checks to include in the sub-agent prompt:
-   1. Verify `fastlane/Fastfile` exists.
-   2. Verify `Gemfile` exists.
-   3. Run `command -v fastlane` to check that the `fastlane` command is available in PATH.
-   4. Run `command -v bundle` to check that `bundler` is available in PATH.
-
-   ### Category: CI/CD
-
-   Checks to include in the sub-agent prompt:
-   1. Verify `.github/workflows/ci.yml` exists.
-   2. Read `.github/workflows/ci.yml` and verify it contains a step that runs `./gradlew check` (look for the string `gradlew check` in a `run:` value).
-   3. Read `.github/workflows/ci.yml` and verify it contains a step that runs `./gradlew koverVerify` (look for the string `gradlew koverVerify` in a `run:` value).
-
    ### Category: Gradle
 
    Checks to include in the sub-agent prompt:
@@ -109,21 +72,21 @@ Follow these steps:
       [PASS] openspec/config.yaml exists
       [PASS] openspec CLI is installed
       [PASS] .claude/commands/opsx/explore.md exists
-      [FAIL] .claude/commands/opsx/apply.md exists — file not found
+      **[FAIL] .claude/commands/opsx/apply.md exists — file not found**
       ...
 
     ### Security Review
       [PASS] security-guidance plugin is enabled in .claude/settings.json
 
-    ### Detekt
+    ### Gradle
       ...
-
-    (remaining categories)
 
     ---
     Summary: N/M checks passed, K failed.
     ```
 
-    If all checks pass, add a closing line: `All checks passed. The project is properly configured for the SDLC workflow.`
+    IMPORTANT: every `[FAIL]` line must be wrapped in bold markdown (`**...**`) so it stands out visually.
 
-    If any checks failed, add: `N check(s) failed. Review the FAIL items above and fix them to ensure full SDLC workflow compatibility.`
+    If all checks pass, add a closing line: `All checks passed. The SDLC framework is properly configured.`
+
+    If any checks failed, add: `**N check(s) failed.** Review the FAIL items above and fix them to ensure full SDLC workflow compatibility.`

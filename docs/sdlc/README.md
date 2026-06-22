@@ -1,6 +1,6 @@
 # SDLC — Agentic AI Software Development Lifecycle
 
-SDLC is a set of five commands that let an AI coding agent autonomously drive the full lifecycle of a user story — from opening to verified delivery — while keeping the human developer in control of key decisions.
+SDLC is a set of six commands that let an AI coding agent autonomously drive the full lifecycle of a user story — from opening to verified delivery — while keeping the human developer in control of key decisions.
 
 Built on top of [OpenSpec](https://github.com/Fission-AI/OpenSpec/) (Spec-Driven Development), SDLC replaces manual task management with agentic orchestration: the AI reads specifications, reasons about architecture, writes and verifies code, and produces auditable reports at every stage.
 
@@ -19,7 +19,7 @@ An example of its usage can be found in [venice](https://github.com/guidovezzoni
 | **On-device verification**          | The agent installs the app on a physical device, interacts with it via UIAutomator, and verifies behaviour autonomously               |
 | **Specification grounding**         | All code generation is anchored to living specs and acceptance criteria — not just free-form prompts                                  |
 
-## The Five Commands
+## The Six Commands
 
 ### 1. `/sdlc_open_story` — Open and Refine
 
@@ -89,9 +89,9 @@ End-to-end quality gate before a story is considered done.
 
 ---
 
-### 5. `/sdlc_doctor` — Project Health Check
+### 5. `/sdlc_doctor` — SDLC Framework Health Check
 
-Validates that the project is correctly configured for the SDLC workflow.
+Validates that the SDLC tooling is properly installed and configured.
 
 **Recommended agent:** Sonnet — orchestration is procedural; Haiku sub-agents run the checks.
 
@@ -99,40 +99,60 @@ Validates that the project is correctly configured for the SDLC workflow.
 
 - Spawns parallel Haiku sub-agents, one per check category, for maximum speed
 - All checks are read-only — no files are modified, no builds are run (except a lightweight `./gradlew tasks`)
-- Checks cover: OpenSpec configuration, security review plugin, Detekt static analysis, Kover code coverage, unit test dependencies, Fastlane, CI/CD pipeline, and Gradle project health
-- Aggregates results into a summary report with `[PASS]`/`[FAIL]` status per check
+- Checks cover: OpenSpec configuration, security review plugin, and Gradle project health
+- Aggregates results into a summary report with `[PASS]`/`**[FAIL]**` status per check
 - Reports which items need attention for full SDLC workflow compatibility
+
+---
+
+### 6. `/sdlc_project_doctor` — Project Configuration Health Check
+
+Validates that the project's quality tooling is properly configured.
+
+**Recommended agent:** Sonnet — orchestration is procedural; Haiku sub-agents run the checks.
+
+**What the agent does autonomously:**
+
+- Spawns parallel Haiku sub-agents, one per check category, for maximum speed
+- All checks are read-only — no files are modified, no builds are run
+- Checks cover: Detekt static analysis, Kover code coverage, unit test dependencies, Fastlane, and CI/CD pipeline
+- Aggregates results into a summary report with `[PASS]`/`**[FAIL]**` status per check
+- Reports which items need attention for full project quality compliance
 
 ---
 
 ## End-to-End Flow
 
 ```
-     User Story (backlog)
-              │
-              ▼
-┌──────────────────────────┐
-│    /open_story           │  Branch, refine, report
-└─────────────┬────────────┘
-              ▼
-┌──────────────────────────┐
-│    /propose_change       │  Explore, design, BDD tasks
-└─────────────┬────────────┘
-              ▼
-┌──────────────────────────┐
-│    /implement_change     │  Sub-agents build + test
-└─────────────┬────────────┘
-              ▼
-┌──────────────────────────┐
-│    /verify_story         │  Quality gates, archive
-└─────────────┬────────────┘
-              ▼
-        Done (merged)
+          User Story (backlog)
+                 │
+                 ▼
+┌──────────────────────────────────┐
+│    /sdlc_open_story              │  Branch, refine, report
+└────────────────┬─────────────────┘
+                 ▼
+┌──────────────────────────────────┐
+│    /sdlc_propose_change          │  Explore, design, BDD tasks
+└────────────────┬─────────────────┘
+                 ▼
+┌──────────────────────────────────┐
+│    /sdlc_implement_change        │  Sub-agents build + test
+└────────────────┬─────────────────┘
+                 ▼
+┌──────────────────────────────────┐
+│    /sdlc_verify_story            │  Quality gates, archive
+└────────────────┬─────────────────┘
+                 ▼
+          Done (merged)
 
 
-┌──────────────────────────┐
-│    /doctor               │  Project health check (run anytime)
-└──────────────────────────┘
+┌──────────────────────────────────┐
+│    /sdlc_doctor                  │  SDLC framework health check
+└──────────────────────────────────┘
+
+┌──────────────────────────────────┐
+│    /sdlc_project_doctor          │  Project config health check
+└──────────────────────────────────┘
 ```
 
 ## Key Design Decisions
@@ -155,7 +175,7 @@ Validates that the project is correctly configured for the SDLC workflow.
     - **Linux / macOS**: `./docs/sdlc/sdlc_init_claude_code.sh`
     - **Windows** (PowerShell, Developer Mode or elevated): `.\docs\sdlc\sdlc_init_claude_code.ps1`
 
-   The script will creates a `CLAUDE.md → AGENTS.md` symlink in the project root and links SDLC command files into `.claude/commands/sdlc/`.
+   The script will create a `CLAUDE.md → AGENTS.md` symlink in the project root and links SDLC command files into `.claude/commands/sdlc/`.
 
 3. Install OpenSpec o your machine from https://github.com/Fission-AI/OpenSpec/ and:
     - Initialise it in your project folder: `openspec init`
@@ -176,7 +196,7 @@ CLAUDE.md is a symlink to AGENTS.md, so it doesn't need any extra change.
 
 Some info usually contained in AGENTS.md will not likely end up in there, as they are already documented in the guidelines files.
 
-The initial part of the AGENTS.md instructs the agent how to selectively load some guidelines files depending on the taskit's working on.
+The initial part of the AGENTS.md instructs the agent how to selectively load some guidelines files depending on the task it's working on.
 
 ### Guidelines files
 
