@@ -4,6 +4,8 @@ import android.app.Application
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.guidovezzoni.venice.domain.analytics.AnalyticsEvent
+import com.guidovezzoni.venice.domain.analytics.AnalyticsTracker
 import com.guidovezzoni.venice.domain.model.Leg
 import com.guidovezzoni.venice.domain.model.StopType
 import com.guidovezzoni.venice.domain.repository.PlaceSearchRepository
@@ -61,6 +63,7 @@ class TripDetailViewModel @Inject constructor(
     private val searchPlacesUseCase: SearchPlacesUseCase,
     private val getPlaceDetailUseCase: GetPlaceDetailUseCase,
     private val placeSearchRepository: PlaceSearchRepository,
+    private val analyticsTracker: AnalyticsTracker,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
@@ -75,6 +78,7 @@ class TripDetailViewModel @Inject constructor(
     val uiEffect: SharedFlow<TripDetailUiEffect> = _uiEffect.asSharedFlow()
 
     init {
+        analyticsTracker.track(AnalyticsEvent.ScreenViewed(AnalyticsEvent.SCREEN_TRIP_DETAIL))
         observeStopsUseCase(tripId)
             .onEach { stops ->
                 val startingPoint = stops.firstOrNull { it.order == STARTING_POINT_ORDER }
@@ -229,7 +233,14 @@ class TripDetailViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             val result = withMinimumDuration { markStopDepartedUseCase(tripId, stopId) }
-            result.onFailure { error ->
+            result.onSuccess {
+                analyticsTracker.track(AnalyticsEvent.StopDeparted(tripId, stopId))
+            }.onFailure { error ->
+                val failedEvent = AnalyticsEvent.OperationFailed(
+                    AnalyticsEvent.OPERATION_MARK_DEPARTED,
+                    error.message ?: UNKNOWN_ERROR,
+                )
+                analyticsTracker.track(failedEvent)
                 _uiEffect.emit(TripDetailUiEffect.ShowError(error.message ?: UNKNOWN_ERROR))
             }
             _uiState.update { it.copy(isLoading = false) }
@@ -251,7 +262,14 @@ class TripDetailViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             val result = withMinimumDuration { moveStopUseCase(tripId, fromOrder, toOrder) }
-            result.onFailure { error ->
+            result.onSuccess {
+                analyticsTracker.track(AnalyticsEvent.StopReordered(tripId))
+            }.onFailure { error ->
+                val failedEvent = AnalyticsEvent.OperationFailed(
+                    AnalyticsEvent.OPERATION_MOVE_STOP,
+                    error.message ?: UNKNOWN_ERROR,
+                )
+                analyticsTracker.track(failedEvent)
                 _uiEffect.emit(TripDetailUiEffect.ShowError(error.message ?: UNKNOWN_ERROR))
             }
             _uiState.update { it.copy(isLoading = false) }
@@ -263,12 +281,18 @@ class TripDetailViewModel @Inject constructor(
             _uiState.update { it.copy(isLoading = true) }
             withMinimumDuration { editStopUseCase(stopId, placeName, latitude, longitude) }
                 .onSuccess {
+                    analyticsTracker.track(AnalyticsEvent.StopEdited(tripId))
                     searchJob?.cancel()
                     clearSearchState()
                     placeSearchRepository.resetSession()
                     _uiState.update { it.copy(editingStop = null, isEditStopDialogVisible = false, isLoading = false) }
                 }
                 .onFailure { error ->
+                    val failedEvent = AnalyticsEvent.OperationFailed(
+                        AnalyticsEvent.OPERATION_EDIT_STOP,
+                        error.message ?: UNKNOWN_ERROR,
+                    )
+                    analyticsTracker.track(failedEvent)
                     _uiState.update { it.copy(isLoading = false) }
                     _uiEffect.emit(TripDetailUiEffect.ShowError(error.message ?: UNKNOWN_ERROR))
                 }
@@ -281,9 +305,15 @@ class TripDetailViewModel @Inject constructor(
             _uiState.update { it.copy(isLoading = true) }
             withMinimumDuration { removeStopUseCase(tripId, stop.id) }
                 .onSuccess {
+                    analyticsTracker.track(AnalyticsEvent.StopRemoved(tripId))
                     _uiState.update { it.copy(stopToRemove = null, isRemoveStopDialogVisible = false, isLoading = false) }
                 }
                 .onFailure { error ->
+                    val failedEvent = AnalyticsEvent.OperationFailed(
+                        AnalyticsEvent.OPERATION_REMOVE_STOP,
+                        error.message ?: UNKNOWN_ERROR,
+                    )
+                    analyticsTracker.track(failedEvent)
                     _uiState.update { it.copy(isLoading = false) }
                     _uiEffect.emit(TripDetailUiEffect.ShowError(error.message ?: UNKNOWN_ERROR))
                 }
@@ -301,12 +331,18 @@ class TripDetailViewModel @Inject constructor(
             _uiState.update { it.copy(isLoading = true) }
             withMinimumDuration { setStopUseCase(tripId, placeName, latitude, longitude, stopType) }
                 .onSuccess {
+                    analyticsTracker.track(AnalyticsEvent.StopSet(tripId, stopType.name))
                     searchJob?.cancel()
                     clearSearchState()
                     placeSearchRepository.resetSession()
                     _uiState.update { dismissDialog(it).copy(isLoading = false) }
                 }
                 .onFailure { error ->
+                    val failedEvent = AnalyticsEvent.OperationFailed(
+                        AnalyticsEvent.OPERATION_SET_STOP,
+                        error.message ?: UNKNOWN_ERROR,
+                    )
+                    analyticsTracker.track(failedEvent)
                     _uiState.update { it.copy(isLoading = false) }
                     _uiEffect.emit(TripDetailUiEffect.ShowError(error.message ?: UNKNOWN_ERROR))
                 }
@@ -324,8 +360,14 @@ class TripDetailViewModel @Inject constructor(
             _uiState.update { it.copy(isCalculatingRoute = true, routeError = null) }
             val result = withMinimumDuration { calculateRouteUseCase(tripId, stops) }
             result.onSuccess {
+                analyticsTracker.track(AnalyticsEvent.RouteCalculated(tripId))
                 _uiState.update { it.copy(isCalculatingRoute = false) }
             }.onFailure { error ->
+                val failedEvent = AnalyticsEvent.OperationFailed(
+                    AnalyticsEvent.OPERATION_CALCULATE_ROUTE,
+                    error.message ?: UNKNOWN_ERROR,
+                )
+                analyticsTracker.track(failedEvent)
                 _uiState.update { it.copy(isCalculatingRoute = false, routeError = error.message ?: UNKNOWN_ERROR) }
             }
         }

@@ -4,6 +4,8 @@ import android.app.Application
 import android.content.res.Resources
 import androidx.lifecycle.SavedStateHandle
 import com.guidovezzoni.venice.R
+import com.guidovezzoni.venice.domain.analytics.AnalyticsEvent
+import com.guidovezzoni.venice.domain.analytics.AnalyticsTracker
 import com.guidovezzoni.venice.domain.model.Leg
 import com.guidovezzoni.venice.domain.model.PlaceDetail
 import com.guidovezzoni.venice.domain.model.PlaceSuggestion
@@ -76,6 +78,7 @@ class TripDetailViewModelTest {
     private lateinit var searchPlacesUseCase: SearchPlacesUseCase
     private lateinit var getPlaceDetailUseCase: GetPlaceDetailUseCase
     private lateinit var placeSearchRepository: PlaceSearchRepository
+    private lateinit var analyticsTracker: AnalyticsTracker
     private lateinit var savedStateHandle: SavedStateHandle
 
     @Before
@@ -99,6 +102,7 @@ class TripDetailViewModelTest {
         searchPlacesUseCase = mockk()
         getPlaceDetailUseCase = mockk()
         placeSearchRepository = mockk(relaxed = true)
+        analyticsTracker = mockk(relaxed = true)
         savedStateHandle = SavedStateHandle(mapOf("tripId" to TRIP_ID))
     }
 
@@ -113,7 +117,7 @@ class TripDetailViewModelTest {
     ): TripDetailViewModel {
         every { observeStopsUseCase(TRIP_ID) } returns flowOf(stops)
         every { observeLegsUseCase(TRIP_ID) } returns flowOf(legs)
-        return TripDetailViewModel(application, setStopUseCase, moveStopUseCase, editStopUseCase, removeStopUseCase, markStopDepartedUseCase, undoMarkStopDepartedUseCase, calculateRouteUseCase, observeStopsUseCase, observeLegsUseCase, searchPlacesUseCase, getPlaceDetailUseCase, placeSearchRepository, savedStateHandle)
+        return TripDetailViewModel(application, setStopUseCase, moveStopUseCase, editStopUseCase, removeStopUseCase, markStopDepartedUseCase, undoMarkStopDepartedUseCase, calculateRouteUseCase, observeStopsUseCase, observeLegsUseCase, searchPlacesUseCase, getPlaceDetailUseCase, placeSearchRepository, analyticsTracker, savedStateHandle)
     }
 
     @Test
@@ -996,5 +1000,209 @@ class TripDetailViewModelTest {
         deferred.complete(Result.success(Unit))
         advanceUntilIdle()
         job.join()
+    }
+
+    // --- Section 11: Analytics Tracking ---
+
+    @Test
+    fun `GIVEN ViewModel initialised WHEN init completes THEN ScreenViewed is tracked`() = runTest(testDispatcher) {
+        createViewModel()
+
+        verify(exactly = 1) {
+            analyticsTracker.track(match { it is AnalyticsEvent.ScreenViewed && it.screenName == AnalyticsEvent.SCREEN_TRIP_DETAIL })
+        }
+    }
+
+    @Test
+    fun `GIVEN valid input WHEN OnStartingPointConfirmed succeeds THEN StopSet is tracked with STARTING_POINT`() = runTest(testDispatcher) {
+        coEvery { setStopUseCase(TRIP_ID, PLACE_NAME, LATITUDE, LONGITUDE, StopType.STARTING_POINT) } returns Result.success(
+            Stop("s1", TRIP_ID, PLACE_NAME, LATITUDE, LONGITUDE, 0, StopStatus.PENDING)
+        )
+        val viewModel = createViewModel()
+
+        viewModel.onIntent(TripDetailUiIntent.OnStartingPointConfirmed(PLACE_NAME, LATITUDE, LONGITUDE))
+        advanceUntilIdle()
+
+        verify(exactly = 1) {
+            analyticsTracker.track(match { it is AnalyticsEvent.StopSet && it.stopType == "STARTING_POINT" })
+        }
+    }
+
+    @Test
+    fun `GIVEN valid input WHEN OnDestinationConfirmed succeeds THEN StopSet is tracked with DESTINATION`() = runTest(testDispatcher) {
+        coEvery { setStopUseCase(TRIP_ID, PLACE_NAME, LATITUDE, LONGITUDE, StopType.DESTINATION) } returns Result.success(
+            Stop("s2", TRIP_ID, PLACE_NAME, LATITUDE, LONGITUDE, 1, StopStatus.PENDING)
+        )
+        val viewModel = createViewModel()
+
+        viewModel.onIntent(TripDetailUiIntent.OnDestinationConfirmed(PLACE_NAME, LATITUDE, LONGITUDE))
+        advanceUntilIdle()
+
+        verify(exactly = 1) {
+            analyticsTracker.track(match { it is AnalyticsEvent.StopSet && it.stopType == "DESTINATION" })
+        }
+    }
+
+    @Test
+    fun `GIVEN valid input WHEN OnAddStopConfirmed succeeds THEN StopSet is tracked with INTERMEDIATE`() = runTest(testDispatcher) {
+        coEvery { setStopUseCase(TRIP_ID, PLACE_NAME, LATITUDE, LONGITUDE, StopType.INTERMEDIATE) } returns Result.success(
+            Stop("s3", TRIP_ID, PLACE_NAME, LATITUDE, LONGITUDE, 1, StopStatus.PENDING)
+        )
+        val viewModel = createViewModel()
+
+        viewModel.onIntent(TripDetailUiIntent.OnAddStopConfirmed(PLACE_NAME, LATITUDE, LONGITUDE))
+        advanceUntilIdle()
+
+        verify(exactly = 1) {
+            analyticsTracker.track(match { it is AnalyticsEvent.StopSet && it.stopType == "INTERMEDIATE" })
+        }
+    }
+
+    @Test
+    fun `GIVEN valid input WHEN OnEditStopConfirmed succeeds THEN StopEdited is tracked`() = runTest(testDispatcher) {
+        val stop = Stop("s1", TRIP_ID, PLACE_NAME, LATITUDE, LONGITUDE, 1, StopStatus.PENDING)
+        coEvery { editStopUseCase("s1", PLACE_NAME, LATITUDE, LONGITUDE) } returns Result.success(stop)
+        val viewModel = createViewModel()
+
+        viewModel.onIntent(TripDetailUiIntent.OnEditStopConfirmed("s1", PLACE_NAME, LATITUDE, LONGITUDE))
+        advanceUntilIdle()
+
+        verify(exactly = 1) {
+            analyticsTracker.track(match { it is AnalyticsEvent.StopEdited && it.tripId == TRIP_ID })
+        }
+    }
+
+    @Test
+    fun `GIVEN remove dialog visible WHEN OnRemoveStopConfirmed succeeds THEN StopRemoved is tracked`() = runTest(testDispatcher) {
+        val stop = Stop("s1", TRIP_ID, PLACE_NAME, LATITUDE, LONGITUDE, 1, StopStatus.PENDING)
+        coEvery { removeStopUseCase(TRIP_ID, "s1") } returns Result.success(Unit)
+        val viewModel = createViewModel()
+
+        viewModel.onIntent(TripDetailUiIntent.OnRemoveStopClicked(stop))
+        viewModel.onIntent(TripDetailUiIntent.OnRemoveStopConfirmed)
+        advanceUntilIdle()
+
+        verify(exactly = 1) {
+            analyticsTracker.track(match { it is AnalyticsEvent.StopRemoved && it.tripId == TRIP_ID })
+        }
+    }
+
+    @Test
+    fun `GIVEN intermediate stops WHEN OnMoveStopUp succeeds THEN StopReordered is tracked`() = runTest(testDispatcher) {
+        coEvery { moveStopUseCase(TRIP_ID, 2, 1) } returns Result.success(Unit)
+        val viewModel = createViewModel()
+
+        viewModel.onIntent(TripDetailUiIntent.OnMoveStopUp("s2", 2))
+        advanceUntilIdle()
+
+        verify(exactly = 1) {
+            analyticsTracker.track(match { it is AnalyticsEvent.StopReordered && it.tripId == TRIP_ID })
+        }
+    }
+
+    @Test
+    fun `GIVEN a stop WHEN OnMarkStopDepartedClicked succeeds THEN StopDeparted is tracked`() = runTest(testDispatcher) {
+        coEvery { markStopDepartedUseCase(TRIP_ID, "s1") } returns Result.success(Unit)
+        val viewModel = createViewModel()
+
+        viewModel.onIntent(TripDetailUiIntent.OnMarkStopDepartedClicked("s1"))
+        advanceUntilIdle()
+
+        verify(exactly = 1) {
+            analyticsTracker.track(match { it is AnalyticsEvent.StopDeparted && it.tripId == TRIP_ID && it.stopId == "s1" })
+        }
+    }
+
+    @Test
+    fun `GIVEN stops WHEN OnCalculateRouteClicked succeeds THEN RouteCalculated is tracked`() = runTest(testDispatcher) {
+        coEvery { calculateRouteUseCase(TRIP_ID, any()) } returns Result.success(Unit)
+        val viewModel = createViewModel()
+
+        viewModel.onIntent(TripDetailUiIntent.OnCalculateRouteClicked)
+        advanceUntilIdle()
+
+        verify(exactly = 1) {
+            analyticsTracker.track(match { it is AnalyticsEvent.RouteCalculated && it.tripId == TRIP_ID })
+        }
+    }
+
+    @Test
+    fun `GIVEN setStop fails WHEN OnStartingPointConfirmed is dispatched THEN OperationFailed is tracked`() = runTest(testDispatcher) {
+        coEvery { setStopUseCase(TRIP_ID, PLACE_NAME, LATITUDE, LONGITUDE, StopType.STARTING_POINT) } returns Result.failure(RuntimeException("error"))
+        val viewModel = createViewModel()
+
+        viewModel.onIntent(TripDetailUiIntent.OnStartingPointConfirmed(PLACE_NAME, LATITUDE, LONGITUDE))
+        advanceUntilIdle()
+
+        verify(exactly = 1) {
+            analyticsTracker.track(match { it is AnalyticsEvent.OperationFailed && it.operation == AnalyticsEvent.OPERATION_SET_STOP })
+        }
+    }
+
+    @Test
+    fun `GIVEN editStop fails WHEN OnEditStopConfirmed is dispatched THEN OperationFailed is tracked`() = runTest(testDispatcher) {
+        coEvery { editStopUseCase("s1", PLACE_NAME, LATITUDE, LONGITUDE) } returns Result.failure(RuntimeException("error"))
+        val viewModel = createViewModel()
+
+        viewModel.onIntent(TripDetailUiIntent.OnEditStopConfirmed("s1", PLACE_NAME, LATITUDE, LONGITUDE))
+        advanceUntilIdle()
+
+        verify(exactly = 1) {
+            analyticsTracker.track(match { it is AnalyticsEvent.OperationFailed && it.operation == AnalyticsEvent.OPERATION_EDIT_STOP })
+        }
+    }
+
+    @Test
+    fun `GIVEN removeStop fails WHEN OnRemoveStopConfirmed is dispatched THEN OperationFailed is tracked`() = runTest(testDispatcher) {
+        val stop = Stop("s1", TRIP_ID, PLACE_NAME, LATITUDE, LONGITUDE, 1, StopStatus.PENDING)
+        coEvery { removeStopUseCase(TRIP_ID, "s1") } returns Result.failure(RuntimeException("error"))
+        val viewModel = createViewModel()
+
+        viewModel.onIntent(TripDetailUiIntent.OnRemoveStopClicked(stop))
+        viewModel.onIntent(TripDetailUiIntent.OnRemoveStopConfirmed)
+        advanceUntilIdle()
+
+        verify(exactly = 1) {
+            analyticsTracker.track(match { it is AnalyticsEvent.OperationFailed && it.operation == AnalyticsEvent.OPERATION_REMOVE_STOP })
+        }
+    }
+
+    @Test
+    fun `GIVEN moveStop fails WHEN OnMoveStopUp is dispatched THEN OperationFailed is tracked`() = runTest(testDispatcher) {
+        coEvery { moveStopUseCase(TRIP_ID, 2, 1) } returns Result.failure(RuntimeException("error"))
+        val viewModel = createViewModel()
+
+        viewModel.onIntent(TripDetailUiIntent.OnMoveStopUp("s2", 2))
+        advanceUntilIdle()
+
+        verify(exactly = 1) {
+            analyticsTracker.track(match { it is AnalyticsEvent.OperationFailed && it.operation == AnalyticsEvent.OPERATION_MOVE_STOP })
+        }
+    }
+
+    @Test
+    fun `GIVEN markStopDeparted fails WHEN OnMarkStopDepartedClicked is dispatched THEN OperationFailed is tracked`() = runTest(testDispatcher) {
+        coEvery { markStopDepartedUseCase(TRIP_ID, "s1") } returns Result.failure(RuntimeException("error"))
+        val viewModel = createViewModel()
+
+        viewModel.onIntent(TripDetailUiIntent.OnMarkStopDepartedClicked("s1"))
+        advanceUntilIdle()
+
+        verify(exactly = 1) {
+            analyticsTracker.track(match { it is AnalyticsEvent.OperationFailed && it.operation == AnalyticsEvent.OPERATION_MARK_DEPARTED })
+        }
+    }
+
+    @Test
+    fun `GIVEN calculateRoute fails WHEN OnCalculateRouteClicked is dispatched THEN OperationFailed is tracked`() = runTest(testDispatcher) {
+        coEvery { calculateRouteUseCase(TRIP_ID, any()) } returns Result.failure(RuntimeException("error"))
+        val viewModel = createViewModel()
+
+        viewModel.onIntent(TripDetailUiIntent.OnCalculateRouteClicked)
+        advanceUntilIdle()
+
+        verify(exactly = 1) {
+            analyticsTracker.track(match { it is AnalyticsEvent.OperationFailed && it.operation == AnalyticsEvent.OPERATION_CALCULATE_ROUTE })
+        }
     }
 }
