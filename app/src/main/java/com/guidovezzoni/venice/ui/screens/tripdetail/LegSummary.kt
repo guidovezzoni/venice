@@ -24,7 +24,6 @@ private val LEG_SUMMARY_ICON_SIZE = 16.dp
 private val LEG_SUMMARY_HORIZONTAL_PADDING = 16.dp
 private val LEG_SUMMARY_VERTICAL_PADDING = 8.dp
 private val LEG_SUMMARY_ICON_SPACING = 6.dp
-private const val METRES_PER_KILOMETRE = 1000
 private const val SECONDS_PER_MINUTE = 60
 private const val MINUTES_PER_HOUR = 60
 
@@ -32,8 +31,8 @@ private const val MINUTES_PER_HOUR = 60
 fun LegSummary(
     modifier: Modifier = Modifier,
     leg: Leg,
+    formattedDistance: String,
 ) {
-    val distanceText = formatDistance(leg.distanceMetres)
     val durationText = formatDuration(leg.durationSeconds)
 
     Row(
@@ -49,20 +48,12 @@ fun LegSummary(
         )
         Spacer(modifier = Modifier.width(LEG_SUMMARY_ICON_SPACING))
         Text(
-            text = "$distanceText · $durationText",
+            text = "$formattedDistance · $durationText",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
 }
-
-@Composable
-private fun formatDistance(distanceMetres: Int): String =
-    if (distanceMetres >= METRES_PER_KILOMETRE) {
-        stringResource(R.string.trip_detail_leg_distance_kilometres, distanceMetres / METRES_PER_KILOMETRE.toFloat())
-    } else {
-        stringResource(R.string.trip_detail_leg_distance_metres, distanceMetres)
-    }
 
 @Composable
 private fun formatDuration(durationSeconds: Int): String {
@@ -90,6 +81,7 @@ private fun PreviewLegSummaryShortDistance() {
                 durationSeconds = 540,
                 encodedPolyline = "",
             ),
+            formattedDistance = "750 m",
         )
     }
 }
@@ -108,6 +100,26 @@ private fun PreviewLegSummaryLongDistance() {
                 durationSeconds = 9000,
                 encodedPolyline = "",
             ),
+            formattedDistance = "12.5 km",
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PreviewLegSummaryImperialLocale() {
+    HeadingToTheAlpsTheme {
+        LegSummary(
+            leg = Leg(
+                id = "leg-3",
+                tripId = "trip-1",
+                fromStopId = "stop-3",
+                toStopId = "stop-4",
+                distanceMetres = 12500,
+                durationSeconds = 9000,
+                encodedPolyline = "",
+            ),
+            formattedDistance = "7.8 mi",
         )
     }
 }

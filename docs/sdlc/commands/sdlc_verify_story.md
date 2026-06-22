@@ -255,7 +255,57 @@ Follow these steps:
 
    **Failure handling:** If the sub-agent fails, retry once. If Haiku, escalate to Sonnet on retry.
 
-7. **Verify test file coverage (sub-agent).** — BLOCKING GATE
+7. **Generate coverage report (sub-agent).** — NON-BLOCKING (informational)
+
+   ```
+   Agent(
+     description: "Coverage report",
+     model: "sonnet",
+     prompt: "<constructed prompt>"
+   )
+   ```
+
+   **Sub-agent prompt:**
+   ```
+   You are generating a code coverage report for the current state of the branch
+   (HEAD), broken down by Kover coverage category.
+
+   ## Task
+
+   1. Generate the coverage report:
+      ```
+      ./gradlew koverXmlReport
+      ```
+
+   2. Parse `app/build/reports/kover/report.xml` and, for each `<counter type="...">`
+      element (INSTRUCTION, BRANCH, LINE, METHOD, CLASS), compute:
+      `percentage = covered / (covered + missed) * 100`
+
+   ## Output Format — CRITICAL
+
+   ### RESULT: PASS or FAIL
+
+   PASS once the coverage table is produced. FAIL only if the Gradle command itself
+   errors out (not if coverage is below target — this step never blocks on coverage,
+   it only reports it; the 95% minimum is already enforced separately by
+   `koverVerify` as part of `./gradlew check` in step 5).
+
+   ### Coverage Report
+   | Category | Coverage |
+   |---|---|
+   | Instructions | XX.XX% |
+   | Branches | XX.XX% |
+   | Lines | XX.XX% |
+   | Methods | XX.XX% |
+   | Classes | XX.XX% |
+   ```
+
+   **Gate decision:** Informational only — never blocks subsequent steps.
+
+   **Failure handling:** If the sub-agent fails, retry once with Sonnet. If it still
+   fails, proceed without the report and note its absence in the report.
+
+8. **Verify test file coverage (sub-agent).** — BLOCKING GATE
 
    ```
    Agent(
@@ -303,7 +353,7 @@ Follow these steps:
 
    **Failure handling:** If the sub-agent fails, retry once with Sonnet.
 
-8. **Verify Compose preview coverage (sub-agent).** — BLOCKING GATE
+9. **Verify Compose preview coverage (sub-agent).** — BLOCKING GATE
 
    ```
    Agent(
@@ -349,7 +399,7 @@ Follow these steps:
 
    **Failure handling:** If the sub-agent fails, retry once with Sonnet.
 
-9. **Run on-device tests (orchestrator + sub-agent).** — BLOCKING GATE
+10. **Run on-device tests (orchestrator + sub-agent).** — BLOCKING GATE
 
    Apply the **device gate** (see above) BEFORE spawning the sub-agent. Only proceed once a device is confirmed connected.
 
@@ -418,7 +468,7 @@ Follow these steps:
 
    **Failure handling:** If the sub-agent fails, retry once. If Haiku, escalate to Sonnet on retry.
 
-10. **Verify the Definition of Done (sub-agent).** — BLOCKING GATE
+11. **Verify the Definition of Done (sub-agent).** — BLOCKING GATE
 
     ```
     Agent(
@@ -464,7 +514,7 @@ Follow these steps:
 
     **Failure handling:** If the sub-agent fails, retry once with Sonnet.
 
-11. **Close the user story (sub-agent).**
+12. **Close the user story (sub-agent).**
 
     ```
     Agent(
@@ -505,7 +555,7 @@ Follow these steps:
 
     **Failure handling:** Retry once. If Haiku, escalate to Sonnet on retry.
 
-12. **Sync delta specs (sub-agent).**
+13. **Sync delta specs (sub-agent).**
 
     ```
     Agent(
@@ -539,7 +589,7 @@ Follow these steps:
 
     **Failure handling:** Retry once with Sonnet.
 
-13. **Archive the OpenSpec change (sub-agent).**
+14. **Archive the OpenSpec change (sub-agent).**
 
     ```
     Agent(
@@ -573,7 +623,7 @@ Follow these steps:
 
     **Failure handling:** Retry once. If Haiku, escalate to Sonnet on retry.
 
-14. **Verify README.md and AGENTS.md are in sync (sub-agent).**
+15. **Verify README.md and AGENTS.md are in sync (sub-agent).**
 
     ```
     Agent(
@@ -619,7 +669,7 @@ Follow these steps:
 
     **Failure handling:** Retry once with Sonnet.
 
-15. **Add a report (sub-agent).**
+16. **Add a report (sub-agent).**
 
     ```
     Agent(
@@ -644,13 +694,14 @@ Follow these steps:
     - Security review: {RESULT_FROM_STEP_4}
     - Clean build: {RESULT_FROM_STEP_5}
     - Unit tests: {RESULT_FROM_STEP_6}
-    - Test file coverage: {RESULT_FROM_STEP_7}
-    - Compose preview coverage: {RESULT_FROM_STEP_8}
-    - On-device tests: {RESULT_FROM_STEP_9}
-    - Definition of Done: {RESULT_FROM_STEP_10}
-    - Archive location: {RESULT_FROM_STEP_13}
-    - Spec sync status: {RESULT_FROM_STEP_12}
-    - README/AGENTS sync: {RESULT_FROM_STEP_14}
+    - Coverage report table: {COVERAGE_TABLE_FROM_STEP_7}
+    - Test file coverage: {RESULT_FROM_STEP_8}
+    - Compose preview coverage: {RESULT_FROM_STEP_9}
+    - On-device tests: {RESULT_FROM_STEP_10}
+    - Definition of Done: {RESULT_FROM_STEP_11}
+    - Archive location: {RESULT_FROM_STEP_14}
+    - Spec sync status: {RESULT_FROM_STEP_13}
+    - README/AGENTS sync: {RESULT_FROM_STEP_15}
     - Final outcome: PASSED
     - Renamed filename: {NEW_STORY_FILENAME}
 
@@ -660,6 +711,11 @@ Follow these steps:
     ## Instructions
     The section should summarise all the data above in a structured format following
     the report guidelines. Include each gate's PASS/FAIL status with details.
+
+    Render the Coverage Report table from step 7 as an HTML `<table>` inside this
+    section, using the existing `table`/`th`/`td` styles from the report skeleton —
+    columns: Category, Coverage. Do this even if some gates failed, as long as the
+    coverage data is available.
 
     ## When Done
     Report:
@@ -671,6 +727,6 @@ Follow these steps:
 
     **Failure handling:** Retry once. If still failing, the orchestrator generates the report inline.
 
-16. **Display the summary.** Output the summary on screen so the user can see what was verified and archived.
+17. **Display the summary.** Output the summary on screen so the user can see what was verified and archived, including the Coverage Report table from step 7 (Category | Coverage), rendered as a markdown table.
 
-17. **Suggest a commit message.** Suggest a commit message following @docs/guidelines/guidelines-git.md.
+18. **Suggest a commit message.** Suggest a commit message following @docs/guidelines/guidelines-git.md.

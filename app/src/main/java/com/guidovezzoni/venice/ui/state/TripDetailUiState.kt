@@ -27,6 +27,7 @@ data class TripDetailUiState(
     val isResolvingPlace: Boolean = false,
     val placeDetailError: String? = null,
     val legs: List<Leg> = emptyList(),
+    val formattedLegDistances: Map<String, String> = emptyMap(),
     val isCalculatingRoute: Boolean = false,
     val routeError: String? = null,
 )

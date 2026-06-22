@@ -72,6 +72,7 @@
     <string name="trip_detail_route_error">Could not calculate route. Please check your connection and try again.</string>
     <string name="trip_detail_leg_distance_metres">%1$d m</string>
     <string name="trip_detail_leg_distance_kilometres">%.1f km</string>
+    <string name="trip_detail_leg_distance_miles">%.1f mi</string>
     <string name="trip_detail_leg_duration_minutes">%1$d min</string>
     <string name="trip_detail_leg_duration_hours_minutes">%1$dh %2$dmin</string>
 </resources>
