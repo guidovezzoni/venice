@@ -1,10 +1,25 @@
+# SDLC — Agentic AI Software Development Lifecycle
+
+SDLC is a set of six commands that let an AI coding agent autonomously drive the full lifecycle of a user story — from opening to verified delivery — while keeping the human developer in control of key decisions.
+
+Built on top of [OpenSpec](https://github.com/Fission-AI/OpenSpec/) (Spec-Driven Development), SDLC replaces manual task management with agentic orchestration: the AI reads specifications, reasons about architecture, writes and verifies code, and produces auditable reports at every stage.
+
+## Features
+
+| Capability                          | How SDLC uses it                                                                                                                      |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| **Autonomous multi-step reasoning** | Each command chains 15+ sequential steps, making decisions at each gate without human intervention                                    |
+| **Sub-agent orchestration**         | All four commands delegate self-contained steps to cheaper sub-agents (Sonnet for reasoning, Haiku for mechanical tasks), each with a fresh context window |
+| **Tool use**                        | The agent drives git, Gradle, adb, static analysis, and Claude Code's security scanners directly                                      |
+| **Self-healing loops**              | Failed tests or security findings trigger automatic fix-and-retry cycles                                                              |
+| **On-device verification**          | The agent installs the app on a physical device, interacts with it via UIAutomator, and verifies behaviour autonomously               |
+| **Specification grounding**         | All code generation is anchored to living specs and acceptance criteria — not just free-form prompts                                  |
+
+**Please note**: full description and repo available at https://github.com/guidovezzoni/SDLC
+
 # Venice
 
 A road trip planning app for Android, built with a modern architecture stack and developed through a specification-driven process (SDD).
-
-
-This is a test bed for testing and improving my AI-based SDLC framework, you can find it here: https://github.com/guidovezzoni/SDLC
-
 
 The app is built entirely in Kotlin with Jetpack Compose and Material 3, following Clean Architecture to separate domain logic, data access, and UI into independent layers. Each feature uses the MVI (Model-View-Intent) pattern, enforcing unidirectional data flow through immutable state, explicit user intents, and one-shot effects. Dependency injection is handled by Hilt, persistence by Room, and all asynchronous work runs on Kotlin Coroutines and Flow.
 
