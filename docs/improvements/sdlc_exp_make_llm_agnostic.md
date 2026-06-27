@@ -22,12 +22,9 @@ All init scripts must be idempotent and report created/updated/skipped counts, m
 - **Naming**: kebab-case derived from the command filename (underscores → hyphens), e.g. `sdlc-open-story.md`
 - **No CLAUDE.md symlink**: OpenCode reads `AGENTS.md` directly.
 
-#### Exclusion rules for ALL init scripts
+#### Exclusion rules
 
-All init scripts (Claude, Codex, OpenCode) must **skip** these files when linking commands:
-- `sdlc_exp_make_llm_agnostic.md` — meta-command for one-time conversion, not a user-facing SDLC command
-
-Additionally, **Claude's init script only** must skip:
+**Claude's init script only** must skip:
 - `sdlc_security_review.md` — Claude Code uses its native `/security-review` skill instead; this file is only for tools without a built-in security review capability
 
 Codex and OpenCode init scripts **must link** `sdlc_security_review.md` as their security review command.
