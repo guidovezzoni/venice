@@ -1,6 +1,6 @@
 Please verify and archive the user story: $ARGUMENTS.
 
-This command uses sub-agent orchestration: each verification gate is delegated to a separate sub-agent with a fresh context window, using cheaper models (Sonnet/Haiku) where appropriate. The orchestrator handles user interaction, device gates, and pass/fail decisions between gates.
+This command uses sub-agent orchestration: each verification gate is delegated to a separate sub-agent with a fresh context window, using cheaper model tiers (standard/fast) where appropriate. The orchestrator handles user interaction, device gates, and pass/fail decisions between gates.
 
 Sub-agent orchestration is the default execution strategy for this command.
 
@@ -48,13 +48,7 @@ Follow these steps:
 
 2. **Run OpenSpec verify (sub-agent).** — BLOCKING GATE
 
-   ```
-   Agent(
-     description: "OpenSpec verify",
-     model: "sonnet",
-     prompt: "<constructed prompt>"
-   )
-   ```
+   Spawn a sub-agent using whatever mechanism is available in your environment (e.g. the Agent tool in Claude Code, or equivalent in Codex CLI or OpenCode). Use the **standard** model tier.
 
    **Sub-agent prompt:**
    ```
@@ -65,7 +59,7 @@ Follow these steps:
 
    ## Task
 
-   Execute the OpenSpec verify command (`/opsx:verify`) to check that the implementation
+   Execute the OpenSpec verify skill/command available in your environment to check that the implementation
    matches the change artefacts. Parse and report the results.
 
    ## Output Format — CRITICAL
@@ -87,17 +81,11 @@ Follow these steps:
 
    **Gate decision:** If RESULT is FAIL, STOP — present the issues clearly to the user and do NOT proceed.
 
-   **Failure handling:** If the sub-agent itself fails (not the verification), retry once with Sonnet.
+   **Failure handling:** If the sub-agent itself fails (not the verification), retry once with **standard** tier.
 
 3. **Review unresolved TODOs (sub-agent).** — BLOCKING GATE
 
-   ```
-   Agent(
-     description: "TODO scan and classification",
-     model: "sonnet",
-     prompt: "<constructed prompt>"
-   )
-   ```
+   Spawn a sub-agent using the **standard** model tier.
 
    **Sub-agent prompt:**
    ```
@@ -135,17 +123,11 @@ Follow these steps:
 
    **Gate decision:** If RESULT is FAIL, STOP — present RESOLVE NOW TODOs to the user and do NOT proceed.
 
-   **Failure handling:** If the sub-agent fails, retry once with Sonnet.
+   **Failure handling:** If the sub-agent fails, retry once with **standard** tier.
 
 4. **Run security review (sub-agent).** — BLOCKING GATE
 
-   ```
-   Agent(
-     description: "Security review",
-     model: "sonnet",
-     prompt: "<constructed prompt>"
-   )
-   ```
+   Spawn a sub-agent using the **standard** model tier.
 
    **Sub-agent prompt:**
    ```
@@ -153,8 +135,8 @@ Follow these steps:
 
    ## Task
 
-   Execute the `/security-review` skill to review all pending changes on the current branch
-   for security issues. Use the Skill tool to invoke the "security-review" skill.
+   Execute the security review skill/command available in your environment to review all
+   pending changes on the current branch for security issues.
 
    ## Output Format — CRITICAL
 
@@ -172,17 +154,11 @@ Follow these steps:
 
    **Gate decision:** If RESULT is FAIL (critical or high-severity findings), STOP — present findings to the user and do NOT proceed.
 
-   **Failure handling:** If the sub-agent fails, retry once with Sonnet.
+   **Failure handling:** If the sub-agent fails, retry once with **standard** tier.
 
 5. **Run clean build and static analysis (sub-agent).** — BLOCKING GATE
 
-   ```
-   Agent(
-     description: "Clean build and static analysis",
-     model: "haiku",
-     prompt: "<constructed prompt>"
-   )
-   ```
+   Spawn a sub-agent using the **fast** model tier.
 
    **Sub-agent prompt:**
    ```
@@ -212,17 +188,11 @@ Follow these steps:
 
    **Gate decision:** If RESULT is FAIL, STOP — present the build errors to the user and do NOT proceed.
 
-   **Failure handling:** If the sub-agent fails, retry once. If Haiku, escalate to Sonnet on retry.
+   **Failure handling:** If the sub-agent fails, retry once. If **fast** tier, escalate to **standard** on retry.
 
 6. **Run unit tests (sub-agent).** — BLOCKING GATE
 
-   ```
-   Agent(
-     description: "Unit tests",
-     model: "haiku",
-     prompt: "<constructed prompt>"
-   )
-   ```
+   Spawn a sub-agent using the **fast** model tier.
 
    **Sub-agent prompt:**
    ```
@@ -253,17 +223,11 @@ Follow these steps:
 
    **Gate decision:** If RESULT is FAIL, STOP — present the failing tests to the user and do NOT proceed.
 
-   **Failure handling:** If the sub-agent fails, retry once. If Haiku, escalate to Sonnet on retry.
+   **Failure handling:** If the sub-agent fails, retry once. If **fast** tier, escalate to **standard** on retry.
 
 7. **Generate coverage report (sub-agent).** — NON-BLOCKING (informational)
 
-   ```
-   Agent(
-     description: "Coverage report",
-     model: "sonnet",
-     prompt: "<constructed prompt>"
-   )
-   ```
+   Spawn a sub-agent using the **standard** model tier.
 
    **Sub-agent prompt:**
    ```
@@ -302,18 +266,12 @@ Follow these steps:
 
    **Gate decision:** Informational only — never blocks subsequent steps.
 
-   **Failure handling:** If the sub-agent fails, retry once with Sonnet. If it still
+   **Failure handling:** If the sub-agent fails, retry once with **standard** tier. If it still
    fails, proceed without the report and note its absence in the report.
 
 8. **Verify test file coverage (sub-agent).** — BLOCKING GATE
 
-   ```
-   Agent(
-     description: "Test file coverage check",
-     model: "sonnet",
-     prompt: "<constructed prompt>"
-   )
-   ```
+   Spawn a sub-agent using the **standard** model tier.
 
    **Sub-agent prompt:**
    ```
@@ -351,17 +309,11 @@ Follow these steps:
 
    **Gate decision:** If RESULT is FAIL, STOP — present the list of missing test files to the user and do NOT proceed.
 
-   **Failure handling:** If the sub-agent fails, retry once with Sonnet.
+   **Failure handling:** If the sub-agent fails, retry once with **standard** tier.
 
 9. **Verify Compose preview coverage (sub-agent).** — BLOCKING GATE
 
-   ```
-   Agent(
-     description: "Compose preview coverage check",
-     model: "sonnet",
-     prompt: "<constructed prompt>"
-   )
-   ```
+   Spawn a sub-agent using the **standard** model tier.
 
    **Sub-agent prompt:**
    ```
@@ -397,19 +349,13 @@ Follow these steps:
 
    **Gate decision:** If RESULT is FAIL, STOP — present the list of missing previews/fields to the user and do NOT proceed.
 
-   **Failure handling:** If the sub-agent fails, retry once with Sonnet.
+   **Failure handling:** If the sub-agent fails, retry once with **standard** tier.
 
 10. **Run on-device tests (orchestrator + sub-agent).** — BLOCKING GATE
 
    Apply the **device gate** (see above) BEFORE spawning the sub-agent. Only proceed once a device is confirmed connected.
 
-   ```
-   Agent(
-     description: "On-device tests",
-     model: "haiku",
-     prompt: "<constructed prompt>"
-   )
-   ```
+   Spawn a sub-agent using the **fast** model tier.
 
    **Sub-agent prompt:**
    ```
@@ -466,17 +412,11 @@ Follow these steps:
    - If RESULT is FAIL: STOP — present failures to user and do NOT proceed.
    - If RESULT is NOT_FEASIBLE: ask the user to perform the manual verification. Describe what to check. **BLOCK** — wait for the user to confirm the result. If the user reports a failure, STOP.
 
-   **Failure handling:** If the sub-agent fails, retry once. If Haiku, escalate to Sonnet on retry.
+   **Failure handling:** If the sub-agent fails, retry once. If **fast** tier, escalate to **standard** on retry.
 
 11. **Verify the Definition of Done (sub-agent).** — BLOCKING GATE
 
-    ```
-    Agent(
-      description: "Definition of Done verification",
-      model: "sonnet",
-      prompt: "<constructed prompt>"
-    )
-    ```
+    Spawn a sub-agent using the **standard** model tier.
 
     **Sub-agent prompt:**
     ```
@@ -512,17 +452,9 @@ Follow these steps:
 
     **Gate decision:** If RESULT is FAIL, STOP — present the failing criteria to the user and do NOT proceed.
 
-    **Failure handling:** If the sub-agent fails, retry once with Sonnet.
+    **Failure handling:** If the sub-agent fails, retry once with **standard** tier.
 
-12. **Close the user story (sub-agent).**
-
-    ```
-    Agent(
-      description: "Close user story",
-      model: "haiku",
-      prompt: "<constructed prompt>"
-    )
-    ```
+12. **Close the user story (sub-agent).** Spawn a sub-agent using the **fast** model tier.
 
     **Sub-agent prompt:**
     ```
@@ -553,17 +485,9 @@ Follow these steps:
 
     **Verification:** Confirm the user story file is at its new path and the index is updated.
 
-    **Failure handling:** Retry once. If Haiku, escalate to Sonnet on retry.
+    **Failure handling:** Retry once. If **fast** tier, escalate to **standard** on retry.
 
-13. **Sync delta specs (sub-agent).**
-
-    ```
-    Agent(
-      description: "Sync delta specs",
-      model: "sonnet",
-      prompt: "<constructed prompt>"
-    )
-    ```
+13. **Sync delta specs (sub-agent).** Spawn a sub-agent using the **standard** model tier.
 
     **Sub-agent prompt:**
     ```
@@ -574,7 +498,7 @@ Follow these steps:
 
     ## Task
 
-    Execute the OpenSpec sync command (`/opsx:sync`) to merge any delta specs from this
+    Execute the OpenSpec sync skill/command available in your environment to merge any delta specs from this
     change into the main specs. Ensure that all file moves use `git mv` so that Git
     tracks the renames.
 
@@ -587,17 +511,9 @@ Follow these steps:
 
     **Verification:** Confirm the sync completed without errors.
 
-    **Failure handling:** Retry once with Sonnet.
+    **Failure handling:** Retry once with **standard** tier.
 
-14. **Archive the OpenSpec change (sub-agent).**
-
-    ```
-    Agent(
-      description: "Archive change",
-      model: "haiku",
-      prompt: "<constructed prompt>"
-    )
-    ```
+14. **Archive the OpenSpec change (sub-agent).** Spawn a sub-agent using the **fast** model tier.
 
     **Sub-agent prompt:**
     ```
@@ -608,7 +524,7 @@ Follow these steps:
 
     ## Task
 
-    Execute the OpenSpec archive command (`/opsx:archive`) to finalise and archive the
+    Execute the OpenSpec archive skill/command available in your environment to finalise and archive the
     completed change artefacts. Ensure that all file moves use `git mv` so that Git
     tracks the renames.
 
@@ -621,17 +537,9 @@ Follow these steps:
 
     **Verification:** Confirm the change directory has been moved to the archive.
 
-    **Failure handling:** Retry once. If Haiku, escalate to Sonnet on retry.
+    **Failure handling:** Retry once. If **fast** tier, escalate to **standard** on retry.
 
-15. **Verify README.md and AGENTS.md are in sync (sub-agent).**
-
-    ```
-    Agent(
-      description: "Verify docs sync",
-      model: "sonnet",
-      prompt: "<constructed prompt>"
-    )
-    ```
+15. **Verify README.md and AGENTS.md are in sync (sub-agent).** Spawn a sub-agent using the **standard** model tier.
 
     **Sub-agent prompt:**
     ```
@@ -646,7 +554,7 @@ Follow these steps:
     ## Task
 
     1. Read README.md
-    2. Read AGENTS.md (NOT CLAUDE.md — it may be a symlink)
+    2. Read and update AGENTS.md
     3. Check whether the changes delivered by this story affect any section:
        - Feature list, architecture table, tech stack, build instructions
        - Project overview, folder structure, workflow descriptions
@@ -655,8 +563,6 @@ Follow these steps:
     5. If everything is accurate, note that the check passed
 
     ## Important
-    - Do NOT write through symlinks. If CLAUDE.md is a symlink to AGENTS.md,
-      edit AGENTS.md directly.
     - Only update sections that are actually affected by this story's changes
 
     ## When Done
@@ -667,17 +573,9 @@ Follow these steps:
 
     **Verification:** Confirm README.md and AGENTS.md are up to date.
 
-    **Failure handling:** Retry once with Sonnet.
+    **Failure handling:** Retry once with **standard** tier.
 
-16. **Add a report (sub-agent).**
-
-    ```
-    Agent(
-      description: "Add verification report",
-      model: "haiku",
-      prompt: "<constructed prompt>"
-    )
-    ```
+16. **Add a report (sub-agent).** Spawn a sub-agent using the **fast** model tier.
 
     **Sub-agent prompt:**
     ```

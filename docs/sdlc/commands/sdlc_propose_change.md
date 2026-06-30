@@ -1,6 +1,6 @@
 Please design the change for the user story: $ARGUMENTS.
 
-This command uses sub-agent orchestration: the codebase exploration, artifact generation, and reporting steps are delegated to separate sub-agents with fresh context windows, using cheaper models (Sonnet/Haiku) where appropriate. Interactive steps (story location, user Q&A) remain with the orchestrator.
+This command uses sub-agent orchestration: the codebase exploration, artifact generation, and reporting steps are delegated to separate sub-agents with fresh context windows, using cheaper model tiers (standard/fast) where appropriate. Interactive steps (story location, user Q&A) remain with the orchestrator.
 
 Sub-agent orchestration is the default execution strategy for this command.
 
@@ -10,15 +10,7 @@ Follow these steps:
 
 1. **Locate the user story.** Match `$ARGUMENTS` against the user story files by number or partial name. If no match is found, ask the user which user story to design a change for. The story should be in WIP status (opened for development). If it is not, inform the user and stop.
 
-2. **Explore the user story (sub-agent).** Spawn a sub-agent to investigate the codebase and surface findings, questions, and risks.
-
-   ```
-   Agent(
-     description: "Explore codebase for user story",
-     model: "sonnet",
-     prompt: "<constructed prompt>"
-   )
-   ```
+2. **Explore the user story (sub-agent).** Spawn a sub-agent to investigate the codebase and surface findings, questions, and risks. Use whatever sub-agent spawning mechanism is available in your environment (e.g. the Agent tool in Claude Code, or equivalent in Codex CLI or OpenCode). Use the **standard** model tier.
 
    **Sub-agent prompt:**
    ```
@@ -29,7 +21,7 @@ Follow these steps:
 
    ## Your Mission
 
-   Execute the OpenSpec explore command (`/opsx:explore`) with the user story content as input.
+   Execute the OpenSpec explore skill/command available in your environment with the user story content as input.
    Use this phase to think through the requirements, investigate the codebase, identify
    integration points, and surface any ambiguities or risks.
 
@@ -75,19 +67,11 @@ Follow these steps:
 
    **Verification:** After the sub-agent returns, confirm it produced a structured report with the required sections (Architecture Findings, Integration Points, Questions, Risks, Recommendations).
 
-   **Failure handling:** If exploration returns incomplete (no findings), retry once with Sonnet. If still empty, the orchestrator performs exploration itself.
+   **Failure handling:** If exploration returns incomplete (no findings), retry once with **standard** tier. If still empty, the orchestrator performs exploration itself.
 
 3. **Clarify all doubts.** Before moving to the proposal phase, present all questions surfaced by the exploration sub-agent to the user. Ensure all ambiguities have been resolved. Ask additional questions if required. No assumptions or unresolved doubts should be carried forward into the proposal. DO NOT MAKE ASSUMPTIONS.
 
-4. **Propose the change with BDD task structure (sub-agent).** Spawn a sub-agent to create all SDD artefacts.
-
-   ```
-   Agent(
-     description: "Propose change with BDD tasks",
-     model: "sonnet",
-     prompt: "<constructed prompt>"
-   )
-   ```
+4. **Propose the change with BDD task structure (sub-agent).** Spawn a sub-agent to create all SDD artefacts. Use the **standard** model tier.
 
    **Sub-agent prompt:**
    ```
@@ -104,7 +88,7 @@ Follow these steps:
 
    ## Task
 
-   Execute the OpenSpec propose command (`/opsx:propose`) to create all SDD artefacts
+   Execute the OpenSpec propose skill/command available in your environment to create all SDD artefacts
    (proposal, design, delta specs, and tasks) based on the explored and clarified requirements.
 
    ## BDD Task-Structuring Rules — CRITICAL
@@ -159,17 +143,9 @@ Follow these steps:
 
    **Verification:** After the sub-agent returns, verify that the change directory exists under `openspec/changes/` and contains the expected artifacts (proposal, design, specs, tasks).
 
-   **Failure handling:** If artifact generation fails (missing artifacts, CLI errors), retry once with Sonnet. If still failing, the orchestrator performs the proposal generation itself (escalation to Opus).
+   **Failure handling:** If artifact generation fails (missing artifacts, CLI errors), retry once with **standard** tier. If still failing, the orchestrator performs the proposal generation itself (escalation to **reasoning** tier).
 
-5. **Add a report (sub-agent).** Spawn a sub-agent to append the report section.
-
-   ```
-   Agent(
-     description: "Add proposal report",
-     model: "haiku",
-     prompt: "<constructed prompt>"
-   )
-   ```
+5. **Add a report (sub-agent).** Spawn a sub-agent to append the report section. Use the **fast** model tier.
 
    **Sub-agent prompt:**
    ```

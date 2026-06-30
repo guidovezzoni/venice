@@ -2,20 +2,11 @@ Please run the project configuration health check.
 
 This command verifies that the project's quality tooling (static analysis, coverage, tests, CI/CD, deployment, Gradle wrapper) is properly configured. For SDLC framework checks (OpenSpec, security plugin, SDLC commands), use `/sdlc_doctor` instead.
 
-This command uses sub-agent orchestration: each check category is delegated to a Haiku sub-agent running in parallel. All checks are read-only — sub-agents must not modify any files, run builds, or install anything.
+This command uses sub-agent orchestration: each check category is delegated to a sub-agent using the **fast** model tier, running in parallel. All checks are read-only — sub-agents must not modify any files, run builds, or install anything.
 
 Follow these steps:
 
-1. **Spawn all check agents in parallel.** Launch one Haiku sub-agent per category in a single message (all `Agent` tool calls in one response). Each sub-agent receives its category-specific checks and returns its results as a structured list.
-
-   Use this `Agent` call pattern for every category:
-   ```
-   Agent(
-     description: "Project Doctor: <Category>",
-     model: "haiku",
-     prompt: "<constructed prompt from the category section below>"
-   )
-   ```
+1. **Spawn all check agents in parallel.** Launch one sub-agent per category using whatever parallel sub-agent mechanism is available in your environment. Use the **fast** model tier for all sub-agents. Each sub-agent receives its category-specific checks and returns its results as a structured list.
 
    ### Sub-agent prompt template
 

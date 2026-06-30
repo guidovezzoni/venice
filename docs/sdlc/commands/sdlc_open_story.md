@@ -1,6 +1,6 @@
 Please open the user story for development: $ARGUMENTS.
 
-This command uses sub-agent orchestration: self-contained steps are delegated to separate sub-agents with fresh context windows, using cheaper models (Sonnet/Haiku) where appropriate. Interactive steps (git operations, user questions) remain with the orchestrator.
+This command uses sub-agent orchestration: self-contained steps are delegated to separate sub-agents with fresh context windows, using cheaper model tiers (standard/fast) where appropriate. Interactive steps (git operations, user questions) remain with the orchestrator.
 
 Sub-agent orchestration is the default execution strategy for this command.
 
@@ -18,15 +18,7 @@ Follow these steps:
    1. The new branch should live under the "feature" folder.
    2. The new branch should start with the ticket number or reference of the user story.
 
-5. **Open the user story (sub-agent).** Spawn a sub-agent to perform the **Opening** operation.
-
-   ```
-   Agent(
-     description: "Open user story",
-     model: "haiku",
-     prompt: "<constructed prompt>"
-   )
-   ```
+5. **Open the user story (sub-agent).** Spawn a sub-agent to perform the **Opening** operation. Use whatever sub-agent spawning mechanism is available in your environment (e.g. the Agent tool in Claude Code, or equivalent in Codex CLI or OpenCode). Use the **fast** model tier.
 
    **Sub-agent prompt:**
    ```
@@ -57,17 +49,9 @@ Follow these steps:
 
    **Verification:** After the sub-agent returns, confirm the user story file is in the expected state and the index is updated.
 
-   **Failure handling:** If the sub-agent fails, retry once with Sonnet. If still failing, perform the operation inline.
+   **Failure handling:** If the sub-agent fails, retry once with **standard** tier. If still failing, perform the operation inline.
 
-6. **Refine the user story (sub-agent).** Spawn a sub-agent to analyse and refine the user story.
-
-   ```
-   Agent(
-     description: "Refine user story",
-     model: "opus",
-     prompt: "<constructed prompt>"
-   )
-   ```
+6. **Refine the user story (sub-agent).** Spawn a sub-agent to analyse and refine the user story. Use the **reasoning** model tier.
 
    **Sub-agent prompt:**
    ```
@@ -124,17 +108,9 @@ Follow these steps:
 
    **Verification:** After the sub-agent returns, read the user story file and confirm it contains refined content at the top and the original story at the bottom under "## Original user story".
 
-   **Failure handling:** If the sub-agent fails or produces incomplete output, retry once with Opus. If still failing, the orchestrator performs the refinement itself.
+   **Failure handling:** If the sub-agent fails or produces incomplete output, retry once with **reasoning** tier. If still failing, the orchestrator performs the refinement itself.
 
-7. **Add a report (sub-agent).** Spawn a sub-agent to create or update the report.
-
-   ```
-   Agent(
-     description: "Add opening report",
-     model: "haiku",
-     prompt: "<constructed prompt>"
-   )
-   ```
+7. **Add a report (sub-agent).** Spawn a sub-agent to create or update the report. Use the **fast** model tier.
 
    **Sub-agent prompt:**
    ```

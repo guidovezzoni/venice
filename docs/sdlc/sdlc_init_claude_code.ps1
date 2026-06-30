@@ -47,8 +47,8 @@ Write-Host ""
 # CLAUDE.md -> AGENTS.md
 Link-File -Src (Join-Path $ProjectRoot "AGENTS.md") -Target (Join-Path $ProjectRoot "CLAUDE.md")
 
-# SDLC command symlinks
-Get-ChildItem -Path $CommandsSrc -Filter "*.md" | ForEach-Object {
+# SDLC command symlinks (exclude sdlc_security_review — Claude Code uses native /security-review)
+Get-ChildItem -Path $CommandsSrc -Filter "*.md" | Where-Object { $_.Name -ne "sdlc_security_review.md" } | ForEach-Object {
     Link-File -Src $_.FullName -Target (Join-Path $ClaudeDst $_.Name)
 }
 

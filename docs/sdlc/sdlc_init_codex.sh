@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Initialise SDLC symlinks for Claude Code.
+# Initialise SDLC symlinks for Codex CLI.
 # Works on Linux and macOS.
 
 set -euo pipefail
@@ -7,19 +7,27 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 COMMANDS_SRC="$PROJECT_ROOT/docs/sdlc/commands"
-CLAUDE_DST="$PROJECT_ROOT/.claude/commands/sdlc"
+CODEX_DST="$PROJECT_ROOT/.codex/skills"
 
-mkdir -p "$CLAUDE_DST"
+mkdir -p "$CODEX_DST"
 
 created=0
 skipped=0
 updated=0
 
-link_file() {
+link_skill() {
     local src="$1"
-    local target="$2"
+    local basename_no_ext
+    basename_no_ext="$(basename "$src" .md)"
+    local skill_dir_name
+    skill_dir_name="$(echo "$basename_no_ext" | tr '_' '-')"
+    local skill_dir="$CODEX_DST/$skill_dir_name"
+    local target="$skill_dir/SKILL.md"
+
+    mkdir -p "$skill_dir"
+
     local rel_src
-    rel_src="$(realpath --relative-to="$(dirname "$target")" "$src")"
+    rel_src="$(realpath --relative-to="$skill_dir" "$src")"
 
     if [ -L "$target" ]; then
         local existing
@@ -41,16 +49,12 @@ link_file() {
     fi
 }
 
-echo "Linking SDLC for Claude Code..."
+echo "Linking SDLC for Codex CLI..."
 echo ""
 
-# CLAUDE.md -> AGENTS.md
-link_file "$PROJECT_ROOT/AGENTS.md" "$PROJECT_ROOT/CLAUDE.md"
-
-# SDLC command symlinks (exclude sdlc_security_review — Claude Code uses native /security-review)
+# SDLC command symlinks (all commands including security review)
 for file in "$COMMANDS_SRC"/*.md; do
-    [ "$(basename "$file")" = "sdlc_security_review.md" ] && continue
-    link_file "$file" "$CLAUDE_DST/$(basename "$file")"
+    link_skill "$file"
 done
 
 echo ""
