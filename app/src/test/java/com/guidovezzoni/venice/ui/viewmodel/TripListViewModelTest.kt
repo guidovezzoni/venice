@@ -1,5 +1,7 @@
 package com.guidovezzoni.venice.ui.viewmodel
 
+import com.guidovezzoni.venice.domain.analytics.AnalyticsEvent
+import com.guidovezzoni.venice.domain.analytics.AnalyticsTracker
 import com.guidovezzoni.venice.domain.model.Trip
 import com.guidovezzoni.venice.domain.repository.TripRepository
 import com.guidovezzoni.venice.domain.usecase.CreateTripUseCase
@@ -8,6 +10,7 @@ import com.guidovezzoni.venice.ui.intent.TripListUiIntent
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
@@ -30,6 +33,7 @@ class TripListViewModelTest {
     private val testDispatcher = UnconfinedTestDispatcher()
 
     private lateinit var createTripUseCase: CreateTripUseCase
+    private lateinit var analyticsTracker: AnalyticsTracker
     private lateinit var tripRepository: TripRepository
     private lateinit var viewModel: TripListViewModel
 
@@ -37,9 +41,10 @@ class TripListViewModelTest {
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
         createTripUseCase = mockk()
+        analyticsTracker = mockk(relaxed = true)
         tripRepository = mockk()
         every { tripRepository.observeTrips() } returns flowOf(emptyList())
-        viewModel = TripListViewModel(createTripUseCase, tripRepository)
+        viewModel = TripListViewModel(createTripUseCase, analyticsTracker, tripRepository)
     }
 
     @After
@@ -99,6 +104,49 @@ class TripListViewModelTest {
         val expectedEffect = TripListUiEffect.NavigateToTripDetail("trip-123")
         assertEquals(expectedEffect, effects.first())
         collectJob.cancel()
+    }
+
+    @Test
+    fun `GIVEN ViewModel initialised WHEN init completes THEN ScreenViewed is tracked`() = runTest(testDispatcher) {
+        verify(exactly = 1) {
+            analyticsTracker.track(match { it is AnalyticsEvent.ScreenViewed && it.screenName == AnalyticsEvent.SCREEN_TRIP_LIST })
+        }
+    }
+
+    @Test
+    fun `GIVEN a valid name WHEN ConfirmCreateTrip succeeds THEN TripCreated is tracked`() = runTest(testDispatcher) {
+        val trip = Trip(id = "trip-id", name = "Summer Drive", createdAt = 0L, updatedAt = 0L)
+        coEvery { createTripUseCase(any()) } returns Result.success(trip)
+
+        viewModel.onIntent(TripListUiIntent.OnTripNameChanged("Summer Drive"))
+        viewModel.onIntent(TripListUiIntent.ConfirmCreateTrip)
+        advanceUntilIdle()
+
+        verify(exactly = 1) {
+            analyticsTracker.track(match { it is AnalyticsEvent.TripCreated && it.tripId == "trip-id" })
+        }
+    }
+
+    @Test
+    fun `GIVEN a trip id WHEN OnTripClicked is dispatched THEN TripOpened is tracked`() = runTest(testDispatcher) {
+        viewModel.onIntent(TripListUiIntent.OnTripClicked("trip-123"))
+
+        verify(exactly = 1) {
+            analyticsTracker.track(match { it is AnalyticsEvent.TripOpened && it.tripId == "trip-123" })
+        }
+    }
+
+    @Test
+    fun `GIVEN use case failure WHEN ConfirmCreateTrip is dispatched THEN OperationFailed is tracked`() = runTest(testDispatcher) {
+        coEvery { createTripUseCase(any()) } returns Result.failure(RuntimeException("error"))
+
+        viewModel.onIntent(TripListUiIntent.OnTripNameChanged("Trip"))
+        viewModel.onIntent(TripListUiIntent.ConfirmCreateTrip)
+        advanceUntilIdle()
+
+        verify(exactly = 1) {
+            analyticsTracker.track(match { it is AnalyticsEvent.OperationFailed && it.operation == AnalyticsEvent.OPERATION_CREATE_TRIP })
+        }
     }
 
     @Test
