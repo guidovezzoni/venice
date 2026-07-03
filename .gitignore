@@ -107,3 +107,6 @@ play-store-key.json
 
 # Release artifacts
 app/release/
+
+# SDLC eval results
+docs/sdlc/evals/results/*.json
