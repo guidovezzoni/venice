@@ -8,17 +8,24 @@ Sub-agent orchestration is the default execution strategy for this command.
 
 Follow these steps:
 
-1. **Ensure main is up-to-date.** If the current branch is not main, check for active changes and inform the user about the current branch and changes, then ask what they want to do: DO NOT MAKE ASSUMPTIONS and DO NOT DELETE DATA. Once on main, fetch and pull the latest changes. If the pull fails or there are conflicts, inform the user and ask how to proceed: DO NOT MAKE ASSUMPTIONS.
+1. **Check for uncommitted changes.** Run `git status` to detect any uncommitted changes (staged, unstaged, or untracked files). If changes are present, warn the user listing the changes and ask if they want to proceed anyway. If the user says no, stop. If the user says yes, continue to step 2. DO NOT MAKE ASSUMPTIONS and DO NOT DELETE DATA.
 
-2. **Resolve the user story argument.** If `$ARGUMENTS` is empty or not provided, identify the **Next User Story** as defined in @docs/guidelines/guidelines-userstories.md. Inform the user which story was auto-selected. If no actionable story exists, inform the user and stop.
+2. **Handle current branch.** Run `git branch --show-current` to determine the current branch.
 
-3. **Locate the user story.** Match the argument against the user story files by number or partial name. If no match is found, ask the user which user story to open. Validate the **preconditions for Opening** as defined in @docs/guidelines/guidelines-userstories.md. If they are not met, inform the user and stop.
+   - **If on `main`:** Fetch and pull the latest changes from remote. If the pull fails or there are conflicts, inform the user and ask how to proceed. DO NOT MAKE ASSUMPTIONS.
+   - **If NOT on `main`:** Inform the user of the current branch name and ask whether they want to proceed on the current branch or switch to `main`.
+     - If the user chooses to **proceed on the current branch**: continue to step 3. Note that branch creation in step 5 must be skipped.
+     - If the user chooses to **switch to `main`**: switch to `main`, then fetch and pull the latest changes from remote. If the pull fails or there are conflicts, inform the user and ask how to proceed. DO NOT MAKE ASSUMPTIONS.
 
-4. **Create a feature branch.** Using the resolved user story reference:
+3. **Resolve the user story argument.** If `$ARGUMENTS` is empty or not provided, identify the **Next User Story** as defined in @docs/guidelines/guidelines-userstories.md. Inform the user which story was auto-selected. If no actionable story exists, inform the user and stop.
+
+4. **Locate the user story.** Match the argument against the user story files by number or partial name. If no match is found, ask the user which user story to open. Validate the **preconditions for Opening** as defined in @docs/guidelines/guidelines-userstories.md. If they are not met, inform the user and stop.
+
+5. **Create a feature branch (conditional).** Skip this step if the user chose to proceed on their current non-main branch in step 2. Otherwise, using the resolved user story reference:
    1. The new branch should live under the "feature" folder.
    2. The new branch should start with the ticket number or reference of the user story.
 
-5. **Open the user story (sub-agent).** Spawn a sub-agent to perform the **Opening** operation.
+6. **Open the user story (sub-agent).** Spawn a sub-agent to perform the **Opening** operation.
 
    ```
    Agent(
@@ -59,7 +66,7 @@ Follow these steps:
 
    **Failure handling:** If the sub-agent fails, retry once with Sonnet. If still failing, perform the operation inline.
 
-6. **Refine the user story (sub-agent).** Spawn a sub-agent to analyse and refine the user story.
+7. **Refine the user story (sub-agent).** Spawn a sub-agent to analyse and refine the user story.
 
    ```
    Agent(
@@ -126,7 +133,7 @@ Follow these steps:
 
    **Failure handling:** If the sub-agent fails or produces incomplete output, retry once with Opus. If still failing, the orchestrator performs the refinement itself.
 
-7. **Add a report (sub-agent).** Spawn a sub-agent to create or update the report.
+8. **Add a report (sub-agent).** Spawn a sub-agent to create or update the report.
 
    ```
    Agent(
@@ -169,6 +176,6 @@ Follow these steps:
 
    **Failure handling:** If the sub-agent fails, retry once. If still failing, the orchestrator generates the report inline.
 
-8. **Display the summary.** Output the summary on screen so the user can see what was done: the user story opened, branch created, and key points from the refinement.
+9. **Display the summary.** Output the summary on screen so the user can see what was done: the user story opened, branch created, and key points from the refinement.
 
-9. **Suggest a commit message.** Suggest a commit message following @docs/guidelines/guidelines-git.md.
+10. **Suggest a commit message.** Suggest a commit message following @docs/guidelines/guidelines-git.md.
