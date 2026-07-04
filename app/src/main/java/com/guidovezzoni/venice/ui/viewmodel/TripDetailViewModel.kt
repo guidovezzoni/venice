@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.guidovezzoni.venice.domain.analytics.AnalyticsEvent
 import com.guidovezzoni.venice.domain.analytics.AnalyticsTracker
 import com.guidovezzoni.venice.domain.model.Leg
+import com.guidovezzoni.venice.domain.model.Stop
 import com.guidovezzoni.venice.domain.model.StopType
 import com.guidovezzoni.venice.domain.repository.PlaceSearchRepository
 import com.guidovezzoni.venice.domain.usecase.CalculateRouteUseCase
@@ -23,6 +24,7 @@ import com.guidovezzoni.venice.domain.usecase.UndoMarkStopDepartedUseCase
 import com.guidovezzoni.venice.ui.effect.TripDetailUiEffect
 import com.guidovezzoni.venice.ui.intent.TripDetailUiIntent
 import com.guidovezzoni.venice.ui.state.TripDetailUiState
+import com.guidovezzoni.venice.ui.util.formatCoordinates
 import com.guidovezzoni.venice.ui.util.formatDistance
 import com.guidovezzoni.venice.ui.util.formatDuration
 import com.guidovezzoni.venice.ui.util.withMinimumDuration
@@ -98,6 +100,7 @@ class TripDetailViewModel @Inject constructor(
                         destination = destination,
                         intermediateStops = intermediateStops,
                         canAddMoreStops = canAddMoreStops,
+                        formattedStopCoordinates = buildFormattedStopCoordinates(stops),
                     )
                 }
             }
@@ -387,6 +390,9 @@ class TripDetailViewModel @Inject constructor(
             )
         }
     }
+
+    private fun buildFormattedStopCoordinates(stops: List<Stop>): Map<String, String> =
+        stops.associate { stop -> stop.id to formatCoordinates(stop.latitude, stop.longitude) }
 
     private fun buildFormattedDistances(legs: List<Leg>): Map<String, String> {
         val locale = Locale.getDefault()

@@ -13,6 +13,7 @@ import com.guidovezzoni.venice.domain.model.StopStatus
 import com.guidovezzoni.venice.ui.intent.TripDetailUiIntent
 import com.guidovezzoni.venice.ui.state.TripDetailUiState
 import com.guidovezzoni.venice.ui.theme.HeadingToVeniceTheme
+import com.guidovezzoni.venice.ui.util.formatCoordinates
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Rule
@@ -123,10 +124,16 @@ class TripDetailScreenTest {
 
     @Test
     fun withStartingPoint_showsCoordinates() {
-        setContent(uiState = TripDetailUiState(startingPoint = STARTING_POINT))
+        val coordinatesText = formatCoordinates(STARTING_POINT.latitude, STARTING_POINT.longitude)
+        setContent(
+            uiState = TripDetailUiState(
+                startingPoint = STARTING_POINT,
+                formattedStopCoordinates = mapOf(STARTING_POINT.id to coordinatesText),
+            ),
+        )
 
         composeTestRule
-            .onNodeWithText("41.9028, 12.4964")
+            .onNodeWithText(coordinatesText)
             .assertIsDisplayed()
     }
 

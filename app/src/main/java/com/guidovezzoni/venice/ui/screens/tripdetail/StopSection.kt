@@ -39,6 +39,7 @@ import com.guidovezzoni.venice.R
 import com.guidovezzoni.venice.domain.model.Stop
 import com.guidovezzoni.venice.domain.model.StopStatus
 import com.guidovezzoni.venice.ui.theme.HeadingToVeniceTheme
+import com.guidovezzoni.venice.ui.util.formatCoordinates
 
 private val SECTION_PADDING = 16.dp
 private val ICON_SIZE = 24.dp
@@ -46,14 +47,13 @@ private val ICON_SPACING = 12.dp
 private val VERTICAL_SPACING = 4.dp
 private val CURRENT_STOP_BORDER_WIDTH = 2.dp
 private const val DEPARTED_ALPHA = 0.6f
-private const val COORDINATE_DECIMAL_PLACES = 4
-private const val COORDINATE_FORMAT = "%.${COORDINATE_DECIMAL_PLACES}f"
 
 @Composable
 fun StopSection(
     modifier: Modifier = Modifier,
     isLoading: Boolean = false,
     stop: Stop? = null,
+    coordinatesText: String? = null,
     onSetStopClicked: () -> Unit = {},
     icon: ImageVector,
     @StringRes titleRes: Int,
@@ -77,6 +77,7 @@ fun StopSection(
         if (stop != null) {
             FilledStop(
                 stop = stop,
+                coordinatesText = coordinatesText,
                 onClick = onSetStopClicked,
                 icon = icon,
                 changeDescriptionRes = changeDescriptionRes,
@@ -102,6 +103,7 @@ fun StopSection(
 @Composable
 private fun FilledStop(
     stop: Stop,
+    coordinatesText: String? = null,
     onClick: () -> Unit,
     icon: ImageVector,
     @StringRes changeDescriptionRes: Int,
@@ -165,12 +167,14 @@ private fun FilledStop(
                     style = MaterialTheme.typography.bodyLarge,
                     modifier = Modifier.graphicsLayer { alpha = contentAlpha },
                 )
-                Text(
-                    text = "${COORDINATE_FORMAT.format(stop.latitude)}, ${COORDINATE_FORMAT.format(stop.longitude)}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.graphicsLayer { alpha = contentAlpha },
-                )
+                if (coordinatesText != null) {
+                    Text(
+                        text = coordinatesText,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.graphicsLayer { alpha = contentAlpha },
+                    )
+                }
             }
             if (onMoveUp != null) {
                 IconButton(onClick = onMoveUp, enabled = !isLoading) {
@@ -276,6 +280,7 @@ private fun PreviewStopSectionStartingPointFilled() {
                 order = 0,
                 status = StopStatus.PENDING,
             ),
+            coordinatesText = formatCoordinates(41.9028, 12.4964),
             icon = Icons.Filled.TripOrigin,
             titleRes = R.string.trip_detail_starting_point_label,
             setButtonTextRes = R.string.trip_detail_set_starting_point,
@@ -300,6 +305,7 @@ private fun PreviewStopSectionIntermediateWithBothButtons() {
                 order = 2,
                 status = StopStatus.PENDING,
             ),
+            coordinatesText = formatCoordinates(43.7696, 11.2558),
             icon = Icons.Filled.Place,
             titleRes = R.string.trip_detail_intermediate_stop_label,
             setButtonTextRes = R.string.trip_detail_add_stop,
@@ -326,6 +332,7 @@ private fun PreviewStopSectionIntermediateWithMoveDownOnly() {
                 order = 1,
                 status = StopStatus.PENDING,
             ),
+            coordinatesText = formatCoordinates(43.7696, 11.2558),
             icon = Icons.Filled.Place,
             titleRes = R.string.trip_detail_intermediate_stop_label,
             setButtonTextRes = R.string.trip_detail_add_stop,
@@ -351,6 +358,7 @@ private fun PreviewStopSectionIntermediateWithMoveUpOnly() {
                 order = 2,
                 status = StopStatus.PENDING,
             ),
+            coordinatesText = formatCoordinates(43.7102, 7.2620),
             icon = Icons.Filled.Place,
             titleRes = R.string.trip_detail_intermediate_stop_label,
             setButtonTextRes = R.string.trip_detail_add_stop,
@@ -390,6 +398,7 @@ private fun PreviewStopSectionDestinationFilled() {
                 order = 1,
                 status = StopStatus.PENDING,
             ),
+            coordinatesText = formatCoordinates(41.3851, 2.1734),
             icon = Icons.Filled.Place,
             titleRes = R.string.trip_detail_destination_label,
             setButtonTextRes = R.string.trip_detail_set_destination,
@@ -414,6 +423,7 @@ private fun PreviewStopSectionDeparted() {
                 order = 0,
                 status = StopStatus.VISITED,
             ),
+            coordinatesText = formatCoordinates(41.9028, 12.4964),
             icon = Icons.Filled.TripOrigin,
             titleRes = R.string.trip_detail_starting_point_label,
             setButtonTextRes = R.string.trip_detail_set_starting_point,
@@ -439,6 +449,7 @@ private fun PreviewStopSectionCurrent() {
                 order = 1,
                 status = StopStatus.PENDING,
             ),
+            coordinatesText = formatCoordinates(43.7696, 11.2558),
             icon = Icons.Filled.Place,
             titleRes = R.string.trip_detail_intermediate_stop_label,
             setButtonTextRes = R.string.trip_detail_add_stop,
@@ -464,6 +475,7 @@ private fun PreviewStopSectionLoading() {
                 order = 1,
                 status = StopStatus.PENDING,
             ),
+            coordinatesText = formatCoordinates(43.7696, 11.2558),
             icon = Icons.Filled.Place,
             titleRes = R.string.trip_detail_intermediate_stop_label,
             setButtonTextRes = R.string.trip_detail_add_stop,
@@ -493,6 +505,7 @@ private fun PreviewStopSectionUpcoming() {
                 order = 2,
                 status = StopStatus.PENDING,
             ),
+            coordinatesText = formatCoordinates(41.3851, 2.1734),
             icon = Icons.Filled.Place,
             titleRes = R.string.trip_detail_destination_label,
             setButtonTextRes = R.string.trip_detail_set_destination,

@@ -26,6 +26,7 @@ import com.guidovezzoni.venice.domain.usecase.SetStopUseCase
 import com.guidovezzoni.venice.domain.usecase.UndoMarkStopDepartedUseCase
 import com.guidovezzoni.venice.ui.effect.TripDetailUiEffect
 import com.guidovezzoni.venice.ui.intent.TripDetailUiIntent
+import com.guidovezzoni.venice.ui.util.formatCoordinates
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -362,6 +363,21 @@ class TripDetailViewModelTest {
         val viewModel = createViewModel(stops = stops)
 
         assertFalse(viewModel.uiState.value.canAddMoreStops)
+    }
+
+    @Test
+    fun `GIVEN stops with coordinates WHEN observed THEN formattedStopCoordinates maps each stop id to locale-formatted string`() = runTest(testDispatcher) {
+        val stops = listOf(
+            Stop("s0", TRIP_ID, "Rome", 41.9028, 12.4964, 0, StopStatus.PENDING),
+            Stop("s1", TRIP_ID, "Florence", 43.7696, 11.2558, 1, StopStatus.PENDING),
+        )
+        val viewModel = createViewModel(stops = stops)
+
+        val expected = mapOf(
+            "s0" to formatCoordinates(41.9028, 12.4964),
+            "s1" to formatCoordinates(43.7696, 11.2558),
+        )
+        assertEquals(expected, viewModel.uiState.value.formattedStopCoordinates)
     }
 
     @Test

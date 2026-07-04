@@ -38,6 +38,7 @@ import com.guidovezzoni.venice.R
 import com.guidovezzoni.venice.domain.model.PlaceDetail
 import com.guidovezzoni.venice.domain.model.PlaceSuggestion
 import com.guidovezzoni.venice.ui.theme.HeadingToVeniceTheme
+import com.guidovezzoni.venice.ui.util.formatCoordinate
 import com.guidovezzoni.venice.ui.util.parseCoordinate
 
 private val FIELD_SPACING = 8.dp
@@ -49,8 +50,6 @@ private const val MIN_LATITUDE = -90.0
 private const val MAX_LATITUDE = 90.0
 private const val MIN_LONGITUDE = -180.0
 private const val MAX_LONGITUDE = 180.0
-private const val COORDINATE_DECIMAL_PLACES = 4
-private const val COORDINATE_FORMAT = "%.${COORDINATE_DECIMAL_PLACES}f"
 
 @Composable
 fun SetStopDialog(
@@ -86,8 +85,8 @@ fun SetStopDialog(
     LaunchedEffect(selectedPlaceDetail) {
         if (selectedPlaceDetail != null) {
             placeName = selectedPlaceDetail.name
-            latitudeText = COORDINATE_FORMAT.format(selectedPlaceDetail.latitude)
-            longitudeText = COORDINATE_FORMAT.format(selectedPlaceDetail.longitude)
+            latitudeText = formatCoordinate(selectedPlaceDetail.latitude)
+            longitudeText = formatCoordinate(selectedPlaceDetail.longitude)
             coordinatesFromAutocomplete = true
         }
     }

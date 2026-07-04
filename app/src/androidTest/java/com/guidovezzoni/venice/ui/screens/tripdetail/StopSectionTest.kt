@@ -12,6 +12,7 @@ import com.guidovezzoni.venice.R
 import com.guidovezzoni.venice.domain.model.Stop
 import com.guidovezzoni.venice.domain.model.StopStatus
 import com.guidovezzoni.venice.ui.theme.HeadingToVeniceTheme
+import com.guidovezzoni.venice.ui.util.formatCoordinates
 import org.junit.Rule
 import org.junit.Test
 
@@ -32,6 +33,7 @@ class StopSectionTest {
 
     private fun setContent(
         stop: Stop? = SAMPLE_STOP,
+        coordinatesText: String? = formatCoordinates(SAMPLE_STOP.latitude, SAMPLE_STOP.longitude),
         stopDisplayState: StopDisplayState = StopDisplayState.UPCOMING,
         isLoading: Boolean = false,
         onMoveUp: (() -> Unit)? = null,
@@ -44,6 +46,7 @@ class StopSectionTest {
             HeadingToVeniceTheme {
                 StopSection(
                     stop = stop,
+                    coordinatesText = coordinatesText,
                     icon = Icons.Filled.Place,
                     titleRes = R.string.trip_detail_intermediate_stop_label,
                     setButtonTextRes = R.string.trip_detail_add_stop,

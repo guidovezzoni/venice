@@ -119,6 +119,7 @@ fun TripDetailScreen(
                 StopSection(
                     isLoading = uiState.isLoading,
                     stop = startingPoint,
+                    coordinatesText = startingPoint?.let { uiState.formattedStopCoordinates[it.id] },
                     onSetStopClicked = {
                         onIntent(TripDetailUiIntent.OnSetStartingPointClicked)
                     },
@@ -155,6 +156,7 @@ fun TripDetailScreen(
                 StopSection(
                     isLoading = uiState.isLoading,
                     stop = stop,
+                    coordinatesText = uiState.formattedStopCoordinates[stop.id],
                     onSetStopClicked = {
                         onIntent(TripDetailUiIntent.OnEditStopClicked(stop))
                     },
@@ -223,6 +225,7 @@ fun TripDetailScreen(
                 StopSection(
                     isLoading = uiState.isLoading,
                     stop = destination,
+                    coordinatesText = destination?.let { uiState.formattedStopCoordinates[it.id] },
                     onSetStopClicked = {
                         onIntent(TripDetailUiIntent.OnSetDestinationClicked)
                     },
