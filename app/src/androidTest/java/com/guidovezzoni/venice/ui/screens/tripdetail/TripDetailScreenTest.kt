@@ -12,7 +12,7 @@ import com.guidovezzoni.venice.domain.model.Stop
 import com.guidovezzoni.venice.domain.model.StopStatus
 import com.guidovezzoni.venice.ui.intent.TripDetailUiIntent
 import com.guidovezzoni.venice.ui.state.TripDetailUiState
-import com.guidovezzoni.venice.ui.theme.HeadingToTheAlpsTheme
+import com.guidovezzoni.venice.ui.theme.HeadingToVeniceTheme
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Rule
@@ -70,7 +70,7 @@ class TripDetailScreenTest {
         onIntent: (TripDetailUiIntent) -> Unit = {},
     ) {
         composeTestRule.setContent {
-            HeadingToTheAlpsTheme {
+            HeadingToVeniceTheme {
                 TripDetailScreen(
                     uiState = uiState,
                     onIntent = onIntent,

@@ -15,7 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.guidovezzoni.venice.ui.theme.HeadingToTheAlpsTheme
+import com.guidovezzoni.venice.ui.theme.HeadingToVeniceTheme
 
 private val LEG_SUMMARY_ICON_SIZE = 16.dp
 private val LEG_SUMMARY_HORIZONTAL_PADDING = 16.dp
@@ -51,7 +51,7 @@ fun LegSummary(
 @Preview(showBackground = true)
 @Composable
 private fun PreviewLegSummaryShortDistance() {
-    HeadingToTheAlpsTheme {
+    HeadingToVeniceTheme {
         LegSummary(
             formattedDistance = "750 m",
             formattedDuration = "9 min",
@@ -62,7 +62,7 @@ private fun PreviewLegSummaryShortDistance() {
 @Preview(showBackground = true)
 @Composable
 private fun PreviewLegSummaryLongDistance() {
-    HeadingToTheAlpsTheme {
+    HeadingToVeniceTheme {
         LegSummary(
             formattedDistance = "12.5 km",
             formattedDuration = "2h 30min",
@@ -73,7 +73,7 @@ private fun PreviewLegSummaryLongDistance() {
 @Preview(showBackground = true)
 @Composable
 private fun PreviewLegSummaryImperialLocale() {
-    HeadingToTheAlpsTheme {
+    HeadingToVeniceTheme {
         LegSummary(
             formattedDistance = "7.8 mi",
             formattedDuration = "2h 30min",

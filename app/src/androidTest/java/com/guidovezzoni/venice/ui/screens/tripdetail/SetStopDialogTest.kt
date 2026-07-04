@@ -10,7 +10,7 @@ import androidx.compose.ui.test.performClick
 import com.guidovezzoni.venice.R
 import com.guidovezzoni.venice.domain.model.PlaceDetail
 import com.guidovezzoni.venice.domain.model.PlaceSuggestion
-import com.guidovezzoni.venice.ui.theme.HeadingToTheAlpsTheme
+import com.guidovezzoni.venice.ui.theme.HeadingToVeniceTheme
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Rule
@@ -33,7 +33,7 @@ class SetStopDialogTest {
         onSuggestionSelected: (PlaceSuggestion) -> Unit = {},
     ) {
         composeTestRule.setContent {
-            HeadingToTheAlpsTheme {
+            HeadingToVeniceTheme {
                 SetStopDialog(
                     isLoading = isLoading,
                     dialogTitleRes = R.string.trip_detail_starting_point_label,

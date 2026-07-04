@@ -38,7 +38,7 @@ import androidx.compose.ui.unit.dp
 import com.guidovezzoni.venice.R
 import com.guidovezzoni.venice.domain.model.Stop
 import com.guidovezzoni.venice.domain.model.StopStatus
-import com.guidovezzoni.venice.ui.theme.HeadingToTheAlpsTheme
+import com.guidovezzoni.venice.ui.theme.HeadingToVeniceTheme
 
 private val SECTION_PADDING = 16.dp
 private val ICON_SIZE = 24.dp
@@ -251,7 +251,7 @@ private fun EmptyStop(
 @Preview(showBackground = true)
 @Composable
 private fun PreviewStopSectionStartingPointEmpty() {
-    HeadingToTheAlpsTheme {
+    HeadingToVeniceTheme {
         StopSection(
             icon = Icons.Filled.TripOrigin,
             titleRes = R.string.trip_detail_starting_point_label,
@@ -265,7 +265,7 @@ private fun PreviewStopSectionStartingPointEmpty() {
 @Preview(showBackground = true)
 @Composable
 private fun PreviewStopSectionStartingPointFilled() {
-    HeadingToTheAlpsTheme {
+    HeadingToVeniceTheme {
         StopSection(
             stop = Stop(
                 id = "1",
@@ -289,7 +289,7 @@ private fun PreviewStopSectionStartingPointFilled() {
 @Preview(showBackground = true)
 @Composable
 private fun PreviewStopSectionIntermediateWithBothButtons() {
-    HeadingToTheAlpsTheme {
+    HeadingToVeniceTheme {
         StopSection(
             stop = Stop(
                 id = "3",
@@ -315,7 +315,7 @@ private fun PreviewStopSectionIntermediateWithBothButtons() {
 @Preview(showBackground = true)
 @Composable
 private fun PreviewStopSectionIntermediateWithMoveDownOnly() {
-    HeadingToTheAlpsTheme {
+    HeadingToVeniceTheme {
         StopSection(
             stop = Stop(
                 id = "3",
@@ -340,7 +340,7 @@ private fun PreviewStopSectionIntermediateWithMoveDownOnly() {
 @Preview(showBackground = true)
 @Composable
 private fun PreviewStopSectionIntermediateWithMoveUpOnly() {
-    HeadingToTheAlpsTheme {
+    HeadingToVeniceTheme {
         StopSection(
             stop = Stop(
                 id = "3",
@@ -365,7 +365,7 @@ private fun PreviewStopSectionIntermediateWithMoveUpOnly() {
 @Preview(showBackground = true)
 @Composable
 private fun PreviewStopSectionDestinationEmpty() {
-    HeadingToTheAlpsTheme {
+    HeadingToVeniceTheme {
         StopSection(
             icon = Icons.Filled.Place,
             titleRes = R.string.trip_detail_destination_label,
@@ -379,7 +379,7 @@ private fun PreviewStopSectionDestinationEmpty() {
 @Preview(showBackground = true)
 @Composable
 private fun PreviewStopSectionDestinationFilled() {
-    HeadingToTheAlpsTheme {
+    HeadingToVeniceTheme {
         StopSection(
             stop = Stop(
                 id = "2",
@@ -403,7 +403,7 @@ private fun PreviewStopSectionDestinationFilled() {
 @Preview(showBackground = true)
 @Composable
 private fun PreviewStopSectionDeparted() {
-    HeadingToTheAlpsTheme {
+    HeadingToVeniceTheme {
         StopSection(
             stop = Stop(
                 id = "1",
@@ -428,7 +428,7 @@ private fun PreviewStopSectionDeparted() {
 @Preview(showBackground = true)
 @Composable
 private fun PreviewStopSectionCurrent() {
-    HeadingToTheAlpsTheme {
+    HeadingToVeniceTheme {
         StopSection(
             stop = Stop(
                 id = "2",
@@ -453,7 +453,7 @@ private fun PreviewStopSectionCurrent() {
 @Preview(showBackground = true)
 @Composable
 private fun PreviewStopSectionLoading() {
-    HeadingToTheAlpsTheme {
+    HeadingToVeniceTheme {
         StopSection(
             stop = Stop(
                 id = "3",
@@ -482,7 +482,7 @@ private fun PreviewStopSectionLoading() {
 @Preview(showBackground = true)
 @Composable
 private fun PreviewStopSectionUpcoming() {
-    HeadingToTheAlpsTheme {
+    HeadingToVeniceTheme {
         StopSection(
             stop = Stop(
                 id = "3",

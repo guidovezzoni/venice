@@ -48,7 +48,7 @@ import com.guidovezzoni.venice.domain.model.Stop
 import com.guidovezzoni.venice.domain.model.StopStatus
 import com.guidovezzoni.venice.ui.intent.TripDetailUiIntent
 import com.guidovezzoni.venice.ui.state.TripDetailUiState
-import com.guidovezzoni.venice.ui.theme.HeadingToTheAlpsTheme
+import com.guidovezzoni.venice.ui.theme.HeadingToVeniceTheme
 
 private val CONTENT_SPACING = 16.dp
 private val BUTTON_PADDING = 16.dp
@@ -440,7 +440,7 @@ private fun deriveDisplayState(stop: Stop, currentStopId: String?): StopDisplayS
 @Preview(showBackground = true)
 @Composable
 private fun PreviewTripDetailScreenEmpty() {
-    HeadingToTheAlpsTheme {
+    HeadingToVeniceTheme {
         TripDetailScreen()
     }
 }
@@ -448,7 +448,7 @@ private fun PreviewTripDetailScreenEmpty() {
 @Preview(showBackground = true)
 @Composable
 private fun PreviewTripDetailScreenWithStartingPoint() {
-    HeadingToTheAlpsTheme {
+    HeadingToVeniceTheme {
         TripDetailScreen(
             uiState = TripDetailUiState(
                 tripId = "trip-1",
@@ -469,7 +469,7 @@ private fun PreviewTripDetailScreenWithStartingPoint() {
 @Preview(showBackground = true)
 @Composable
 private fun PreviewTripDetailScreenWithStartingPointAndDestination() {
-    HeadingToTheAlpsTheme {
+    HeadingToVeniceTheme {
         TripDetailScreen(
             uiState = TripDetailUiState(
                 tripId = "trip-1",
@@ -500,7 +500,7 @@ private fun PreviewTripDetailScreenWithStartingPointAndDestination() {
 @Preview(showBackground = true)
 @Composable
 private fun PreviewTripDetailScreenWithIntermediateStops() {
-    HeadingToTheAlpsTheme {
+    HeadingToVeniceTheme {
         TripDetailScreen(
             uiState = TripDetailUiState(
                 tripId = "trip-1",
@@ -551,7 +551,7 @@ private fun PreviewTripDetailScreenWithIntermediateStops() {
 @Preview(showBackground = true)
 @Composable
 private fun PreviewTripDetailScreenAtStopLimit() {
-    HeadingToTheAlpsTheme {
+    HeadingToVeniceTheme {
         TripDetailScreen(
             uiState = TripDetailUiState(
                 tripId = "trip-1",
@@ -592,7 +592,7 @@ private fun PreviewTripDetailScreenAtStopLimit() {
 @Preview(showBackground = true)
 @Composable
 private fun PreviewTripDetailScreenWithProgress() {
-    HeadingToTheAlpsTheme {
+    HeadingToVeniceTheme {
         TripDetailScreen(
             uiState = TripDetailUiState(
                 tripId = "trip-1",
@@ -643,7 +643,7 @@ private fun PreviewTripDetailScreenWithProgress() {
 @Preview(showBackground = true)
 @Composable
 private fun PreviewTripDetailScreenLoading() {
-    HeadingToTheAlpsTheme {
+    HeadingToVeniceTheme {
         TripDetailScreen(
             uiState = TripDetailUiState(
                 tripId = "trip-1",
@@ -656,7 +656,7 @@ private fun PreviewTripDetailScreenLoading() {
 @Preview(showBackground = true)
 @Composable
 private fun PreviewTripDetailScreenStartingPointDialog() {
-    HeadingToTheAlpsTheme {
+    HeadingToVeniceTheme {
         TripDetailScreen(
             uiState = TripDetailUiState(
                 tripId = "trip-1",
@@ -679,7 +679,7 @@ private fun PreviewTripDetailScreenStartingPointDialog() {
 @Preview(showBackground = true)
 @Composable
 private fun PreviewTripDetailScreenDestinationDialog() {
-    HeadingToTheAlpsTheme {
+    HeadingToVeniceTheme {
         TripDetailScreen(
             uiState = TripDetailUiState(
                 tripId = "trip-1",
@@ -711,7 +711,7 @@ private fun PreviewTripDetailScreenDestinationDialog() {
 @Preview(showBackground = true)
 @Composable
 private fun PreviewTripDetailScreenAddStopDialog() {
-    HeadingToTheAlpsTheme {
+    HeadingToVeniceTheme {
         TripDetailScreen(
             uiState = TripDetailUiState(
                 tripId = "trip-1",
@@ -743,7 +743,7 @@ private fun PreviewTripDetailScreenAddStopDialog() {
 @Preview(showBackground = true)
 @Composable
 private fun PreviewTripDetailScreenEditStopDialog() {
-    HeadingToTheAlpsTheme {
+    HeadingToVeniceTheme {
         TripDetailScreen(
             uiState = TripDetailUiState(
                 tripId = "trip-1",
@@ -795,7 +795,7 @@ private fun PreviewTripDetailScreenEditStopDialog() {
 @Preview(showBackground = true)
 @Composable
 private fun PreviewTripDetailScreenRemoveStopDialog() {
-    HeadingToTheAlpsTheme {
+    HeadingToVeniceTheme {
         TripDetailScreen(
             uiState = TripDetailUiState(
                 tripId = "trip-1",
@@ -847,7 +847,7 @@ private fun PreviewTripDetailScreenRemoveStopDialog() {
 @Preview(showBackground = true)
 @Composable
 private fun PreviewTripDetailScreenWithSuggestions() {
-    HeadingToTheAlpsTheme {
+    HeadingToVeniceTheme {
         TripDetailScreen(
             uiState = TripDetailUiState(
                 tripId = "trip-1",
@@ -892,7 +892,7 @@ private fun PreviewTripDetailScreenWithSuggestions() {
 @Preview(showBackground = true)
 @Composable
 private fun PreviewTripDetailScreenSearchLoading() {
-    HeadingToTheAlpsTheme {
+    HeadingToVeniceTheme {
         TripDetailScreen(
             uiState = TripDetailUiState(
                 tripId = "trip-1",
@@ -916,7 +916,7 @@ private fun PreviewTripDetailScreenSearchLoading() {
 @Preview(showBackground = true)
 @Composable
 private fun PreviewTripDetailScreenSearchError() {
-    HeadingToTheAlpsTheme {
+    HeadingToVeniceTheme {
         TripDetailScreen(
             uiState = TripDetailUiState(
                 tripId = "trip-1",
@@ -940,7 +940,7 @@ private fun PreviewTripDetailScreenSearchError() {
 @Preview(showBackground = true)
 @Composable
 private fun PreviewTripDetailScreenPlaceDetailError() {
-    HeadingToTheAlpsTheme {
+    HeadingToVeniceTheme {
         TripDetailScreen(
             uiState = TripDetailUiState(
                 tripId = "trip-1",
@@ -964,7 +964,7 @@ private fun PreviewTripDetailScreenPlaceDetailError() {
 @Preview(showBackground = true)
 @Composable
 private fun PreviewTripDetailScreenResolvingPlace() {
-    HeadingToTheAlpsTheme {
+    HeadingToVeniceTheme {
         TripDetailScreen(
             uiState = TripDetailUiState(
                 tripId = "trip-1",
@@ -988,7 +988,7 @@ private fun PreviewTripDetailScreenResolvingPlace() {
 @Preview(showBackground = true)
 @Composable
 private fun PreviewTripDetailScreenWithLegs() {
-    HeadingToTheAlpsTheme {
+    HeadingToVeniceTheme {
         TripDetailScreen(
             uiState = TripDetailUiState(
                 tripId = "trip-1",
@@ -1032,7 +1032,7 @@ private fun PreviewTripDetailScreenWithLegs() {
 @Preview(showBackground = true)
 @Composable
 private fun PreviewTripDetailScreenCalculatingRoute() {
-    HeadingToTheAlpsTheme {
+    HeadingToVeniceTheme {
         TripDetailScreen(
             uiState = TripDetailUiState(
                 tripId = "trip-1",
@@ -1064,7 +1064,7 @@ private fun PreviewTripDetailScreenCalculatingRoute() {
 @Preview(showBackground = true)
 @Composable
 private fun PreviewTripDetailScreenWithRouteError() {
-    HeadingToTheAlpsTheme {
+    HeadingToVeniceTheme {
         TripDetailScreen(
             uiState = TripDetailUiState(
                 tripId = "trip-1",

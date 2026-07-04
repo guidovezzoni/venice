@@ -11,7 +11,7 @@ import androidx.compose.ui.test.onNodeWithText
 import com.guidovezzoni.venice.R
 import com.guidovezzoni.venice.domain.model.Stop
 import com.guidovezzoni.venice.domain.model.StopStatus
-import com.guidovezzoni.venice.ui.theme.HeadingToTheAlpsTheme
+import com.guidovezzoni.venice.ui.theme.HeadingToVeniceTheme
 import org.junit.Rule
 import org.junit.Test
 
@@ -41,7 +41,7 @@ class StopSectionTest {
         onUndoDeparted: (() -> Unit)? = null,
     ) {
         composeTestRule.setContent {
-            HeadingToTheAlpsTheme {
+            HeadingToVeniceTheme {
                 StopSection(
                     stop = stop,
                     icon = Icons.Filled.Place,

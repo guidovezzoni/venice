@@ -24,7 +24,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.guidovezzoni.venice.R
-import com.guidovezzoni.venice.ui.theme.HeadingToTheAlpsTheme
+import com.guidovezzoni.venice.ui.theme.HeadingToVeniceTheme
 
 private const val MAX_TRIP_NAME_LENGTH = 100
 private val PREVIEW_PADDING = 16.dp
@@ -100,7 +100,7 @@ private fun CreateTripDialogContent(
 @Preview(showBackground = true)
 @Composable
 private fun PreviewCreateTripDialogEmpty() {
-    HeadingToTheAlpsTheme {
+    HeadingToVeniceTheme {
         Column(modifier = Modifier.padding(PREVIEW_PADDING)) {
             Text(
                 text = "New Roadtrip",
@@ -115,7 +115,7 @@ private fun PreviewCreateTripDialogEmpty() {
 @Preview(showBackground = true)
 @Composable
 private fun PreviewCreateTripDialogFilled() {
-    HeadingToTheAlpsTheme {
+    HeadingToVeniceTheme {
         Column(modifier = Modifier.padding(PREVIEW_PADDING)) {
             Text(
                 text = "New Roadtrip",
@@ -130,7 +130,7 @@ private fun PreviewCreateTripDialogFilled() {
 @Preview(showBackground = true)
 @Composable
 private fun PreviewCreateTripDialogLoading() {
-    HeadingToTheAlpsTheme {
+    HeadingToVeniceTheme {
         Column(modifier = Modifier.padding(PREVIEW_PADDING)) {
             Text(
                 text = "New Roadtrip",

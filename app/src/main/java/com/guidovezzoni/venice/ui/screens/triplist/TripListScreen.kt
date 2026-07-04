@@ -27,7 +27,7 @@ import androidx.compose.ui.unit.dp
 import com.guidovezzoni.venice.R
 import com.guidovezzoni.venice.domain.model.Trip
 import com.guidovezzoni.venice.ui.state.TripListUiState
-import com.guidovezzoni.venice.ui.theme.HeadingToTheAlpsTheme
+import com.guidovezzoni.venice.ui.theme.HeadingToVeniceTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -97,7 +97,7 @@ fun TripListScreen(
 @Preview(showBackground = true)
 @Composable
 private fun PreviewTripListScreenEmpty() {
-    HeadingToTheAlpsTheme {
+    HeadingToVeniceTheme {
         TripListScreen(uiState = TripListUiState())
     }
 }
@@ -105,7 +105,7 @@ private fun PreviewTripListScreenEmpty() {
 @Preview(showBackground = true)
 @Composable
 private fun PreviewTripListScreenWithTrips() {
-    HeadingToTheAlpsTheme {
+    HeadingToVeniceTheme {
         TripListScreen(
             uiState = TripListUiState(
                 trips = listOf(
@@ -120,7 +120,7 @@ private fun PreviewTripListScreenWithTrips() {
 @Preview(showBackground = true)
 @Composable
 private fun PreviewTripListScreenLoading() {
-    HeadingToTheAlpsTheme {
+    HeadingToVeniceTheme {
         TripListScreen(uiState = TripListUiState(isLoading = true))
     }
 }
@@ -128,7 +128,7 @@ private fun PreviewTripListScreenLoading() {
 @Preview(showBackground = true)
 @Composable
 private fun PreviewTripListScreenWithDialog() {
-    HeadingToTheAlpsTheme {
+    HeadingToVeniceTheme {
         TripListScreen(
             uiState = TripListUiState(
                 isCreateDialogVisible = true,
