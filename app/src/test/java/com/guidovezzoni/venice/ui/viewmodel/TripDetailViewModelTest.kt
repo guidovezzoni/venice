@@ -26,6 +26,8 @@ import com.guidovezzoni.venice.domain.usecase.SetStopUseCase
 import com.guidovezzoni.venice.domain.usecase.UndoMarkStopDepartedUseCase
 import com.guidovezzoni.venice.ui.effect.TripDetailUiEffect
 import com.guidovezzoni.venice.ui.intent.TripDetailUiIntent
+import com.guidovezzoni.venice.ui.state.DialogState
+import com.guidovezzoni.venice.ui.state.RouteCalculationState
 import com.guidovezzoni.venice.ui.util.formatCoordinates
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -124,22 +126,22 @@ class TripDetailViewModelTest {
     }
 
     @Test
-    fun `GIVEN initial state WHEN OnSetStartingPointClicked is dispatched THEN isSetStartingPointDialogVisible becomes true`() = runTest(testDispatcher) {
+    fun `GIVEN initial state WHEN OnSetStartingPointClicked is dispatched THEN dialogState becomes SetStartingPoint`() = runTest(testDispatcher) {
         val viewModel = createViewModel()
 
         viewModel.onIntent(TripDetailUiIntent.OnSetStartingPointClicked)
 
-        assertTrue(viewModel.uiState.value.isSetStartingPointDialogVisible)
+        assertEquals(DialogState.SetStartingPoint, viewModel.uiState.value.dialogState)
     }
 
     @Test
-    fun `GIVEN dialog is visible WHEN OnDismissStartingPointDialog is dispatched THEN isSetStartingPointDialogVisible becomes false`() = runTest(testDispatcher) {
+    fun `GIVEN dialog is visible WHEN OnDismissStartingPointDialog is dispatched THEN dialogState becomes None`() = runTest(testDispatcher) {
         val viewModel = createViewModel()
 
         viewModel.onIntent(TripDetailUiIntent.OnSetStartingPointClicked)
         viewModel.onIntent(TripDetailUiIntent.OnDismissStartingPointDialog)
 
-        assertFalse(viewModel.uiState.value.isSetStartingPointDialogVisible)
+        assertEquals(DialogState.None, viewModel.uiState.value.dialogState)
     }
 
     @Test
@@ -160,7 +162,7 @@ class TripDetailViewModelTest {
         viewModel.onIntent(TripDetailUiIntent.OnStartingPointConfirmed(PLACE_NAME, LATITUDE, LONGITUDE))
         advanceUntilIdle()
 
-        assertFalse(viewModel.uiState.value.isSetStartingPointDialogVisible)
+        assertEquals(DialogState.None, viewModel.uiState.value.dialogState)
     }
 
     @Test
@@ -204,22 +206,22 @@ class TripDetailViewModelTest {
     }
 
     @Test
-    fun `GIVEN initial state WHEN OnSetDestinationClicked is dispatched THEN isSetDestinationDialogVisible becomes true`() = runTest(testDispatcher) {
+    fun `GIVEN initial state WHEN OnSetDestinationClicked is dispatched THEN dialogState becomes SetDestination`() = runTest(testDispatcher) {
         val viewModel = createViewModel()
 
         viewModel.onIntent(TripDetailUiIntent.OnSetDestinationClicked)
 
-        assertTrue(viewModel.uiState.value.isSetDestinationDialogVisible)
+        assertEquals(DialogState.SetDestination, viewModel.uiState.value.dialogState)
     }
 
     @Test
-    fun `GIVEN dialog is visible WHEN OnDismissDestinationDialog is dispatched THEN isSetDestinationDialogVisible becomes false`() = runTest(testDispatcher) {
+    fun `GIVEN dialog is visible WHEN OnDismissDestinationDialog is dispatched THEN dialogState becomes None`() = runTest(testDispatcher) {
         val viewModel = createViewModel()
 
         viewModel.onIntent(TripDetailUiIntent.OnSetDestinationClicked)
         viewModel.onIntent(TripDetailUiIntent.OnDismissDestinationDialog)
 
-        assertFalse(viewModel.uiState.value.isSetDestinationDialogVisible)
+        assertEquals(DialogState.None, viewModel.uiState.value.dialogState)
     }
 
     @Test
@@ -240,7 +242,7 @@ class TripDetailViewModelTest {
         viewModel.onIntent(TripDetailUiIntent.OnDestinationConfirmed(PLACE_NAME, LATITUDE, LONGITUDE))
         advanceUntilIdle()
 
-        assertFalse(viewModel.uiState.value.isSetDestinationDialogVisible)
+        assertEquals(DialogState.None, viewModel.uiState.value.dialogState)
     }
 
     @Test
@@ -307,22 +309,22 @@ class TripDetailViewModelTest {
     }
 
     @Test
-    fun `GIVEN OnAddStopClicked intent WHEN dispatched THEN isAddStopDialogVisible becomes true`() = runTest(testDispatcher) {
+    fun `GIVEN OnAddStopClicked intent WHEN dispatched THEN dialogState becomes AddStop`() = runTest(testDispatcher) {
         val viewModel = createViewModel()
 
         viewModel.onIntent(TripDetailUiIntent.OnAddStopClicked)
 
-        assertTrue(viewModel.uiState.value.isAddStopDialogVisible)
+        assertEquals(DialogState.AddStop, viewModel.uiState.value.dialogState)
     }
 
     @Test
-    fun `GIVEN OnDismissAddStopDialog intent WHEN dispatched THEN isAddStopDialogVisible becomes false`() = runTest(testDispatcher) {
+    fun `GIVEN OnDismissAddStopDialog intent WHEN dispatched THEN dialogState becomes None`() = runTest(testDispatcher) {
         val viewModel = createViewModel()
 
         viewModel.onIntent(TripDetailUiIntent.OnAddStopClicked)
         viewModel.onIntent(TripDetailUiIntent.OnDismissAddStopDialog)
 
-        assertFalse(viewModel.uiState.value.isAddStopDialogVisible)
+        assertEquals(DialogState.None, viewModel.uiState.value.dialogState)
     }
 
     @Test
@@ -335,7 +337,7 @@ class TripDetailViewModelTest {
         viewModel.onIntent(TripDetailUiIntent.OnAddStopConfirmed(PLACE_NAME, LATITUDE, LONGITUDE))
         advanceUntilIdle()
 
-        assertFalse(viewModel.uiState.value.isAddStopDialogVisible)
+        assertEquals(DialogState.None, viewModel.uiState.value.dialogState)
     }
 
     @Test
@@ -430,30 +432,28 @@ class TripDetailViewModelTest {
     }
 
     @Test
-    fun `GIVEN initial state WHEN OnEditStopClicked is dispatched THEN editingStop is set and isEditStopDialogVisible is true`() = runTest(testDispatcher) {
+    fun `GIVEN initial state WHEN OnEditStopClicked is dispatched THEN dialogState becomes EditStop with the stop`() = runTest(testDispatcher) {
         val stop = Stop("s1", TRIP_ID, PLACE_NAME, LATITUDE, LONGITUDE, 1, StopStatus.PENDING)
         val viewModel = createViewModel()
 
         viewModel.onIntent(TripDetailUiIntent.OnEditStopClicked(stop))
 
-        assertEquals(stop, viewModel.uiState.value.editingStop)
-        assertTrue(viewModel.uiState.value.isEditStopDialogVisible)
+        assertEquals(DialogState.EditStop(stop), viewModel.uiState.value.dialogState)
     }
 
     @Test
-    fun `GIVEN edit dialog visible WHEN OnDismissEditStopDialog is dispatched THEN editingStop is null and isEditStopDialogVisible is false`() = runTest(testDispatcher) {
+    fun `GIVEN edit dialog visible WHEN OnDismissEditStopDialog is dispatched THEN dialogState becomes None`() = runTest(testDispatcher) {
         val stop = Stop("s1", TRIP_ID, PLACE_NAME, LATITUDE, LONGITUDE, 1, StopStatus.PENDING)
         val viewModel = createViewModel()
 
         viewModel.onIntent(TripDetailUiIntent.OnEditStopClicked(stop))
         viewModel.onIntent(TripDetailUiIntent.OnDismissEditStopDialog)
 
-        assertNull(viewModel.uiState.value.editingStop)
-        assertFalse(viewModel.uiState.value.isEditStopDialogVisible)
+        assertEquals(DialogState.None, viewModel.uiState.value.dialogState)
     }
 
     @Test
-    fun `GIVEN edit dialog visible WHEN OnEditStopConfirmed is dispatched and EditStopUseCase succeeds THEN editingStop is null and isEditStopDialogVisible is false`() = runTest(testDispatcher) {
+    fun `GIVEN edit dialog visible WHEN OnEditStopConfirmed is dispatched and EditStopUseCase succeeds THEN dialogState becomes None`() = runTest(testDispatcher) {
         val stop = Stop("s1", TRIP_ID, PLACE_NAME, LATITUDE, LONGITUDE, 1, StopStatus.PENDING)
         coEvery { editStopUseCase("s1", PLACE_NAME, LATITUDE, LONGITUDE) } returns Result.success(stop)
         val viewModel = createViewModel()
@@ -462,8 +462,7 @@ class TripDetailViewModelTest {
         viewModel.onIntent(TripDetailUiIntent.OnEditStopConfirmed("s1", PLACE_NAME, LATITUDE, LONGITUDE))
         advanceUntilIdle()
 
-        assertNull(viewModel.uiState.value.editingStop)
-        assertFalse(viewModel.uiState.value.isEditStopDialogVisible)
+        assertEquals(DialogState.None, viewModel.uiState.value.dialogState)
     }
 
     @Test
@@ -486,30 +485,28 @@ class TripDetailViewModelTest {
     }
 
     @Test
-    fun `GIVEN the screen is displayed WHEN OnRemoveStopClicked is dispatched THEN stopToRemove is set and isRemoveStopDialogVisible becomes true`() = runTest(testDispatcher) {
+    fun `GIVEN the screen is displayed WHEN OnRemoveStopClicked is dispatched THEN dialogState becomes RemoveStop with the stop`() = runTest(testDispatcher) {
         val stop = Stop("s1", TRIP_ID, PLACE_NAME, LATITUDE, LONGITUDE, 1, StopStatus.PENDING)
         val viewModel = createViewModel()
 
         viewModel.onIntent(TripDetailUiIntent.OnRemoveStopClicked(stop))
 
-        assertEquals(stop, viewModel.uiState.value.stopToRemove)
-        assertTrue(viewModel.uiState.value.isRemoveStopDialogVisible)
+        assertEquals(DialogState.RemoveStop(stop), viewModel.uiState.value.dialogState)
     }
 
     @Test
-    fun `GIVEN remove dialog is visible WHEN OnDismissRemoveStopDialog is dispatched THEN stopToRemove is null and isRemoveStopDialogVisible becomes false`() = runTest(testDispatcher) {
+    fun `GIVEN remove dialog is visible WHEN OnDismissRemoveStopDialog is dispatched THEN dialogState becomes None`() = runTest(testDispatcher) {
         val stop = Stop("s1", TRIP_ID, PLACE_NAME, LATITUDE, LONGITUDE, 1, StopStatus.PENDING)
         val viewModel = createViewModel()
 
         viewModel.onIntent(TripDetailUiIntent.OnRemoveStopClicked(stop))
         viewModel.onIntent(TripDetailUiIntent.OnDismissRemoveStopDialog)
 
-        assertNull(viewModel.uiState.value.stopToRemove)
-        assertFalse(viewModel.uiState.value.isRemoveStopDialogVisible)
+        assertEquals(DialogState.None, viewModel.uiState.value.dialogState)
     }
 
     @Test
-    fun `GIVEN remove dialog is visible WHEN OnRemoveStopConfirmed is dispatched and RemoveStopUseCase succeeds THEN stopToRemove is null and isRemoveStopDialogVisible becomes false`() = runTest(testDispatcher) {
+    fun `GIVEN remove dialog is visible WHEN OnRemoveStopConfirmed is dispatched and RemoveStopUseCase succeeds THEN dialogState becomes None`() = runTest(testDispatcher) {
         val stop = Stop("s1", TRIP_ID, PLACE_NAME, LATITUDE, LONGITUDE, 1, StopStatus.PENDING)
         coEvery { removeStopUseCase(TRIP_ID, "s1") } returns Result.success(Unit)
         val viewModel = createViewModel()
@@ -518,8 +515,7 @@ class TripDetailViewModelTest {
         viewModel.onIntent(TripDetailUiIntent.OnRemoveStopConfirmed)
         advanceUntilIdle()
 
-        assertNull(viewModel.uiState.value.stopToRemove)
-        assertFalse(viewModel.uiState.value.isRemoveStopDialogVisible)
+        assertEquals(DialogState.None, viewModel.uiState.value.dialogState)
     }
 
     @Test
@@ -745,8 +741,8 @@ class TripDetailViewModelTest {
         runCurrent()
 
         val expectedSuggestions = suggestions
-        assertEquals(expectedSuggestions, viewModel.uiState.value.placeSuggestions)
-        assertFalse(viewModel.uiState.value.isSearchingPlaces)
+        assertEquals(expectedSuggestions, viewModel.uiState.value.placeSearchState.suggestions)
+        assertFalse(viewModel.uiState.value.placeSearchState.isSearching)
         coVerify(exactly = 1) { searchPlacesUseCase("Rome") }
     }
 
@@ -757,9 +753,9 @@ class TripDetailViewModelTest {
         viewModel.onIntent(TripDetailUiIntent.OnSearchQueryChanged(""))
 
         val expectedSuggestions = emptyList<PlaceSuggestion>()
-        assertEquals(expectedSuggestions, viewModel.uiState.value.placeSuggestions)
-        assertFalse(viewModel.uiState.value.isSearchingPlaces)
-        assertNull(viewModel.uiState.value.searchError)
+        assertEquals(expectedSuggestions, viewModel.uiState.value.placeSearchState.suggestions)
+        assertFalse(viewModel.uiState.value.placeSearchState.isSearching)
+        assertNull(viewModel.uiState.value.placeSearchState.searchError)
         coVerify(exactly = 0) { searchPlacesUseCase(any()) }
     }
 
@@ -796,8 +792,8 @@ class TripDetailViewModelTest {
         advanceUntilIdle()
 
         val expectedPlaceDetail = placeDetail
-        assertEquals(expectedPlaceDetail, viewModel.uiState.value.selectedPlaceDetail)
-        assertEquals(emptyList<PlaceSuggestion>(), viewModel.uiState.value.placeSuggestions)
+        assertEquals(expectedPlaceDetail, viewModel.uiState.value.placeSearchState.selectedPlaceDetail)
+        assertEquals(emptyList<PlaceSuggestion>(), viewModel.uiState.value.placeSearchState.suggestions)
     }
 
     @Test
@@ -810,8 +806,8 @@ class TripDetailViewModelTest {
         advanceUntilIdle()
 
         val expectedPlaceDetailError = "Network error"
-        assertEquals(expectedPlaceDetailError, viewModel.uiState.value.placeDetailError)
-        assertNull(viewModel.uiState.value.selectedPlaceDetail)
+        assertEquals(expectedPlaceDetailError, viewModel.uiState.value.placeSearchState.placeDetailError)
+        assertNull(viewModel.uiState.value.placeSearchState.selectedPlaceDetail)
     }
 
     // --- Task 2.1: isResolvingPlace is true while GetPlaceDetailUseCase is in-flight ---
@@ -828,7 +824,7 @@ class TripDetailViewModelTest {
         viewModel.onIntent(TripDetailUiIntent.OnSuggestionSelected(suggestion))
         runCurrent()
 
-        assertTrue(viewModel.uiState.value.isResolvingPlace)
+        assertTrue(viewModel.uiState.value.placeSearchState.isResolvingPlace)
 
         deferred.complete(Result.success(PlaceDetail("Colosseum", 41.8902, 12.4922)))
         advanceUntilIdle()
@@ -847,8 +843,8 @@ class TripDetailViewModelTest {
         advanceUntilIdle()
 
         val expectedPlaceDetail = placeDetail
-        assertFalse(viewModel.uiState.value.isResolvingPlace)
-        assertEquals(expectedPlaceDetail, viewModel.uiState.value.selectedPlaceDetail)
+        assertFalse(viewModel.uiState.value.placeSearchState.isResolvingPlace)
+        assertEquals(expectedPlaceDetail, viewModel.uiState.value.placeSearchState.selectedPlaceDetail)
     }
 
     // --- Task 3.1: isResolvingPlace is false and placeDetailError is set on failure ---
@@ -863,8 +859,8 @@ class TripDetailViewModelTest {
         advanceUntilIdle()
 
         val expectedPlaceDetailError = "Network error"
-        assertFalse(viewModel.uiState.value.isResolvingPlace)
-        assertEquals(expectedPlaceDetailError, viewModel.uiState.value.placeDetailError)
+        assertFalse(viewModel.uiState.value.placeSearchState.isResolvingPlace)
+        assertEquals(expectedPlaceDetailError, viewModel.uiState.value.placeSearchState.placeDetailError)
     }
 
     // --- Task 4.1: OnSearchQueryChanged clears placeDetailError when query is non-blank ---
@@ -881,7 +877,7 @@ class TripDetailViewModelTest {
 
         viewModel.onIntent(TripDetailUiIntent.OnSearchQueryChanged("Rome"))
 
-        assertNull(viewModel.uiState.value.placeDetailError)
+        assertNull(viewModel.uiState.value.placeSearchState.placeDetailError)
     }
 
     // --- Task 4.2: OnSuggestionSelected clears placeDetailError ---
@@ -901,7 +897,7 @@ class TripDetailViewModelTest {
         viewModel.onIntent(TripDetailUiIntent.OnSuggestionSelected(suggestion))
         advanceUntilIdle()
 
-        assertNull(viewModel.uiState.value.placeDetailError)
+        assertNull(viewModel.uiState.value.placeSearchState.placeDetailError)
     }
 
     // --- Task 10.4: Dialog dismiss clears search state ---
@@ -917,10 +913,10 @@ class TripDetailViewModelTest {
         advanceTimeBy(DEBOUNCE_MILLIS)
         viewModel.onIntent(TripDetailUiIntent.OnDismissStartingPointDialog)
 
-        assertEquals(emptyList<PlaceSuggestion>(), viewModel.uiState.value.placeSuggestions)
-        assertFalse(viewModel.uiState.value.isSearchingPlaces)
-        assertNull(viewModel.uiState.value.searchError)
-        assertNull(viewModel.uiState.value.selectedPlaceDetail)
+        assertEquals(emptyList<PlaceSuggestion>(), viewModel.uiState.value.placeSearchState.suggestions)
+        assertFalse(viewModel.uiState.value.placeSearchState.isSearching)
+        assertNull(viewModel.uiState.value.placeSearchState.searchError)
+        assertNull(viewModel.uiState.value.placeSearchState.selectedPlaceDetail)
         verify(exactly = 1) { placeSearchRepository.resetSession() }
     }
 
@@ -931,10 +927,10 @@ class TripDetailViewModelTest {
 
         viewModel.onIntent(TripDetailUiIntent.OnDismissDestinationDialog)
 
-        assertEquals(emptyList<PlaceSuggestion>(), viewModel.uiState.value.placeSuggestions)
-        assertFalse(viewModel.uiState.value.isSearchingPlaces)
-        assertNull(viewModel.uiState.value.searchError)
-        assertNull(viewModel.uiState.value.selectedPlaceDetail)
+        assertEquals(emptyList<PlaceSuggestion>(), viewModel.uiState.value.placeSearchState.suggestions)
+        assertFalse(viewModel.uiState.value.placeSearchState.isSearching)
+        assertNull(viewModel.uiState.value.placeSearchState.searchError)
+        assertNull(viewModel.uiState.value.placeSearchState.selectedPlaceDetail)
         verify(exactly = 1) { placeSearchRepository.resetSession() }
     }
 
@@ -945,10 +941,10 @@ class TripDetailViewModelTest {
 
         viewModel.onIntent(TripDetailUiIntent.OnDismissAddStopDialog)
 
-        assertEquals(emptyList<PlaceSuggestion>(), viewModel.uiState.value.placeSuggestions)
-        assertFalse(viewModel.uiState.value.isSearchingPlaces)
-        assertNull(viewModel.uiState.value.searchError)
-        assertNull(viewModel.uiState.value.selectedPlaceDetail)
+        assertEquals(emptyList<PlaceSuggestion>(), viewModel.uiState.value.placeSearchState.suggestions)
+        assertFalse(viewModel.uiState.value.placeSearchState.isSearching)
+        assertNull(viewModel.uiState.value.placeSearchState.searchError)
+        assertNull(viewModel.uiState.value.placeSearchState.selectedPlaceDetail)
         verify(exactly = 1) { placeSearchRepository.resetSession() }
     }
 
@@ -959,10 +955,10 @@ class TripDetailViewModelTest {
 
         viewModel.onIntent(TripDetailUiIntent.OnDismissEditStopDialog)
 
-        assertEquals(emptyList<PlaceSuggestion>(), viewModel.uiState.value.placeSuggestions)
-        assertFalse(viewModel.uiState.value.isSearchingPlaces)
-        assertNull(viewModel.uiState.value.searchError)
-        assertNull(viewModel.uiState.value.selectedPlaceDetail)
+        assertEquals(emptyList<PlaceSuggestion>(), viewModel.uiState.value.placeSearchState.suggestions)
+        assertFalse(viewModel.uiState.value.placeSearchState.isSearching)
+        assertNull(viewModel.uiState.value.placeSearchState.searchError)
+        assertNull(viewModel.uiState.value.placeSearchState.selectedPlaceDetail)
         verify(exactly = 1) { placeSearchRepository.resetSession() }
     }
 
@@ -979,19 +975,18 @@ class TripDetailViewModelTest {
     }
 
     @Test
-    fun `GIVEN OnCalculateRouteClicked dispatched WHEN CalculateRouteUseCase succeeds THEN isCalculatingRoute becomes false and routeError is null`() = runTest(testDispatcher) {
+    fun `GIVEN OnCalculateRouteClicked dispatched WHEN CalculateRouteUseCase succeeds THEN routeCalculationState becomes Idle`() = runTest(testDispatcher) {
         coEvery { calculateRouteUseCase(TRIP_ID, any()) } returns Result.success(Unit)
         val viewModel = createViewModel()
 
         viewModel.onIntent(TripDetailUiIntent.OnCalculateRouteClicked)
         advanceUntilIdle()
 
-        assertFalse(viewModel.uiState.value.isCalculatingRoute)
-        assertNull(viewModel.uiState.value.routeError)
+        assertEquals(RouteCalculationState.Idle, viewModel.uiState.value.routeCalculationState)
     }
 
     @Test
-    fun `GIVEN OnCalculateRouteClicked dispatched WHEN CalculateRouteUseCase fails THEN isCalculatingRoute becomes false and routeError contains error message`() = runTest(testDispatcher) {
+    fun `GIVEN OnCalculateRouteClicked dispatched WHEN CalculateRouteUseCase fails THEN routeCalculationState becomes Error with message`() = runTest(testDispatcher) {
         val errorMessage = "Network error"
         coEvery { calculateRouteUseCase(TRIP_ID, any()) } returns Result.failure(RuntimeException(errorMessage))
         val viewModel = createViewModel()
@@ -999,13 +994,12 @@ class TripDetailViewModelTest {
         viewModel.onIntent(TripDetailUiIntent.OnCalculateRouteClicked)
         advanceUntilIdle()
 
-        assertFalse(viewModel.uiState.value.isCalculatingRoute)
-        val expectedRouteError = errorMessage
-        assertEquals(expectedRouteError, viewModel.uiState.value.routeError)
+        val expectedRouteCalculationState = RouteCalculationState.Error(errorMessage)
+        assertEquals(expectedRouteCalculationState, viewModel.uiState.value.routeCalculationState)
     }
 
     @Test
-    fun `GIVEN OnCalculateRouteClicked dispatched WHEN API call is in-flight THEN isCalculatingRoute is true`() = runTest(testDispatcher) {
+    fun `GIVEN OnCalculateRouteClicked dispatched WHEN API call is in-flight THEN routeCalculationState is Calculating`() = runTest(testDispatcher) {
         val deferred = CompletableDeferred<Result<Unit>>()
         coEvery { calculateRouteUseCase(TRIP_ID, any()) } coAnswers { deferred.await() }
         val viewModel = createViewModel()
@@ -1013,7 +1007,7 @@ class TripDetailViewModelTest {
         val job = launch { viewModel.onIntent(TripDetailUiIntent.OnCalculateRouteClicked) }
         runCurrent()
 
-        assertTrue(viewModel.uiState.value.isCalculatingRoute)
+        assertEquals(RouteCalculationState.Calculating, viewModel.uiState.value.routeCalculationState)
 
         deferred.complete(Result.success(Unit))
         advanceUntilIdle()

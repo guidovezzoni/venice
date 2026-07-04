@@ -11,6 +11,8 @@ import androidx.compose.ui.test.performScrollTo
 import com.guidovezzoni.venice.domain.model.Stop
 import com.guidovezzoni.venice.domain.model.StopStatus
 import com.guidovezzoni.venice.ui.intent.TripDetailUiIntent
+import com.guidovezzoni.venice.ui.state.DialogState
+import com.guidovezzoni.venice.ui.state.RouteCalculationState
 import com.guidovezzoni.venice.ui.state.TripDetailUiState
 import com.guidovezzoni.venice.ui.theme.HeadingToVeniceTheme
 import com.guidovezzoni.venice.ui.util.formatCoordinates
@@ -365,7 +367,7 @@ class TripDetailScreenTest {
     @Test
     fun startingPointDialogVisible_showsDialogTitle() {
         setContent(
-            uiState = TripDetailUiState(isSetStartingPointDialogVisible = true),
+            uiState = TripDetailUiState(dialogState = DialogState.SetStartingPoint),
         )
 
         composeTestRule
@@ -376,7 +378,7 @@ class TripDetailScreenTest {
     @Test
     fun startingPointDialogVisible_showsConfirmAndCancelButtons() {
         setContent(
-            uiState = TripDetailUiState(isSetStartingPointDialogVisible = true),
+            uiState = TripDetailUiState(dialogState = DialogState.SetStartingPoint),
         )
 
         composeTestRule.onNodeWithText("Confirm").assertIsDisplayed()
@@ -387,7 +389,7 @@ class TripDetailScreenTest {
     fun startingPointDialog_clickingCancel_firesOnDismissStartingPointDialog() {
         val intents = mutableListOf<TripDetailUiIntent>()
         setContent(
-            uiState = TripDetailUiState(isSetStartingPointDialogVisible = true),
+            uiState = TripDetailUiState(dialogState = DialogState.SetStartingPoint),
             onIntent = { intents.add(it) },
         )
 
@@ -405,7 +407,7 @@ class TripDetailScreenTest {
     @Test
     fun destinationDialogVisible_showsDialogTitle() {
         setContent(
-            uiState = TripDetailUiState(isSetDestinationDialogVisible = true),
+            uiState = TripDetailUiState(dialogState = DialogState.SetDestination),
         )
 
         composeTestRule
@@ -417,7 +419,7 @@ class TripDetailScreenTest {
     fun destinationDialog_clickingCancel_firesOnDismissDestinationDialog() {
         val intents = mutableListOf<TripDetailUiIntent>()
         setContent(
-            uiState = TripDetailUiState(isSetDestinationDialogVisible = true),
+            uiState = TripDetailUiState(dialogState = DialogState.SetDestination),
             onIntent = { intents.add(it) },
         )
 
@@ -435,7 +437,7 @@ class TripDetailScreenTest {
     @Test
     fun addStopDialogVisible_showsDialogTitle() {
         setContent(
-            uiState = TripDetailUiState(isAddStopDialogVisible = true),
+            uiState = TripDetailUiState(dialogState = DialogState.AddStop),
         )
 
         composeTestRule
@@ -447,7 +449,7 @@ class TripDetailScreenTest {
     fun addStopDialog_clickingCancel_firesOnDismissAddStopDialog() {
         val intents = mutableListOf<TripDetailUiIntent>()
         setContent(
-            uiState = TripDetailUiState(isAddStopDialogVisible = true),
+            uiState = TripDetailUiState(dialogState = DialogState.AddStop),
             onIntent = { intents.add(it) },
         )
 
@@ -466,8 +468,7 @@ class TripDetailScreenTest {
     fun editStopDialogVisible_showsDialogTitle() {
         setContent(
             uiState = TripDetailUiState(
-                isEditStopDialogVisible = true,
-                editingStop = INTERMEDIATE_1,
+                dialogState = DialogState.EditStop(INTERMEDIATE_1),
             ),
         )
 
@@ -480,8 +481,7 @@ class TripDetailScreenTest {
     fun editStopDialogVisible_prePopulatesFields() {
         setContent(
             uiState = TripDetailUiState(
-                isEditStopDialogVisible = true,
-                editingStop = INTERMEDIATE_1,
+                dialogState = DialogState.EditStop(INTERMEDIATE_1),
             ),
         )
 
@@ -495,8 +495,7 @@ class TripDetailScreenTest {
         val intents = mutableListOf<TripDetailUiIntent>()
         setContent(
             uiState = TripDetailUiState(
-                isEditStopDialogVisible = true,
-                editingStop = INTERMEDIATE_1,
+                dialogState = DialogState.EditStop(INTERMEDIATE_1),
             ),
             onIntent = { intents.add(it) },
         )
@@ -516,8 +515,7 @@ class TripDetailScreenTest {
     fun removeStopDialogVisible_showsConfirmationMessage() {
         setContent(
             uiState = TripDetailUiState(
-                isRemoveStopDialogVisible = true,
-                stopToRemove = INTERMEDIATE_1,
+                dialogState = DialogState.RemoveStop(INTERMEDIATE_1),
             ),
         )
 
@@ -533,8 +531,7 @@ class TripDetailScreenTest {
     fun removeStopDialog_showsRemoveAndCancelButtons() {
         setContent(
             uiState = TripDetailUiState(
-                isRemoveStopDialogVisible = true,
-                stopToRemove = INTERMEDIATE_1,
+                dialogState = DialogState.RemoveStop(INTERMEDIATE_1),
             ),
         )
 
@@ -547,8 +544,7 @@ class TripDetailScreenTest {
         val intents = mutableListOf<TripDetailUiIntent>()
         setContent(
             uiState = TripDetailUiState(
-                isRemoveStopDialogVisible = true,
-                stopToRemove = INTERMEDIATE_1,
+                dialogState = DialogState.RemoveStop(INTERMEDIATE_1),
             ),
             onIntent = { intents.add(it) },
         )
@@ -565,8 +561,7 @@ class TripDetailScreenTest {
         val intents = mutableListOf<TripDetailUiIntent>()
         setContent(
             uiState = TripDetailUiState(
-                isRemoveStopDialogVisible = true,
-                stopToRemove = INTERMEDIATE_1,
+                dialogState = DialogState.RemoveStop(INTERMEDIATE_1),
             ),
             onIntent = { intents.add(it) },
         )
@@ -581,7 +576,7 @@ class TripDetailScreenTest {
     @Test
     fun removeStopDialogNotVisible_dialogIsNotShown() {
         setContent(
-            uiState = TripDetailUiState(isRemoveStopDialogVisible = false),
+            uiState = TripDetailUiState(),
         )
 
         composeTestRule
@@ -759,7 +754,7 @@ class TripDetailScreenTest {
                 tripId = TRIP_ID,
                 startingPoint = STARTING_POINT,
                 destination = DESTINATION,
-                isCalculatingRoute = true,
+                routeCalculationState = RouteCalculationState.Calculating,
             ),
         )
         composeTestRule.onNodeWithText("Calculating route…")
@@ -776,7 +771,7 @@ class TripDetailScreenTest {
                 tripId = TRIP_ID,
                 startingPoint = STARTING_POINT,
                 destination = DESTINATION,
-                routeError = errorMessage,
+                routeCalculationState = RouteCalculationState.Error(errorMessage),
             ),
         )
         composeTestRule.onNodeWithText(errorMessage).performScrollTo().assertIsDisplayed()

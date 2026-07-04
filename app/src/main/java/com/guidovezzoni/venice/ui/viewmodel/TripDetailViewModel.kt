@@ -23,6 +23,9 @@ import com.guidovezzoni.venice.domain.usecase.SetStopUseCase
 import com.guidovezzoni.venice.domain.usecase.UndoMarkStopDepartedUseCase
 import com.guidovezzoni.venice.ui.effect.TripDetailUiEffect
 import com.guidovezzoni.venice.ui.intent.TripDetailUiIntent
+import com.guidovezzoni.venice.ui.state.DialogState
+import com.guidovezzoni.venice.ui.state.PlaceSearchState
+import com.guidovezzoni.venice.ui.state.RouteCalculationState
 import com.guidovezzoni.venice.ui.state.TripDetailUiState
 import com.guidovezzoni.venice.ui.util.formatCoordinates
 import com.guidovezzoni.venice.ui.util.formatDistance
@@ -122,49 +125,43 @@ class TripDetailViewModel @Inject constructor(
     fun onIntent(intent: TripDetailUiIntent) {
         when (intent) {
             TripDetailUiIntent.OnSetStartingPointClicked ->
-                _uiState.update { it.copy(isSetStartingPointDialogVisible = true) }
+                _uiState.update { it.copy(dialogState = DialogState.SetStartingPoint) }
 
             TripDetailUiIntent.OnDismissStartingPointDialog -> {
                 searchJob?.cancel()
-                _uiState.update { it.copy(isSetStartingPointDialogVisible = false) }
+                _uiState.update { it.copy(dialogState = DialogState.None) }
                 clearSearchState()
                 placeSearchRepository.resetSession()
             }
 
             is TripDetailUiIntent.OnStartingPointConfirmed ->
-                setStop(intent.placeName, intent.latitude, intent.longitude, StopType.STARTING_POINT) {
-                    it.copy(isSetStartingPointDialogVisible = false)
-                }
+                setStop(intent.placeName, intent.latitude, intent.longitude, StopType.STARTING_POINT)
 
             TripDetailUiIntent.OnSetDestinationClicked ->
-                _uiState.update { it.copy(isSetDestinationDialogVisible = true) }
+                _uiState.update { it.copy(dialogState = DialogState.SetDestination) }
 
             TripDetailUiIntent.OnDismissDestinationDialog -> {
                 searchJob?.cancel()
-                _uiState.update { it.copy(isSetDestinationDialogVisible = false) }
+                _uiState.update { it.copy(dialogState = DialogState.None) }
                 clearSearchState()
                 placeSearchRepository.resetSession()
             }
 
             is TripDetailUiIntent.OnDestinationConfirmed ->
-                setStop(intent.placeName, intent.latitude, intent.longitude, StopType.DESTINATION) {
-                    it.copy(isSetDestinationDialogVisible = false)
-                }
+                setStop(intent.placeName, intent.latitude, intent.longitude, StopType.DESTINATION)
 
             TripDetailUiIntent.OnAddStopClicked ->
-                _uiState.update { it.copy(isAddStopDialogVisible = true) }
+                _uiState.update { it.copy(dialogState = DialogState.AddStop) }
 
             TripDetailUiIntent.OnDismissAddStopDialog -> {
                 searchJob?.cancel()
-                _uiState.update { it.copy(isAddStopDialogVisible = false) }
+                _uiState.update { it.copy(dialogState = DialogState.None) }
                 clearSearchState()
                 placeSearchRepository.resetSession()
             }
 
             is TripDetailUiIntent.OnAddStopConfirmed ->
-                setStop(intent.placeName, intent.latitude, intent.longitude, StopType.INTERMEDIATE) {
-                    it.copy(isAddStopDialogVisible = false)
-                }
+                setStop(intent.placeName, intent.latitude, intent.longitude, StopType.INTERMEDIATE)
 
             is TripDetailUiIntent.OnMoveStopUp ->
                 moveStop(intent.currentOrder, intent.currentOrder - 1)
@@ -173,11 +170,11 @@ class TripDetailViewModel @Inject constructor(
                 moveStop(intent.currentOrder, intent.currentOrder + 1)
 
             is TripDetailUiIntent.OnEditStopClicked ->
-                _uiState.update { it.copy(editingStop = intent.stop, isEditStopDialogVisible = true) }
+                _uiState.update { it.copy(dialogState = DialogState.EditStop(intent.stop)) }
 
             TripDetailUiIntent.OnDismissEditStopDialog -> {
                 searchJob?.cancel()
-                _uiState.update { it.copy(editingStop = null, isEditStopDialogVisible = false) }
+                _uiState.update { it.copy(dialogState = DialogState.None) }
                 clearSearchState()
                 placeSearchRepository.resetSession()
             }
@@ -186,13 +183,13 @@ class TripDetailViewModel @Inject constructor(
                 editStop(intent.stopId, intent.placeName, intent.latitude, intent.longitude)
 
             is TripDetailUiIntent.OnRemoveStopClicked ->
-                _uiState.update { it.copy(stopToRemove = intent.stop, isRemoveStopDialogVisible = true) }
+                _uiState.update { it.copy(dialogState = DialogState.RemoveStop(intent.stop)) }
 
             TripDetailUiIntent.OnRemoveStopConfirmed ->
                 removeStop()
 
             TripDetailUiIntent.OnDismissRemoveStopDialog ->
-                _uiState.update { it.copy(stopToRemove = null, isRemoveStopDialogVisible = false) }
+                _uiState.update { it.copy(dialogState = DialogState.None) }
 
             is TripDetailUiIntent.OnMarkStopDepartedClicked ->
                 markStopDeparted(intent.stopId)
@@ -206,13 +203,36 @@ class TripDetailViewModel @Inject constructor(
                     clearSearchState()
                 } else {
                     searchJob = viewModelScope.launch {
-                        _uiState.update { it.copy(isSearchingPlaces = true, placeDetailError = null) }
+                        _uiState.update {
+                            it.copy(
+                                placeSearchState = it.placeSearchState.copy(
+                                    isSearching = true,
+                                    placeDetailError = null,
+                                ),
+                            )
+                        }
                         delay(SEARCH_DEBOUNCE_MILLIS)
                         val result = searchPlacesUseCase(intent.query)
                         result.onSuccess { suggestions ->
-                            _uiState.update { it.copy(placeSuggestions = suggestions, isSearchingPlaces = false, searchError = null) }
+                            _uiState.update {
+                                it.copy(
+                                    placeSearchState = it.placeSearchState.copy(
+                                        suggestions = suggestions,
+                                        isSearching = false,
+                                        searchError = null,
+                                    ),
+                                )
+                            }
                         }.onFailure { error ->
-                            _uiState.update { it.copy(isSearchingPlaces = false, searchError = error.message, placeSuggestions = emptyList()) }
+                            _uiState.update {
+                                it.copy(
+                                    placeSearchState = it.placeSearchState.copy(
+                                        isSearching = false,
+                                        searchError = error.message,
+                                        suggestions = emptyList(),
+                                    ),
+                                )
+                            }
                         }
                     }
                 }
@@ -220,12 +240,34 @@ class TripDetailViewModel @Inject constructor(
 
             is TripDetailUiIntent.OnSuggestionSelected -> {
                 viewModelScope.launch {
-                    _uiState.update { it.copy(isResolvingPlace = true, placeDetailError = null) }
+                    _uiState.update {
+                        it.copy(
+                            placeSearchState = it.placeSearchState.copy(
+                                isResolvingPlace = true,
+                                placeDetailError = null,
+                            ),
+                        )
+                    }
                     val result = getPlaceDetailUseCase(intent.suggestion.placeId)
                     result.onSuccess { detail ->
-                        _uiState.update { it.copy(isResolvingPlace = false, selectedPlaceDetail = detail, placeSuggestions = emptyList()) }
+                        _uiState.update {
+                            it.copy(
+                                placeSearchState = it.placeSearchState.copy(
+                                    isResolvingPlace = false,
+                                    selectedPlaceDetail = detail,
+                                    suggestions = emptyList(),
+                                ),
+                            )
+                        }
                     }.onFailure { error ->
-                        _uiState.update { it.copy(isResolvingPlace = false, placeDetailError = error.message ?: UNKNOWN_ERROR) }
+                        _uiState.update {
+                            it.copy(
+                                placeSearchState = it.placeSearchState.copy(
+                                    isResolvingPlace = false,
+                                    placeDetailError = error.message ?: UNKNOWN_ERROR,
+                                ),
+                            )
+                        }
                     }
                 }
             }
@@ -290,7 +332,7 @@ class TripDetailViewModel @Inject constructor(
                     searchJob?.cancel()
                     clearSearchState()
                     placeSearchRepository.resetSession()
-                    _uiState.update { it.copy(editingStop = null, isEditStopDialogVisible = false, isLoading = false) }
+                    _uiState.update { it.copy(dialogState = DialogState.None, isLoading = false) }
                 }
                 .onFailure { error ->
                     val failedEvent = AnalyticsEvent.OperationFailed(
@@ -305,13 +347,13 @@ class TripDetailViewModel @Inject constructor(
     }
 
     private fun removeStop() {
-        val stop = _uiState.value.stopToRemove ?: return
+        val stop = (_uiState.value.dialogState as? DialogState.RemoveStop)?.stop ?: return
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             withMinimumDuration { removeStopUseCase(tripId, stop.id) }
                 .onSuccess {
                     analyticsTracker.track(AnalyticsEvent.StopRemoved(tripId))
-                    _uiState.update { it.copy(stopToRemove = null, isRemoveStopDialogVisible = false, isLoading = false) }
+                    _uiState.update { it.copy(dialogState = DialogState.None, isLoading = false) }
                 }
                 .onFailure { error ->
                     val failedEvent = AnalyticsEvent.OperationFailed(
@@ -330,7 +372,6 @@ class TripDetailViewModel @Inject constructor(
         latitude: Double,
         longitude: Double,
         stopType: StopType,
-        dismissDialog: (TripDetailUiState) -> TripDetailUiState,
     ) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
@@ -340,7 +381,7 @@ class TripDetailViewModel @Inject constructor(
                     searchJob?.cancel()
                     clearSearchState()
                     placeSearchRepository.resetSession()
-                    _uiState.update { dismissDialog(it).copy(isLoading = false) }
+                    _uiState.update { it.copy(dialogState = DialogState.None, isLoading = false) }
                 }
                 .onFailure { error ->
                     val failedEvent = AnalyticsEvent.OperationFailed(
@@ -362,33 +403,30 @@ class TripDetailViewModel @Inject constructor(
             state.destination?.let { add(it) }
         }
         viewModelScope.launch {
-            _uiState.update { it.copy(isCalculatingRoute = true, routeError = null) }
+            _uiState.update { it.copy(routeCalculationState = RouteCalculationState.Calculating) }
             val result = withMinimumDuration { calculateRouteUseCase(tripId, stops) }
             result.onSuccess {
                 analyticsTracker.track(AnalyticsEvent.RouteCalculated(tripId))
-                _uiState.update { it.copy(isCalculatingRoute = false) }
+                _uiState.update { it.copy(routeCalculationState = RouteCalculationState.Idle) }
             }.onFailure { error ->
                 val failedEvent = AnalyticsEvent.OperationFailed(
                     AnalyticsEvent.OPERATION_CALCULATE_ROUTE,
                     error.message ?: UNKNOWN_ERROR,
                 )
                 analyticsTracker.track(failedEvent)
-                _uiState.update { it.copy(isCalculatingRoute = false, routeError = error.message ?: UNKNOWN_ERROR) }
+                _uiState.update {
+                    it.copy(
+                        routeCalculationState = RouteCalculationState.Error(
+                            error.message ?: UNKNOWN_ERROR,
+                        ),
+                    )
+                }
             }
         }
     }
 
     private fun clearSearchState() {
-        _uiState.update {
-            it.copy(
-                placeSuggestions = emptyList(),
-                isSearchingPlaces = false,
-                searchError = null,
-                selectedPlaceDetail = null,
-                isResolvingPlace = false,
-                placeDetailError = null,
-            )
-        }
+        _uiState.update { it.copy(placeSearchState = PlaceSearchState()) }
     }
 
     private fun buildFormattedStopCoordinates(stops: List<Stop>): Map<String, String> =
