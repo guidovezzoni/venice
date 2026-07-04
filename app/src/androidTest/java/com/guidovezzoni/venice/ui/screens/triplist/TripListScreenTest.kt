@@ -63,7 +63,7 @@ class TripListScreenTest {
         setContent()
 
         composeTestRule
-            .onNodeWithText("Venice")
+            .onNodeWithText("Heading to Venice")
             .assertIsDisplayed()
     }
 
