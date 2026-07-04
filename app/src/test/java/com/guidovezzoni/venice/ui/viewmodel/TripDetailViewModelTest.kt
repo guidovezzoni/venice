@@ -88,6 +88,8 @@ class TripDetailViewModelTest {
         every { mockResources.getString(R.string.trip_detail_leg_distance_metres, any()) } returns "0 m"
         every { mockResources.getString(R.string.trip_detail_leg_distance_kilometres, any()) } returns "0.0 km"
         every { mockResources.getString(R.string.trip_detail_leg_distance_miles, any()) } returns "0.0 mi"
+        every { mockResources.getString(R.string.trip_detail_leg_duration_minutes, any()) } returns "0 min"
+        every { mockResources.getString(R.string.trip_detail_leg_duration_hours_minutes, any(), any()) } returns "0h 0min"
         application = mockk()
         every { application.resources } returns mockResources
         setStopUseCase = mockk()
@@ -1204,5 +1206,22 @@ class TripDetailViewModelTest {
         verify(exactly = 1) {
             analyticsTracker.track(match { it is AnalyticsEvent.OperationFailed && it.operation == AnalyticsEvent.OPERATION_CALCULATE_ROUTE })
         }
+    }
+
+    // --- Section 3: Duration Wiring ---
+
+    @Test
+    fun `GIVEN a trip with legs of varying durationSeconds WHEN observeLegsUseCase emits those legs THEN uiState formattedLegDurations contains one formatted entry per leg keyed by fromStopId`() = runTest(testDispatcher) {
+        val legs = listOf(
+            Leg("leg-1", TRIP_ID, "stop-a", "stop-b", 1000, 540, ""),
+            Leg("leg-2", TRIP_ID, "stop-b", "stop-c", 2000, 5400, ""),
+        )
+        val viewModel = createViewModel(legs = legs)
+
+        val expectedFormattedLegDurations = mapOf(
+            "stop-a" to "0 min",
+            "stop-b" to "0h 0min",
+        )
+        assertEquals(expectedFormattedLegDurations, viewModel.uiState.value.formattedLegDurations)
     }
 }

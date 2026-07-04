@@ -139,10 +139,10 @@ fun TripDetailScreen(
                     },
                 )
                 startingPoint?.let { stop ->
-                    legByFromStopId[stop.id]?.let { leg ->
+                    legByFromStopId[stop.id]?.let {
                         LegSummary(
-                            leg = leg,
                             formattedDistance = uiState.formattedLegDistances[stop.id] ?: "",
+                            formattedDuration = uiState.formattedLegDurations[stop.id] ?: "",
                         )
                     }
                 }
@@ -186,10 +186,10 @@ fun TripDetailScreen(
                         null
                     },
                 )
-                legByFromStopId[stop.id]?.let { leg ->
+                legByFromStopId[stop.id]?.let {
                     LegSummary(
-                        leg = leg,
                         formattedDistance = uiState.formattedLegDistances[stop.id] ?: "",
+                        formattedDuration = uiState.formattedLegDurations[stop.id] ?: "",
                     )
                 }
             }
@@ -1023,6 +1023,7 @@ private fun PreviewTripDetailScreenWithLegs() {
                     ),
                 ),
                 formattedLegDistances = mapOf("stop-1" to "12.5 km"),
+                formattedLegDurations = mapOf("stop-1" to "15 min"),
             ),
         )
     }

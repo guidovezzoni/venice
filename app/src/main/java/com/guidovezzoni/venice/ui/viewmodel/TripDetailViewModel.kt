@@ -24,6 +24,7 @@ import com.guidovezzoni.venice.ui.effect.TripDetailUiEffect
 import com.guidovezzoni.venice.ui.intent.TripDetailUiIntent
 import com.guidovezzoni.venice.ui.state.TripDetailUiState
 import com.guidovezzoni.venice.ui.util.formatDistance
+import com.guidovezzoni.venice.ui.util.formatDuration
 import com.guidovezzoni.venice.ui.util.withMinimumDuration
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
@@ -108,6 +109,7 @@ class TripDetailViewModel @Inject constructor(
                     it.copy(
                         legs = legs,
                         formattedLegDistances = buildFormattedDistances(legs),
+                        formattedLegDurations = buildFormattedDurations(legs),
                     )
                 }
             }
@@ -393,4 +395,8 @@ class TripDetailViewModel @Inject constructor(
             leg.fromStopId to formatDistance(leg.distanceMetres, locale, resources)
         }
     }
+
+    private fun buildFormattedDurations(legs: List<Leg>): Map<String, String> =
+        legs.associate { leg -> leg.fromStopId to formatDuration(leg.durationSeconds, application.resources) }
+
 }

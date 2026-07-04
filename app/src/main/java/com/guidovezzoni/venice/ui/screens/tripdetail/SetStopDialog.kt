@@ -38,6 +38,7 @@ import com.guidovezzoni.venice.R
 import com.guidovezzoni.venice.domain.model.PlaceDetail
 import com.guidovezzoni.venice.domain.model.PlaceSuggestion
 import com.guidovezzoni.venice.ui.theme.HeadingToTheAlpsTheme
+import com.guidovezzoni.venice.ui.util.parseCoordinate
 
 private val FIELD_SPACING = 8.dp
 private val PREVIEW_PADDING = 16.dp
@@ -92,9 +93,9 @@ fun SetStopDialog(
     }
 
     val placeNameError = hasAttemptedSubmit && placeName.isBlank()
-    val latitude = latitudeText.toDoubleOrNull()
+    val latitude = parseCoordinate(latitudeText)
     val latitudeError = hasAttemptedSubmit && (latitude == null || latitude < MIN_LATITUDE || latitude > MAX_LATITUDE)
-    val longitude = longitudeText.toDoubleOrNull()
+    val longitude = parseCoordinate(longitudeText)
     val longitudeError = hasAttemptedSubmit && (longitude == null || longitude < MIN_LONGITUDE || longitude > MAX_LONGITUDE)
 
     AlertDialog(
@@ -148,8 +149,8 @@ fun SetStopDialog(
                 TextButton(
                     onClick = {
                         hasAttemptedSubmit = true
-                        val lat = latitudeText.toDoubleOrNull()
-                        val lng = longitudeText.toDoubleOrNull()
+                        val lat = parseCoordinate(latitudeText)
+                        val lng = parseCoordinate(longitudeText)
                         if (placeName.isNotBlank() &&
                             lat != null && lat in MIN_LATITUDE..MAX_LATITUDE &&
                             lng != null && lng in MIN_LONGITUDE..MAX_LONGITUDE
