@@ -116,6 +116,57 @@
     <h3>Concerns</h3>
     <p><span class="badge badge-pass">None</span> No security, performance, or GDPR concerns identified. This is a pure UI-layer refactoring.</p>
   </section>
+  <section class="report-section" data-source="opsx:propose" data-timestamp="2026-07-04T00:00:00Z">
+    <header>
+      <h2>Change Proposed</h2>
+      <time datetime="2026-07-04">4 Jul 2026</time>
+    </header>
+    <p class="section-source">Source: opsx:propose</p>
+
+    <h3>Exploration Findings</h3>
+    <ul>
+      <li><code>DistanceFormatter.kt</code> provides the exact pattern to mirror: top-level function taking <code>(Int, Resources)</code>, private constants, MockK-based unit tests</li>
+      <li><code>LegSummary.kt</code> currently has a private <code>@Composable formatDuration</code> function that violates the "composables are purely presentational" rule</li>
+      <li><code>TripDetailViewModel.buildFormattedDistances</code> is the ViewModel pattern to replicate for durations</li>
+      <li>String resources already exist in all 3 locale files — no new strings needed</li>
+      <li><code>TripDetailViewModelTest</code> does not mock duration string resources yet — must be added proactively</li>
+    </ul>
+
+    <h3>Questions &amp; Answers</h3>
+    <table>
+      <tr><th>Question</th><th>Answer</th></tr>
+      <tr><td>Should <code>formatDuration</code> take a <code>Locale</code> parameter?</td><td>No — only <code>(durationSeconds: Int, resources: Resources)</code>. Time units are universal per AC 7.</td></tr>
+      <tr><td>Where should the new test file live?</td><td><code>ui/util/DurationFormatterTest.kt</code> — correct placement matching source file, not the misplaced distance test.</td></tr>
+      <tr><td>Truncation boundary: 3599s behaviour?</td><td>Truncate to minutes first (59 min), then check threshold → "59 min". Matches existing logic.</td></tr>
+      <tr><td>Zero-duration display?</td><td>Show "0 min" naturally — no special handling or hiding.</td></tr>
+    </table>
+
+    <h3>Artifacts Created</h3>
+    <table>
+      <tr><th>Artifact</th><th>Path</th></tr>
+      <tr><td>Proposal</td><td><code>openspec/changes/see-leg-duration/proposal.md</code></td></tr>
+      <tr><td>Design</td><td><code>openspec/changes/see-leg-duration/design.md</code></td></tr>
+      <tr><td>Delta Spec (route-display)</td><td><code>openspec/changes/see-leg-duration/specs/route-display/spec.md</code></td></tr>
+      <tr><td>Tasks</td><td><code>openspec/changes/see-leg-duration/tasks.md</code></td></tr>
+    </table>
+
+    <h3>Task Structure</h3>
+    <ul>
+      <li><strong>22 tasks total</strong> across 7 sections</li>
+      <li>1 prerequisite task (UiState field)</li>
+      <li>3 BDD groups: Duration Formatting (5 tests + 1 impl), ViewModel Wiring (1 mock setup + 1 test + 1 impl), LegSummary (1 test + 1 impl + 1 update)</li>
+      <li>2 integration sections (screen wiring, preview coverage)</li>
+      <li>1 verification section (4 tasks)</li>
+    </ul>
+
+    <h3>Design Decisions</h3>
+    <ul>
+      <li>No <code>Locale</code> parameter — simpler signature than <code>formatDistance</code></li>
+      <li>Truncation semantics: seconds → minutes via integer division first, then split into hours/minutes</li>
+      <li>Constants (<code>SECONDS_PER_MINUTE</code>, <code>MINUTES_PER_HOUR</code>) move from <code>LegSummary.kt</code> to <code>DurationFormatter.kt</code></li>
+      <li>Delta spec corrected stale scenarios that described rounding (actual code already truncates)</li>
+    </ul>
+  </section>
   </main>
 
 </body>
