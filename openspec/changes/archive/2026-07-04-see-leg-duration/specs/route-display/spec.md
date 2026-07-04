@@ -2,7 +2,7 @@
 
 ### Requirement: LegSummary composable displays leg information
 The UI layer SHALL define a `LegSummary` composable in `ui/screens/tripdetail/LegSummary.kt` that:
-- Accepts `modifier: Modifier = Modifier`, `leg: Leg`, `formattedDistance: String`, and `formattedDuration: String`.
+- Accepts `modifier: Modifier = Modifier`, `formattedDistance: String`, and `formattedDuration: String`.
 - Renders `formattedDistance` and `formattedDuration` as-is; it performs no locale detection, unit conversion, string-resource resolution, or arithmetic itself, per the project's "composables are purely presentational" guideline.
 - Uses a compact, visually lightweight style (smaller text, secondary colour) to sit naturally between stop cards.
 

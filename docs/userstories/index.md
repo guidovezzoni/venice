@@ -61,7 +61,7 @@ Using Google Directions API to compute distances, durations, and route geometry 
 |----|------------|---------|
 | 3.1.1 | As a user, I want the app to calculate the route between consecutive stops when I finalise my plan | [3.1.1-calculate-route-between-stops](3.1.1-calculate-route-between-stops-DONE.md) |
 | 3.1.2 | As a user, I want to see the distance for each leg of the trip | [3.1.2-see-leg-distance](3.1.2-see-leg-distance-DONE.md) |
-| 3.1.3 | As a user, I want to see the estimated duration for each leg of the trip | [3.1.3-see-leg-duration](3.1.3-see-leg-duration-WIP.md) |
+| 3.1.3 | As a user, I want to see the estimated duration for each leg of the trip | [3.1.3-see-leg-duration](3.1.3-see-leg-duration-DONE.md) |
 
 ### Feature 3.2: Trip Totals
 

@@ -109,9 +109,7 @@ class TripDetailViewModel @Inject constructor(
                     it.copy(
                         legs = legs,
                         formattedLegDistances = buildFormattedDistances(legs),
-                        formattedLegDurations = legs.associate { leg ->
-                            leg.fromStopId to formatDuration(leg.durationSeconds, application.resources)
-                        },
+                        formattedLegDurations = buildFormattedDurations(legs),
                     )
                 }
             }
@@ -397,5 +395,8 @@ class TripDetailViewModel @Inject constructor(
             leg.fromStopId to formatDistance(leg.distanceMetres, locale, resources)
         }
     }
+
+    private fun buildFormattedDurations(legs: List<Leg>): Map<String, String> =
+        legs.associate { leg -> leg.fromStopId to formatDuration(leg.durationSeconds, application.resources) }
 
 }
