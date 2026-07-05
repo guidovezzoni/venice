@@ -6,8 +6,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.guidovezzoni.venice.domain.analytics.AnalyticsEvent
 import com.guidovezzoni.venice.domain.analytics.AnalyticsTracker
-import com.guidovezzoni.venice.domain.model.Leg
-import com.guidovezzoni.venice.domain.model.Stop
 import com.guidovezzoni.venice.domain.model.StopType
 import com.guidovezzoni.venice.domain.repository.PlaceSearchRepository
 import com.guidovezzoni.venice.domain.usecase.CalculateRouteUseCase
@@ -103,7 +101,9 @@ class TripDetailViewModel @Inject constructor(
                         destination = destination,
                         intermediateStops = intermediateStops,
                         canAddMoreStops = canAddMoreStops,
-                        formattedStopCoordinates = buildFormattedStopCoordinates(stops),
+                        formattedStopCoordinates = stops.associate { stop ->
+                            stop.id to formatCoordinates(stop.latitude, stop.longitude)
+                        },
                     )
                 }
             }
@@ -111,11 +111,17 @@ class TripDetailViewModel @Inject constructor(
 
         observeLegsUseCase(tripId)
             .onEach { legs ->
+                val locale = Locale.getDefault()
+                val resources = application.resources
                 _uiState.update {
                     it.copy(
                         legs = legs,
-                        formattedLegDistances = buildFormattedDistances(legs),
-                        formattedLegDurations = buildFormattedDurations(legs),
+                        formattedLegDistances = legs.associate { leg ->
+                            leg.fromStopId to formatDistance(leg.distanceMetres, locale, resources)
+                        },
+                        formattedLegDurations = legs.associate { leg ->
+                            leg.fromStopId to formatDuration(leg.durationSeconds, resources)
+                        },
                     )
                 }
             }
@@ -428,19 +434,5 @@ class TripDetailViewModel @Inject constructor(
     private fun clearSearchState() {
         _uiState.update { it.copy(placeSearchState = PlaceSearchState()) }
     }
-
-    private fun buildFormattedStopCoordinates(stops: List<Stop>): Map<String, String> =
-        stops.associate { stop -> stop.id to formatCoordinates(stop.latitude, stop.longitude) }
-
-    private fun buildFormattedDistances(legs: List<Leg>): Map<String, String> {
-        val locale = Locale.getDefault()
-        val resources = application.resources
-        return legs.associate { leg ->
-            leg.fromStopId to formatDistance(leg.distanceMetres, locale, resources)
-        }
-    }
-
-    private fun buildFormattedDurations(legs: List<Leg>): Map<String, String> =
-        legs.associate { leg -> leg.fromStopId to formatDuration(leg.durationSeconds, application.resources) }
 
 }
