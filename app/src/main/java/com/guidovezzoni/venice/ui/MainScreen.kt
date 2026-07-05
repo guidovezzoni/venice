@@ -18,6 +18,7 @@ import com.guidovezzoni.venice.ui.effect.TripDetailUiEffect
 import com.guidovezzoni.venice.ui.effect.TripListUiEffect
 import com.guidovezzoni.venice.ui.intent.TripListUiIntent
 import com.guidovezzoni.venice.ui.screens.tripdetail.TripDetailScreen
+import com.guidovezzoni.venice.ui.state.DialogState
 import com.guidovezzoni.venice.ui.screens.triplist.TripListScreen
 import com.guidovezzoni.venice.ui.viewmodel.TripDetailViewModel
 import com.guidovezzoni.venice.ui.viewmodel.TripListViewModel
@@ -73,7 +74,7 @@ fun MainScreen() {
                 viewModel.uiEffect.collect { effect ->
                     when (effect) {
                         is TripDetailUiEffect.ShowError -> {
-                            val message = if (uiState.isSetDestinationDialogVisible) {
+                            val message = if (uiState.dialogState is DialogState.SetDestination) {
                                 destinationErrorMessage
                             } else {
                                 startingPointErrorMessage

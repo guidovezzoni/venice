@@ -7,7 +7,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import com.guidovezzoni.venice.domain.model.Trip
 import com.guidovezzoni.venice.ui.state.TripListUiState
-import com.guidovezzoni.venice.ui.theme.HeadingToTheAlpsTheme
+import com.guidovezzoni.venice.ui.theme.HeadingToVeniceTheme
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Rule
@@ -43,7 +43,7 @@ class TripListScreenTest {
         onDismissCreateDialog: () -> Unit = {},
     ) {
         composeTestRule.setContent {
-            HeadingToTheAlpsTheme {
+            HeadingToVeniceTheme {
                 TripListScreen(
                     uiState = uiState,
                     onTripClicked = onTripClicked,
@@ -63,7 +63,7 @@ class TripListScreenTest {
         setContent()
 
         composeTestRule
-            .onNodeWithText("Venice")
+            .onNodeWithText("Heading to Venice")
             .assertIsDisplayed()
     }
 

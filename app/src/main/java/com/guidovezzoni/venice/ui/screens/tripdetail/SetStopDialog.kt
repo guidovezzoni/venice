@@ -37,7 +37,9 @@ import androidx.compose.ui.unit.dp
 import com.guidovezzoni.venice.R
 import com.guidovezzoni.venice.domain.model.PlaceDetail
 import com.guidovezzoni.venice.domain.model.PlaceSuggestion
-import com.guidovezzoni.venice.ui.theme.HeadingToTheAlpsTheme
+import com.guidovezzoni.venice.ui.theme.HeadingToVeniceTheme
+import com.guidovezzoni.venice.ui.util.formatCoordinate
+import com.guidovezzoni.venice.ui.util.parseCoordinate
 
 private val FIELD_SPACING = 8.dp
 private val PREVIEW_PADDING = 16.dp
@@ -48,8 +50,6 @@ private const val MIN_LATITUDE = -90.0
 private const val MAX_LATITUDE = 90.0
 private const val MIN_LONGITUDE = -180.0
 private const val MAX_LONGITUDE = 180.0
-private const val COORDINATE_DECIMAL_PLACES = 4
-private const val COORDINATE_FORMAT = "%.${COORDINATE_DECIMAL_PLACES}f"
 
 @Composable
 fun SetStopDialog(
@@ -85,16 +85,16 @@ fun SetStopDialog(
     LaunchedEffect(selectedPlaceDetail) {
         if (selectedPlaceDetail != null) {
             placeName = selectedPlaceDetail.name
-            latitudeText = COORDINATE_FORMAT.format(selectedPlaceDetail.latitude)
-            longitudeText = COORDINATE_FORMAT.format(selectedPlaceDetail.longitude)
+            latitudeText = formatCoordinate(selectedPlaceDetail.latitude)
+            longitudeText = formatCoordinate(selectedPlaceDetail.longitude)
             coordinatesFromAutocomplete = true
         }
     }
 
     val placeNameError = hasAttemptedSubmit && placeName.isBlank()
-    val latitude = latitudeText.toDoubleOrNull()
+    val latitude = parseCoordinate(latitudeText)
     val latitudeError = hasAttemptedSubmit && (latitude == null || latitude < MIN_LATITUDE || latitude > MAX_LATITUDE)
-    val longitude = longitudeText.toDoubleOrNull()
+    val longitude = parseCoordinate(longitudeText)
     val longitudeError = hasAttemptedSubmit && (longitude == null || longitude < MIN_LONGITUDE || longitude > MAX_LONGITUDE)
 
     AlertDialog(
@@ -148,8 +148,8 @@ fun SetStopDialog(
                 TextButton(
                     onClick = {
                         hasAttemptedSubmit = true
-                        val lat = latitudeText.toDoubleOrNull()
-                        val lng = longitudeText.toDoubleOrNull()
+                        val lat = parseCoordinate(latitudeText)
+                        val lng = parseCoordinate(longitudeText)
                         if (placeName.isNotBlank() &&
                             lat != null && lat in MIN_LATITUDE..MAX_LATITUDE &&
                             lng != null && lng in MIN_LONGITUDE..MAX_LONGITUDE
@@ -308,7 +308,7 @@ private fun StopForm(
 @Preview(showBackground = true)
 @Composable
 private fun PreviewSetStopDialogLoading() {
-    HeadingToTheAlpsTheme {
+    HeadingToVeniceTheme {
         Column(modifier = Modifier.padding(PREVIEW_PADDING)) {
             Text(
                 text = "Set starting point",
@@ -360,7 +360,7 @@ private fun PreviewSetStopDialogLoading() {
 @Preview(showBackground = true)
 @Composable
 private fun PreviewSetStopDialogStartingPointEmpty() {
-    HeadingToTheAlpsTheme {
+    HeadingToVeniceTheme {
         Column(modifier = Modifier.padding(PREVIEW_PADDING)) {
             Text(
                 text = "Set starting point",
@@ -391,7 +391,7 @@ private fun PreviewSetStopDialogStartingPointEmpty() {
 @Preview(showBackground = true)
 @Composable
 private fun PreviewSetStopDialogStartingPointWithErrors() {
-    HeadingToTheAlpsTheme {
+    HeadingToVeniceTheme {
         Column(modifier = Modifier.padding(PREVIEW_PADDING)) {
             Text(
                 text = "Set starting point",
@@ -422,7 +422,7 @@ private fun PreviewSetStopDialogStartingPointWithErrors() {
 @Preview(showBackground = true)
 @Composable
 private fun PreviewSetStopDialogDestinationEmpty() {
-    HeadingToTheAlpsTheme {
+    HeadingToVeniceTheme {
         Column(modifier = Modifier.padding(PREVIEW_PADDING)) {
             Text(
                 text = "Set destination",
@@ -453,7 +453,7 @@ private fun PreviewSetStopDialogDestinationEmpty() {
 @Preview(showBackground = true)
 @Composable
 private fun PreviewSetStopDialogStartingPointPrePopulated() {
-    HeadingToTheAlpsTheme {
+    HeadingToVeniceTheme {
         Column(modifier = Modifier.padding(PREVIEW_PADDING)) {
             Text(
                 text = "Set starting point (pre-populated)",
@@ -484,7 +484,7 @@ private fun PreviewSetStopDialogStartingPointPrePopulated() {
 @Preview(showBackground = true)
 @Composable
 private fun PreviewSetStopDialogDestinationPrePopulated() {
-    HeadingToTheAlpsTheme {
+    HeadingToVeniceTheme {
         Column(modifier = Modifier.padding(PREVIEW_PADDING)) {
             Text(
                 text = "Set destination (pre-populated)",
@@ -515,7 +515,7 @@ private fun PreviewSetStopDialogDestinationPrePopulated() {
 @Preview(showBackground = true)
 @Composable
 private fun PreviewSetStopDialogDestinationWithErrors() {
-    HeadingToTheAlpsTheme {
+    HeadingToVeniceTheme {
         Column(modifier = Modifier.padding(PREVIEW_PADDING)) {
             Text(
                 text = "Set destination",
@@ -546,7 +546,7 @@ private fun PreviewSetStopDialogDestinationWithErrors() {
 @Preview(showBackground = true)
 @Composable
 private fun PreviewSetStopDialogWithSuggestions() {
-    HeadingToTheAlpsTheme {
+    HeadingToVeniceTheme {
         Column(modifier = Modifier.padding(PREVIEW_PADDING)) {
             Text(
                 text = "Search with suggestions",
@@ -589,7 +589,7 @@ private fun PreviewSetStopDialogWithSuggestions() {
 @Preview(showBackground = true)
 @Composable
 private fun PreviewSetStopDialogSearchLoading() {
-    HeadingToTheAlpsTheme {
+    HeadingToVeniceTheme {
         Column(modifier = Modifier.padding(PREVIEW_PADDING)) {
             Text(
                 text = "Search loading",
@@ -621,7 +621,7 @@ private fun PreviewSetStopDialogSearchLoading() {
 @Preview(showBackground = true)
 @Composable
 private fun PreviewSetStopDialogReadOnlyCoordinates() {
-    HeadingToTheAlpsTheme {
+    HeadingToVeniceTheme {
         Column(modifier = Modifier.padding(PREVIEW_PADDING)) {
             Text(
                 text = "Read-only coordinates after selection",
@@ -653,7 +653,7 @@ private fun PreviewSetStopDialogReadOnlyCoordinates() {
 @Preview(showBackground = true)
 @Composable
 private fun PreviewSetStopDialogResolvingPlace() {
-    HeadingToTheAlpsTheme {
+    HeadingToVeniceTheme {
         Column(modifier = Modifier.padding(PREVIEW_PADDING)) {
             Text(
                 text = "Resolving place coordinates",
@@ -685,7 +685,7 @@ private fun PreviewSetStopDialogResolvingPlace() {
 @Preview(showBackground = true)
 @Composable
 private fun PreviewSetStopDialogPlaceDetailError() {
-    HeadingToTheAlpsTheme {
+    HeadingToVeniceTheme {
         Column(modifier = Modifier.padding(PREVIEW_PADDING)) {
             Text(
                 text = "Place detail error",

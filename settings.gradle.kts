@@ -22,5 +22,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Heading to the Alps!"
+rootProject.name = "Heading to Venice!"
 include(":app")

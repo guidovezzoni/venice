@@ -3,7 +3,7 @@ package com.guidovezzoni.venice.ui.screens.tripdetail
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
-import com.guidovezzoni.venice.ui.theme.HeadingToTheAlpsTheme
+import com.guidovezzoni.venice.ui.theme.HeadingToVeniceTheme
 import org.junit.Rule
 import org.junit.Test
 
@@ -14,7 +14,7 @@ class TripProgressSummaryTest {
 
     private fun setContent(departedCount: Int, totalCount: Int) {
         composeTestRule.setContent {
-            HeadingToTheAlpsTheme {
+            HeadingToVeniceTheme {
                 TripProgressSummary(
                     departedCount = departedCount,
                     totalCount = totalCount,

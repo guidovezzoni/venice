@@ -8,7 +8,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.guidovezzoni.venice.R
-import com.guidovezzoni.venice.ui.theme.HeadingToTheAlpsTheme
+import com.guidovezzoni.venice.ui.theme.HeadingToVeniceTheme
 
 @Composable
 fun TripListItem(
@@ -29,7 +29,7 @@ fun TripListItem(
 @Preview(showBackground = true)
 @Composable
 private fun PreviewTripListItemWithStops() {
-    HeadingToTheAlpsTheme {
+    HeadingToVeniceTheme {
         TripListItem(
             tripName = "Summer Drive",
             stopCount = 3,
@@ -40,7 +40,7 @@ private fun PreviewTripListItemWithStops() {
 @Preview(showBackground = true)
 @Composable
 private fun PreviewTripListItemNoStops() {
-    HeadingToTheAlpsTheme {
+    HeadingToVeniceTheme {
         TripListItem(
             tripName = "Coast Trip",
             stopCount = 0,

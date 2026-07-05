@@ -47,8 +47,11 @@ import com.guidovezzoni.venice.domain.model.PlaceSuggestion
 import com.guidovezzoni.venice.domain.model.Stop
 import com.guidovezzoni.venice.domain.model.StopStatus
 import com.guidovezzoni.venice.ui.intent.TripDetailUiIntent
+import com.guidovezzoni.venice.ui.state.DialogState
+import com.guidovezzoni.venice.ui.state.PlaceSearchState
+import com.guidovezzoni.venice.ui.state.RouteCalculationState
 import com.guidovezzoni.venice.ui.state.TripDetailUiState
-import com.guidovezzoni.venice.ui.theme.HeadingToTheAlpsTheme
+import com.guidovezzoni.venice.ui.theme.HeadingToVeniceTheme
 
 private val CONTENT_SPACING = 16.dp
 private val BUTTON_PADDING = 16.dp
@@ -119,6 +122,7 @@ fun TripDetailScreen(
                 StopSection(
                     isLoading = uiState.isLoading,
                     stop = startingPoint,
+                    coordinatesText = startingPoint?.let { uiState.formattedStopCoordinates[it.id] },
                     onSetStopClicked = {
                         onIntent(TripDetailUiIntent.OnSetStartingPointClicked)
                     },
@@ -139,10 +143,10 @@ fun TripDetailScreen(
                     },
                 )
                 startingPoint?.let { stop ->
-                    legByFromStopId[stop.id]?.let { leg ->
+                    legByFromStopId[stop.id]?.let {
                         LegSummary(
-                            leg = leg,
                             formattedDistance = uiState.formattedLegDistances[stop.id] ?: "",
+                            formattedDuration = uiState.formattedLegDurations[stop.id] ?: "",
                         )
                     }
                 }
@@ -155,6 +159,7 @@ fun TripDetailScreen(
                 StopSection(
                     isLoading = uiState.isLoading,
                     stop = stop,
+                    coordinatesText = uiState.formattedStopCoordinates[stop.id],
                     onSetStopClicked = {
                         onIntent(TripDetailUiIntent.OnEditStopClicked(stop))
                     },
@@ -186,10 +191,10 @@ fun TripDetailScreen(
                         null
                     },
                 )
-                legByFromStopId[stop.id]?.let { leg ->
+                legByFromStopId[stop.id]?.let {
                     LegSummary(
-                        leg = leg,
                         formattedDistance = uiState.formattedLegDistances[stop.id] ?: "",
+                        formattedDuration = uiState.formattedLegDurations[stop.id] ?: "",
                     )
                 }
             }
@@ -223,6 +228,7 @@ fun TripDetailScreen(
                 StopSection(
                     isLoading = uiState.isLoading,
                     stop = destination,
+                    coordinatesText = destination?.let { uiState.formattedStopCoordinates[it.id] },
                     onSetStopClicked = {
                         onIntent(TripDetailUiIntent.OnSetDestinationClicked)
                     },
@@ -251,12 +257,14 @@ fun TripDetailScreen(
                             .fillMaxWidth()
                             .padding(horizontal = BUTTON_PADDING),
                     ) {
+                        val isCalculating =
+                            uiState.routeCalculationState is RouteCalculationState.Calculating
                         Button(
                             onClick = { onIntent(TripDetailUiIntent.OnCalculateRouteClicked) },
-                            enabled = !uiState.isCalculatingRoute && !uiState.isLoading,
+                            enabled = !isCalculating && !uiState.isLoading,
                             modifier = Modifier.fillMaxWidth(),
                         ) {
-                            if (uiState.isCalculatingRoute) {
+                            if (isCalculating) {
                                 CircularProgressIndicator(
                                     modifier = Modifier.size(ICON_SIZE),
                                     strokeWidth = 2.dp,
@@ -268,10 +276,11 @@ fun TripDetailScreen(
                                 Text(stringResource(R.string.trip_detail_calculate_route))
                             }
                         }
-                        uiState.routeError?.let { error ->
+                        val routeCalculationState = uiState.routeCalculationState
+                        if (routeCalculationState is RouteCalculationState.Error) {
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
-                                text = error,
+                                text = routeCalculationState.message,
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.error,
                             )
@@ -290,144 +299,149 @@ fun TripDetailScreen(
         }
     }
 
-    if (uiState.isSetStartingPointDialogVisible) {
-        SetStopDialog(
-            isLoading = uiState.isLoading,
-            isResolvingPlace = uiState.isResolvingPlace,
-            placeDetailError = uiState.placeDetailError,
-            dialogTitleRes = R.string.trip_detail_starting_point_dialog_title,
-            placeNameHintRes = R.string.trip_detail_starting_point_place_name_hint,
-            placeNameErrorRes = R.string.trip_detail_starting_point_place_name_error,
-            latitudeHintRes = R.string.trip_detail_starting_point_latitude_hint,
-            latitudeErrorRes = R.string.trip_detail_starting_point_latitude_error,
-            longitudeHintRes = R.string.trip_detail_starting_point_longitude_hint,
-            longitudeErrorRes = R.string.trip_detail_starting_point_longitude_error,
-            initialPlaceName = uiState.startingPoint?.placeName ?: "",
-            initialLatitude = uiState.startingPoint?.latitude?.toString() ?: "",
-            initialLongitude = uiState.startingPoint?.longitude?.toString() ?: "",
-            suggestions = uiState.placeSuggestions,
-            isSearchingPlaces = uiState.isSearchingPlaces,
-            searchError = uiState.searchError,
-            selectedPlaceDetail = uiState.selectedPlaceDetail,
-            onSearchQueryChanged = { query -> onIntent(TripDetailUiIntent.OnSearchQueryChanged(query)) },
-            onSuggestionSelected = { suggestion -> onIntent(TripDetailUiIntent.OnSuggestionSelected(suggestion)) },
-            onConfirm = { placeName, latitude, longitude ->
-                onIntent(TripDetailUiIntent.OnStartingPointConfirmed(placeName, latitude, longitude))
-            },
-            onDismiss = { onIntent(TripDetailUiIntent.OnDismissStartingPointDialog) },
-        )
-    }
+    when (val dialogState = uiState.dialogState) {
+        is DialogState.None -> { /* no dialog */ }
 
-    if (uiState.isAddStopDialogVisible) {
-        SetStopDialog(
-            isLoading = uiState.isLoading,
-            isResolvingPlace = uiState.isResolvingPlace,
-            placeDetailError = uiState.placeDetailError,
-            dialogTitleRes = R.string.trip_detail_add_stop_dialog_title,
-            placeNameHintRes = R.string.trip_detail_add_stop_place_name_hint,
-            placeNameErrorRes = R.string.trip_detail_add_stop_place_name_error,
-            latitudeHintRes = R.string.trip_detail_add_stop_latitude_hint,
-            latitudeErrorRes = R.string.trip_detail_add_stop_latitude_error,
-            longitudeHintRes = R.string.trip_detail_add_stop_longitude_hint,
-            longitudeErrorRes = R.string.trip_detail_add_stop_longitude_error,
-            suggestions = uiState.placeSuggestions,
-            isSearchingPlaces = uiState.isSearchingPlaces,
-            searchError = uiState.searchError,
-            selectedPlaceDetail = uiState.selectedPlaceDetail,
-            onSearchQueryChanged = { query -> onIntent(TripDetailUiIntent.OnSearchQueryChanged(query)) },
-            onSuggestionSelected = { suggestion -> onIntent(TripDetailUiIntent.OnSuggestionSelected(suggestion)) },
-            onConfirm = { placeName, latitude, longitude ->
-                onIntent(TripDetailUiIntent.OnAddStopConfirmed(placeName, latitude, longitude))
-            },
-            onDismiss = { onIntent(TripDetailUiIntent.OnDismissAddStopDialog) },
-        )
-    }
+        is DialogState.SetStartingPoint -> {
+            SetStopDialog(
+                isLoading = uiState.isLoading,
+                isResolvingPlace = uiState.placeSearchState.isResolvingPlace,
+                placeDetailError = uiState.placeSearchState.placeDetailError,
+                dialogTitleRes = R.string.trip_detail_starting_point_dialog_title,
+                placeNameHintRes = R.string.trip_detail_starting_point_place_name_hint,
+                placeNameErrorRes = R.string.trip_detail_starting_point_place_name_error,
+                latitudeHintRes = R.string.trip_detail_starting_point_latitude_hint,
+                latitudeErrorRes = R.string.trip_detail_starting_point_latitude_error,
+                longitudeHintRes = R.string.trip_detail_starting_point_longitude_hint,
+                longitudeErrorRes = R.string.trip_detail_starting_point_longitude_error,
+                initialPlaceName = uiState.startingPoint?.placeName ?: "",
+                initialLatitude = uiState.startingPoint?.latitude?.toString() ?: "",
+                initialLongitude = uiState.startingPoint?.longitude?.toString() ?: "",
+                suggestions = uiState.placeSearchState.suggestions,
+                isSearchingPlaces = uiState.placeSearchState.isSearching,
+                searchError = uiState.placeSearchState.searchError,
+                selectedPlaceDetail = uiState.placeSearchState.selectedPlaceDetail,
+                onSearchQueryChanged = { query -> onIntent(TripDetailUiIntent.OnSearchQueryChanged(query)) },
+                onSuggestionSelected = { suggestion -> onIntent(TripDetailUiIntent.OnSuggestionSelected(suggestion)) },
+                onConfirm = { placeName, latitude, longitude ->
+                    onIntent(TripDetailUiIntent.OnStartingPointConfirmed(placeName, latitude, longitude))
+                },
+                onDismiss = { onIntent(TripDetailUiIntent.OnDismissStartingPointDialog) },
+            )
+        }
 
-    if (uiState.isEditStopDialogVisible) {
-        val editingStop = uiState.editingStop
-        SetStopDialog(
-            isLoading = uiState.isLoading,
-            isResolvingPlace = uiState.isResolvingPlace,
-            placeDetailError = uiState.placeDetailError,
-            dialogTitleRes = R.string.trip_detail_edit_stop_dialog_title,
-            placeNameHintRes = R.string.trip_detail_add_stop_place_name_hint,
-            placeNameErrorRes = R.string.trip_detail_add_stop_place_name_error,
-            latitudeHintRes = R.string.trip_detail_add_stop_latitude_hint,
-            latitudeErrorRes = R.string.trip_detail_add_stop_latitude_error,
-            longitudeHintRes = R.string.trip_detail_add_stop_longitude_hint,
-            longitudeErrorRes = R.string.trip_detail_add_stop_longitude_error,
-            initialPlaceName = editingStop?.placeName ?: "",
-            initialLatitude = editingStop?.latitude?.toString() ?: "",
-            initialLongitude = editingStop?.longitude?.toString() ?: "",
-            suggestions = uiState.placeSuggestions,
-            isSearchingPlaces = uiState.isSearchingPlaces,
-            searchError = uiState.searchError,
-            selectedPlaceDetail = uiState.selectedPlaceDetail,
-            onSearchQueryChanged = { query -> onIntent(TripDetailUiIntent.OnSearchQueryChanged(query)) },
-            onSuggestionSelected = { suggestion -> onIntent(TripDetailUiIntent.OnSuggestionSelected(suggestion)) },
-            onConfirm = { placeName, latitude, longitude ->
-                editingStop?.let {
-                    onIntent(TripDetailUiIntent.OnEditStopConfirmed(it.id, placeName, latitude, longitude))
-                }
-            },
-            onDismiss = { onIntent(TripDetailUiIntent.OnDismissEditStopDialog) },
-        )
-    }
+        is DialogState.SetDestination -> {
+            SetStopDialog(
+                isLoading = uiState.isLoading,
+                isResolvingPlace = uiState.placeSearchState.isResolvingPlace,
+                placeDetailError = uiState.placeSearchState.placeDetailError,
+                dialogTitleRes = R.string.trip_detail_destination_dialog_title,
+                placeNameHintRes = R.string.trip_detail_destination_place_name_hint,
+                placeNameErrorRes = R.string.trip_detail_destination_place_name_error,
+                latitudeHintRes = R.string.trip_detail_destination_latitude_hint,
+                latitudeErrorRes = R.string.trip_detail_destination_latitude_error,
+                longitudeHintRes = R.string.trip_detail_destination_longitude_hint,
+                longitudeErrorRes = R.string.trip_detail_destination_longitude_error,
+                initialPlaceName = uiState.destination?.placeName ?: "",
+                initialLatitude = uiState.destination?.latitude?.toString() ?: "",
+                initialLongitude = uiState.destination?.longitude?.toString() ?: "",
+                suggestions = uiState.placeSearchState.suggestions,
+                isSearchingPlaces = uiState.placeSearchState.isSearching,
+                searchError = uiState.placeSearchState.searchError,
+                selectedPlaceDetail = uiState.placeSearchState.selectedPlaceDetail,
+                onSearchQueryChanged = { query -> onIntent(TripDetailUiIntent.OnSearchQueryChanged(query)) },
+                onSuggestionSelected = { suggestion -> onIntent(TripDetailUiIntent.OnSuggestionSelected(suggestion)) },
+                onConfirm = { placeName, latitude, longitude ->
+                    onIntent(TripDetailUiIntent.OnDestinationConfirmed(placeName, latitude, longitude))
+                },
+                onDismiss = { onIntent(TripDetailUiIntent.OnDismissDestinationDialog) },
+            )
+        }
 
-    if (uiState.isSetDestinationDialogVisible) {
-        SetStopDialog(
-            isLoading = uiState.isLoading,
-            isResolvingPlace = uiState.isResolvingPlace,
-            placeDetailError = uiState.placeDetailError,
-            dialogTitleRes = R.string.trip_detail_destination_dialog_title,
-            placeNameHintRes = R.string.trip_detail_destination_place_name_hint,
-            placeNameErrorRes = R.string.trip_detail_destination_place_name_error,
-            latitudeHintRes = R.string.trip_detail_destination_latitude_hint,
-            latitudeErrorRes = R.string.trip_detail_destination_latitude_error,
-            longitudeHintRes = R.string.trip_detail_destination_longitude_hint,
-            longitudeErrorRes = R.string.trip_detail_destination_longitude_error,
-            initialPlaceName = uiState.destination?.placeName ?: "",
-            initialLatitude = uiState.destination?.latitude?.toString() ?: "",
-            initialLongitude = uiState.destination?.longitude?.toString() ?: "",
-            suggestions = uiState.placeSuggestions,
-            isSearchingPlaces = uiState.isSearchingPlaces,
-            searchError = uiState.searchError,
-            selectedPlaceDetail = uiState.selectedPlaceDetail,
-            onSearchQueryChanged = { query -> onIntent(TripDetailUiIntent.OnSearchQueryChanged(query)) },
-            onSuggestionSelected = { suggestion -> onIntent(TripDetailUiIntent.OnSuggestionSelected(suggestion)) },
-            onConfirm = { placeName, latitude, longitude ->
-                onIntent(TripDetailUiIntent.OnDestinationConfirmed(placeName, latitude, longitude))
-            },
-            onDismiss = { onIntent(TripDetailUiIntent.OnDismissDestinationDialog) },
-        )
-    }
+        is DialogState.AddStop -> {
+            SetStopDialog(
+                isLoading = uiState.isLoading,
+                isResolvingPlace = uiState.placeSearchState.isResolvingPlace,
+                placeDetailError = uiState.placeSearchState.placeDetailError,
+                dialogTitleRes = R.string.trip_detail_add_stop_dialog_title,
+                placeNameHintRes = R.string.trip_detail_add_stop_place_name_hint,
+                placeNameErrorRes = R.string.trip_detail_add_stop_place_name_error,
+                latitudeHintRes = R.string.trip_detail_add_stop_latitude_hint,
+                latitudeErrorRes = R.string.trip_detail_add_stop_latitude_error,
+                longitudeHintRes = R.string.trip_detail_add_stop_longitude_hint,
+                longitudeErrorRes = R.string.trip_detail_add_stop_longitude_error,
+                suggestions = uiState.placeSearchState.suggestions,
+                isSearchingPlaces = uiState.placeSearchState.isSearching,
+                searchError = uiState.placeSearchState.searchError,
+                selectedPlaceDetail = uiState.placeSearchState.selectedPlaceDetail,
+                onSearchQueryChanged = { query -> onIntent(TripDetailUiIntent.OnSearchQueryChanged(query)) },
+                onSuggestionSelected = { suggestion -> onIntent(TripDetailUiIntent.OnSuggestionSelected(suggestion)) },
+                onConfirm = { placeName, latitude, longitude ->
+                    onIntent(TripDetailUiIntent.OnAddStopConfirmed(placeName, latitude, longitude))
+                },
+                onDismiss = { onIntent(TripDetailUiIntent.OnDismissAddStopDialog) },
+            )
+        }
 
-    if (uiState.isRemoveStopDialogVisible) {
-        AlertDialog(
-            onDismissRequest = { onIntent(TripDetailUiIntent.OnDismissRemoveStopDialog) },
-            title = { Text(stringResource(R.string.trip_detail_remove_stop_dialog_title)) },
-            text = {
-                Text(
-                    stringResource(
-                        R.string.trip_detail_remove_stop_dialog_message,
-                        uiState.stopToRemove?.placeName ?: "",
-                    ),
-                )
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = { onIntent(TripDetailUiIntent.OnRemoveStopConfirmed) },
-                    enabled = !uiState.isLoading,
-                ) {
-                    Text(stringResource(R.string.global_remove))
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { onIntent(TripDetailUiIntent.OnDismissRemoveStopDialog) }) {
-                    Text(stringResource(R.string.global_cancel))
-                }
-            },
-        )
+        is DialogState.EditStop -> {
+            SetStopDialog(
+                isLoading = uiState.isLoading,
+                isResolvingPlace = uiState.placeSearchState.isResolvingPlace,
+                placeDetailError = uiState.placeSearchState.placeDetailError,
+                dialogTitleRes = R.string.trip_detail_edit_stop_dialog_title,
+                placeNameHintRes = R.string.trip_detail_add_stop_place_name_hint,
+                placeNameErrorRes = R.string.trip_detail_add_stop_place_name_error,
+                latitudeHintRes = R.string.trip_detail_add_stop_latitude_hint,
+                latitudeErrorRes = R.string.trip_detail_add_stop_latitude_error,
+                longitudeHintRes = R.string.trip_detail_add_stop_longitude_hint,
+                longitudeErrorRes = R.string.trip_detail_add_stop_longitude_error,
+                initialPlaceName = dialogState.stop.placeName,
+                initialLatitude = dialogState.stop.latitude.toString(),
+                initialLongitude = dialogState.stop.longitude.toString(),
+                suggestions = uiState.placeSearchState.suggestions,
+                isSearchingPlaces = uiState.placeSearchState.isSearching,
+                searchError = uiState.placeSearchState.searchError,
+                selectedPlaceDetail = uiState.placeSearchState.selectedPlaceDetail,
+                onSearchQueryChanged = { query -> onIntent(TripDetailUiIntent.OnSearchQueryChanged(query)) },
+                onSuggestionSelected = { suggestion -> onIntent(TripDetailUiIntent.OnSuggestionSelected(suggestion)) },
+                onConfirm = { placeName, latitude, longitude ->
+                    onIntent(
+                        TripDetailUiIntent.OnEditStopConfirmed(
+                            dialogState.stop.id, placeName, latitude, longitude,
+                        ),
+                    )
+                },
+                onDismiss = { onIntent(TripDetailUiIntent.OnDismissEditStopDialog) },
+            )
+        }
+
+        is DialogState.RemoveStop -> {
+            AlertDialog(
+                onDismissRequest = { onIntent(TripDetailUiIntent.OnDismissRemoveStopDialog) },
+                title = { Text(stringResource(R.string.trip_detail_remove_stop_dialog_title)) },
+                text = {
+                    Text(
+                        stringResource(
+                            R.string.trip_detail_remove_stop_dialog_message,
+                            dialogState.stop.placeName,
+                        ),
+                    )
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = { onIntent(TripDetailUiIntent.OnRemoveStopConfirmed) },
+                        enabled = !uiState.isLoading,
+                    ) {
+                        Text(stringResource(R.string.global_remove))
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { onIntent(TripDetailUiIntent.OnDismissRemoveStopDialog) }) {
+                        Text(stringResource(R.string.global_cancel))
+                    }
+                },
+            )
+        }
     }
 }
 
@@ -440,7 +454,7 @@ private fun deriveDisplayState(stop: Stop, currentStopId: String?): StopDisplayS
 @Preview(showBackground = true)
 @Composable
 private fun PreviewTripDetailScreenEmpty() {
-    HeadingToTheAlpsTheme {
+    HeadingToVeniceTheme {
         TripDetailScreen()
     }
 }
@@ -448,7 +462,7 @@ private fun PreviewTripDetailScreenEmpty() {
 @Preview(showBackground = true)
 @Composable
 private fun PreviewTripDetailScreenWithStartingPoint() {
-    HeadingToTheAlpsTheme {
+    HeadingToVeniceTheme {
         TripDetailScreen(
             uiState = TripDetailUiState(
                 tripId = "trip-1",
@@ -469,7 +483,7 @@ private fun PreviewTripDetailScreenWithStartingPoint() {
 @Preview(showBackground = true)
 @Composable
 private fun PreviewTripDetailScreenWithStartingPointAndDestination() {
-    HeadingToTheAlpsTheme {
+    HeadingToVeniceTheme {
         TripDetailScreen(
             uiState = TripDetailUiState(
                 tripId = "trip-1",
@@ -500,7 +514,7 @@ private fun PreviewTripDetailScreenWithStartingPointAndDestination() {
 @Preview(showBackground = true)
 @Composable
 private fun PreviewTripDetailScreenWithIntermediateStops() {
-    HeadingToTheAlpsTheme {
+    HeadingToVeniceTheme {
         TripDetailScreen(
             uiState = TripDetailUiState(
                 tripId = "trip-1",
@@ -551,7 +565,7 @@ private fun PreviewTripDetailScreenWithIntermediateStops() {
 @Preview(showBackground = true)
 @Composable
 private fun PreviewTripDetailScreenAtStopLimit() {
-    HeadingToTheAlpsTheme {
+    HeadingToVeniceTheme {
         TripDetailScreen(
             uiState = TripDetailUiState(
                 tripId = "trip-1",
@@ -592,7 +606,7 @@ private fun PreviewTripDetailScreenAtStopLimit() {
 @Preview(showBackground = true)
 @Composable
 private fun PreviewTripDetailScreenWithProgress() {
-    HeadingToTheAlpsTheme {
+    HeadingToVeniceTheme {
         TripDetailScreen(
             uiState = TripDetailUiState(
                 tripId = "trip-1",
@@ -643,7 +657,7 @@ private fun PreviewTripDetailScreenWithProgress() {
 @Preview(showBackground = true)
 @Composable
 private fun PreviewTripDetailScreenLoading() {
-    HeadingToTheAlpsTheme {
+    HeadingToVeniceTheme {
         TripDetailScreen(
             uiState = TripDetailUiState(
                 tripId = "trip-1",
@@ -656,7 +670,7 @@ private fun PreviewTripDetailScreenLoading() {
 @Preview(showBackground = true)
 @Composable
 private fun PreviewTripDetailScreenStartingPointDialog() {
-    HeadingToTheAlpsTheme {
+    HeadingToVeniceTheme {
         TripDetailScreen(
             uiState = TripDetailUiState(
                 tripId = "trip-1",
@@ -669,7 +683,7 @@ private fun PreviewTripDetailScreenStartingPointDialog() {
                     order = 0,
                     status = StopStatus.PENDING,
                 ),
-                isSetStartingPointDialogVisible = true,
+                dialogState = DialogState.SetStartingPoint,
                 canAddMoreStops = true,
             ),
         )
@@ -679,7 +693,7 @@ private fun PreviewTripDetailScreenStartingPointDialog() {
 @Preview(showBackground = true)
 @Composable
 private fun PreviewTripDetailScreenDestinationDialog() {
-    HeadingToTheAlpsTheme {
+    HeadingToVeniceTheme {
         TripDetailScreen(
             uiState = TripDetailUiState(
                 tripId = "trip-1",
@@ -701,7 +715,7 @@ private fun PreviewTripDetailScreenDestinationDialog() {
                     order = 1,
                     status = StopStatus.PENDING,
                 ),
-                isSetDestinationDialogVisible = true,
+                dialogState = DialogState.SetDestination,
                 canAddMoreStops = true,
             ),
         )
@@ -711,7 +725,7 @@ private fun PreviewTripDetailScreenDestinationDialog() {
 @Preview(showBackground = true)
 @Composable
 private fun PreviewTripDetailScreenAddStopDialog() {
-    HeadingToTheAlpsTheme {
+    HeadingToVeniceTheme {
         TripDetailScreen(
             uiState = TripDetailUiState(
                 tripId = "trip-1",
@@ -733,7 +747,7 @@ private fun PreviewTripDetailScreenAddStopDialog() {
                     order = 1,
                     status = StopStatus.PENDING,
                 ),
-                isAddStopDialogVisible = true,
+                dialogState = DialogState.AddStop,
                 canAddMoreStops = true,
             ),
         )
@@ -743,7 +757,7 @@ private fun PreviewTripDetailScreenAddStopDialog() {
 @Preview(showBackground = true)
 @Composable
 private fun PreviewTripDetailScreenEditStopDialog() {
-    HeadingToTheAlpsTheme {
+    HeadingToVeniceTheme {
         TripDetailScreen(
             uiState = TripDetailUiState(
                 tripId = "trip-1",
@@ -776,15 +790,16 @@ private fun PreviewTripDetailScreenEditStopDialog() {
                     order = 2,
                     status = StopStatus.PENDING,
                 ),
-                isEditStopDialogVisible = true,
-                editingStop = Stop(
-                    id = "2",
-                    tripId = "trip-1",
-                    placeName = "Florence, Italy",
-                    latitude = 43.7696,
-                    longitude = 11.2558,
-                    order = 1,
-                    status = StopStatus.PENDING,
+                dialogState = DialogState.EditStop(
+                    stop = Stop(
+                        id = "2",
+                        tripId = "trip-1",
+                        placeName = "Florence, Italy",
+                        latitude = 43.7696,
+                        longitude = 11.2558,
+                        order = 1,
+                        status = StopStatus.PENDING,
+                    ),
                 ),
                 canAddMoreStops = true,
             ),
@@ -795,7 +810,7 @@ private fun PreviewTripDetailScreenEditStopDialog() {
 @Preview(showBackground = true)
 @Composable
 private fun PreviewTripDetailScreenRemoveStopDialog() {
-    HeadingToTheAlpsTheme {
+    HeadingToVeniceTheme {
         TripDetailScreen(
             uiState = TripDetailUiState(
                 tripId = "trip-1",
@@ -828,15 +843,16 @@ private fun PreviewTripDetailScreenRemoveStopDialog() {
                     order = 2,
                     status = StopStatus.PENDING,
                 ),
-                isRemoveStopDialogVisible = true,
-                stopToRemove = Stop(
-                    id = "2",
-                    tripId = "trip-1",
-                    placeName = "Florence, Italy",
-                    latitude = 43.7696,
-                    longitude = 11.2558,
-                    order = 1,
-                    status = StopStatus.PENDING,
+                dialogState = DialogState.RemoveStop(
+                    stop = Stop(
+                        id = "2",
+                        tripId = "trip-1",
+                        placeName = "Florence, Italy",
+                        latitude = 43.7696,
+                        longitude = 11.2558,
+                        order = 1,
+                        status = StopStatus.PENDING,
+                    ),
                 ),
                 canAddMoreStops = true,
             ),
@@ -847,7 +863,7 @@ private fun PreviewTripDetailScreenRemoveStopDialog() {
 @Preview(showBackground = true)
 @Composable
 private fun PreviewTripDetailScreenWithSuggestions() {
-    HeadingToTheAlpsTheme {
+    HeadingToVeniceTheme {
         TripDetailScreen(
             uiState = TripDetailUiState(
                 tripId = "trip-1",
@@ -860,28 +876,30 @@ private fun PreviewTripDetailScreenWithSuggestions() {
                     order = 0,
                     status = StopStatus.PENDING,
                 ),
-                isSetStartingPointDialogVisible = true,
-                placeSuggestions = listOf(
-                    PlaceSuggestion(
-                        placeId = "place-1",
-                        primaryText = "Colosseum",
-                        secondaryText = "Rome, Italy",
+                dialogState = DialogState.SetStartingPoint,
+                placeSearchState = PlaceSearchState(
+                    suggestions = listOf(
+                        PlaceSuggestion(
+                            placeId = "place-1",
+                            primaryText = "Colosseum",
+                            secondaryText = "Rome, Italy",
+                        ),
+                        PlaceSuggestion(
+                            placeId = "place-2",
+                            primaryText = "Vatican City",
+                            secondaryText = "Rome, Italy",
+                        ),
+                        PlaceSuggestion(
+                            placeId = "place-3",
+                            primaryText = "Roman Forum",
+                            secondaryText = "Rome, Italy",
+                        ),
                     ),
-                    PlaceSuggestion(
-                        placeId = "place-2",
-                        primaryText = "Vatican City",
-                        secondaryText = "Rome, Italy",
+                    selectedPlaceDetail = PlaceDetail(
+                        name = "Colosseum",
+                        latitude = 41.8902,
+                        longitude = 12.4924,
                     ),
-                    PlaceSuggestion(
-                        placeId = "place-3",
-                        primaryText = "Roman Forum",
-                        secondaryText = "Rome, Italy",
-                    ),
-                ),
-                selectedPlaceDetail = PlaceDetail(
-                    name = "Colosseum",
-                    latitude = 41.8902,
-                    longitude = 12.4924,
                 ),
                 canAddMoreStops = true,
             ),
@@ -892,7 +910,7 @@ private fun PreviewTripDetailScreenWithSuggestions() {
 @Preview(showBackground = true)
 @Composable
 private fun PreviewTripDetailScreenSearchLoading() {
-    HeadingToTheAlpsTheme {
+    HeadingToVeniceTheme {
         TripDetailScreen(
             uiState = TripDetailUiState(
                 tripId = "trip-1",
@@ -905,8 +923,8 @@ private fun PreviewTripDetailScreenSearchLoading() {
                     order = 0,
                     status = StopStatus.PENDING,
                 ),
-                isSetStartingPointDialogVisible = true,
-                isSearchingPlaces = true,
+                dialogState = DialogState.SetStartingPoint,
+                placeSearchState = PlaceSearchState(isSearching = true),
                 canAddMoreStops = true,
             ),
         )
@@ -916,7 +934,7 @@ private fun PreviewTripDetailScreenSearchLoading() {
 @Preview(showBackground = true)
 @Composable
 private fun PreviewTripDetailScreenSearchError() {
-    HeadingToTheAlpsTheme {
+    HeadingToVeniceTheme {
         TripDetailScreen(
             uiState = TripDetailUiState(
                 tripId = "trip-1",
@@ -929,8 +947,10 @@ private fun PreviewTripDetailScreenSearchError() {
                     order = 0,
                     status = StopStatus.PENDING,
                 ),
-                isSetStartingPointDialogVisible = true,
-                searchError = "Search unavailable",
+                dialogState = DialogState.SetStartingPoint,
+                placeSearchState = PlaceSearchState(
+                    searchError = "Search unavailable",
+                ),
                 canAddMoreStops = true,
             ),
         )
@@ -940,7 +960,7 @@ private fun PreviewTripDetailScreenSearchError() {
 @Preview(showBackground = true)
 @Composable
 private fun PreviewTripDetailScreenPlaceDetailError() {
-    HeadingToTheAlpsTheme {
+    HeadingToVeniceTheme {
         TripDetailScreen(
             uiState = TripDetailUiState(
                 tripId = "trip-1",
@@ -953,8 +973,10 @@ private fun PreviewTripDetailScreenPlaceDetailError() {
                     order = 0,
                     status = StopStatus.PENDING,
                 ),
-                isSetStartingPointDialogVisible = true,
-                placeDetailError = "Unable to resolve location",
+                dialogState = DialogState.SetStartingPoint,
+                placeSearchState = PlaceSearchState(
+                    placeDetailError = "Unable to resolve location",
+                ),
                 canAddMoreStops = true,
             ),
         )
@@ -964,7 +986,7 @@ private fun PreviewTripDetailScreenPlaceDetailError() {
 @Preview(showBackground = true)
 @Composable
 private fun PreviewTripDetailScreenResolvingPlace() {
-    HeadingToTheAlpsTheme {
+    HeadingToVeniceTheme {
         TripDetailScreen(
             uiState = TripDetailUiState(
                 tripId = "trip-1",
@@ -977,8 +999,8 @@ private fun PreviewTripDetailScreenResolvingPlace() {
                     order = 0,
                     status = StopStatus.PENDING,
                 ),
-                isSetStartingPointDialogVisible = true,
-                isResolvingPlace = true,
+                dialogState = DialogState.SetStartingPoint,
+                placeSearchState = PlaceSearchState(isResolvingPlace = true),
                 canAddMoreStops = true,
             ),
         )
@@ -988,7 +1010,7 @@ private fun PreviewTripDetailScreenResolvingPlace() {
 @Preview(showBackground = true)
 @Composable
 private fun PreviewTripDetailScreenWithLegs() {
-    HeadingToTheAlpsTheme {
+    HeadingToVeniceTheme {
         TripDetailScreen(
             uiState = TripDetailUiState(
                 tripId = "trip-1",
@@ -1023,6 +1045,7 @@ private fun PreviewTripDetailScreenWithLegs() {
                     ),
                 ),
                 formattedLegDistances = mapOf("stop-1" to "12.5 km"),
+                formattedLegDurations = mapOf("stop-1" to "15 min"),
             ),
         )
     }
@@ -1031,7 +1054,7 @@ private fun PreviewTripDetailScreenWithLegs() {
 @Preview(showBackground = true)
 @Composable
 private fun PreviewTripDetailScreenCalculatingRoute() {
-    HeadingToTheAlpsTheme {
+    HeadingToVeniceTheme {
         TripDetailScreen(
             uiState = TripDetailUiState(
                 tripId = "trip-1",
@@ -1054,7 +1077,7 @@ private fun PreviewTripDetailScreenCalculatingRoute() {
                     status = StopStatus.PENDING,
                 ),
                 canAddMoreStops = true,
-                isCalculatingRoute = true,
+                routeCalculationState = RouteCalculationState.Calculating,
             ),
         )
     }
@@ -1063,7 +1086,7 @@ private fun PreviewTripDetailScreenCalculatingRoute() {
 @Preview(showBackground = true)
 @Composable
 private fun PreviewTripDetailScreenWithRouteError() {
-    HeadingToTheAlpsTheme {
+    HeadingToVeniceTheme {
         TripDetailScreen(
             uiState = TripDetailUiState(
                 tripId = "trip-1",
@@ -1086,7 +1109,7 @@ private fun PreviewTripDetailScreenWithRouteError() {
                     status = StopStatus.PENDING,
                 ),
                 canAddMoreStops = true,
-                routeError = "Network error",
+                routeCalculationState = RouteCalculationState.Error("Network error"),
             ),
         )
     }
