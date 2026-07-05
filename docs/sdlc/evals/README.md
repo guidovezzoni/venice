@@ -50,9 +50,18 @@ Runs SDLC commands through Claude Code (or another tool) against controlled fixt
 ./docs/sdlc/evals/run_evals.sh --output results/baseline.json
 ```
 
-**When to use:**
-- Phase 2 when touching `sdlc_doctor` or `sdlc_project_doctor` (lightweight, ~8 scenarios with Haiku sub-agents)
-- Phase 3 when touching `sdlc_open_story`, `sdlc_propose_change`, or `sdlc_verify_story` — run only the relevant scenarios. Avoid running in a tight loop.
+**When to use:** Run evals for the specific command you modified:
+
+| Command modified | What to run | Rate-limit cost |
+|---|---|---|
+| `sdlc_doctor` | `./run_evals.sh doctor` | Low (Haiku sub-agents only) |
+| `sdlc_project_doctor` | `./run_evals.sh project_doctor` | Low (Haiku sub-agents only) |
+| `sdlc_open_story` | `./run_evals.sh open_story` | Moderate (Opus sub-agent) |
+| `sdlc_propose_change` | `./run_evals.sh propose_change` | Moderate (Sonnet sub-agents) |
+| `sdlc_verify_story` | `./run_evals.sh verify_story` | Moderate (multiple sub-agents) |
+| `sdlc_implement_change` | No execution evals yet (work in progress) | — |
+
+Run all with no filter if you touched shared infrastructure (e.g. `eval_helpers.sh`, guidelines files referenced by multiple commands).
 
 ---
 
@@ -76,11 +85,12 @@ Diffs two aggregate JSON result files and reports regressions (PASS to FAIL), im
 
 ## Recommended Workflow
 
-1. **Always run Phase 1** before committing changes to command files — it's free, instant, and checks all 6 commands.
-2. **Run Phase 2** when touching `sdlc_doctor` or `sdlc_project_doctor`: `./docs/sdlc/evals/run_evals.sh phase2`
-3. **Run Phase 3 selectively** when touching `sdlc_open_story`, `sdlc_propose_change`, or `sdlc_verify_story` — only the relevant scenarios: `./docs/sdlc/evals/run_evals.sh open_story`. Avoid running `phase3` in a tight loop to stay within rate limits.
-4. **Compare before/after** when modifying commands: save results with `--output` before changes, run again after, then use `compare_results.sh` to identify regressions.
-5. **Cross-tool comparison** when evaluating a new tool: run the same scenarios with `--tool claude` and `--tool opencode`, then compare with `--tool-diff`.
+1. **Always run `check_guardrails.sh`** before committing changes to command files — it's free, instant, and checks all 6 commands.
+2. **Run execution evals for the command you modified** — see the table above for the correct filter and expected cost.
+3. **Compare before/after** when modifying commands: save results with `--output` before changes, run again after, then use `compare_results.sh` to identify regressions.
+4. **Cross-tool comparison** when evaluating a new tool: run the same scenarios with `--tool claude` and `--tool opencode`, then compare with `--tool-diff`.
+
+Note: `sdlc_implement_change` does not have execution evals yet — it is only covered by static guardrails (`check_guardrails.sh`).
 
 ---
 
