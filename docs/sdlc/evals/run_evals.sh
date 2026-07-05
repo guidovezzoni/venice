@@ -1,13 +1,18 @@
 #!/usr/bin/env bash
-# SDLC Execution Evals — Phase 2
+# SDLC Execution Evals — Phase 2 & 3
 #
-# Runs doctor and project_doctor commands against controlled fixtures via
-# Claude Code CLI and asserts on actual behavior.
+# Runs SDLC commands against controlled fixtures via Claude Code CLI
+# and asserts on actual behavior.
 #
 # Usage:
 #   ./docs/sdlc/evals/run_evals.sh                          # Run all evals
 #   ./docs/sdlc/evals/run_evals.sh doctor                   # Run only doctor evals
 #   ./docs/sdlc/evals/run_evals.sh project_doctor            # Run only project_doctor evals
+#   ./docs/sdlc/evals/run_evals.sh open_story                # Run only open_story evals
+#   ./docs/sdlc/evals/run_evals.sh propose_change            # Run only propose_change evals
+#   ./docs/sdlc/evals/run_evals.sh verify_story              # Run only verify_story evals
+#   ./docs/sdlc/evals/run_evals.sh phase2                    # Run all Phase 2 evals
+#   ./docs/sdlc/evals/run_evals.sh phase3                    # Run all Phase 3 evals
 #   ./docs/sdlc/evals/run_evals.sh doctor_all_pass           # Run a single scenario
 #   EVAL_TOOL=opencode ./docs/sdlc/evals/run_evals.sh       # Run with OpenCode
 #
@@ -70,7 +75,7 @@ FAILED_SCENARIOS=0
 FAILED_NAMES=()
 
 echo ""
-echo -e "${BOLD}SDLC Execution Evals (Phase 2)${RESET}"
+echo -e "${BOLD}SDLC Execution Evals (Phase 2 & 3)${RESET}"
 echo -e "${DIM}Tool: $EVAL_TOOL${RESET}"
 echo -e "${DIM}Filter: ${FILTER:-all}${RESET}"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -86,6 +91,25 @@ for scenario_script in "$SCENARIOS_DIR"/*.sh; do
                 ;;
             project_doctor)
                 [[ "$scenario_name" == project_doctor_* ]] || continue
+                ;;
+            open_story)
+                [[ "$scenario_name" == open_story_* ]] || continue
+                ;;
+            propose_change)
+                [[ "$scenario_name" == propose_change_* ]] || continue
+                ;;
+            verify_story)
+                [[ "$scenario_name" == verify_story_* ]] || continue
+                ;;
+            implement_change)
+                [[ "$scenario_name" == implement_change_* ]] || continue
+                ;;
+            phase2)
+                [[ "$scenario_name" == doctor_* || "$scenario_name" == project_doctor_* ]] || continue
+                ;;
+            phase3)
+                [[ "$scenario_name" == open_story_* || "$scenario_name" == propose_change_* || \
+                   "$scenario_name" == verify_story_* || "$scenario_name" == implement_change_* ]] || continue
                 ;;
             *)
                 [[ "$scenario_name" == "$FILTER" ]] || continue

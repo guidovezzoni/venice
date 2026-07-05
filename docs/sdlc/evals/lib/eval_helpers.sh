@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Shared helper library for SDLC execution evals (Phase 2).
+# Shared helper library for SDLC execution evals (Phase 2 & 3).
 # Sourced by scenario scripts — not executed directly.
 
 set -euo pipefail
@@ -181,6 +181,246 @@ GRADLEW
 }
 
 # ---------------------------------------------------------------------------
+# Phase 3: Base fixture for story-level commands (open, propose, verify)
+# ---------------------------------------------------------------------------
+
+create_story_command_base_fixture() {
+    local dir="$1"
+
+    git -C "$dir" config user.name "Eval Fixture"
+    git -C "$dir" config user.email "eval@fixture.test"
+
+    mkdir -p "$dir/docs/guidelines"
+
+    cat > "$dir/docs/guidelines/guidelines-userstories.md" << 'GUIDELINE_EOF'
+# User Story Management Guidelines
+
+This file is the single source of truth for how user stories are managed.
+
+## Storage
+
+User stories are stored as Markdown files in `docs/userstories/`.
+
+## Index
+
+The file `docs/userstories/index.md` is the master index of all user stories.
+
+## File Naming
+
+```
+{id}-{slug}[-STATE].md
+```
+
+- **id**: hierarchical identifier (e.g. `1.2.4`)
+- **slug**: kebab-case short description
+- **STATE**: optional lifecycle suffix (`WIP` or `DONE`)
+
+## Lifecycle
+
+| State       | Filename pattern        | Example                        |
+|-------------|-------------------------|--------------------------------|
+| New         | `{id}-{slug}.md`        | `1.2.5-edit-stop.md`          |
+| In Progress | `{id}-{slug}-WIP.md`    | `1.2.5-edit-stop-WIP.md`      |
+| Done        | `{id}-{slug}-DONE.md`   | `1.2.5-edit-stop-DONE.md`     |
+
+### Next User Story
+
+When no specific story is specified, the next story to open is the first one in the index that is in the **New** state (i.e. not `-WIP` or `-DONE`).
+
+### Opening a User Story
+
+Rename the file by appending `-WIP` before the `.md` extension.
+
+**Precondition:** The file must be in the **New** state.
+
+### Closing a User Story
+
+Rename the file by replacing the `-WIP` suffix with `-DONE` before the `.md` extension.
+
+**Precondition:** The file must be in the **In Progress** state (`-WIP`).
+
+### Renaming
+
+File renames must use `git mv` so the change is tracked in version control.
+
+### Index Update
+
+After any state transition, update the link in `docs/userstories/index.md`.
+GUIDELINE_EOF
+
+    cat > "$dir/docs/guidelines/guidelines-git.md" << 'GUIDELINE_EOF'
+# Git Guidelines
+
+## Commit Message Format
+1. First line: simple and concise summary of the change
+2. Body (optional): extra detail if required
+
+## File Operations
+- Always use `git mv` instead of plain `mv` when renaming or moving tracked files
+
+## Branch Verification
+- Always verify the current branch by running `git branch --show-current`
+GUIDELINE_EOF
+
+    cat > "$dir/docs/guidelines/guidelines-reports.md" << 'GUIDELINE_EOF'
+# Report Guidelines
+
+Reports are HTML files in `docs/reports/`.
+File naming: `{id}-{slug}.html`
+One report per user story.
+GUIDELINE_EOF
+
+    cat > "$dir/docs/guidelines/guidelines-android.md" << 'GUIDELINE_EOF'
+# Android Guidelines
+
+- MVI Architecture with Clean Architecture (data/domain/UI)
+- Jetpack Compose with Material 3
+- Dependency Injection with Hilt
+GUIDELINE_EOF
+
+    cat > "$dir/docs/guidelines/guidelines-process.md" << 'GUIDELINE_EOF'
+# Process and Workflow Guidelines
+
+- Run `./gradlew clean` before coding
+- Run `./gradlew check` after changes
+- Run `./gradlew test` for unit tests
+GUIDELINE_EOF
+
+    mkdir -p "$dir/docs/userstories"
+    mkdir -p "$dir/docs/reports"
+
+    mkdir -p "$dir/openspec"
+    cat > "$dir/openspec/config.yaml" << 'EOF'
+schema: spec-driven
+EOF
+
+    cat > "$dir/AGENTS.md" << 'EOF'
+# AGENTS.md
+## Project Overview
+Test project for SDLC evals.
+EOF
+
+    cat > "$dir/gradlew" << 'GRADLEW'
+#!/bin/bash
+exit 0
+GRADLEW
+    chmod +x "$dir/gradlew"
+
+    git -C "$dir" add -A
+    git -C "$dir" commit -m "Initial fixture setup" --quiet
+    git -C "$dir" branch -M main
+}
+
+create_sample_story_new() {
+    local dir="$1"
+    local story_id="${2:-99.1.1}"
+    local story_slug="${3:-test-feature}"
+
+    cat > "$dir/docs/userstories/${story_id}-${story_slug}.md" << STORY_EOF
+# ${story_id} — Test Feature
+
+**Epic:** Test Epic
+**Feature:** Test Feature
+
+## User Story
+
+As a user, I want to test a feature so that I can verify it works.
+
+## Acceptance Criteria
+
+- The feature should work correctly.
+- The UI should update appropriately.
+- Error states should be handled gracefully.
+STORY_EOF
+
+    cat > "$dir/docs/userstories/index.md" << INDEX_EOF
+# User Stories Index
+
+## Epic 99: Test
+
+### Feature 99.1: Test Feature
+
+- [${story_id} — Test Feature](${story_id}-${story_slug}.md)
+INDEX_EOF
+}
+
+create_sample_story_wip() {
+    local dir="$1"
+    local story_id="${2:-99.1.1}"
+    local story_slug="${3:-test-feature}"
+
+    cat > "$dir/docs/userstories/${story_id}-${story_slug}-WIP.md" << STORY_EOF
+# ${story_id} — Test Feature
+
+**Epic:** Test Epic
+**Feature:** Test Feature
+
+## User Story
+
+As a user, I want to test a feature so that I can verify it works.
+
+## Acceptance Criteria
+
+- The feature should work correctly.
+- The UI should update appropriately.
+- Error states should be handled gracefully.
+
+## Definition of Done
+
+- All acceptance criteria are met.
+- Unit tests pass with >95% coverage.
+- UI tests pass on a connected device.
+STORY_EOF
+
+    cat > "$dir/docs/userstories/index.md" << INDEX_EOF
+# User Stories Index
+
+## Epic 99: Test
+
+### Feature 99.1: Test Feature
+
+- [${story_id} — Test Feature](${story_id}-${story_slug}-WIP.md)
+INDEX_EOF
+}
+
+create_sample_story_ambiguous() {
+    local dir="$1"
+    local story_id="${2:-99.1.1}"
+    local story_slug="${3:-ambiguous-feature}"
+
+    cat > "$dir/docs/userstories/${story_id}-${story_slug}-WIP.md" << STORY_EOF
+# ${story_id} — Ambiguous Feature
+
+**Epic:** Test Epic
+**Feature:** Ambiguous Feature
+
+## User Story
+
+As a user, I want to manage items so that they are organised.
+
+## Description
+
+The feature should allow managing items. Details about the specific item types,
+storage mechanism, and UI layout are intentionally unspecified.
+
+## Acceptance Criteria
+
+- Items can be managed.
+- The feature integrates with existing functionality.
+STORY_EOF
+
+    cat > "$dir/docs/userstories/index.md" << INDEX_EOF
+# User Stories Index
+
+## Epic 99: Test
+
+### Feature 99.1: Ambiguous Feature
+
+- [${story_id} — Ambiguous Feature](${story_id}-${story_slug}-WIP.md)
+INDEX_EOF
+}
+
+# ---------------------------------------------------------------------------
 # Eval execution
 # ---------------------------------------------------------------------------
 
@@ -201,6 +441,36 @@ run_eval() {
         --no-session-persistence \
         --output-format text \
     ) > "$output_file" 2>&1 || exit_code=$?
+
+    return $exit_code
+}
+
+run_eval_with_args() {
+    local fixture_dir="$1"
+    local command_file="$2"
+    local output_file="$3"
+    local args="${4:-}"
+    local max_turns="${5:-}"
+
+    OUTPUT_FILE="$output_file"
+
+    local prompt
+    prompt="$(cat "$command_file")"
+    prompt="${prompt//\$ARGUMENTS/$args}"
+
+    local tool_args=(
+        -p "$prompt"
+        --dangerously-skip-permissions
+        --no-session-persistence
+        --output-format text
+    )
+
+    if [[ -n "$max_turns" ]]; then
+        tool_args+=(--max-turns "$max_turns")
+    fi
+
+    local exit_code=0
+    (cd "$fixture_dir" && "$EVAL_TOOL" "${tool_args[@]}") > "$output_file" 2>&1 || exit_code=$?
 
     return $exit_code
 }
@@ -323,6 +593,55 @@ assert_min_fail_count() {
         assertion_pass "fail count >= $minimum (got $actual)"
     else
         assertion_fail "fail count should be >= $minimum" "got $actual"
+    fi
+}
+
+assert_file_exists() {
+    local file_path="$1"
+    local description="$2"
+
+    if [[ -f "$file_path" ]]; then
+        assertion_pass "$description"
+    else
+        assertion_fail "$description" "file not found: $file_path"
+    fi
+}
+
+assert_file_not_exists() {
+    local file_path="$1"
+    local description="$2"
+
+    if [[ ! -f "$file_path" ]]; then
+        assertion_pass "$description"
+    else
+        assertion_fail "$description" "file should not exist: $file_path"
+    fi
+}
+
+assert_branch_exists() {
+    local fixture_dir="$1"
+    local branch_pattern="$2"
+    local description="$3"
+
+    if git -C "$fixture_dir" branch 2>/dev/null | grep -qE "$branch_pattern"; then
+        assertion_pass "$description"
+    else
+        assertion_fail "$description" "no branch matching '$branch_pattern'"
+    fi
+}
+
+assert_on_branch() {
+    local fixture_dir="$1"
+    local expected_branch="$2"
+    local description="$3"
+
+    local current_branch
+    current_branch=$(git -C "$fixture_dir" branch --show-current 2>/dev/null)
+
+    if [[ "$current_branch" == "$expected_branch" ]]; then
+        assertion_pass "$description"
+    else
+        assertion_fail "$description" "expected branch '$expected_branch', got '$current_branch'"
     fi
 }
 

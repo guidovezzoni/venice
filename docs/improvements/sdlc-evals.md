@@ -147,17 +147,29 @@ Once the doctor evals are stable, add evals for the commands with more complex b
    - Most rate-limit-heavy to run fully; test individual sections rather than the whole command
    - Rate-limit note: defer or test subsections only. Run sparingly.
 
+**Implemented scenarios:**
+
+| Scenario | Command | Fixture state | Key assertions |
+|----------|---------|--------------|----------------|
+| `open_story_dirty_state` | `sdlc_open_story` | Git repo on main with uncommitted changes | Output warns about dirty state, mentions specific dirty file |
+| `open_story_not_on_main` | `sdlc_open_story` | Git repo on `feature/existing-work` branch | Output detects non-main branch, asks about proceeding/switching |
+| `verify_story_precondition_fail` | `sdlc_verify_story` | Story in "New" state (not WIP) | Stops before gates, doesn't reach later verification steps |
+| `verify_story_blocks_on_gate_failure` | `sdlc_verify_story` | WIP story, no openspec change artifacts | Blocks at first gate, doesn't reach downstream gates |
+| `propose_change_surfaces_questions` | `sdlc_propose_change` | WIP story with deliberately ambiguous requirements | Surfaces questions, does not make assumptions |
+
+**Deferred:** `sdlc_implement_change` evals require a full openspec change with task artifacts and are the most rate-limit-heavy. To be added when the first 3 commands' evals are stable.
+
 **Fixture design for git-based commands:**
-```bash
-# Setup script creates:
-fixture_dir=$(mktemp -d)
-cd "$fixture_dir"
-git init
-# Create known files, branches, user stories, openspec config
-# Run eval
-# Teardown
-rm -rf "$fixture_dir"
-```
+
+All Phase 3 fixtures use `create_story_command_base_fixture()` which creates a git repo with:
+- Git user config, initial commit on `main`
+- Minimal guidelines files (userstories, git, reports, android, process)
+- OpenSpec config, AGENTS.md, gradlew stub
+- `docs/userstories/` and `docs/reports/` directories
+
+Scenarios extend the base with `create_sample_story_new()`, `create_sample_story_wip()`, or `create_sample_story_ambiguous()` and then apply scenario-specific tweaks (dirty files, branch switches, etc.).
+
+All Phase 3 scenarios use `run_eval_with_args()` which supports `$ARGUMENTS` substitution and `--max-turns` to control cost.
 
 ---
 
@@ -183,27 +195,29 @@ rm -rf "$fixture_dir"
 
 ---
 
-## Files to Create
+## Files
 
 ```
 docs/sdlc/evals/
-├── README.md                          # How evals work, how to run
-├── check_guardrails.sh                # Phase 1: static assertions
-├── run_evals.sh                       # Phase 2+: execution eval runner
-├── compare_results.sh                 # Phase 4: regression comparison
-├── fixtures/                          # Fixture setup scripts
-│   ├── setup_doctor_all_pass.sh
-│   ├── setup_doctor_missing_openspec.sh
-│   ├── setup_doctor_missing_opsx.sh
-│   ├── setup_doctor_security_disabled.sh
-│   ├── setup_doctor_everything_broken.sh
-│   ├── setup_project_doctor_all_pass.sh
-│   ├── setup_project_doctor_missing_detekt.sh
-│   └── setup_project_doctor_low_coverage.sh
-├── assertions/                        # Expected outputs per scenario
-│   ├── doctor_all_pass.assertions
-│   ├── doctor_missing_openspec.assertions
-│   └── ...
+├── check_guardrails.sh                # Phase 1: static assertions (126 checks)
+├── run_evals.sh                       # Phase 2 & 3: execution eval runner
+├── lib/
+│   └── eval_helpers.sh                # Shared fixture creators, assertion helpers
+├── scenarios/                         # Phase 2: doctor scenarios
+│   ├── doctor_all_pass.sh
+│   ├── doctor_everything_broken.sh
+│   ├── doctor_missing_openspec_config.sh
+│   ├── doctor_missing_opsx_commands.sh
+│   ├── doctor_security_disabled.sh
+│   ├── project_doctor_all_pass.sh
+│   ├── project_doctor_low_coverage.sh
+│   ├── project_doctor_missing_detekt.sh
+│   ├── open_story_dirty_state.sh      # Phase 3: git dirty state detection
+│   ├── open_story_not_on_main.sh      # Phase 3: non-main branch detection
+│   ├── verify_story_precondition_fail.sh      # Phase 3: precondition validation
+│   ├── verify_story_blocks_on_gate_failure.sh # Phase 3: blocking gate protocol
+│   └── propose_change_surfaces_questions.sh   # Phase 3: no-assumptions guardrail
+├── compare_results.sh                 # Phase 4: regression comparison (planned)
 └── results/                           # Gitignored eval results
     └── .gitkeep
 ```
@@ -211,11 +225,12 @@ docs/sdlc/evals/
 ## Verification
 
 - **Phase 1:** Run `./docs/sdlc/evals/check_guardrails.sh` — all assertions pass against current command files. Intentionally remove a guardrail phrase → re-run → verify it catches the regression.
-- **Phase 2:** Run `./docs/sdlc/evals/run_evals.sh doctor` — all doctor scenarios pass. Intentionally break a fixture (remove a file that should exist) → verify the eval catches the changed behavior.
+- **Phase 2:** Run `./docs/sdlc/evals/run_evals.sh phase2` — all doctor scenarios pass. Intentionally break a fixture (remove a file that should exist) → verify the eval catches the changed behavior.
+- **Phase 3:** Run `./docs/sdlc/evals/run_evals.sh phase3` — all Phase 3 scenarios pass. Run individual commands selectively: `./docs/sdlc/evals/run_evals.sh open_story` or a single scenario: `./docs/sdlc/evals/run_evals.sh open_story_dirty_state`.
 - **Phase 4:** Run before/after a command change → verify the comparison script correctly identifies regressions.
 
 ## Recommended Workflow
 
 - **Always run Phase 1** before committing changes to command files — it's free and instant.
-- **Run Phase 2** when touching any command — lightweight, ~8 scenarios.
-- **Run Phase 3 selectively** — only the scenarios relevant to the specific command you changed. Avoid running the full suite in a tight loop to stay within rate limits.
+- **Run Phase 2** when touching any command — lightweight, ~8 scenarios: `./docs/sdlc/evals/run_evals.sh phase2`
+- **Run Phase 3 selectively** — only the scenarios relevant to the specific command you changed: `./docs/sdlc/evals/run_evals.sh open_story` or `./docs/sdlc/evals/run_evals.sh verify_story`. Avoid running `phase3` in a tight loop to stay within rate limits.
