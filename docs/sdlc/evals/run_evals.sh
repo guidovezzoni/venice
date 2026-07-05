@@ -14,7 +14,9 @@
 #   ./docs/sdlc/evals/run_evals.sh phase2                    # Run all Phase 2 evals
 #   ./docs/sdlc/evals/run_evals.sh phase3                    # Run all Phase 3 evals
 #   ./docs/sdlc/evals/run_evals.sh doctor_all_pass           # Run a single scenario
-#   EVAL_TOOL=opencode ./docs/sdlc/evals/run_evals.sh       # Run with OpenCode
+#   ./docs/sdlc/evals/run_evals.sh --tool opencode           # Run with OpenCode
+#   ./docs/sdlc/evals/run_evals.sh --tool opencode doctor    # Filter + tool
+#   ./docs/sdlc/evals/run_evals.sh --output results/run1.json  # Custom output path
 #
 # Prerequisites:
 #   - claude CLI installed and authenticated
@@ -22,7 +24,7 @@
 #   - fastlane, bundle installed (for project_doctor CLI checks)
 #
 # Environment variables:
-#   EVAL_TOOL    CLI tool to use (default: claude)
+#   EVAL_TOOL    CLI tool to use (default: claude, overridden by --tool)
 
 set -euo pipefail
 
@@ -44,7 +46,37 @@ RESET='\033[0m'
 # CLI argument parsing
 # ---------------------------------------------------------------------------
 
-FILTER="${1:-}"
+FILTER=""
+CUSTOM_OUTPUT=""
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --tool)
+            EVAL_TOOL="$2"
+            export EVAL_TOOL
+            shift 2
+            ;;
+        --output)
+            CUSTOM_OUTPUT="$2"
+            shift 2
+            ;;
+        -h|--help)
+            echo "Usage: $(basename "$0") [--tool <name>] [--output <path>] [<filter>]"
+            echo ""
+            echo "Options:"
+            echo "  --tool <name>    CLI tool to invoke (default: claude)"
+            echo "  --output <path>  Write aggregate results to a custom path"
+            echo ""
+            echo "Filters: doctor, project_doctor, open_story, propose_change,"
+            echo "         verify_story, phase2, phase3, or a specific scenario name"
+            exit 0
+            ;;
+        *)
+            FILTER="$1"
+            shift
+            ;;
+    esac
+done
 
 # ---------------------------------------------------------------------------
 # Preflight checks
@@ -174,5 +206,12 @@ for result_file in "$RESULTS_DIR"/*.json; do
 done
 echo "" >> "$AGGREGATE"
 echo "]" >> "$AGGREGATE"
+
+# Copy aggregate to custom output path if specified
+if [[ -n "$CUSTOM_OUTPUT" ]]; then
+    mkdir -p "$(dirname "$CUSTOM_OUTPUT")"
+    cp "$AGGREGATE" "$CUSTOM_OUTPUT"
+    echo -e "${DIM}Custom output: $CUSTOM_OUTPUT${RESET}"
+fi
 
 exit "$FAILED_SCENARIOS"

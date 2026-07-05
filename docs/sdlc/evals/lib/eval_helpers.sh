@@ -690,6 +690,7 @@ report_scenario_result() {
   "failed": $ASSERTIONS_FAILED,
   "total": $ASSERTIONS_TOTAL,
   "result": "$([ "$ASSERTIONS_FAILED" -eq 0 ] && echo "PASS" || echo "FAIL")",
+  "tool": "$EVAL_TOOL",
   "timestamp": "$(date -Iseconds)"
 }
 RESULT_EOF
