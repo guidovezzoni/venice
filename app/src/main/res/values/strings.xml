@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name" translatable="false">Venice</string>
+    <string name="app_name" translatable="false">Heading to Venice</string>
     <string name="global_confirm">Confirm</string>
     <string name="global_cancel">Cancel</string>
     <string name="global_loading">Loading</string>

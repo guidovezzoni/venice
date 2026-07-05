@@ -10,7 +10,8 @@ import androidx.compose.ui.test.performClick
 import com.guidovezzoni.venice.R
 import com.guidovezzoni.venice.domain.model.PlaceDetail
 import com.guidovezzoni.venice.domain.model.PlaceSuggestion
-import com.guidovezzoni.venice.ui.theme.HeadingToTheAlpsTheme
+import com.guidovezzoni.venice.ui.theme.HeadingToVeniceTheme
+import com.guidovezzoni.venice.ui.util.formatCoordinate
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Rule
@@ -33,7 +34,7 @@ class SetStopDialogTest {
         onSuggestionSelected: (PlaceSuggestion) -> Unit = {},
     ) {
         composeTestRule.setContent {
-            HeadingToTheAlpsTheme {
+            HeadingToVeniceTheme {
                 SetStopDialog(
                     isLoading = isLoading,
                     dialogTitleRes = R.string.trip_detail_starting_point_label,
@@ -150,8 +151,8 @@ class SetStopDialogTest {
         setContent(selectedPlaceDetail = placeDetail)
 
         // Verify the coordinate values from PlaceDetail are shown
-        composeTestRule.onNodeWithText("41.8902").assertExists()
-        composeTestRule.onNodeWithText("12.4922").assertExists()
+        composeTestRule.onNodeWithText(formatCoordinate(placeDetail.latitude)).assertExists()
+        composeTestRule.onNodeWithText(formatCoordinate(placeDetail.longitude)).assertExists()
     }
 
     // Task 5.1: GIVEN isResolvingPlace is true THEN the progress indicator with content description "Resolving place" is visible and confirm button is disabled

@@ -1,4 +1,4 @@
-# GitHub Actions CI/CD + Fastlane Setup — Venice ("Heading to the Alps!")
+# GitHub Actions CI/CD + Fastlane Setup — Venice ("Heading to Venice!")
 
 ## Context
 

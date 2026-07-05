@@ -14,7 +14,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.guidovezzoni.venice.R
-import com.guidovezzoni.venice.ui.theme.HeadingToTheAlpsTheme
+import com.guidovezzoni.venice.ui.theme.HeadingToVeniceTheme
 
 private const val EMPTY_STATE_PADDING_DP = 16
 
@@ -46,7 +46,7 @@ fun TripEmptyState(
 @Preview(showBackground = true)
 @Composable
 private fun PreviewTripEmptyState() {
-    HeadingToTheAlpsTheme {
+    HeadingToVeniceTheme {
         TripEmptyState()
     }
 }

@@ -12,7 +12,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.guidovezzoni.venice.R
-import com.guidovezzoni.venice.ui.theme.HeadingToTheAlpsTheme
+import com.guidovezzoni.venice.ui.theme.HeadingToVeniceTheme
 
 private val HORIZONTAL_PADDING = 16.dp
 private val VERTICAL_PADDING = 8.dp
@@ -45,7 +45,7 @@ fun TripProgressSummary(
 @Preview(showBackground = true)
 @Composable
 private fun PreviewTripProgressSummaryZero() {
-    HeadingToTheAlpsTheme {
+    HeadingToVeniceTheme {
         TripProgressSummary(departedCount = 0, totalCount = 4)
     }
 }
@@ -53,7 +53,7 @@ private fun PreviewTripProgressSummaryZero() {
 @Preview(showBackground = true)
 @Composable
 private fun PreviewTripProgressSummaryPartial() {
-    HeadingToTheAlpsTheme {
+    HeadingToVeniceTheme {
         TripProgressSummary(departedCount = 3, totalCount = 6)
     }
 }
@@ -61,7 +61,7 @@ private fun PreviewTripProgressSummaryPartial() {
 @Preview(showBackground = true)
 @Composable
 private fun PreviewTripProgressSummaryComplete() {
-    HeadingToTheAlpsTheme {
+    HeadingToVeniceTheme {
         TripProgressSummary(departedCount = 6, totalCount = 6)
     }
 }
