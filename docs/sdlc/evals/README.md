@@ -51,8 +51,8 @@ Runs SDLC commands through Claude Code (or another tool) against controlled fixt
 ```
 
 **When to use:**
-- Phase 2 when touching any command (lightweight, ~8 scenarios with Haiku sub-agents)
-- Phase 3 selectively — only the scenarios relevant to the command you changed. Avoid running in a tight loop.
+- Phase 2 when touching `sdlc_doctor` or `sdlc_project_doctor` (lightweight, ~8 scenarios with Haiku sub-agents)
+- Phase 3 when touching `sdlc_open_story`, `sdlc_propose_change`, or `sdlc_verify_story` — run only the relevant scenarios. Avoid running in a tight loop.
 
 ---
 
@@ -76,9 +76,9 @@ Diffs two aggregate JSON result files and reports regressions (PASS to FAIL), im
 
 ## Recommended Workflow
 
-1. **Always run Phase 1** before committing changes to command files — it's free and instant.
-2. **Run Phase 2** when touching any command — lightweight: `./docs/sdlc/evals/run_evals.sh phase2`
-3. **Run Phase 3 selectively** — only the scenarios relevant to the command you changed. Avoid running `phase3` in a tight loop to stay within rate limits.
+1. **Always run Phase 1** before committing changes to command files — it's free, instant, and checks all 6 commands.
+2. **Run Phase 2** when touching `sdlc_doctor` or `sdlc_project_doctor`: `./docs/sdlc/evals/run_evals.sh phase2`
+3. **Run Phase 3 selectively** when touching `sdlc_open_story`, `sdlc_propose_change`, or `sdlc_verify_story` — only the relevant scenarios: `./docs/sdlc/evals/run_evals.sh open_story`. Avoid running `phase3` in a tight loop to stay within rate limits.
 4. **Compare before/after** when modifying commands: save results with `--output` before changes, run again after, then use `compare_results.sh` to identify regressions.
 5. **Cross-tool comparison** when evaluating a new tool: run the same scenarios with `--tool claude` and `--tool opencode`, then compare with `--tool-diff`.
 
