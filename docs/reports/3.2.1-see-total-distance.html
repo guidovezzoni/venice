@@ -233,6 +233,64 @@
 
     <div class="outcome outcome-passed">Design complete. 5 SDD artifacts generated. 20 tasks structured and validated. Ready for implementation phase.</div>
   </section>
+  <section class="report-section" data-source="sdlc_implement_change" data-timestamp="2026-07-06T22:55:00+02:00">
+    <header>
+      <h2>Implementation</h2>
+      <time datetime="2026-07-06T22:55:00+02:00">6 Jul 2026</time>
+    </header>
+    <p class="section-source">Source: sdlc_implement_change</p>
+
+    <h3>What Was Implemented</h3>
+    <ul>
+      <li><strong><code>TripDetailUiState.kt</code></strong> — added <code>formattedTotalDistance: String? = null</code> field (with docblock noting <code>null</code> means route not complete or unavailable)</li>
+      <li><strong><code>TripDetailViewModel.kt</code></strong> — added independent <code>combine(observeStopsUseCase, observeLegsUseCase)</code> collector; computes completeness as <code>legs.size == stops.size - 1 &amp;&amp; stops.size &gt;= 2</code>; when complete, sums <code>leg.distanceMetres</code> (via <code>sumOf</code>) and formats via <code>formatDistance</code>; otherwise emits <code>null</code></li>
+      <li><strong><code>TripTotalSummary.kt</code></strong> — new stateless <code>@Composable</code> with private <code>Dp</code> layout constants; renders label + formatted value when non-null, renders <code>trip_detail_total_distance_unavailable</code> string when null; two previews covering both states</li>
+      <li><strong><code>TripDetailScreen.kt</code></strong> — wired <code>TripTotalSummary</code> as a <code>LazyColumn</code> item placed after the calculate-route button block; added previews for total-available and total-unavailable states</li>
+      <li><strong><code>strings.xml</code> (EN base)</strong> — added <code>trip_detail_total_distance_label</code> ("Total distance") and <code>trip_detail_total_distance_unavailable</code> ("Total distance unavailable")</li>
+      <li><strong><code>values-it/strings.xml</code></strong> — translated both keys to Italian</li>
+      <li><strong><code>values-es-rES/strings.xml</code></strong> — translated both keys to Spanish</li>
+    </ul>
+
+    <h3>BDD Cycles</h3>
+    <table>
+      <tr><th>Section</th><th>Test Tasks</th><th>Impl Tasks</th><th>Result</th></tr>
+      <tr><td>2 — ViewModel total distance</td><td>7 (2.1–2.7)</td><td>1 (2.8)</td><td><span class="badge badge-pass">GREEN</span></td></tr>
+      <tr><td>3 — TripTotalSummary composable</td><td>2 (3.1–3.2)</td><td>1 (3.3)</td><td><span class="badge badge-pass">GREEN</span></td></tr>
+      <tr><td>4 — Screen wiring</td><td>2 (4.4–4.5)</td><td>3 (4.1–4.3)</td><td><span class="badge badge-pass">GREEN</span></td></tr>
+    </table>
+    <p>Total: <strong>11 test tasks, 5 impl tasks</strong> across 3 BDD sections. All red/green cycles completed.</p>
+
+    <h3>Verification Results</h3>
+    <table>
+      <tr><th>Check</th><th>Result</th><th>Notes</th></tr>
+      <tr><td>6.1 Unit tests (<code>./gradlew test</code>)</td><td><span class="badge badge-pass">PASS</span></td><td>All tests pass including 7 new ViewModel total-distance cases</td></tr>
+      <tr><td>6.2 Instrumented tests (<code>connectedDebugAndroidTest</code>)</td><td><span class="badge badge-pass">PASS</span></td><td>97 tests on Pixel 6a (Android 16), 0 failed — includes TripTotalSummaryTest and TripDetailScreenTest</td></tr>
+      <tr><td>6.3 Static analysis + coverage (<code>./gradlew check</code>)</td><td><span class="badge badge-pass">PASS</span></td><td>No Detekt regressions; Kover coverage ≥95% on new code</td></tr>
+      <tr><td>6.4 On-device manual verification</td><td><span class="badge badge-warn">NOT FEASIBLE</span></td><td>Device has empty database; full round-trip (create trip → add stops → calculate route → verify total) exceeds 3-interaction limit. Feature verified via automated tests.</td></tr>
+      <tr><td>6.5 Acceptance criteria review</td><td><span class="badge badge-pass">PASS</span></td><td>All 10 ACs satisfied; AC4 (unavailable not zero) and AC5 (derived, no persistence) confirmed</td></tr>
+    </table>
+
+    <h3>TODO Scan</h3>
+    <p>3 pre-existing TODOs found in <code>app/src/</code>. All classified as <strong>ACKNOWLEDGED</strong> (unrelated to this story):</p>
+    <ul>
+      <li><code>DirectionsApiService.kt:24</code> — Replace with Retrofit when additional API endpoints are added (network infrastructure)</li>
+      <li><code>TripDetailUiIntent.kt:9</code> — Design question about PlaceDetail usage in intent parameters (pre-existing design note)</li>
+      <li><code>NetworkModule.kt:18</code> — Replace with Retrofit module when additional endpoints added (network infrastructure)</li>
+    </ul>
+    <p>No RESOLVE NOW TODOs found.</p>
+
+    <h3>Security Review</h3>
+    <p><span class="badge badge-pass">CLEAN</span> No security findings. The changes introduce no new attack surface: no new network calls, no new user inputs, no new persisted fields, no new API keys. Total distance is a purely derived, on-device computation.</p>
+
+    <h3>Documentation Updates</h3>
+    <ul>
+      <li><strong>README.md</strong> — Updated "The App" section to describe the total distance feature</li>
+      <li><strong>AGENTS.md</strong> — Added Epic 3 / Feature 3.2 entry recording story 3.2.1 as complete</li>
+      <li><strong>docs/userstories/index.md</strong> — Updated 3.2.1 link from <code>-WIP.md</code> to <code>-DONE.md</code></li>
+    </ul>
+
+    <div class="outcome outcome-passed">Implementation complete. All automated tests pass (unit + instrumented). No security findings. All documentation updated. Ready for verify phase.</div>
+  </section>
   </main>
 
 </body>

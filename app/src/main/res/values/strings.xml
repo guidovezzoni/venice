@@ -75,4 +75,6 @@
     <string name="trip_detail_leg_distance_miles">%.1f mi</string>
     <string name="trip_detail_leg_duration_minutes">%1$d min</string>
     <string name="trip_detail_leg_duration_hours_minutes">%1$dh %2$dmin</string>
+    <string name="trip_detail_total_distance_label">Total distance</string>
+    <string name="trip_detail_total_distance_unavailable">Total distance unavailable</string>
 </resources>
