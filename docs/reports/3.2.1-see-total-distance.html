@@ -167,6 +167,72 @@
 
     <div class="outcome outcome-passed">Story refined and ready for design phase. All requirements grounded in existing codebase; no blockers identified.</div>
   </section>
+  <section class="report-section" data-source="sdlc_propose_change" data-timestamp="2026-07-06T00:00:00Z">
+    <header>
+      <h2>Change Proposed</h2>
+      <time datetime="2026-07-06">6 Jul 2026</time>
+    </header>
+    <p class="section-source">Source: sdlc_propose_change</p>
+
+    <h3>Exploration Findings</h3>
+    <ul>
+      <li>Total distance is a <strong>purely derived value</strong> — sum of <code>Leg.distanceMetres</code> already present in <code>TripDetailUiState.legs</code></li>
+      <li>No new domain model field needed; no new network call required</li>
+      <li>Existing <code>DistanceFormatter.formatDistance</code> can be reused as-is for consistent display</li>
+      <li>Route availability model clarified: <strong>all-or-nothing invalidation</strong> — any stop mutation deletes all legs (via existing <code>InvalidateRouteUseCase</code>)</li>
+      <li>Route completeness rule: <code>legs.size == stops.size - 1 && stops.size >= 2</code>; legs are either complete or absent (no partial state)</li>
+      <li>Every Stop is placed (lat/long non-nullable), so <code>placedStopCount = stops.size</code></li>
+      <li>Existing composables <code>LegSummary</code> and <code>TripProgressSummary</code> provide the stateless pattern to mirror</li>
+      <li>Locale files <code>values-es-rES</code> and <code>values-it</code> both need new strings; <code>values</code> (EN) is primary source of truth</li>
+      <li>Existing <code>createViewModel(stops, legs)</code> test factory already supports new tests without modification</li>
+    </ul>
+
+    <h3>Decisions Resolved (Auto Mode, Per Story Assumptions)</h3>
+    <ul>
+      <li><strong>UiState Design:</strong> Add only <code>formattedTotalDistance: String? = null</code> to <code>TripDetailUiState</code>. No separate <code>isRouteComplete</code> flag (unavailable state signalled by <code>null</code> + fallback string in render)</li>
+      <li><strong>Computation:</strong> Add <strong>separate</strong> <code>combine(observeStopsUseCase, observeLegsUseCase)</code> collector for the total, leaving existing stops-only and legs-only collectors untouched (lower risk, preserves tested behaviour)</li>
+      <li><strong>String Resources:</strong> <code>trip_detail_total_distance_label = "Total distance"</code>, <code>trip_detail_total_distance_unavailable = "Total distance unavailable"</code></li>
+      <li><strong>UI Location:</strong> Total rendered as new <code>LazyColumn</code> item (<code>TripTotalSummary</code>) near the calculate-route button</li>
+      <li><strong>Scope Boundaries:</strong> Trip-list total is OUT OF SCOPE (deferred as separate story). No new analytics events</li>
+    </ul>
+
+    <h3>Open Note Flagged</h3>
+    <p><span class="badge badge-warn">Pre-existing Spec Drift</span> <code>openspec/specs/trip-detail/spec.md</code> is stale relative to the codebase. It describes flat <code>dialog</code> and <code>route</code> fields consolidated into sealed <code>DialogState</code> and <code>RouteCalculationState</code> during the earlier pl012 refactor without a spec sync. This delta spec only adds the <code>formattedTotalDistance</code> bullet and scenarios. Recommends a separate doc-only resync change. <strong>Not a blocker for this story.</strong></p>
+
+    <h3>Artifacts Created (Change Name: <code>see-total-distance</code>)</h3>
+    <table>
+      <tr><th>Artifact</th><th>Path</th></tr>
+      <tr><td>Proposal</td><td><code>openspec/changes/see-total-distance/proposal.md</code></td></tr>
+      <tr><td>Design</td><td><code>openspec/changes/see-total-distance/design.md</code></td></tr>
+      <tr><td>Delta Spec (trip-detail)</td><td><code>openspec/changes/see-total-distance/specs/trip-detail/spec.md</code></td></tr>
+      <tr><td>Delta Spec (route-display)</td><td><code>openspec/changes/see-total-distance/specs/route-display/spec.md</code></td></tr>
+      <tr><td>Task List</td><td><code>openspec/changes/see-total-distance/tasks.md</code></td></tr>
+    </table>
+
+    <h3>Task Structure</h3>
+    <ul>
+      <li><strong>20 tasks total</strong> across 6 sections</li>
+      <li><strong>Section 1 (Prerequisites):</strong> 1 task — add <code>formattedTotalDistance</code> field to <code>TripDetailUiState</code></li>
+      <li><strong>Section 2 (ViewModel Total Distance Computation):</strong> 7 BDD test tasks + 1 impl task</li>
+      <li><strong>Section 3 (TripTotalSummary Composable):</strong> 2 BDD test tasks + 1 impl task</li>
+      <li><strong>Section 4 (Integration: Screen Wiring):</strong> String resources + locale mirrors + wiring + 2 screen tests</li>
+      <li><strong>Section 5 (Preview Coverage):</strong> 3 tasks for state coverage</li>
+      <li><strong>Section 6 (Verification):</strong> Build, on-device, docs updates</li>
+      <li><strong>9 test tasks paired against 4 impl tasks</strong> following BDD Red/Green discipline</li>
+      <li><code>openspec validate --strict</code> passes</li>
+    </ul>
+
+    <h3>Design Summary</h3>
+    <ul>
+      <li><code>TripDetailUiState</code> gains <code>formattedTotalDistance: String?</code> — single computed field eliminating need for separate flags</li>
+      <li>ViewModel combines stops and legs observables to detect route completeness and trigger formatting</li>
+      <li>New <code>TripTotalSummary</code> composable mirrors <code>LegSummary</code> pattern: stateless, receives pre-computed string, no logic</li>
+      <li>Accumulation uses <code>Long</code> to prevent integer overflow on high-distance trips</li>
+      <li>Existing <code>formatDistance(metres, resources, locale)</code> reused for consistency</li>
+    </ul>
+
+    <div class="outcome outcome-passed">Design complete. 5 SDD artifacts generated. 20 tasks structured and validated. Ready for implementation phase.</div>
+  </section>
   </main>
 
 </body>
