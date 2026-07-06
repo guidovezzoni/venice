@@ -5,7 +5,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
-import com.guidovezzoni.venice.ui.theme.HeadingToTheAlpsTheme
+import com.guidovezzoni.venice.ui.theme.HeadingToVeniceTheme
 import org.junit.Rule
 import org.junit.Test
 
@@ -16,7 +16,7 @@ class LegSummaryTest {
 
     private fun setContent(formattedDistance: String, formattedDuration: String = "") {
         composeTestRule.setContent {
-            HeadingToTheAlpsTheme {
+            HeadingToVeniceTheme {
                 LegSummary(formattedDistance = formattedDistance, formattedDuration = formattedDuration)
             }
         }
@@ -40,7 +40,7 @@ class LegSummaryTest {
     @Test
     fun legSummary_withFormattedDuration_showsDurationTextAlongsideDistance() {
         composeTestRule.setContent {
-            HeadingToTheAlpsTheme {
+            HeadingToVeniceTheme {
                 LegSummary(
                     formattedDistance = "750 m",
                     formattedDuration = "9 min",

@@ -265,6 +265,6 @@ Unit tests should follow these criteria:
 - Assert UI elements are displayed using `onNodeWithText`, `onNodeWithContentDescription`, etc.
 - Assert user interactions fire the correct `UiIntent` by collecting intents in a `mutableListOf` passed to `onIntent`.
 - When a text string appears in multiple nodes (e.g. a button label and a dialog title), use `onAllNodesWithText(...)[index]` instead of `onNodeWithText`.
-- Wrap the composable in the app theme (`HeadingToTheAlpsTheme`) for accurate rendering.
+- Wrap the composable in the app theme (`HeadingToVeniceTheme`) for accurate rendering.
 - Cover at minimum: empty/default state, populated state, visibility toggles for dialogs, button click intents, and dismiss intents.
 - **Execution**: tests run on a connected device (physical or emulator) via `./gradlew connectedDebugAndroidTest`.
