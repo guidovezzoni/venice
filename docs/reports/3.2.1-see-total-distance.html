@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Report: 3.2.1 — See Total Distance of the Roadtrip</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.6;
+      color: #1a1a1a;
+      background: #fafafa;
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+
+    .report-header {
+      border-bottom: 3px solid #2563eb;
+      padding-bottom: 1rem;
+      margin-bottom: 2rem;
+    }
+    .report-header h1 { font-size: 1.75rem; color: #1e293b; }
+    .report-meta {
+      display: flex; gap: 2rem; flex-wrap: wrap;
+      margin-top: 0.5rem; font-size: 0.875rem; color: #64748b;
+    }
+    .report-meta span { display: inline-flex; align-items: center; gap: 0.25rem; }
+
+    .report-section {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .report-section header {
+      display: flex; justify-content: space-between; align-items: baseline;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 0.75rem; margin-bottom: 1rem;
+    }
+    .report-section header h2 { font-size: 1.25rem; color: #1e293b; }
+    .report-section header time { font-size: 0.8rem; color: #94a3b8; white-space: nowrap; }
+    .section-source { font-size: 0.75rem; color: #94a3b8; font-style: italic; margin-bottom: 0.75rem; }
+
+    h3 { font-size: 1.05rem; color: #334155; margin: 1rem 0 0.5rem; }
+    p { margin-bottom: 0.75rem; }
+    ul, ol { margin: 0.5rem 0 0.75rem 1.5rem; }
+    li { margin-bottom: 0.25rem; }
+    code {
+      background: #f1f5f9; padding: 0.15rem 0.35rem; border-radius: 3px;
+      font-size: 0.875em;
+      font-family: "SF Mono", "Fira Code", Menlo, Consolas, monospace;
+    }
+
+    table { width: 100%; border-collapse: collapse; margin: 0.75rem 0; font-size: 0.9rem; }
+    th, td { text-align: left; padding: 0.5rem 0.75rem; border: 1px solid #e2e8f0; }
+    th { background: #f8fafc; font-weight: 600; color: #475569; }
+
+    .badge {
+      display: inline-block; padding: 0.15rem 0.5rem;
+      border-radius: 4px; font-size: 0.8rem; font-weight: 600;
+    }
+    .badge-pass { background: #dcfce7; color: #166534; }
+    .badge-fail { background: #fee2e2; color: #991b1b; }
+    .badge-warn { background: #fef9c3; color: #854d0e; }
+    .badge-info { background: #dbeafe; color: #1e40af; }
+
+    .outcome { margin-top: 1rem; padding: 0.75rem 1rem; border-radius: 6px; font-weight: 600; }
+    .outcome-passed { background: #dcfce7; color: #166534; border-left: 4px solid #22c55e; }
+    .outcome-failed { background: #fee2e2; color: #991b1b; border-left: 4px solid #ef4444; }
+  </style>
+</head>
+<body>
+
+  <div class="report-header">
+    <h1>3.2.1 — See Total Distance of the Roadtrip</h1>
+    <div class="report-meta">
+      <span><strong>Story:</strong> 3.2.1</span>
+      <span><strong>Branch:</strong> feature/PL013-3.2.1</span>
+      <span><strong>Created:</strong> 2026-07-06</span>
+    </div>
+  </div>
+
+  <main id="report-sections">
+  <section class="report-section" data-source="open_user_story" data-timestamp="2026-07-06T00:00:00Z">
+    <header>
+      <h2>Story Opened</h2>
+      <time datetime="2026-07-06">6 Jul 2026</time>
+    </header>
+    <p class="section-source">Source: open_user_story</p>
+
+    <h3>Summary</h3>
+    <p>User story <strong>3.2.1 — See Total Distance of the Roadtrip</strong> opened for development on branch <code>feature/PL013-3.2.1</code>.</p>
+
+    <h3>Refinement Highlights</h3>
+    <ul>
+      <li><strong>Total distance is a derived value</strong> — sum of existing <code>Leg.distanceMetres</code> across all legs</li>
+      <li>No new persisted field required; no endpoint required</li>
+      <li>Proposed approach: pre-compute <code>formattedTotalDistance: String?</code> on <code>TripDetailUiState</code>, computed in ViewModel's existing legs collector</li>
+      <li>Reuses <code>formatDistance(...)</code> for consistency with existing <code>formattedLegDistances</code> and <code>formattedLegDurations</code></li>
+      <li>Route availability model clarified: all-or-nothing invalidation (InvalidateRouteUseCase deletes all legs on any stop mutation)</li>
+      <li>Route is complete when <code>legs.size == placedStopCount − 1</code> and <code>placedStopCount >= 2</code>; otherwise unavailable (no partial state)</li>
+      <li>Total lives on Trip Detail overview footer</li>
+    </ul>
+
+    <h3>Key Decisions</h3>
+    <ul>
+      <li>Summation accumulates as <code>Long</code> to guard against integer overflow</li>
+      <li>Total displays only when route is complete (legs available)</li>
+      <li>When route unavailable, total field remains <code>null</code> (no "unavailable" placeholder text)</li>
+      <li>Composable summation/formatting stays in ViewModel, not in UI layer</li>
+    </ul>
+
+    <h3>Scope &amp; Assumptions</h3>
+    <ul>
+      <li><strong>Trip list total deferred</strong> — trip list loads only stop count, no leg data; total distance on trip cards deferred as separate story</li>
+      <li><strong>Partial routes with warning dropped</strong> — actual InvalidateRouteUseCase uses all-or-nothing semantics, not partial with warning</li>
+      <li><strong>Total lives on Trip Detail, not trip list</strong> — aligns with available leg data at that screen</li>
+    </ul>
+
+    <h3>Files to Modify</h3>
+    <table>
+      <tr><th>File</th><th>Intent</th></tr>
+      <tr><td><code>TripDetailUiState.kt</code></td><td>Add <code>formattedTotalDistance: String?</code> field</td></tr>
+      <tr><td><code>TripDetailViewModel.kt</code></td><td>Compute total distance in legs collector; add <code>calculateTotalDistance(...)</code> helper</td></tr>
+      <tr><td><code>TripDetailScreen.kt</code></td><td>Display total distance in overview footer</td></tr>
+      <tr><td><code>TripDetailUiStateTest.kt</code></td><td>Add copy constructor and equality tests for new field</td></tr>
+      <tr><td><code>TripDetailViewModelTest.kt</code></td><td>Add tests for total distance computation; mock formattedTotalDistance values</td></tr>
+      <tr><td><code>TripDetailScreenTest.kt</code></td><td>Assert total distance displayed when route complete; verify hidden when unavailable</td></tr>
+      <tr><td><code>TripDetailScreenPreview.kt</code></td><td>Add preview state with total distance populated</td></tr>
+    </table>
+
+    <h3>Test Plan</h3>
+    <ul>
+      <li><strong>Unit Tests (ViewModel):</strong> verify total accumulates correctly across multiple legs; overflow guard at Long.MAX_VALUE boundary</li>
+      <li><strong>ViewModel Tests:</strong> assert formattedTotalDistance updates when legs change; null when no legs</li>
+      <li><strong>Compose UI Tests:</strong> verify total displayed when route complete; hidden/null when route unavailable</li>
+      <li><strong>Preview Coverage:</strong> add state with populated total distance to TripDetailScreen preview suite</li>
+    </ul>
+
+    <h3>Concerns</h3>
+    <table>
+      <tr><th>Category</th><th>Finding</th><th>Severity</th></tr>
+      <tr><td>Security</td><td><span class="badge badge-pass">None</span> On-device aggregate, no new endpoint, no new input validation required</td><td>—</td></tr>
+      <tr><td>GDPR</td><td><span class="badge badge-pass">None</span> Distance totals are computed from existing trip data, no new personal data collected or stored</td><td>—</td></tr>
+      <tr><td>Performance</td><td><span class="badge badge-warn">Integer overflow guard</span> Accumulate as Long, not Int, to handle trips with very long distances safely</td><td>Low</td></tr>
+      <tr><td>Composable Purity</td><td><span class="badge badge-pass">Confirmed</span> Summation and formatting remain in ViewModel; composable is purely presentational</td><td>—</td></tr>
+    </table>
+
+    <h3>Definition of Done (11 items)</h3>
+    <ol>
+      <li>TripDetailUiState has <code>formattedTotalDistance: String?</code> field</li>
+      <li>ViewModel computes total distance on every legs collector emission</li>
+      <li>calculateTotalDistance(...) accumulates as Long to prevent overflow</li>
+      <li>Total is null when legs are empty or route unavailable</li>
+      <li>Total is formatted using formatDistance(...) for consistency</li>
+      <li>TripDetailScreen displays total in overview footer (when non-null)</li>
+      <li>Unit tests cover normal case, empty legs, overflow boundary, and null scenarios</li>
+      <li>Compose UI tests verify total displayed when route complete, hidden when unavailable</li>
+      <li>TripDetailScreenPreview includes state with populated total distance</li>
+      <li>No new endpoints, database schema, or string resources required</li>
+      <li>Static analysis passes (Detekt), security review clean</li>
+    </ol>
+
+    <div class="outcome outcome-passed">Story refined and ready for design phase. All requirements grounded in existing codebase; no blockers identified.</div>
+  </section>
+  </main>
+
+</body>
+</html>
