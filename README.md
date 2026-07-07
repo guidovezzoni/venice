@@ -113,11 +113,12 @@ Prerequisites (setup, models) come first, BDD pairs in the middle ordered by dep
 ## Build & Run
 
 ```bash
-./gradlew clean              # Clean state
-./gradlew assembleDebug      # Debug build
-./gradlew test               # Unit tests
-./gradlew check              # Full checks
-./gradlew build              # Complete verification
+./gradlew clean                        # Clean state
+./gradlew assembleDebug                # Debug build
+./gradlew test                         # Unit tests
+./gradlew connectedDebugAndroidTest    # UI tests (requires connected device or emulator)
+./gradlew check                        # Full checks
+./gradlew build                        # Complete verification
 ```
 
 
