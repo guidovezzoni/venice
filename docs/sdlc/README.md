@@ -1,6 +1,6 @@
 # SDLC — Agentic AI Software Development Lifecycle
 
-SDLC is a set of six commands that let an AI coding agent autonomously drive the full lifecycle of a user story — from opening to verified delivery — while keeping the human developer in control of key decisions.
+SDLC is a set of commands that let an AI coding agent autonomously drive the full lifecycle of a user story — from opening to verified delivery — while keeping the human developer in control of key decisions.
 
 Built on top of [OpenSpec](https://github.com/Fission-AI/OpenSpec/) (Spec-Driven Development), SDLC replaces manual task management with agentic orchestration: the AI reads specifications, reasons about architecture, writes and verifies code, and produces auditable reports at every stage.
 
@@ -19,7 +19,7 @@ An example of its usage can be found in [venice](https://github.com/guidovezzoni
 | **On-device verification**          | The agent installs the app on a physical device, interacts with it via UIAutomator, and verifies behaviour autonomously               |
 | **Specification grounding**         | All code generation is anchored to living specs and acceptance criteria — not just free-form prompts                                  |
 
-## The Six Commands
+## The Commands
 
 ### 1. `/sdlc_open_story` — Open and Refine
 
@@ -89,7 +89,28 @@ End-to-end quality gate before a story is considered done.
 
 ---
 
-### 5. `/sdlc_doctor` — SDLC Framework Health Check
+### 5. `/sdlc_vibe_a_story` — End-to-End Autonomous Run
+
+> **Not recommended for regular use.** Chaining all phases skips the human review gates between them — the points where a developer catches ambiguity, scope creep, or design debt before it is baked into code. Use the individual commands instead so each phase can be reviewed before the next begins.
+
+Chains all four lifecycle commands into a single run with auto-commits between phases.
+
+**Recommended agent:** Opus (orchestrator) — delegates each phase to a sub-agent with the appropriate model.
+
+**What the agent does autonomously:**
+
+- Spawns a sub-agent per phase: Opus for open/propose (deep reasoning), Sonnet for implement/verify (procedural orchestration)
+- Each sub-agent reads and follows the corresponding command file exactly as written — all interactive steps preserved
+- After each phase completes: commits all changes automatically, then launches the next phase
+- Produces 4 commits: open, propose, implement, verify
+
+**What stays interactive (unchanged from individual commands):**
+
+- Uncommitted changes warning, branch choice, clarifying doubts, device gates, verification failures
+
+---
+
+### 6. `/sdlc_doctor` — SDLC Framework Health Check
 
 Validates that the SDLC tooling is properly installed and configured.
 
@@ -105,7 +126,7 @@ Validates that the SDLC tooling is properly installed and configured.
 
 ---
 
-### 6. `/sdlc_project_doctor` — Project Configuration Health Check
+### 7. `/sdlc_project_doctor` — Project Configuration Health Check
 
 Validates that the project's quality tooling is properly configured.
 
@@ -145,6 +166,10 @@ Validates that the project's quality tooling is properly configured.
                  ▼
           Done (merged)
 
+
+┌──────────────────────────────────┐
+│    /sdlc_vibe_a_story            │  All four in one autonomous run
+└──────────────────────────────────┘
 
 ┌──────────────────────────────────┐
 │    /sdlc_doctor                  │  SDLC framework health check
