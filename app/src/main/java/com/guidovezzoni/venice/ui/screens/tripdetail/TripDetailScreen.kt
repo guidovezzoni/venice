@@ -288,6 +288,9 @@ fun TripDetailScreen(
                     }
                 }
             }
+            item {
+                TripTotalSummary(formattedTotalDistance = uiState.formattedTotalDistance)
+            }
         }
             if (uiState.isLoading) {
                 CircularProgressIndicator(
@@ -1009,6 +1012,62 @@ private fun PreviewTripDetailScreenResolvingPlace() {
 
 @Preview(showBackground = true)
 @Composable
+private fun PreviewTripDetailScreenTotalUnavailable() {
+    HeadingToVeniceTheme {
+        TripDetailScreen(
+            uiState = TripDetailUiState(
+                tripId = "trip-1",
+                startingPoint = Stop(
+                    id = "stop-1",
+                    tripId = "trip-1",
+                    placeName = "Rome, Italy",
+                    latitude = 41.9028,
+                    longitude = 12.4964,
+                    order = 0,
+                    status = StopStatus.PENDING,
+                ),
+                intermediateStops = listOf(
+                    Stop(
+                        id = "stop-2",
+                        tripId = "trip-1",
+                        placeName = "Florence, Italy",
+                        latitude = 43.7696,
+                        longitude = 11.2558,
+                        order = 1,
+                        status = StopStatus.PENDING,
+                    ),
+                ),
+                destination = Stop(
+                    id = "stop-3",
+                    tripId = "trip-1",
+                    placeName = "Barcelona, Spain",
+                    latitude = 41.3851,
+                    longitude = 2.1734,
+                    order = 2,
+                    status = StopStatus.PENDING,
+                ),
+                canAddMoreStops = true,
+                legs = listOf(
+                    Leg(
+                        id = "leg-1",
+                        tripId = "trip-1",
+                        fromStopId = "stop-1",
+                        toStopId = "stop-2",
+                        distanceMetres = 10000,
+                        durationSeconds = 600,
+                        encodedPolyline = "",
+                    ),
+                ),
+                formattedLegDistances = mapOf("stop-1" to "10.0 km"),
+                formattedLegDurations = mapOf("stop-1" to "10 min"),
+                formattedTotalDistance = null,
+            ),
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
 private fun PreviewTripDetailScreenWithLegs() {
     HeadingToVeniceTheme {
         TripDetailScreen(
@@ -1046,6 +1105,7 @@ private fun PreviewTripDetailScreenWithLegs() {
                 ),
                 formattedLegDistances = mapOf("stop-1" to "12.5 km"),
                 formattedLegDurations = mapOf("stop-1" to "15 min"),
+                formattedTotalDistance = "12.5 km",
             ),
         )
     }
@@ -1110,6 +1170,41 @@ private fun PreviewTripDetailScreenWithRouteError() {
                 ),
                 canAddMoreStops = true,
                 routeCalculationState = RouteCalculationState.Error("Network error"),
+            ),
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PreviewTripDetailScreenWithStopCoordinates() {
+    HeadingToVeniceTheme {
+        TripDetailScreen(
+            uiState = TripDetailUiState(
+                tripId = "trip-1",
+                startingPoint = Stop(
+                    id = "stop-1",
+                    tripId = "trip-1",
+                    placeName = "Rome, Italy",
+                    latitude = 41.9028,
+                    longitude = 12.4964,
+                    order = 0,
+                    status = StopStatus.PENDING,
+                ),
+                destination = Stop(
+                    id = "stop-2",
+                    tripId = "trip-1",
+                    placeName = "Barcelona, Spain",
+                    latitude = 41.3851,
+                    longitude = 2.1734,
+                    order = 1,
+                    status = StopStatus.PENDING,
+                ),
+                canAddMoreStops = true,
+                formattedStopCoordinates = mapOf(
+                    "stop-1" to "41.9028, 12.4964",
+                    "stop-2" to "41.3851, 2.1734",
+                ),
             ),
         )
     }

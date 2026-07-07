@@ -15,6 +15,8 @@ data class TripDetailUiState(
     val legs: List<Leg> = emptyList(),
     val formattedLegDistances: Map<String, String> = emptyMap(),
     val formattedLegDurations: Map<String, String> = emptyMap(),
+    /** null means "route not complete / unavailable" */
+    val formattedTotalDistance: String? = null,
     val formattedStopCoordinates: Map<String, String> = emptyMap(),
     val routeCalculationState: RouteCalculationState = RouteCalculationState.Idle,
 )

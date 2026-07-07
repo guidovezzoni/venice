@@ -794,6 +794,39 @@ class TripDetailScreenTest {
 
     // endregion
 
+    // region Total distance summary
+
+    @Test
+    fun withNonNullFormattedTotalDistance_showsTotalDistanceLabelAndValue() {
+        setContent(
+            uiState = TripDetailUiState(
+                tripId = TRIP_ID,
+                startingPoint = STARTING_POINT,
+                destination = DESTINATION,
+                formattedTotalDistance = "12.5 km",
+            ),
+        )
+
+        composeTestRule.onNodeWithText("Total distance").performScrollTo().assertIsDisplayed()
+        composeTestRule.onNodeWithText("12.5 km").performScrollTo().assertIsDisplayed()
+    }
+
+    @Test
+    fun withNullFormattedTotalDistance_showsTotalDistanceUnavailableText() {
+        setContent(
+            uiState = TripDetailUiState(
+                tripId = TRIP_ID,
+                startingPoint = STARTING_POINT,
+                destination = DESTINATION,
+                formattedTotalDistance = null,
+            ),
+        )
+
+        composeTestRule.onNodeWithText("Total distance unavailable").performScrollTo().assertIsDisplayed()
+    }
+
+    // endregion
+
     // region Loading state
 
     @Test

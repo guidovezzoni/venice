@@ -29,6 +29,7 @@ import com.guidovezzoni.venice.ui.intent.TripDetailUiIntent
 import com.guidovezzoni.venice.ui.state.DialogState
 import com.guidovezzoni.venice.ui.state.RouteCalculationState
 import com.guidovezzoni.venice.ui.util.formatCoordinates
+import com.guidovezzoni.venice.ui.util.formatDistance
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -39,6 +40,7 @@ import io.mockk.verify
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -49,9 +51,11 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import java.util.Locale
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -1215,6 +1219,135 @@ class TripDetailViewModelTest {
 
         verify(exactly = 1) {
             analyticsTracker.track(match { it is AnalyticsEvent.OperationFailed && it.operation == AnalyticsEvent.OPERATION_CALCULATE_ROUTE })
+        }
+    }
+
+    // --- Section 2: Total Distance ---
+
+    @Test
+    fun `GIVEN complete route with at least 2 stops WHEN both use cases emit THEN formattedTotalDistance equals formatDistance of summed leg distanceMetres`() = runTest(testDispatcher) {
+        val stops = listOf(
+            Stop("s0", TRIP_ID, "Start", 0.0, 0.0, 0, StopStatus.PENDING),
+            Stop("s1", TRIP_ID, "End", 1.0, 1.0, 1, StopStatus.PENDING),
+        )
+        val legs = listOf(
+            Leg("leg-1", TRIP_ID, "s0", "s1", 5000, 120, ""),
+        )
+        val viewModel = createViewModel(stops = stops, legs = legs)
+
+        val expectedFormattedTotalDistance = formatDistance(
+            legs.sumOf { it.distanceMetres },
+            Locale.getDefault(),
+            application.resources,
+        )
+        assertEquals(expectedFormattedTotalDistance, viewModel.uiState.value.formattedTotalDistance)
+    }
+
+    @Test
+    fun `GIVEN two legs with distanceMetres 10000 and 2500 for 3 stops WHEN observed THEN formattedTotalDistance equals formatted 12500 metres in active locale`() = runTest(testDispatcher) {
+        val stops = listOf(
+            Stop("s0", TRIP_ID, "Start", 0.0, 0.0, 0, StopStatus.PENDING),
+            Stop("s1", TRIP_ID, "Mid", 1.0, 1.0, 1, StopStatus.PENDING),
+            Stop("s2", TRIP_ID, "End", 2.0, 2.0, 2, StopStatus.PENDING),
+        )
+        val legs = listOf(
+            Leg("leg-1", TRIP_ID, "s0", "s1", 10000, 120, ""),
+            Leg("leg-2", TRIP_ID, "s1", "s2", 2500, 60, ""),
+        )
+        val viewModel = createViewModel(stops = stops, legs = legs)
+
+        val expectedFormattedTotalDistance = formatDistance(12500, Locale.getDefault(), application.resources)
+        assertEquals(expectedFormattedTotalDistance, viewModel.uiState.value.formattedTotalDistance)
+    }
+
+    @Test
+    fun `GIVEN at least 2 stops and no legs exist for the trip WHEN observed THEN uiState formattedTotalDistance is null`() = runTest(testDispatcher) {
+        val stops = listOf(
+            Stop("s0", TRIP_ID, "Start", 0.0, 0.0, 0, StopStatus.PENDING),
+            Stop("s1", TRIP_ID, "End", 1.0, 1.0, 1, StopStatus.PENDING),
+        )
+        val viewModel = createViewModel(stops = stops, legs = emptyList())
+
+        assertNull(viewModel.uiState.value.formattedTotalDistance)
+    }
+
+    @Test
+    fun `GIVEN a leg count that is neither 0 nor stops-size minus 1 WHEN observed THEN uiState formattedTotalDistance is null`() = runTest(testDispatcher) {
+        val stops = listOf(
+            Stop("s0", TRIP_ID, "Start", 0.0, 0.0, 0, StopStatus.PENDING),
+            Stop("s1", TRIP_ID, "Mid", 1.0, 1.0, 1, StopStatus.PENDING),
+            Stop("s2", TRIP_ID, "End", 2.0, 2.0, 2, StopStatus.PENDING),
+        )
+        val legs = listOf(
+            Leg("leg-1", TRIP_ID, "s0", "s1", 5000, 120, ""),
+        )
+        val viewModel = createViewModel(stops = stops, legs = legs)
+
+        assertNull(viewModel.uiState.value.formattedTotalDistance)
+    }
+
+    @Test
+    fun `GIVEN fewer than two placed stops WHEN observed THEN uiState formattedTotalDistance is null regardless of any legs present`() = runTest(testDispatcher) {
+        val stops = listOf(
+            Stop("s0", TRIP_ID, "Start", 0.0, 0.0, 0, StopStatus.PENDING),
+        )
+        val legs = listOf(
+            Leg("leg-1", TRIP_ID, "s0", "s1", 5000, 120, ""),
+        )
+        val viewModel = createViewModel(stops = stops, legs = legs)
+
+        assertNull(viewModel.uiState.value.formattedTotalDistance)
+    }
+
+    @Test
+    fun `GIVEN a viewmodel with a complete route WHEN a stop mutation invalidates all legs THEN uiState formattedTotalDistance transitions to null`() = runTest(testDispatcher) {
+        val stops = listOf(
+            Stop("s0", TRIP_ID, "Start", 0.0, 0.0, 0, StopStatus.PENDING),
+            Stop("s1", TRIP_ID, "End", 1.0, 1.0, 1, StopStatus.PENDING),
+        )
+        val completeLeg = Leg("leg-1", TRIP_ID, "s0", "s1", 5000, 120, "")
+        val legsFlow = MutableSharedFlow<List<Leg>>(replay = 1)
+
+        every { observeStopsUseCase(TRIP_ID) } returns flowOf(stops)
+        every { observeLegsUseCase(TRIP_ID) } returns legsFlow
+
+        legsFlow.emit(listOf(completeLeg))
+
+        val viewModel = TripDetailViewModel(
+            application, setStopUseCase, moveStopUseCase, editStopUseCase, removeStopUseCase,
+            markStopDepartedUseCase, undoMarkStopDepartedUseCase, calculateRouteUseCase,
+            observeStopsUseCase, observeLegsUseCase, searchPlacesUseCase, getPlaceDetailUseCase,
+            placeSearchRepository, analyticsTracker, savedStateHandle,
+        )
+
+        assertNotNull(viewModel.uiState.value.formattedTotalDistance)
+
+        legsFlow.emit(emptyList())
+
+        assertNull(viewModel.uiState.value.formattedTotalDistance)
+    }
+
+    @Test
+    fun `GIVEN a complete route under an imperial-unit locale WHEN observed THEN uiState formattedTotalDistance is expressed in miles consistent with formattedLegDistances for the same legs`() = runTest(testDispatcher) {
+        val imperialLocale = Locale("en", "US")
+        val savedLocale = Locale.getDefault()
+        try {
+            Locale.setDefault(imperialLocale)
+            val stops = listOf(
+                Stop("s0", TRIP_ID, "Start", 0.0, 0.0, 0, StopStatus.PENDING),
+                Stop("s1", TRIP_ID, "End", 1.0, 1.0, 1, StopStatus.PENDING),
+            )
+            val legs = listOf(
+                Leg("leg-1", TRIP_ID, "s0", "s1", 5000, 120, ""),
+            )
+            val viewModel = createViewModel(stops = stops, legs = legs)
+
+            val expectedFormattedTotalDistance = "0.0 mi"
+            val expectedFormattedLegDistance = "0.0 mi"
+            assertEquals(expectedFormattedTotalDistance, viewModel.uiState.value.formattedTotalDistance)
+            assertEquals(mapOf("s0" to expectedFormattedLegDistance), viewModel.uiState.value.formattedLegDistances)
+        } finally {
+            Locale.setDefault(savedLocale)
         }
     }
 
