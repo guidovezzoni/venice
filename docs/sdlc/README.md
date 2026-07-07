@@ -91,6 +91,8 @@ End-to-end quality gate before a story is considered done.
 
 ### 5. `/sdlc_vibe_a_story` — End-to-End Autonomous Run
 
+> **Not recommended for regular use.** Chaining all phases skips the human review gates between them — the points where a developer catches ambiguity, scope creep, or design debt before it is baked into code. Use the individual commands instead so each phase can be reviewed before the next begins.
+
 Chains all four lifecycle commands into a single run with auto-commits between phases.
 
 **Recommended agent:** Opus (orchestrator) — delegates each phase to a sub-agent with the appropriate model.
