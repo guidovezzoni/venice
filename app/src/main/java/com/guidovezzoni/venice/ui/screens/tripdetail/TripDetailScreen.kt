@@ -1174,3 +1174,38 @@ private fun PreviewTripDetailScreenWithRouteError() {
         )
     }
 }
+
+@Preview(showBackground = true)
+@Composable
+private fun PreviewTripDetailScreenWithStopCoordinates() {
+    HeadingToVeniceTheme {
+        TripDetailScreen(
+            uiState = TripDetailUiState(
+                tripId = "trip-1",
+                startingPoint = Stop(
+                    id = "stop-1",
+                    tripId = "trip-1",
+                    placeName = "Rome, Italy",
+                    latitude = 41.9028,
+                    longitude = 12.4964,
+                    order = 0,
+                    status = StopStatus.PENDING,
+                ),
+                destination = Stop(
+                    id = "stop-2",
+                    tripId = "trip-1",
+                    placeName = "Barcelona, Spain",
+                    latitude = 41.3851,
+                    longitude = 2.1734,
+                    order = 1,
+                    status = StopStatus.PENDING,
+                ),
+                canAddMoreStops = true,
+                formattedStopCoordinates = mapOf(
+                    "stop-1" to "41.9028, 12.4964",
+                    "stop-2" to "41.3851, 2.1734",
+                ),
+            ),
+        )
+    }
+}
