@@ -1,3 +1,18 @@
+## Warning
+
+> **This command is not recommended for regular use.**
+>
+> It chains all four lifecycle phases (open, propose, implement, verify) without pausing for human review between them. Those review gates are the primary safeguard against tech debt, misaligned design, and scope creep being baked into the codebase.
+>
+> Additionally, running all four phases sequentially spawns significantly more sub-agents than any individual command. Token consumption is much higher, and a single run may bring you close to your rate limit.
+
+**Before proceeding, ask the user:**
+> "⚠️ `sdlc_vibe_a_story` skips the human review gates between phases — those gates are the primary safeguard against tech debt, misaligned design, and scope creep being baked into the codebase. It also uses significantly more tokens than individual commands, potentially hitting your rate limit. Do you want to proceed? (yes/no)"
+
+If the answer is anything other than an explicit **yes**, stop immediately and suggest running the individual commands (`/sdlc_open_story`, `/sdlc_propose_change`, `/sdlc_implement_change`, `/sdlc_verify_story`) instead.
+
+---
+
 Please vibe the user story end-to-end: $ARGUMENTS.
 
 This command chains the four SDLC lifecycle commands (open, propose, implement, verify) into a single run with auto-commits between phases. Each phase executes its corresponding command file exactly as-is — all interactive steps are preserved. The only automation added is: commit after each phase completes, then launch the next phase.

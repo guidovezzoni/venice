@@ -1,6 +1,6 @@
 # SDLC — Agentic AI Software Development Lifecycle
 
-SDLC is a set of seven commands that let an AI coding agent autonomously drive the full lifecycle of a user story — from opening to verified delivery — while keeping the human developer in control of key decisions.
+SDLC is a set of commands that let an AI coding agent autonomously drive the full lifecycle of a user story — from opening to verified delivery — while keeping the human developer in control of key decisions.
 
 Built on top of [OpenSpec](https://github.com/Fission-AI/OpenSpec/) (Spec-Driven Development), SDLC replaces manual task management with agentic orchestration: the AI reads specifications, reasons about architecture, writes and verifies code, and produces auditable reports at every stage.
 
@@ -19,7 +19,7 @@ An example of its usage can be found in [venice](https://github.com/guidovezzoni
 | **On-device verification**          | The agent installs the app on a physical device, interacts with it via UIAutomator, and verifies behaviour autonomously               |
 | **Specification grounding**         | All code generation is anchored to living specs and acceptance criteria — not just free-form prompts                                  |
 
-## The Seven Commands
+## The Commands
 
 ### 1. `/sdlc_open_story` — Open and Refine
 
@@ -90,6 +90,8 @@ End-to-end quality gate before a story is considered done.
 ---
 
 ### 5. `/sdlc_vibe_a_story` — End-to-End Autonomous Run
+
+> **Not recommended for regular use.** Chaining all phases skips the human review gates between them — the points where a developer catches ambiguity, scope creep, or design debt before it is baked into code. Use the individual commands instead so each phase can be reviewed before the next begins.
 
 Chains all four lifecycle commands into a single run with auto-commits between phases.
 
