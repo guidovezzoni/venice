@@ -64,6 +64,7 @@ Follow these steps:
       - `.claude/commands/sdlc/sdlc_propose_change.md`
       - `.claude/commands/sdlc/sdlc_implement_change.md`
       - `.claude/commands/sdlc/sdlc_verify_story.md`
+      - `.claude/commands/sdlc/sdlc_vibe_a_story.md`
       - `.claude/commands/sdlc/sdlc_doctor.md`
       - `.claude/commands/sdlc/sdlc_project_doctor.md`
 
