@@ -86,7 +86,7 @@ section "Command File Existence"
 
 for cmd in sdlc_open_story.md sdlc_propose_change.md sdlc_implement_change.md \
            sdlc_verify_story.md sdlc_doctor.md sdlc_project_doctor.md \
-           sdlc_vibe_a_story.md; do
+           sdlc_exp_four_in_one.md; do
     TOTAL=$((TOTAL + 1))
     if [[ -f "$COMMANDS_DIR/$cmd" ]]; then
         PASS=$((PASS + 1))
@@ -468,92 +468,92 @@ assert_contains_regex "sdlc_project_doctor.md" 'Summary.*checks passed|checks pa
     "Outputs summary with pass/fail count"
 
 # ─────────────────────────────────────────────────────────────────────
-# sdlc_vibe_a_story.md
+# sdlc_exp_four_in_one.md
 # ─────────────────────────────────────────────────────────────────────
-section "sdlc_vibe_a_story.md — User Confirmation Gate"
+section "sdlc_exp_four_in_one.md — User Confirmation Gate"
 
-assert_contains "sdlc_vibe_a_story.md" "Do you want to proceed" \
+assert_contains "sdlc_exp_four_in_one.md" "Do you want to proceed" \
     "Asks user for explicit confirmation before proceeding"
 
-assert_contains "sdlc_vibe_a_story.md" "stop immediately" \
+assert_contains "sdlc_exp_four_in_one.md" "stop immediately" \
     "Stops immediately on non-yes answer"
 
-assert_contains_regex "sdlc_vibe_a_story.md" 'sdlc_open_story.*sdlc_propose_change.*sdlc_implement_change.*sdlc_verify_story|individual commands' \
+assert_contains_regex "sdlc_exp_four_in_one.md" 'sdlc_open_story.*sdlc_propose_change.*sdlc_implement_change.*sdlc_verify_story|individual commands' \
     "Suggests individual commands as alternative"
 
-assert_contains "sdlc_vibe_a_story.md" "skips the human review gates" \
+assert_contains "sdlc_exp_four_in_one.md" "skips the human review gates" \
     "Warning explains review gates are skipped"
 
-assert_contains "sdlc_vibe_a_story.md" "token" \
+assert_contains "sdlc_exp_four_in_one.md" "token" \
     "Warning mentions token consumption"
 
-section "sdlc_vibe_a_story.md — Model Assignment"
+section "sdlc_exp_four_in_one.md — Model Assignment"
 
-assert_contains "sdlc_vibe_a_story.md" 'model: "opus"' \
+assert_contains "sdlc_exp_four_in_one.md" 'model: "opus"' \
     "Phases 1 & 2 use opus model"
 
-assert_contains "sdlc_vibe_a_story.md" 'model: "sonnet"' \
+assert_contains "sdlc_exp_four_in_one.md" 'model: "sonnet"' \
     "Phases 3 & 4 use sonnet model"
 
-section "sdlc_vibe_a_story.md — Phase References"
+section "sdlc_exp_four_in_one.md — Phase References"
 
-assert_contains "sdlc_vibe_a_story.md" "docs/sdlc/commands/sdlc_open_story.md" \
+assert_contains "sdlc_exp_four_in_one.md" "docs/sdlc/commands/sdlc_open_story.md" \
     "Phase 1 references sdlc_open_story.md command file"
 
-assert_contains "sdlc_vibe_a_story.md" "docs/sdlc/commands/sdlc_propose_change.md" \
+assert_contains "sdlc_exp_four_in_one.md" "docs/sdlc/commands/sdlc_propose_change.md" \
     "Phase 2 references sdlc_propose_change.md command file"
 
-assert_contains "sdlc_vibe_a_story.md" "docs/sdlc/commands/sdlc_implement_change.md" \
+assert_contains "sdlc_exp_four_in_one.md" "docs/sdlc/commands/sdlc_implement_change.md" \
     "Phase 3 references sdlc_implement_change.md command file"
 
-assert_contains "sdlc_vibe_a_story.md" "docs/sdlc/commands/sdlc_verify_story.md" \
+assert_contains "sdlc_exp_four_in_one.md" "docs/sdlc/commands/sdlc_verify_story.md" \
     "Phase 4 references sdlc_verify_story.md command file"
 
-section "sdlc_vibe_a_story.md — Commit Policy"
+section "sdlc_exp_four_in_one.md — Commit Policy"
 
-assert_contains "sdlc_vibe_a_story.md" "git add -A" \
+assert_contains "sdlc_exp_four_in_one.md" "git add -A" \
     "Commits use git add -A"
 
-assert_contains "sdlc_vibe_a_story.md" "git commit" \
+assert_contains "sdlc_exp_four_in_one.md" "git commit" \
     "Commits after each phase"
 
-assert_contains "sdlc_vibe_a_story.md" "Co-Authored-By" \
+assert_contains "sdlc_exp_four_in_one.md" "Co-Authored-By" \
     "Commit messages include Co-Authored-By"
 
-assert_contains "sdlc_vibe_a_story.md" "{REF}" \
+assert_contains "sdlc_exp_four_in_one.md" "{REF}" \
     "Commit messages use {REF} prefix from branch name"
 
-section "sdlc_vibe_a_story.md — Blocker Handling"
+section "sdlc_exp_four_in_one.md — Blocker Handling"
 
-assert_contains "sdlc_vibe_a_story.md" "blocker" \
+assert_contains "sdlc_exp_four_in_one.md" "blocker" \
     "Handles blocker reports from sub-agents"
 
-assert_contains "sdlc_vibe_a_story.md" "STOP" \
+assert_contains "sdlc_exp_four_in_one.md" "STOP" \
     "Stops on blocker from any phase"
 
-section "sdlc_vibe_a_story.md — Verification After Phases"
+section "sdlc_exp_four_in_one.md — Verification After Phases"
 
-assert_contains_regex "sdlc_vibe_a_story.md" '\-WIP' \
+assert_contains_regex "sdlc_exp_four_in_one.md" '\-WIP' \
     "Verifies story file renamed to -WIP after Phase 1"
 
-assert_contains_regex "sdlc_vibe_a_story.md" '\-DONE' \
+assert_contains_regex "sdlc_exp_four_in_one.md" '\-DONE' \
     "Verifies story file renamed to -DONE after Phase 4"
 
-assert_contains_regex "sdlc_vibe_a_story.md" 'all tasks are.*\[x\]|\[x\]' \
+assert_contains_regex "sdlc_exp_four_in_one.md" 'all tasks are.*\[x\]|\[x\]' \
     "Verifies all tasks completed after Phase 3"
 
-assert_contains "sdlc_vibe_a_story.md" "openspec/changes/" \
+assert_contains "sdlc_exp_four_in_one.md" "openspec/changes/" \
     "Verifies change directory exists after Phase 2"
 
-section "sdlc_vibe_a_story.md — Final Summary"
+section "sdlc_exp_four_in_one.md — Final Summary"
 
-assert_contains "sdlc_vibe_a_story.md" "Vibe Complete" \
+assert_contains "sdlc_exp_four_in_one.md" "Vibe Complete" \
     "Outputs final summary with Vibe Complete header"
 
-assert_contains "sdlc_vibe_a_story.md" "Total commits: 4" \
+assert_contains "sdlc_exp_four_in_one.md" "Total commits: 4" \
     "Summary shows 4 total commits"
 
-assert_contains_regex "sdlc_vibe_a_story.md" 'PR.*merge|merge.*main' \
+assert_contains_regex "sdlc_exp_four_in_one.md" 'PR.*merge|merge.*main' \
     "Summary indicates ready for PR/merge"
 
 # ─────────────────────────────────────────────────────────────────────
@@ -584,7 +584,7 @@ section "Cross-Command — Sub-agent Orchestration Declaration"
 
 for cmd in sdlc_open_story.md sdlc_propose_change.md sdlc_implement_change.md \
            sdlc_verify_story.md sdlc_doctor.md sdlc_project_doctor.md \
-           sdlc_vibe_a_story.md; do
+           sdlc_exp_four_in_one.md; do
     assert_contains_regex "$cmd" '[Ss]ub-agent orchestration|sub-agent' \
         "$cmd uses sub-agent orchestration"
 done

@@ -59,7 +59,7 @@ Runs SDLC commands through Claude Code (or another tool) against controlled fixt
 | `sdlc_open_story` | `./run_evals.sh open_story` | Moderate (Opus sub-agent) |
 | `sdlc_propose_change` | `./run_evals.sh propose_change` | Moderate (Sonnet sub-agents) |
 | `sdlc_verify_story` | `./run_evals.sh verify_story` | Moderate (multiple sub-agents) |
-| `sdlc_vibe_a_story` | `./run_evals.sh vibe_a_story` | Low (confirmation gate only) |
+| `sdlc_exp_four_in_one` | `./run_evals.sh exp_four_in_one` | Low (confirmation gate only) |
 | `sdlc_implement_change` | No execution evals yet (work in progress) | — |
 
 Run all with no filter if you touched shared infrastructure (e.g. `eval_helpers.sh`, guidelines files referenced by multiple commands).
@@ -184,7 +184,7 @@ Evals for commands with more complex behaviour and critical guardrails. These us
 1. **`sdlc_open_story`** — git safety guardrails
 2. **`sdlc_propose_change`** — "no assumptions" guardrail
 3. **`sdlc_verify_story`** — blocking gate protocol
-4. **`sdlc_vibe_a_story`** — user confirmation gate
+4. **`sdlc_exp_four_in_one`** — user confirmation gate
 5. **`sdlc_implement_change`** — BDD discipline and model assignment (deferred)
 
 ### Implemented scenarios
@@ -196,7 +196,7 @@ Evals for commands with more complex behaviour and critical guardrails. These us
 | `verify_story_precondition_fail` | `sdlc_verify_story` | Story in "New" state (not WIP) | Stops before gates, doesn't reach later verification steps |
 | `verify_story_blocks_on_gate_failure` | `sdlc_verify_story` | WIP story, no openspec change artifacts | Blocks at first gate, doesn't reach downstream gates |
 | `propose_change_surfaces_questions` | `sdlc_propose_change` | WIP story with deliberately ambiguous requirements | Surfaces questions, does not make assumptions |
-| `vibe_a_story_asks_confirmation` | `sdlc_vibe_a_story` | Git repo on main with story in New state | Warns about skipping review gates, asks confirmation, does not proceed to Phase 1 |
+| `exp_four_in_one_asks_confirmation` | `sdlc_exp_four_in_one` | Git repo on main with story in New state | Warns about skipping review gates, asks confirmation, does not proceed to Phase 1 |
 
 ### Fixture design for git-based commands
 
@@ -267,7 +267,7 @@ docs/sdlc/evals/
 │   ├── verify_story_precondition_fail.sh
 │   ├── verify_story_blocks_on_gate_failure.sh
 │   ├── propose_change_surfaces_questions.sh
-│   └── vibe_a_story_asks_confirmation.sh
+│   └── exp_four_in_one_asks_confirmation.sh
 └── results/                           # Gitignored eval results
     └── .gitkeep
 ```

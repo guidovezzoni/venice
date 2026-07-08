@@ -1,1 +1,0 @@
-../../../docs/sdlc/commands/sdlc_vibe_a_story.md

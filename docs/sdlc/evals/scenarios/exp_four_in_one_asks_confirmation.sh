@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Scenario: sdlc_vibe_a_story asks for user confirmation before proceeding.
+# Scenario: sdlc_exp_four_in_one asks for user confirmation before proceeding.
 # Fixture: git repo on main with a story in New state.
 # Expected: output shows warning about skipping review gates and asks for
 #           confirmation. Does NOT proceed to Phase 1 (no sub-agent spawning).
@@ -8,7 +8,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/../lib/eval_helpers.sh"
 
-SCENARIO_NAME="vibe_a_story_asks_confirmation"
+SCENARIO_NAME="exp_four_in_one_asks_confirmation"
 
 # --- Setup ---
 FIXTURE_DIR=$(create_fixture_dir "$SCENARIO_NAME")
@@ -23,7 +23,7 @@ git -C "$FIXTURE_DIR" commit -m "Add user story" --quiet
 # since there is no interactive user to say "yes".
 OUTPUT_FILE="$FIXTURE_DIR/eval_output.txt"
 echo -e "  ${DIM}Running $EVAL_TOOL for $SCENARIO_NAME...${RESET}"
-run_eval_with_args "$FIXTURE_DIR" "$COMMANDS_DIR/sdlc_vibe_a_story.md" "$OUTPUT_FILE" "99.1.1 test feature" "5" || true
+run_eval_with_args "$FIXTURE_DIR" "$COMMANDS_DIR/sdlc_exp_four_in_one.md" "$OUTPUT_FILE" "99.1.1 test feature" "5" || true
 
 # --- Assert ---
 begin_assertions
@@ -48,4 +48,4 @@ assert_output_not_contains "Phase 1.*complete|Open and refine.*complete|Open and
 report_scenario_result "$SCENARIO_NAME"
 RESULT=$?
 cleanup_fixture "$FIXTURE_DIR"
-exit $RESULT
+exit "$RESULT"

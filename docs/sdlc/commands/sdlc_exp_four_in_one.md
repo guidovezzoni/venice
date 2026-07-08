@@ -7,7 +7,7 @@
 > Additionally, running all four phases sequentially spawns significantly more sub-agents than any individual command. Token consumption is much higher, and a single run may bring you close to your rate limit.
 
 **Before proceeding, ask the user:**
-> "⚠️ `sdlc_vibe_a_story` skips the human review gates between phases — those gates are the primary safeguard against tech debt, misaligned design, and scope creep being baked into the codebase. It also uses significantly more tokens than individual commands, potentially hitting your rate limit. Do you want to proceed? (yes/no)"
+> "⚠️ `sdlc_exp_four_in_one` skips the human review gates between phases — those gates are the primary safeguard against tech debt, misaligned design, and scope creep being baked into the codebase. It also uses significantly more tokens than individual commands, potentially hitting your rate limit. Do you want to proceed? (yes/no)"
 
 If the answer is anything other than an explicit **yes**, stop immediately and suggest running the individual commands (`/sdlc_open_story`, `/sdlc_propose_change`, `/sdlc_implement_change`, `/sdlc_verify_story`) instead.
 

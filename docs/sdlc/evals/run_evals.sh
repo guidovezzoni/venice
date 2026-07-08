@@ -11,7 +11,7 @@
 #   ./docs/sdlc/evals/run_evals.sh open_story                # Run only open_story evals
 #   ./docs/sdlc/evals/run_evals.sh propose_change            # Run only propose_change evals
 #   ./docs/sdlc/evals/run_evals.sh verify_story              # Run only verify_story evals
-#   ./docs/sdlc/evals/run_evals.sh vibe_a_story              # Run only vibe_a_story evals
+#   ./docs/sdlc/evals/run_evals.sh exp_four_in_one            # Run only exp_four_in_one evals
 #   ./docs/sdlc/evals/run_evals.sh phase2                    # Run all Phase 2 evals
 #   ./docs/sdlc/evals/run_evals.sh phase3                    # Run all Phase 3 evals
 #   ./docs/sdlc/evals/run_evals.sh doctor_all_pass           # Run a single scenario
@@ -69,7 +69,7 @@ while [[ $# -gt 0 ]]; do
             echo "  --output <path>  Write aggregate results to a custom path"
             echo ""
             echo "Filters: doctor, project_doctor, open_story, propose_change,"
-            echo "         verify_story, vibe_a_story, phase2, phase3, or a specific scenario name"
+            echo "         verify_story, exp_four_in_one, phase2, phase3, or a specific scenario name"
             exit 0
             ;;
         *)
@@ -137,8 +137,8 @@ for scenario_script in "$SCENARIOS_DIR"/*.sh; do
             implement_change)
                 [[ "$scenario_name" == implement_change_* ]] || continue
                 ;;
-            vibe_a_story)
-                [[ "$scenario_name" == vibe_a_story_* ]] || continue
+            exp_four_in_one)
+                [[ "$scenario_name" == exp_four_in_one_* ]] || continue
                 ;;
             phase2)
                 [[ "$scenario_name" == doctor_* || "$scenario_name" == project_doctor_* ]] || continue
@@ -146,7 +146,7 @@ for scenario_script in "$SCENARIOS_DIR"/*.sh; do
             phase3)
                 [[ "$scenario_name" == open_story_* || "$scenario_name" == propose_change_* || \
                    "$scenario_name" == verify_story_* || "$scenario_name" == implement_change_* || \
-                   "$scenario_name" == vibe_a_story_* ]] || continue
+                   "$scenario_name" == exp_four_in_one_* ]] || continue
                 ;;
             *)
                 [[ "$scenario_name" == "$FILTER" ]] || continue
