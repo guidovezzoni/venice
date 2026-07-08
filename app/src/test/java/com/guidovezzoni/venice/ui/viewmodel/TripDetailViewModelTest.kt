@@ -30,6 +30,7 @@ import com.guidovezzoni.venice.ui.state.DialogState
 import com.guidovezzoni.venice.ui.state.RouteCalculationState
 import com.guidovezzoni.venice.ui.util.formatCoordinates
 import com.guidovezzoni.venice.ui.util.formatDistance
+import com.guidovezzoni.venice.ui.util.formatDuration
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -1349,6 +1350,131 @@ class TripDetailViewModelTest {
         } finally {
             Locale.setDefault(savedLocale)
         }
+    }
+
+    // --- Section 2 (continued): Total Duration ---
+
+    @Test
+    fun `GIVEN complete route with at least 2 stops WHEN both use cases emit THEN formattedTotalDuration equals formatDuration of summed leg durationSeconds`() = runTest(testDispatcher) {
+        val stops = listOf(
+            Stop("s0", TRIP_ID, "Start", 0.0, 0.0, 0, StopStatus.PENDING),
+            Stop("s1", TRIP_ID, "End", 1.0, 1.0, 1, StopStatus.PENDING),
+        )
+        val legs = listOf(
+            Leg("leg-1", TRIP_ID, "s0", "s1", 5000, 120, ""),
+        )
+        val viewModel = createViewModel(stops = stops, legs = legs)
+
+        val expectedFormattedTotalDuration = formatDuration(
+            legs.sumOf { it.durationSeconds },
+            application.resources,
+        )
+        assertEquals(expectedFormattedTotalDuration, viewModel.uiState.value.formattedTotalDuration)
+    }
+
+    @Test
+    fun `GIVEN two legs with durationSeconds 600 and 900 for 3 stops WHEN observed THEN formattedTotalDuration equals formatDuration of 1500 seconds`() = runTest(testDispatcher) {
+        val stops = listOf(
+            Stop("s0", TRIP_ID, "Start", 0.0, 0.0, 0, StopStatus.PENDING),
+            Stop("s1", TRIP_ID, "Mid", 1.0, 1.0, 1, StopStatus.PENDING),
+            Stop("s2", TRIP_ID, "End", 2.0, 2.0, 2, StopStatus.PENDING),
+        )
+        val legs = listOf(
+            Leg("leg-1", TRIP_ID, "s0", "s1", 1000, 600, ""),
+            Leg("leg-2", TRIP_ID, "s1", "s2", 2000, 900, ""),
+        )
+        val viewModel = createViewModel(stops = stops, legs = legs)
+
+        val expectedFormattedTotalDuration = formatDuration(1500, application.resources)
+        assertEquals(expectedFormattedTotalDuration, viewModel.uiState.value.formattedTotalDuration)
+    }
+
+    @Test
+    fun `GIVEN at least 2 stops and no legs exist for the trip WHEN observed THEN uiState formattedTotalDuration is null`() = runTest(testDispatcher) {
+        val stops = listOf(
+            Stop("s0", TRIP_ID, "Start", 0.0, 0.0, 0, StopStatus.PENDING),
+            Stop("s1", TRIP_ID, "End", 1.0, 1.0, 1, StopStatus.PENDING),
+        )
+        val viewModel = createViewModel(stops = stops, legs = emptyList())
+
+        assertNull(viewModel.uiState.value.formattedTotalDuration)
+    }
+
+    @Test
+    fun `GIVEN a leg count that is neither 0 nor stops-size minus 1 WHEN observed THEN uiState formattedTotalDuration is null`() = runTest(testDispatcher) {
+        val stops = listOf(
+            Stop("s0", TRIP_ID, "Start", 0.0, 0.0, 0, StopStatus.PENDING),
+            Stop("s1", TRIP_ID, "Mid", 1.0, 1.0, 1, StopStatus.PENDING),
+            Stop("s2", TRIP_ID, "End", 2.0, 2.0, 2, StopStatus.PENDING),
+        )
+        val legs = listOf(
+            Leg("leg-1", TRIP_ID, "s0", "s1", 5000, 120, ""),
+        )
+        val viewModel = createViewModel(stops = stops, legs = legs)
+
+        assertNull(viewModel.uiState.value.formattedTotalDuration)
+    }
+
+    @Test
+    fun `GIVEN fewer than two placed stops WHEN observed THEN uiState formattedTotalDuration is null regardless of any legs present`() = runTest(testDispatcher) {
+        val stops = listOf(
+            Stop("s0", TRIP_ID, "Start", 0.0, 0.0, 0, StopStatus.PENDING),
+        )
+        val legs = listOf(
+            Leg("leg-1", TRIP_ID, "s0", "s1", 5000, 120, ""),
+        )
+        val viewModel = createViewModel(stops = stops, legs = legs)
+
+        assertNull(viewModel.uiState.value.formattedTotalDuration)
+    }
+
+    @Test
+    fun `GIVEN a viewmodel with a complete route WHEN a stop mutation invalidates all legs THEN uiState formattedTotalDuration transitions to null at the same time as formattedTotalDistance`() = runTest(testDispatcher) {
+        val stops = listOf(
+            Stop("s0", TRIP_ID, "Start", 0.0, 0.0, 0, StopStatus.PENDING),
+            Stop("s1", TRIP_ID, "End", 1.0, 1.0, 1, StopStatus.PENDING),
+        )
+        val completeLeg = Leg("leg-1", TRIP_ID, "s0", "s1", 5000, 120, "")
+        val legsFlow = MutableSharedFlow<List<Leg>>(replay = 1)
+
+        every { observeStopsUseCase(TRIP_ID) } returns flowOf(stops)
+        every { observeLegsUseCase(TRIP_ID) } returns legsFlow
+
+        legsFlow.emit(listOf(completeLeg))
+
+        val viewModel = TripDetailViewModel(
+            application, setStopUseCase, moveStopUseCase, editStopUseCase, removeStopUseCase,
+            markStopDepartedUseCase, undoMarkStopDepartedUseCase, calculateRouteUseCase,
+            observeStopsUseCase, observeLegsUseCase, searchPlacesUseCase, getPlaceDetailUseCase,
+            placeSearchRepository, analyticsTracker, savedStateHandle,
+        )
+
+        assertNotNull(viewModel.uiState.value.formattedTotalDuration)
+
+        legsFlow.emit(emptyList())
+
+        assertNull(viewModel.uiState.value.formattedTotalDuration)
+        assertNull(viewModel.uiState.value.formattedTotalDistance)
+    }
+
+    @Test
+    fun `GIVEN a complete route WHEN formattedTotalDistance is non-null THEN formattedTotalDuration is simultaneously non-null in the same uiState emission and vice versa when both are null`() = runTest(testDispatcher) {
+        val stops = listOf(
+            Stop("s0", TRIP_ID, "Start", 0.0, 0.0, 0, StopStatus.PENDING),
+            Stop("s1", TRIP_ID, "End", 1.0, 1.0, 1, StopStatus.PENDING),
+        )
+        val legs = listOf(
+            Leg("leg-1", TRIP_ID, "s0", "s1", 5000, 120, ""),
+        )
+        val completeViewModel = createViewModel(stops = stops, legs = legs)
+
+        assertNotNull(completeViewModel.uiState.value.formattedTotalDistance)
+        assertNotNull(completeViewModel.uiState.value.formattedTotalDuration)
+
+        val incompleteViewModel = createViewModel(stops = stops, legs = emptyList())
+
+        assertNull(incompleteViewModel.uiState.value.formattedTotalDistance)
+        assertNull(incompleteViewModel.uiState.value.formattedTotalDuration)
     }
 
     // --- Section 3: Duration Wiring ---

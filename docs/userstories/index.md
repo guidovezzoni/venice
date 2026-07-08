@@ -68,7 +68,7 @@ Using Google Directions API to compute distances, durations, and route geometry 
 | ID | User Story | Details |
 |----|------------|---------|
 | 3.2.1 | As a user, I want to see the total distance of the entire roadtrip | [3.2.1-see-total-distance](3.2.1-see-total-distance-DONE.md) |
-| 3.2.2 | As a user, I want to see the total estimated duration of the entire roadtrip | [3.2.2-see-total-duration](3.2.2-see-total-duration-WIP.md) |
+| 3.2.2 | As a user, I want to see the total estimated duration of the entire roadtrip | [3.2.2-see-total-duration](3.2.2-see-total-duration-DONE.md) |
 
 ---
 

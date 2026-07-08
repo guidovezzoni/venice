@@ -289,7 +289,10 @@ fun TripDetailScreen(
                 }
             }
             item {
-                TripTotalSummary(formattedTotalDistance = uiState.formattedTotalDistance)
+                TripTotalSummary(
+                    formattedTotalDistance = uiState.formattedTotalDistance,
+                    formattedTotalDuration = uiState.formattedTotalDuration,
+                )
             }
         }
             if (uiState.isLoading) {
@@ -1061,6 +1064,7 @@ private fun PreviewTripDetailScreenTotalUnavailable() {
                 formattedLegDistances = mapOf("stop-1" to "10.0 km"),
                 formattedLegDurations = mapOf("stop-1" to "10 min"),
                 formattedTotalDistance = null,
+                formattedTotalDuration = null,
             ),
         )
     }
@@ -1106,6 +1110,7 @@ private fun PreviewTripDetailScreenWithLegs() {
                 formattedLegDistances = mapOf("stop-1" to "12.5 km"),
                 formattedLegDurations = mapOf("stop-1" to "15 min"),
                 formattedTotalDistance = "12.5 km",
+                formattedTotalDuration = "15 min",
             ),
         )
     }
