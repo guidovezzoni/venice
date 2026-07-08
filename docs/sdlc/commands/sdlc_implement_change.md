@@ -218,11 +218,15 @@ Follow these steps:
    3. Re-run the tests to confirm the fixes.
    4. Repeat until all tests pass.
 
-5. **Run security review.** Once all tests pass, execute the `/security-review` command to review pending changes on the current branch for security issues. If the review reports any findings:
+5. **Run security review.** Once all tests pass, spawn a sub-agent (Sonnet) to run the `/security-review` skill and return its findings. Do NOT invoke `/security-review` directly in the orchestrator — calling the skill inline creates a turn boundary that interrupts subsequent steps. The sub-agent prompt should be:
+
+   > Run the `/security-review` skill on the current branch. Return: (a) PASS or FAIL, (b) a list of any findings with file, severity, and description, (c) your recommended fixes for any findings.
+
+   If the sub-agent reports findings:
    1. Present the findings to the user for awareness.
    2. Fix all reported issues in the codebase.
-   3. Re-run `/security-review` to confirm the fixes are effective.
-   4. Repeat this cycle until the security review comes back clean.
+   3. Spawn another sub-agent to re-run `/security-review` and confirm the fixes.
+   4. Repeat until the sub-agent reports PASS with no findings.
 
 6. **Update README.md if required.** Read `README.md` and check whether the changes delivered by this story affect any section of the file (e.g. feature list, architecture table, tech stack, build instructions). If any section is now outdated or incomplete, update it to reflect the current state of the project. If everything is already accurate, skip this step.
 

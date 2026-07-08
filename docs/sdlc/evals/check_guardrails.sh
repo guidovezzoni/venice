@@ -223,6 +223,12 @@ assert_contains "sdlc_implement_change.md" "BLOCK" \
 assert_contains "sdlc_implement_change.md" "security-review" \
     "Runs security review"
 
+assert_contains_regex "sdlc_implement_change.md" 'spawn a sub-agent.*security|security.*sub-agent' \
+    "Security review is delegated to a sub-agent (not invoked inline)"
+
+assert_contains "sdlc_implement_change.md" "Do NOT invoke" \
+    "Explicitly forbids direct inline invocation of security-review skill"
+
 section "sdlc_implement_change.md — Sub-agent Orchestration"
 
 assert_contains_regex "sdlc_implement_change.md" 'model.*sonnet|sonnet.*model' \
