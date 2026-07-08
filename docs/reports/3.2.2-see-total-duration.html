@@ -151,6 +151,63 @@
       <li><code>openspec/changes/see-total-duration/tasks.md</code> &mdash; 31 tasks across 7 sections (Prerequisites, ViewModel BDD, Composable BDD, Screen Wiring, Analytics TODO, Previews, Verification)</li>
     </ul>
   </section>
+
+  <section class="report-section" data-source="sdlc_implement_change" data-timestamp="2026-07-08T14:45:00Z">
+    <header>
+      <h2>Implementation</h2>
+      <time datetime="2026-07-08T14:45:00Z">8 Jul 2026</time>
+    </header>
+    <p class="section-source">Source: sdlc_implement_change</p>
+
+    <h3>Summary</h3>
+    <p>Implemented all 31 tasks across 7 sections using sub-agent orchestration (1 Haiku, 5 Sonnet agents). One iteration cycle was needed — no sections required retry.</p>
+
+    <h3>Sections Applied</h3>
+    <table>
+      <tr><th>Section</th><th>Tasks</th><th>Model</th><th>Notes</th></tr>
+      <tr><td>1 — Prerequisites</td><td>1</td><td>Sonnet</td><td>Added <code>formattedTotalDuration: String?</code> to <code>TripDetailUiState</code></td></tr>
+      <tr><td>2 — ViewModel BDD</td><td>8</td><td>Sonnet</td><td>7 tests (RED confirmed), implementation GREEN. Extended <code>combine</code> collector to return <code>Pair&lt;String?, String?&gt;</code>; sums <code>durationSeconds</code> and calls <code>formatDuration</code></td></tr>
+      <tr><td>3 — TripTotalSummary BDD</td><td>5</td><td>Sonnet</td><td>4 androidTest cases written; composable restructured into both-null branch (combined message) and Row with two <code>weight(1f)</code> columns. 4 previews also added here (pre-completing §6.1)</td></tr>
+      <tr><td>4 — Screen Wiring</td><td>6</td><td>Sonnet</td><td>3 string resources added in 3 locales (en, it, es-rES); call site updated; 2 screen-level androidTests added. Agent also fixed a DEX compatibility issue (backtick test names at minSdk 24) and a stale import left by §3</td></tr>
+      <tr><td>5 — Analytics Follow-Up</td><td>1</td><td>Haiku</td><td>Verified pre-existing <code>// TODO</code> comment added in §2; marked done</td></tr>
+      <tr><td>6 — Preview Coverage</td><td>3</td><td>Haiku</td><td>Updated <code>PreviewTripDetailScreenWithLegs</code> (non-null duration) and partial-legs preview (null duration). §6.1 was already done by §3 agent</td></tr>
+      <tr><td>7 — Verification</td><td>7</td><td>Sonnet</td><td>All gates passed; AGENTS.md and index.md updated; story renamed to <code>-DONE</code></td></tr>
+    </table>
+
+    <h3>Test Results</h3>
+    <ul>
+      <li>Unit tests (<code>./gradlew test</code>): <span class="badge badge-pass">PASS</span> — 92 tests in <code>TripDetailViewModelTest</code>, all green</li>
+      <li>Instrumented tests (<code>./gradlew connectedDebugAndroidTest</code>): <span class="badge badge-pass">PASS</span> — 101 tests on Pixel 6a (Android 16). Note: device keyguard must be dismissed before running; <code>adb shell wm dismiss-keyguard</code> resolves the pre-existing "No compose hierarchies found" failure seen when screen is locked</li>
+      <li>Static analysis (<code>./gradlew check</code>): <span class="badge badge-pass">PASS</span> — no regressions, coverage ≥ 95%</li>
+    </ul>
+
+    <h3>On-Device Verification</h3>
+    <ul>
+      <li>Total distance (465,1 km) and Est. driving time (6h 15min) displayed side by side after route calculation — values match the single leg's distance and duration ✓</li>
+      <li>After removing the destination stop, "Trip totals unavailable" appeared immediately (combined message, not per-metric) ✓</li>
+      <li>Label reads "Est. driving time" — driving-time-specific wording confirmed ✓</li>
+      <li>No new network calls or persisted fields — computation is purely derived from existing leg flow ✓</li>
+    </ul>
+
+    <h3>TODO Review</h3>
+    <p>4 TODOs found in <code>app/src/</code>, all classified <strong>ACKNOWLEDGED</strong> (no RESOLVE NOW):</p>
+    <ul>
+      <li><code>TripDetailViewModel.kt:139</code> — Analytics event for total-duration display; intentionally deferred per task 5.1</li>
+      <li><code>TripDetailUiIntent.kt:9</code> — PlaceDetail question in UI intents; unrelated to this story</li>
+      <li><code>DirectionsApiService.kt:24</code> / <code>NetworkModule.kt:18</code> — Replace with Retrofit; precondition (additional endpoints) not met</li>
+    </ul>
+
+    <h3>Security Review</h3>
+    <p><span class="badge badge-pass">PASS</span> — No findings. All changes are display-only: a new nullable <code>String?</code> field derived from existing persisted leg data, a composable restructuring with no new inputs, and string resources. No new network calls, persistence, or user input surfaces introduced.</p>
+
+    <h3>Documentation</h3>
+    <ul>
+      <li><strong>README.md</strong>: Updated "The App" paragraph to describe trip totals (distance + estimated driving time side by side, combined unavailable message)</li>
+      <li><strong>AGENTS.md</strong>: Extended Epic 3 / Feature 3.2 entry to record story 3.2.2 as complete</li>
+    </ul>
+
+    <div class="outcome outcome-passed">Implementation PASSED — all 31 tasks complete, all gates green.</div>
+  </section>
   </main>
 
 </body>
