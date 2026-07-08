@@ -89,7 +89,43 @@ End-to-end quality gate before a story is considered done.
 
 ---
 
-### 5. `/sdlc_vibe_a_story` — End-to-End Autonomous Run
+### 5. `/sdlc_doctor` — SDLC Framework Health Check
+
+Validates that the SDLC tooling is properly installed and configured.
+
+**Recommended agent:** Sonnet — orchestration is procedural; Haiku sub-agents run the checks.
+
+**What the agent does autonomously:**
+
+- Spawns parallel Haiku sub-agents, one per check category, for maximum speed
+- All checks are read-only — no files are modified, no builds are run (except a lightweight `./gradlew tasks`)
+- Checks cover: OpenSpec configuration, security review plugin, and Gradle project health
+- Aggregates results into a summary report with `[PASS]`/`**[FAIL]**` status per check
+- Reports which items need attention for full SDLC workflow compatibility
+
+---
+
+### 6. `/sdlc_project_doctor` — Project Configuration Health Check
+
+Validates that the project's quality tooling is properly configured.
+
+**Recommended agent:** Sonnet — orchestration is procedural; Haiku sub-agents run the checks.
+
+**What the agent does autonomously:**
+
+- Spawns parallel Haiku sub-agents, one per check category, for maximum speed
+- All checks are read-only — no files are modified, no builds are run
+- Checks cover: Detekt static analysis, Kover code coverage, unit test dependencies, Fastlane, and CI/CD pipeline
+- Aggregates results into a summary report with `[PASS]`/`**[FAIL]**` status per check
+- Reports which items need attention for full project quality compliance
+
+---
+
+## Experimental Commands
+
+> These commands are not recommended for regular use. They automate steps that benefit from human review and are likely to evolve or be replaced as the SDLC framework matures.
+
+### `/sdlc_exp_four_in_one` — End-to-End Autonomous Run
 
 > **Not recommended for regular use.** Chaining all phases skips the human review gates between them — the points where a developer catches ambiguity, scope creep, or design debt before it is baked into code. Use the individual commands instead so each phase can be reviewed before the next begins.
 
@@ -107,38 +143,6 @@ Chains all four lifecycle commands into a single run with auto-commits between p
 **What stays interactive (unchanged from individual commands):**
 
 - Uncommitted changes warning, branch choice, clarifying doubts, device gates, verification failures
-
----
-
-### 6. `/sdlc_doctor` — SDLC Framework Health Check
-
-Validates that the SDLC tooling is properly installed and configured.
-
-**Recommended agent:** Sonnet — orchestration is procedural; Haiku sub-agents run the checks.
-
-**What the agent does autonomously:**
-
-- Spawns parallel Haiku sub-agents, one per check category, for maximum speed
-- All checks are read-only — no files are modified, no builds are run (except a lightweight `./gradlew tasks`)
-- Checks cover: OpenSpec configuration, security review plugin, and Gradle project health
-- Aggregates results into a summary report with `[PASS]`/`**[FAIL]**` status per check
-- Reports which items need attention for full SDLC workflow compatibility
-
----
-
-### 7. `/sdlc_project_doctor` — Project Configuration Health Check
-
-Validates that the project's quality tooling is properly configured.
-
-**Recommended agent:** Sonnet — orchestration is procedural; Haiku sub-agents run the checks.
-
-**What the agent does autonomously:**
-
-- Spawns parallel Haiku sub-agents, one per check category, for maximum speed
-- All checks are read-only — no files are modified, no builds are run
-- Checks cover: Detekt static analysis, Kover code coverage, unit test dependencies, Fastlane, and CI/CD pipeline
-- Aggregates results into a summary report with `[PASS]`/`**[FAIL]**` status per check
-- Reports which items need attention for full project quality compliance
 
 ---
 
@@ -168,15 +172,16 @@ Validates that the project's quality tooling is properly configured.
 
 
 ┌──────────────────────────────────┐
-│    /sdlc_vibe_a_story            │  All four in one autonomous run
-└──────────────────────────────────┘
-
-┌──────────────────────────────────┐
 │    /sdlc_doctor                  │  SDLC framework health check
 └──────────────────────────────────┘
 
 ┌──────────────────────────────────┐
 │    /sdlc_project_doctor          │  Project config health check
+└──────────────────────────────────┘
+
+── Experimental ───────────────────────────────────
+┌──────────────────────────────────┐
+│    /sdlc_exp_four_in_one         │  All four in one autonomous run
 └──────────────────────────────────┘
 ```
 
