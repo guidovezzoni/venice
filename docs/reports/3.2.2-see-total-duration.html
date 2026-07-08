@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Report: 3.2.2 — See Total Estimated Duration</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.6;
+      color: #1a1a1a;
+      background: #fafafa;
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+
+    .report-header {
+      border-bottom: 3px solid #2563eb;
+      padding-bottom: 1rem;
+      margin-bottom: 2rem;
+    }
+    .report-header h1 { font-size: 1.75rem; color: #1e293b; }
+    .report-meta {
+      display: flex; gap: 2rem; flex-wrap: wrap;
+      margin-top: 0.5rem; font-size: 0.875rem; color: #64748b;
+    }
+    .report-meta span { display: inline-flex; align-items: center; gap: 0.25rem; }
+
+    .report-section {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .report-section header {
+      display: flex; justify-content: space-between; align-items: baseline;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 0.75rem; margin-bottom: 1rem;
+    }
+    .report-section header h2 { font-size: 1.25rem; color: #1e293b; }
+    .report-section header time { font-size: 0.8rem; color: #94a3b8; white-space: nowrap; }
+    .section-source { font-size: 0.75rem; color: #94a3b8; font-style: italic; margin-bottom: 0.75rem; }
+
+    h3 { font-size: 1.05rem; color: #334155; margin: 1rem 0 0.5rem; }
+    p { margin-bottom: 0.75rem; }
+    ul, ol { margin: 0.5rem 0 0.75rem 1.5rem; }
+    li { margin-bottom: 0.25rem; }
+    code {
+      background: #f1f5f9; padding: 0.15rem 0.35rem; border-radius: 3px;
+      font-size: 0.875em;
+      font-family: "SF Mono", "Fira Code", Menlo, Consolas, monospace;
+    }
+
+    table { width: 100%; border-collapse: collapse; margin: 0.75rem 0; font-size: 0.9rem; }
+    th, td { text-align: left; padding: 0.5rem 0.75rem; border: 1px solid #e2e8f0; }
+    th { background: #f8fafc; font-weight: 600; color: #475569; }
+
+    .badge {
+      display: inline-block; padding: 0.15rem 0.5rem;
+      border-radius: 4px; font-size: 0.8rem; font-weight: 600;
+    }
+    .badge-pass { background: #dcfce7; color: #166534; }
+    .badge-fail { background: #fee2e2; color: #991b1b; }
+    .badge-warn { background: #fef9c3; color: #854d0e; }
+    .badge-info { background: #dbeafe; color: #1e40af; }
+
+    .outcome { margin-top: 1rem; padding: 0.75rem 1rem; border-radius: 6px; font-weight: 600; }
+    .outcome-passed { background: #dcfce7; color: #166534; border-left: 4px solid #22c55e; }
+    .outcome-failed { background: #fee2e2; color: #991b1b; border-left: 4px solid #ef4444; }
+  </style>
+</head>
+<body>
+
+  <div class="report-header">
+    <h1>3.2.2 — See Total Estimated Duration</h1>
+    <div class="report-meta">
+      <span><strong>Story:</strong> 3.2.2</span>
+      <span><strong>Branch:</strong> feature/3.2.2-see-total-duration</span>
+      <span><strong>Created:</strong> 2026-07-08</span>
+    </div>
+  </div>
+
+  <main id="report-sections">
+  <section class="report-section" data-source="open_user_story" data-timestamp="2026-07-08T00:00:00Z">
+    <header>
+      <h2>Story Opened</h2>
+      <time datetime="2026-07-08">8 Jul 2026</time>
+    </header>
+    <p class="section-source">Source: open_user_story</p>
+
+    <h3>Actions</h3>
+    <ul>
+      <li>Created feature branch <code>feature/3.2.2-see-total-duration</code> from <code>main</code></li>
+      <li>Renamed story file to <code>3.2.2-see-total-duration-WIP.md</code> (In Progress)</li>
+      <li>Updated <code>docs/userstories/index.md</code> link to reflect new filename</li>
+    </ul>
+
+    <h3>Story Refinement Summary</h3>
+    <ul>
+      <li>Added structured functionality overview: total driving duration displayed alongside total distance, same formatting as individual legs, auto-update on recalculation, unavailable state when route is absent</li>
+      <li>Documented the route-availability model (all-or-nothing invalidation), clarifying that "partial with a warning" is not required given the current architecture</li>
+      <li>Identified the single new UI state field: <code>formattedTotalDuration: String?</code> in <code>TripDetailUiState</code> &mdash; no new domain or persistence fields needed</li>
+      <li>Listed files to modify with intent: UiState, ViewModel (extend existing combine block), TripTotalSummary composable, TripDetailScreen, string resources across 3 locales</li>
+      <li>Defined unit and Compose UI test expectations following GIVEN/WHEN/THEN naming</li>
+      <li>Scoped out trip-list total and "time at stop" to separate future stories</li>
+    </ul>
+
+    <h3>Key Concerns</h3>
+    <ul>
+      <li><span class="badge badge-pass">Low</span> <strong>Security:</strong> No new attack surface; only concern is integer summation integrity (mitigated by Long accumulation)</li>
+      <li><span class="badge badge-pass">Low</span> <strong>Performance:</strong> Negligible &mdash; summation over at most 24 legs reuses existing combine block</li>
+      <li><span class="badge badge-pass">None</span> <strong>GDPR:</strong> No personal data processed or created; no new data collection or transmission</li>
+    </ul>
+  </section>
+  </main>
+
+</body>
+</html>
