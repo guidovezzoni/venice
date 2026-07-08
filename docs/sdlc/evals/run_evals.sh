@@ -69,7 +69,8 @@ while [[ $# -gt 0 ]]; do
             echo "  --output <path>  Write aggregate results to a custom path"
             echo ""
             echo "Filters: doctor, project_doctor, open_story, propose_change,"
-            echo "         verify_story, exp_four_in_one, phase2, phase3, or a specific scenario name"
+            echo "         verify_story, exp_four_in_one, exp_vibe, exp_vibe_quicker,"
+            echo "         phase2, phase3, or a specific scenario name"
             exit 0
             ;;
         *)
@@ -140,13 +141,19 @@ for scenario_script in "$SCENARIOS_DIR"/*.sh; do
             exp_four_in_one)
                 [[ "$scenario_name" == exp_four_in_one_* ]] || continue
                 ;;
+            exp_vibe)
+                [[ "$scenario_name" == exp_vibe_* && "$scenario_name" != exp_vibe_quicker_* ]] || continue
+                ;;
+            exp_vibe_quicker)
+                [[ "$scenario_name" == exp_vibe_quicker_* ]] || continue
+                ;;
             phase2)
                 [[ "$scenario_name" == doctor_* || "$scenario_name" == project_doctor_* ]] || continue
                 ;;
             phase3)
                 [[ "$scenario_name" == open_story_* || "$scenario_name" == propose_change_* || \
                    "$scenario_name" == verify_story_* || "$scenario_name" == implement_change_* || \
-                   "$scenario_name" == exp_four_in_one_* ]] || continue
+                   "$scenario_name" == exp_four_in_one_* || "$scenario_name" == exp_vibe_* ]] || continue
                 ;;
             *)
                 [[ "$scenario_name" == "$FILTER" ]] || continue
