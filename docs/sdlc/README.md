@@ -146,6 +146,61 @@ Chains all four lifecycle commands into a single run with auto-commits between p
 
 ---
 
+### `/sdlc_exp_vibe_a_story` — Streamlined Three-Phase Run
+
+Streamlines the SDLC into three phases (Analyze, Build, Check) with reduced ceremony while preserving the core analytical value.
+
+**Recommended agent:** Opus (orchestrator) — delegates analysis to Opus, implementation to Sonnet/Haiku, verification to Sonnet.
+
+**What it keeps from the full SDLC:**
+
+- Story refinement (Opus 11-point analysis), codebase exploration, user Q&A gate
+- Sub-agent orchestration with model-tier classification for cost efficiency
+- TODO resolution with precondition analysis
+- Essential verification gates: build, tests, security review, on-device tests, Definition of Done
+- Story lifecycle management (open/close)
+
+**What it cuts:**
+
+- OpenSpec artifacts (proposal, design, delta specs) — replaced by a lightweight task list in `vibe/`
+- BDD RED/GREEN ceremony — tests and implementation can be in the same task
+- Reports at every phase
+- Redundant security/TODO scans (each runs once, not twice)
+- Preview coverage and test file coverage gates
+- README/AGENTS.md sync checks
+- Spec sync and change archival
+
+**Output:** 3 commits (analyze, implement, verify), ~10-12 sub-agents, ~60-70% token cost of full SDLC.
+
+---
+
+### `/sdlc_exp_vibe_a_story_quicker` — Fast Two-Phase Run
+
+The fastest option — compresses the SDLC into two phases (Think, Build & Check) with minimal ceremony.
+
+**Recommended agent:** Opus (orchestrator) — delegates analysis to a single Opus sub-agent, implementation to Sonnet/Haiku.
+
+**What it keeps:**
+
+- Story refinement, codebase exploration, and task planning (merged into one Opus sub-agent call)
+- User Q&A gate for ambiguities
+- Sub-agent orchestration with model-tier classification
+- Build + test + security verification
+- On-device tests
+- Story lifecycle management
+
+**What it cuts (in addition to everything `/sdlc_exp_vibe_a_story` cuts):**
+
+- Formal Definition of Done verification
+- Separate exploration and task-generation sub-agents (merged into one)
+- TODO resolution loop
+
+**Best for:** Small features, spikes, well-understood changes, solo projects.
+
+**Output:** 2 commits (analyze+plan, implement+verify), ~6 sub-agents, ~40-50% token cost of full SDLC.
+
+---
+
 ## End-to-End Flow
 
 ```
@@ -179,9 +234,21 @@ Chains all four lifecycle commands into a single run with auto-commits between p
 │    /sdlc_project_doctor          │  Project config health check
 └──────────────────────────────────┘
 
+
+
 ── Experimental ───────────────────────────────────
+
+
 ┌──────────────────────────────────┐
 │    /sdlc_exp_four_in_one         │  All four in one autonomous run
+└──────────────────────────────────┘
+
+┌──────────────────────────────────┐
+│    /sdlc_exp_vibe_a_story        │  Three-phase streamlined run
+└──────────────────────────────────┘
+
+┌──────────────────────────────────┐
+│    /sdlc_exp_vibe_a_story_quicker│  Two-phase fast run
 └──────────────────────────────────┘
 ```
 
