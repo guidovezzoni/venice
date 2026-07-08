@@ -276,6 +276,7 @@ The other guidelines file are primarily used by the SDLC commands and describe h
   - do not use for the expected value, the same internal function being tested -> this however conflicts with BDD's black box behaviour
   - insert a comment with the AAA?
 - There are several decisions that have been taken just "because it's a small project": that should not happen: all the projects I start are small and they will likely  become bigger, so they should use the expected architecture and structures.
+- Analytics !!!
 
 Not sure what's best yet:
 

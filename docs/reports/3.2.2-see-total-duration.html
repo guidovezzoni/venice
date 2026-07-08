@@ -116,6 +116,41 @@
       <li><span class="badge badge-pass">None</span> <strong>GDPR:</strong> No personal data processed or created; no new data collection or transmission</li>
     </ul>
   </section>
+
+  <section class="report-section" data-source="sdlc_propose_change" data-timestamp="2026-07-08T00:00:00Z">
+    <header>
+      <h2>Change Proposed</h2>
+      <time datetime="2026-07-08">8 Jul 2026</time>
+    </header>
+    <p class="section-source">Source: sdlc_propose_change</p>
+
+    <h3>Exploration Findings</h3>
+    <ul>
+      <li>Near-identical shape to archived story 3.2.1 (total distance) &mdash; same integration points, same completeness rule</li>
+      <li><code>TripDetailUiState</code> already has <code>formattedTotalDistance: String?</code> &mdash; new field <code>formattedTotalDuration: String?</code> follows same pattern</li>
+      <li>Existing <code>combine(observeStopsUseCase, observeLegsUseCase)</code> collector (added by 3.2.1) can be extended rather than adding a 4th subscription</li>
+      <li><code>DurationFormatter.formatDuration</code> already exists and is reused as-is</li>
+      <li><code>TripTotalSummary.kt</code> composable needs restructuring from single-value Column to side-by-side Row layout</li>
+      <li>Analytics infrastructure exists (<code>AnalyticsTracker</code>/<code>AnalyticsEvent</code>) but no existing event tracks derived summary display</li>
+    </ul>
+
+    <h3>Questions Asked and Answers</h3>
+    <ul>
+      <li><strong>Label text:</strong> "Est. driving time" / "Est. driving time unavailable"</li>
+      <li><strong>Layout:</strong> Side by side (distance and duration in a Row, each taking half width)</li>
+      <li><strong>Unavailable state:</strong> Single combined "Trip totals unavailable" message when both absent</li>
+      <li><strong>Analytics:</strong> Deferred to follow-up (TODO marker), since no existing event tracks summary display</li>
+    </ul>
+
+    <h3>Artifacts Created</h3>
+    <ul>
+      <li><code>openspec/changes/see-total-duration/proposal.md</code> &mdash; Why, What Changes, Capabilities, Impact</li>
+      <li><code>openspec/changes/see-total-duration/design.md</code> &mdash; Context, Goals/Non-Goals, 6 Decisions, Risks, Migration Plan</li>
+      <li><code>openspec/changes/see-total-duration/specs/trip-detail/spec.md</code> &mdash; Delta spec for TripDetailUiState, ViewModel, Screen, previews</li>
+      <li><code>openspec/changes/see-total-duration/specs/route-display/spec.md</code> &mdash; Delta spec for string resources (3 new keys)</li>
+      <li><code>openspec/changes/see-total-duration/tasks.md</code> &mdash; 31 tasks across 7 sections (Prerequisites, ViewModel BDD, Composable BDD, Screen Wiring, Analytics TODO, Previews, Verification)</li>
+    </ul>
+  </section>
   </main>
 
 </body>
