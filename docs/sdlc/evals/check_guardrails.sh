@@ -632,6 +632,27 @@ for cmd in sdlc_implement_change.md sdlc_verify_story.md; do
 done
 
 # ─────────────────────────────────────────────────────────────────────
+# Infrastructure Failure Handling
+# ─────────────────────────────────────────────────────────────────────
+section "Infrastructure failure handling"
+
+assert_contains_regex "sdlc_implement_change.md" \
+    "Infrastructure failure" \
+    "implement_change: defines infrastructure failure branch"
+
+assert_contains_regex "sdlc_implement_change.md" \
+    "BLOCK here" \
+    "implement_change: blocks on infrastructure failure"
+
+assert_contains_regex "sdlc_verify_story.md" \
+    "INFRASTRUCTURE_FAIL" \
+    "verify_story: defines INFRASTRUCTURE_FAIL result type"
+
+assert_contains_regex "sdlc_verify_story.md" \
+    "re-spawn the sub-agent" \
+    "verify_story: retries sub-agent after infrastructure fix"
+
+# ─────────────────────────────────────────────────────────────────────
 # Summary
 # ─────────────────────────────────────────────────────────────────────
 echo ""

@@ -443,10 +443,11 @@ Follow these steps:
 
    ## Output Format — CRITICAL
 
-   ### RESULT: PASS or FAIL or NOT_FEASIBLE
+   ### RESULT: PASS or FAIL or INFRASTRUCTURE_FAIL or NOT_FEASIBLE
 
    PASS if instrumented tests pass AND app exercise confirmed the feature works.
-   FAIL if instrumented tests fail OR app exercise shows a defect.
+   FAIL if instrumented tests fail due to code or test defects (assertion errors, compilation failures, logic issues).
+   INFRASTRUCTURE_FAIL if tests could not run due to a non-code infrastructure problem: no network on the device, ADB disconnection, emulator crash, Gradle daemon failure, device offline. Include the specific error message in the output.
    NOT_FEASIBLE if adb-based exercise cannot verify the feature (too complex, requires
    multi-step setup that exceeds 3 interactions).
 
@@ -464,6 +465,7 @@ Follow these steps:
    **Gate decision:**
    - If RESULT is PASS: proceed to next step.
    - If RESULT is FAIL: STOP — present failures to user and do NOT proceed.
+   - If RESULT is INFRASTRUCTURE_FAIL: inform the user of the infrastructure problem (include the specific error), and ask whether they can resolve it. **BLOCK** — wait for the user to confirm the issue is fixed. Once confirmed, re-spawn the sub-agent to retry. If failure persists after one retry, STOP and present the issue to the user.
    - If RESULT is NOT_FEASIBLE: ask the user to perform the manual verification. Describe what to check. **BLOCK** — wait for the user to confirm the result. If the user reports a failure, STOP.
 
    **Failure handling:** If the sub-agent fails, retry once. If Haiku, escalate to Sonnet on retry.
