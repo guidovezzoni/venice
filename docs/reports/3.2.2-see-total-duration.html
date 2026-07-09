@@ -208,6 +208,65 @@
 
     <div class="outcome outcome-passed">Implementation PASSED — all 31 tasks complete, all gates green.</div>
   </section>
+
+  <section class="report-section" data-source="verify_user_story" data-timestamp="2026-07-09T00:00:00Z">
+    <header>
+      <h2>Verification &amp; Archive</h2>
+      <time datetime="2026-07-09">9 Jul 2026</time>
+    </header>
+    <p class="section-source">Source: verify_user_story</p>
+
+    <h3>Verification Gates</h3>
+    <table>
+      <tr><th>Gate</th><th>Status</th><th>Details</th></tr>
+      <tr><td>OpenSpec Verify</td><td><span class="badge badge-pass">PASS</span></td><td>31/31 tasks complete, no critical issues</td></tr>
+      <tr><td>TODO Scan</td><td><span class="badge badge-pass">PASS</span></td><td>4 TODOs found, all acknowledged as unrelated to this story</td></tr>
+      <tr><td>Security Review</td><td><span class="badge badge-pass">PASS</span></td><td>No findings of any severity</td></tr>
+      <tr><td>Clean Build &amp; Static Analysis</td><td><span class="badge badge-pass">PASS</span></td><td>BUILD SUCCESSFUL, koverVerify passed, minor non-blocking warnings only</td></tr>
+      <tr><td>Unit Tests</td><td><span class="badge badge-pass">PASS</span></td><td>All tests passed</td></tr>
+      <tr><td>Coverage Report</td><td><span class="badge badge-pass">PASS</span></td><td>See table below</td></tr>
+      <tr><td>Test File Coverage</td><td><span class="badge badge-pass">PASS</span></td><td><code>TripDetailViewModel</code>, <code>TripDetailScreen</code>, <code>TripTotalSummary</code> all have test files</td></tr>
+      <tr><td>Compose Preview Coverage</td><td><span class="badge badge-pass">PASS</span></td><td>15/15 UiState fields covered, all 4 TripTotalSummary combinations previewed</td></tr>
+      <tr><td>On-Device Tests</td><td><span class="badge badge-pass">PASS</span></td><td>101 instrumented tests passed; on-device verified (see details below)</td></tr>
+      <tr><td>Definition of Done</td><td><span class="badge badge-pass">PASS</span></td><td>All 11 criteria met</td></tr>
+      <tr><td>Story Closed</td><td><span class="badge badge-pass">PASS</span></td><td>File at <code>docs/userstories/3.2.2-see-total-duration-DONE.md</code></td></tr>
+      <tr><td>Spec Sync</td><td><span class="badge badge-pass">PASS</span></td><td>2 capabilities synced (route-display, trip-detail)</td></tr>
+      <tr><td>Archive</td><td><span class="badge badge-pass">PASS</span></td><td>Archived to <code>openspec/changes/archive/2026-07-09-see-total-duration/</code></td></tr>
+      <tr><td>README/AGENTS Sync</td><td><span class="badge badge-pass">PASS</span></td><td>Both files already in sync</td></tr>
+    </table>
+
+    <h3>Coverage Report</h3>
+    <table>
+      <tr><th>Category</th><th>Coverage</th></tr>
+      <tr><td>Instructions</td><td>99.37%</td></tr>
+      <tr><td>Branches</td><td>93.81%</td></tr>
+      <tr><td>Lines</td><td>98.90%</td></tr>
+      <tr><td>Methods</td><td>98.15%</td></tr>
+      <tr><td>Classes</td><td>99.12%</td></tr>
+    </table>
+
+    <h3>On-Device Verification</h3>
+    <ul>
+      <li>101 instrumented tests passed on connected device</li>
+      <li>Visual confirmation: "Est. driving time: 3h 6min" displayed alongside "Total distance: 271,0 km" after route calculation ✓</li>
+      <li>After stop removal: "Trip totals unavailable" message confirmed (combined state) ✓</li>
+      <li>Label wording and layout match design specification ✓</li>
+    </ul>
+
+    <h3>Archive Details</h3>
+    <ul>
+      <li><strong>Change:</strong> see-total-duration</li>
+      <li><strong>Archive Path:</strong> <code>openspec/changes/archive/2026-07-09-see-total-duration/</code></li>
+      <li><strong>Specs Synced:</strong>
+        <ul>
+          <li>route-display (string resources)</li>
+          <li>trip-detail (TripDetailUiState, ViewModel, Screen)</li>
+        </ul>
+      </li>
+    </ul>
+
+    <div class="outcome outcome-passed">Verification and Archive PASSED — All 14 gates passed. Story closed and changes archived.</div>
+  </section>
   </main>
 
 </body>
