@@ -74,6 +74,22 @@ assert_not_contains() {
     fi
 }
 
+assert_not_contains_regex() {
+    local file="$COMMANDS_DIR/$1"
+    local pattern="$2"
+    local description="$3"
+    TOTAL=$((TOTAL + 1))
+    if grep -qE "$pattern" "$file" 2>/dev/null; then
+        echo -e "  ${RED}❌${RESET} $description — pattern should NOT be present: $pattern"
+        FAIL=$((FAIL + 1))
+    else
+        PASS=$((PASS + 1))
+        if $VERBOSE; then
+            echo -e "  ${GREEN}✅${RESET} $description"
+        fi
+    fi
+}
+
 section() {
     echo ""
     echo -e "${BOLD}### $1${RESET}"
@@ -563,6 +579,25 @@ assert_contains_regex "sdlc_exp_four_in_one.md" 'PR.*merge|merge.*main' \
     "Summary indicates ready for PR/merge"
 
 # ─────────────────────────────────────────────────────────────────────
+# Cross-Command — Skill Invocations Must Use Sub-agents
+# ─────────────────────────────────────────────────────────────────────
+section "Cross-Command — Skill Invocation via Sub-agents"
+
+# A skill invoked inline appears on the numbered step line itself, e.g.:
+#   5. **Run security review.** … execute the `/security-review` command…
+# A skill invoked via sub-agent has its reference inside a code-fenced
+# sub-agent prompt block — the numbered step line does NOT contain the skill name.
+# Pattern: numbered list item line that contains a slash-prefixed skill name.
+
+for cmd in sdlc_open_story.md sdlc_propose_change.md sdlc_implement_change.md \
+           sdlc_verify_story.md sdlc_doctor.md sdlc_project_doctor.md \
+           sdlc_exp_four_in_one.md; do
+    assert_not_contains_regex "$cmd" \
+        "^\s*[0-9]+\..*/(security-review|opsx:|code-review)" \
+        "$cmd: no skill invoked inline on orchestrator step (must use sub-agent)"
+done
+
+# ─────────────────────────────────────────────────────────────────────
 # Cross-Command Consistency Checks
 # ─────────────────────────────────────────────────────────────────────
 section "Cross-Command — Commit Message Suggestion"
@@ -601,6 +636,27 @@ for cmd in sdlc_implement_change.md sdlc_verify_story.md; do
     assert_contains "$cmd" "adb devices" \
         "$cmd checks device connectivity"
 done
+
+# ─────────────────────────────────────────────────────────────────────
+# Infrastructure Failure Handling
+# ─────────────────────────────────────────────────────────────────────
+section "Infrastructure failure handling"
+
+assert_contains_regex "sdlc_implement_change.md" \
+    "Infrastructure failure" \
+    "implement_change: defines infrastructure failure branch"
+
+assert_contains_regex "sdlc_implement_change.md" \
+    "BLOCK here" \
+    "implement_change: blocks on infrastructure failure"
+
+assert_contains_regex "sdlc_verify_story.md" \
+    "INFRASTRUCTURE_FAIL" \
+    "verify_story: defines INFRASTRUCTURE_FAIL result type"
+
+assert_contains_regex "sdlc_verify_story.md" \
+    "re-spawn the sub-agent" \
+    "verify_story: retries sub-agent after infrastructure fix"
 
 # ─────────────────────────────────────────────────────────────────────
 # Summary

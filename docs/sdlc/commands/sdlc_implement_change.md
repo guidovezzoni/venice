@@ -214,8 +214,14 @@ Follow these steps:
    **Run this autonomously — do not ask the user to run it.** Once the device is confirmed connected, execute the command yourself and report the results.
    If any tests fail:
    1. Present the failures to the user for awareness.
-   2. Fix the failing tests or the production code as appropriate.
-   3. Re-run the tests to confirm the fixes.
+   2. **Determine the failure type:**
+      - **Infrastructure failure** — the failure is caused by a non-code problem: no network on the device, ADB disconnection, emulator crash, Gradle daemon failure, device going offline mid-test, etc. Recognise these by error messages such as "No connected devices", "device offline", "Connection refused", "network error", or Gradle process crashes.
+        - Inform the user of the infrastructure problem and its likely cause.
+        - Ask whether they can resolve the issue (e.g. enable Wi-Fi, reconnect the device, restart the emulator).
+        - **BLOCK here.** Do NOT attempt to fix test code or production code. Wait for the user to confirm the issue is fixed before retrying.
+        - Once the user confirms, re-run `./gradlew connectedDebugAndroidTest` and repeat this failure-type check.
+      - **Test or code failure** — assertion errors, compilation failures, or test logic issues: Fix the failing tests or the production code as appropriate.
+   3. Re-run the tests.
    4. Repeat until all tests pass.
 
 5. **Run security review.** Once all tests pass, spawn a sub-agent (Sonnet) to run the `/security-review` skill and return its findings. Do NOT invoke `/security-review` directly in the orchestrator — calling the skill inline creates a turn boundary that interrupts subsequent steps. The sub-agent prompt should be:
