@@ -17,6 +17,12 @@ data class TripDetailUiState(
     val formattedLegDurations: Map<String, String> = emptyMap(),
     /** null means "route not complete / unavailable" */
     val formattedTotalDistance: String? = null,
+    /**
+     * null means "route not complete / unavailable".
+     * Transitions to/from null in lockstep with [formattedTotalDistance], since both share the
+     * same completeness check (`legs.size == stops.size - 1 && stops.size >= 2`).
+     */
+    val formattedTotalDuration: String? = null,
     val formattedStopCoordinates: Map<String, String> = emptyMap(),
     val routeCalculationState: RouteCalculationState = RouteCalculationState.Idle,
 )

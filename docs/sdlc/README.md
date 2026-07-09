@@ -14,6 +14,7 @@ An example of its usage can be found in [venice](https://github.com/guidovezzoni
 | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
 | **Autonomous multi-step reasoning** | Each command chains 15+ sequential steps, making decisions at each gate without human intervention                                    |
 | **Sub-agent orchestration**         | All four commands delegate self-contained steps to cheaper sub-agents (Sonnet for reasoning, Haiku for mechanical tasks), each with a fresh context window |
+| **Execution evals**                 | Bash-based [eval harness](docs/sdlc/evals/README.md) runs each SDLC command against controlled fixtures, asserts on actual agent behaviour, and produces JSON results for regression tracking |
 | **Tool use**                        | The agent drives git, Gradle, adb, static analysis, and Claude Code's security scanners directly                                      |
 | **Self-healing loops**              | Failed tests or security findings trigger automatic fix-and-retry cycles                                                              |
 | **On-device verification**          | The agent installs the app on a physical device, interacts with it via UIAutomator, and verifies behaviour autonomously               |
@@ -276,6 +277,7 @@ The other guidelines file are primarily used by the SDLC commands and describe h
   - do not use for the expected value, the same internal function being tested -> this however conflicts with BDD's black box behaviour
   - insert a comment with the AAA?
 - There are several decisions that have been taken just "because it's a small project": that should not happen: all the projects I start are small and they will likely  become bigger, so they should use the expected architecture and structures.
+- Analytics !!!
 
 Not sure what's best yet:
 

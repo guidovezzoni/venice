@@ -76,4 +76,7 @@
     <string name="trip_detail_leg_duration_hours_minutes">%1$dh %2$dmin</string>
     <string name="trip_detail_total_distance_label">Distancia total</string>
     <string name="trip_detail_total_distance_unavailable">Distancia total no disponible</string>
+    <string name="trip_detail_total_duration_label">Tiempo de conducción estimado</string>
+    <string name="trip_detail_total_duration_unavailable">Tiempo de conducción estimado no disponible</string>
+    <string name="trip_detail_totals_unavailable">Totales del viaje no disponibles</string>
 </resources>

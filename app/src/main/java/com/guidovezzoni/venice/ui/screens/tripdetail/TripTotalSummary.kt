@@ -1,6 +1,7 @@
 package com.guidovezzoni.venice.ui.screens.tripdetail
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
@@ -20,6 +21,7 @@ private val TRIP_TOTAL_SUMMARY_VERTICAL_PADDING = 8.dp
 fun TripTotalSummary(
     modifier: Modifier = Modifier,
     formattedTotalDistance: String?,
+    formattedTotalDuration: String?,
 ) {
     Column(
         modifier = modifier
@@ -29,38 +31,97 @@ fun TripTotalSummary(
                 vertical = TRIP_TOTAL_SUMMARY_VERTICAL_PADDING,
             ),
     ) {
-        if (formattedTotalDistance != null) {
+        if (formattedTotalDistance == null && formattedTotalDuration == null) {
             Text(
-                text = stringResource(R.string.trip_detail_total_distance_label),
-                style = MaterialTheme.typography.bodyMedium,
-            )
-            Text(
-                text = formattedTotalDistance,
+                text = stringResource(R.string.trip_detail_totals_unavailable),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         } else {
-            Text(
-                text = stringResource(R.string.trip_detail_total_distance_unavailable),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+            Row(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.weight(1f)) {
+                    if (formattedTotalDistance != null) {
+                        Text(
+                            text = stringResource(R.string.trip_detail_total_distance_label),
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
+                        Text(
+                            text = formattedTotalDistance,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    } else {
+                        Text(
+                            text = stringResource(R.string.trip_detail_total_distance_unavailable),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+                Column(modifier = Modifier.weight(1f)) {
+                    if (formattedTotalDuration != null) {
+                        Text(
+                            text = stringResource(R.string.trip_detail_total_duration_label),
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
+                        Text(
+                            text = formattedTotalDuration,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    } else {
+                        Text(
+                            text = stringResource(R.string.trip_detail_total_duration_unavailable),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+            }
         }
     }
 }
 
 @Preview(showBackground = true)
 @Composable
-private fun PreviewTripTotalSummaryWithValue() {
+private fun PreviewTripTotalSummaryBothAvailable() {
     HeadingToVeniceTheme {
-        TripTotalSummary(formattedTotalDistance = "12.5 km")
+        TripTotalSummary(
+            formattedTotalDistance = "12.5 km",
+            formattedTotalDuration = "25 min",
+        )
     }
 }
 
 @Preview(showBackground = true)
 @Composable
-private fun PreviewTripTotalSummaryUnavailable() {
+private fun PreviewTripTotalSummaryBothUnavailable() {
     HeadingToVeniceTheme {
-        TripTotalSummary(formattedTotalDistance = null)
+        TripTotalSummary(
+            formattedTotalDistance = null,
+            formattedTotalDuration = null,
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PreviewTripTotalSummaryDistanceOnlyAvailable() {
+    HeadingToVeniceTheme {
+        TripTotalSummary(
+            formattedTotalDistance = "12.5 km",
+            formattedTotalDuration = null,
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PreviewTripTotalSummaryDurationOnlyAvailable() {
+    HeadingToVeniceTheme {
+        TripTotalSummary(
+            formattedTotalDistance = null,
+            formattedTotalDuration = "25 min",
+        )
     }
 }

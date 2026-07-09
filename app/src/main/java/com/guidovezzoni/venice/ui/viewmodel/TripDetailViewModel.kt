@@ -130,17 +130,29 @@ class TripDetailViewModel @Inject constructor(
 
         combine(observeStopsUseCase(tripId), observeLegsUseCase(tripId)) { stops, legs ->
             if (legs.size == stops.size - 1 && stops.size >= 2) {
-                formatDistance(
+                val formattedTotalDistance = formatDistance(
                     legs.sumOf { it.distanceMetres },
                     Locale.getDefault(),
                     application.resources,
                 )
+                val totalDurationSeconds = legs.sumOf { it.durationSeconds.toLong() }.toInt()
+                // TODO: a dedicated analytics event for total-duration display should be designed
+                //  and wired in a follow-up story, rather than added as a side effect of this
+                //  display-only change (per user clarification; no new AnalyticsEvent subtype is
+                //  introduced by this change)
+                val formattedTotalDuration = formatDuration(totalDurationSeconds, application.resources)
+                formattedTotalDistance to formattedTotalDuration
             } else {
-                null
+                null to null
             }
         }
-            .onEach { formattedTotalDistance ->
-                _uiState.update { it.copy(formattedTotalDistance = formattedTotalDistance) }
+            .onEach { (formattedTotalDistance, formattedTotalDuration) ->
+                _uiState.update {
+                    it.copy(
+                        formattedTotalDistance = formattedTotalDistance,
+                        formattedTotalDuration = formattedTotalDuration,
+                    )
+                }
             }
             .launchIn(viewModelScope)
     }

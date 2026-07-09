@@ -12,19 +12,25 @@ class TripTotalSummaryTest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
-    private fun setContent(formattedTotalDistance: String?) {
+    private fun setContent(
+        formattedTotalDistance: String? = null,
+        formattedTotalDuration: String? = null,
+    ) {
         composeTestRule.setContent {
             HeadingToVeniceTheme {
-                TripTotalSummary(formattedTotalDistance = formattedTotalDistance)
+                TripTotalSummary(
+                    formattedTotalDistance = formattedTotalDistance,
+                    formattedTotalDuration = formattedTotalDuration,
+                )
             }
         }
     }
 
-    // region Non-null total distance
+    // region Both values available
 
     @Test
-    fun nonNullFormattedTotalDistance_showsLabelAndFormattedValue() {
-        setContent(formattedTotalDistance = "12.5 km")
+    fun bothValuesAvailable_showsBothDistanceAndDurationLabelsAndValues() {
+        setContent(formattedTotalDistance = "12.5 km", formattedTotalDuration = "25 min")
 
         composeTestRule
             .onNodeWithText("Total distance")
@@ -32,21 +38,70 @@ class TripTotalSummaryTest {
         composeTestRule
             .onNodeWithText("12.5 km")
             .assertIsDisplayed()
+        composeTestRule
+            .onNodeWithText("Est. driving time")
+            .assertIsDisplayed()
+        composeTestRule
+            .onNodeWithText("25 min")
+            .assertIsDisplayed()
     }
 
     // endregion
 
-    // region Null total distance
+    // region Both values unavailable
 
     @Test
-    fun nullFormattedTotalDistance_showsUnavailableTextAndNoNumericValue() {
-        setContent(formattedTotalDistance = null)
+    fun bothValuesUnavailable_showsCombinedTotalsUnavailableTextAndNoPerMetricText() {
+        setContent(formattedTotalDistance = null, formattedTotalDuration = null)
 
+        composeTestRule
+            .onNodeWithText("Trip totals unavailable")
+            .assertIsDisplayed()
+        composeTestRule
+            .onNodeWithText("Total distance unavailable")
+            .assertDoesNotExist()
+        composeTestRule
+            .onNodeWithText("Est. driving time unavailable")
+            .assertDoesNotExist()
+    }
+
+    // endregion
+
+    // region Mixed availability
+
+    @Test
+    fun distanceAvailableDurationUnavailable_showsDistanceLabelAndValueAlongsideDurationUnavailableText() {
+        setContent(formattedTotalDistance = "12.5 km", formattedTotalDuration = null)
+
+        composeTestRule
+            .onNodeWithText("Total distance")
+            .assertIsDisplayed()
+        composeTestRule
+            .onNodeWithText("12.5 km")
+            .assertIsDisplayed()
+        composeTestRule
+            .onNodeWithText("Est. driving time unavailable")
+            .assertIsDisplayed()
+        composeTestRule
+            .onNodeWithText("Trip totals unavailable")
+            .assertDoesNotExist()
+    }
+
+    @Test
+    fun durationAvailableDistanceUnavailable_showsDurationLabelAndValueAlongsideDistanceUnavailableText() {
+        setContent(formattedTotalDistance = null, formattedTotalDuration = "25 min")
+
+        composeTestRule
+            .onNodeWithText("Est. driving time")
+            .assertIsDisplayed()
+        composeTestRule
+            .onNodeWithText("25 min")
+            .assertIsDisplayed()
         composeTestRule
             .onNodeWithText("Total distance unavailable")
             .assertIsDisplayed()
         composeTestRule
-            .onNodeWithText("12.5 km")
+            .onNodeWithText("Trip totals unavailable")
             .assertDoesNotExist()
     }
 

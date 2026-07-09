@@ -812,17 +812,51 @@ class TripDetailScreenTest {
     }
 
     @Test
-    fun withNullFormattedTotalDistance_showsTotalDistanceUnavailableText() {
+    fun withNullFormattedTotalDistanceAndNonNullDuration_showsTotalDistanceUnavailableText() {
         setContent(
             uiState = TripDetailUiState(
                 tripId = TRIP_ID,
                 startingPoint = STARTING_POINT,
                 destination = DESTINATION,
                 formattedTotalDistance = null,
+                formattedTotalDuration = "25 min",
             ),
         )
 
         composeTestRule.onNodeWithText("Total distance unavailable").performScrollTo().assertIsDisplayed()
+    }
+
+    @Test
+    fun withBothNonNullFormattedTotals_showsBothTotalDistanceAndTotalDurationLabelsAndValues() {
+        setContent(
+            uiState = TripDetailUiState(
+                tripId = TRIP_ID,
+                startingPoint = STARTING_POINT,
+                destination = DESTINATION,
+                formattedTotalDistance = "12.5 km",
+                formattedTotalDuration = "25 min",
+            ),
+        )
+
+        composeTestRule.onNodeWithText("Total distance").performScrollTo().assertIsDisplayed()
+        composeTestRule.onNodeWithText("12.5 km").performScrollTo().assertIsDisplayed()
+        composeTestRule.onNodeWithText("Est. driving time").performScrollTo().assertIsDisplayed()
+        composeTestRule.onNodeWithText("25 min").performScrollTo().assertIsDisplayed()
+    }
+
+    @Test
+    fun withBothNullFormattedTotals_showsCombinedTotalsUnavailableText() {
+        setContent(
+            uiState = TripDetailUiState(
+                tripId = TRIP_ID,
+                startingPoint = STARTING_POINT,
+                destination = DESTINATION,
+                formattedTotalDistance = null,
+                formattedTotalDuration = null,
+            ),
+        )
+
+        composeTestRule.onNodeWithText("Trip totals unavailable").performScrollTo().assertIsDisplayed()
     }
 
     // endregion

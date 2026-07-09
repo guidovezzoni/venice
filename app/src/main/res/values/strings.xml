@@ -77,4 +77,7 @@
     <string name="trip_detail_leg_duration_hours_minutes">%1$dh %2$dmin</string>
     <string name="trip_detail_total_distance_label">Total distance</string>
     <string name="trip_detail_total_distance_unavailable">Total distance unavailable</string>
+    <string name="trip_detail_total_duration_label">Est. driving time</string>
+    <string name="trip_detail_total_duration_unavailable">Est. driving time unavailable</string>
+    <string name="trip_detail_totals_unavailable">Trip totals unavailable</string>
 </resources>

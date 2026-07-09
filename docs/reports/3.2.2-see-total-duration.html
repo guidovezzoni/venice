@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Report: 3.2.2 — See Total Estimated Duration</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.6;
+      color: #1a1a1a;
+      background: #fafafa;
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+
+    .report-header {
+      border-bottom: 3px solid #2563eb;
+      padding-bottom: 1rem;
+      margin-bottom: 2rem;
+    }
+    .report-header h1 { font-size: 1.75rem; color: #1e293b; }
+    .report-meta {
+      display: flex; gap: 2rem; flex-wrap: wrap;
+      margin-top: 0.5rem; font-size: 0.875rem; color: #64748b;
+    }
+    .report-meta span { display: inline-flex; align-items: center; gap: 0.25rem; }
+
+    .report-section {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .report-section header {
+      display: flex; justify-content: space-between; align-items: baseline;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 0.75rem; margin-bottom: 1rem;
+    }
+    .report-section header h2 { font-size: 1.25rem; color: #1e293b; }
+    .report-section header time { font-size: 0.8rem; color: #94a3b8; white-space: nowrap; }
+    .section-source { font-size: 0.75rem; color: #94a3b8; font-style: italic; margin-bottom: 0.75rem; }
+
+    h3 { font-size: 1.05rem; color: #334155; margin: 1rem 0 0.5rem; }
+    p { margin-bottom: 0.75rem; }
+    ul, ol { margin: 0.5rem 0 0.75rem 1.5rem; }
+    li { margin-bottom: 0.25rem; }
+    code {
+      background: #f1f5f9; padding: 0.15rem 0.35rem; border-radius: 3px;
+      font-size: 0.875em;
+      font-family: "SF Mono", "Fira Code", Menlo, Consolas, monospace;
+    }
+
+    table { width: 100%; border-collapse: collapse; margin: 0.75rem 0; font-size: 0.9rem; }
+    th, td { text-align: left; padding: 0.5rem 0.75rem; border: 1px solid #e2e8f0; }
+    th { background: #f8fafc; font-weight: 600; color: #475569; }
+
+    .badge {
+      display: inline-block; padding: 0.15rem 0.5rem;
+      border-radius: 4px; font-size: 0.8rem; font-weight: 600;
+    }
+    .badge-pass { background: #dcfce7; color: #166534; }
+    .badge-fail { background: #fee2e2; color: #991b1b; }
+    .badge-warn { background: #fef9c3; color: #854d0e; }
+    .badge-info { background: #dbeafe; color: #1e40af; }
+
+    .outcome { margin-top: 1rem; padding: 0.75rem 1rem; border-radius: 6px; font-weight: 600; }
+    .outcome-passed { background: #dcfce7; color: #166534; border-left: 4px solid #22c55e; }
+    .outcome-failed { background: #fee2e2; color: #991b1b; border-left: 4px solid #ef4444; }
+  </style>
+</head>
+<body>
+
+  <div class="report-header">
+    <h1>3.2.2 — See Total Estimated Duration</h1>
+    <div class="report-meta">
+      <span><strong>Story:</strong> 3.2.2</span>
+      <span><strong>Branch:</strong> feature/3.2.2-see-total-duration</span>
+      <span><strong>Created:</strong> 2026-07-08</span>
+    </div>
+  </div>
+
+  <main id="report-sections">
+  <section class="report-section" data-source="open_user_story" data-timestamp="2026-07-08T00:00:00Z">
+    <header>
+      <h2>Story Opened</h2>
+      <time datetime="2026-07-08">8 Jul 2026</time>
+    </header>
+    <p class="section-source">Source: open_user_story</p>
+
+    <h3>Actions</h3>
+    <ul>
+      <li>Created feature branch <code>feature/3.2.2-see-total-duration</code> from <code>main</code></li>
+      <li>Renamed story file to <code>3.2.2-see-total-duration-WIP.md</code> (In Progress)</li>
+      <li>Updated <code>docs/userstories/index.md</code> link to reflect new filename</li>
+    </ul>
+
+    <h3>Story Refinement Summary</h3>
+    <ul>
+      <li>Added structured functionality overview: total driving duration displayed alongside total distance, same formatting as individual legs, auto-update on recalculation, unavailable state when route is absent</li>
+      <li>Documented the route-availability model (all-or-nothing invalidation), clarifying that "partial with a warning" is not required given the current architecture</li>
+      <li>Identified the single new UI state field: <code>formattedTotalDuration: String?</code> in <code>TripDetailUiState</code> &mdash; no new domain or persistence fields needed</li>
+      <li>Listed files to modify with intent: UiState, ViewModel (extend existing combine block), TripTotalSummary composable, TripDetailScreen, string resources across 3 locales</li>
+      <li>Defined unit and Compose UI test expectations following GIVEN/WHEN/THEN naming</li>
+      <li>Scoped out trip-list total and "time at stop" to separate future stories</li>
+    </ul>
+
+    <h3>Key Concerns</h3>
+    <ul>
+      <li><span class="badge badge-pass">Low</span> <strong>Security:</strong> No new attack surface; only concern is integer summation integrity (mitigated by Long accumulation)</li>
+      <li><span class="badge badge-pass">Low</span> <strong>Performance:</strong> Negligible &mdash; summation over at most 24 legs reuses existing combine block</li>
+      <li><span class="badge badge-pass">None</span> <strong>GDPR:</strong> No personal data processed or created; no new data collection or transmission</li>
+    </ul>
+  </section>
+
+  <section class="report-section" data-source="sdlc_propose_change" data-timestamp="2026-07-08T00:00:00Z">
+    <header>
+      <h2>Change Proposed</h2>
+      <time datetime="2026-07-08">8 Jul 2026</time>
+    </header>
+    <p class="section-source">Source: sdlc_propose_change</p>
+
+    <h3>Exploration Findings</h3>
+    <ul>
+      <li>Near-identical shape to archived story 3.2.1 (total distance) &mdash; same integration points, same completeness rule</li>
+      <li><code>TripDetailUiState</code> already has <code>formattedTotalDistance: String?</code> &mdash; new field <code>formattedTotalDuration: String?</code> follows same pattern</li>
+      <li>Existing <code>combine(observeStopsUseCase, observeLegsUseCase)</code> collector (added by 3.2.1) can be extended rather than adding a 4th subscription</li>
+      <li><code>DurationFormatter.formatDuration</code> already exists and is reused as-is</li>
+      <li><code>TripTotalSummary.kt</code> composable needs restructuring from single-value Column to side-by-side Row layout</li>
+      <li>Analytics infrastructure exists (<code>AnalyticsTracker</code>/<code>AnalyticsEvent</code>) but no existing event tracks derived summary display</li>
+    </ul>
+
+    <h3>Questions Asked and Answers</h3>
+    <ul>
+      <li><strong>Label text:</strong> "Est. driving time" / "Est. driving time unavailable"</li>
+      <li><strong>Layout:</strong> Side by side (distance and duration in a Row, each taking half width)</li>
+      <li><strong>Unavailable state:</strong> Single combined "Trip totals unavailable" message when both absent</li>
+      <li><strong>Analytics:</strong> Deferred to follow-up (TODO marker), since no existing event tracks summary display</li>
+    </ul>
+
+    <h3>Artifacts Created</h3>
+    <ul>
+      <li><code>openspec/changes/see-total-duration/proposal.md</code> &mdash; Why, What Changes, Capabilities, Impact</li>
+      <li><code>openspec/changes/see-total-duration/design.md</code> &mdash; Context, Goals/Non-Goals, 6 Decisions, Risks, Migration Plan</li>
+      <li><code>openspec/changes/see-total-duration/specs/trip-detail/spec.md</code> &mdash; Delta spec for TripDetailUiState, ViewModel, Screen, previews</li>
+      <li><code>openspec/changes/see-total-duration/specs/route-display/spec.md</code> &mdash; Delta spec for string resources (3 new keys)</li>
+      <li><code>openspec/changes/see-total-duration/tasks.md</code> &mdash; 31 tasks across 7 sections (Prerequisites, ViewModel BDD, Composable BDD, Screen Wiring, Analytics TODO, Previews, Verification)</li>
+    </ul>
+  </section>
+
+  <section class="report-section" data-source="sdlc_implement_change" data-timestamp="2026-07-08T14:45:00Z">
+    <header>
+      <h2>Implementation</h2>
+      <time datetime="2026-07-08T14:45:00Z">8 Jul 2026</time>
+    </header>
+    <p class="section-source">Source: sdlc_implement_change</p>
+
+    <h3>Summary</h3>
+    <p>Implemented all 31 tasks across 7 sections using sub-agent orchestration (1 Haiku, 5 Sonnet agents). One iteration cycle was needed — no sections required retry.</p>
+
+    <h3>Sections Applied</h3>
+    <table>
+      <tr><th>Section</th><th>Tasks</th><th>Model</th><th>Notes</th></tr>
+      <tr><td>1 — Prerequisites</td><td>1</td><td>Sonnet</td><td>Added <code>formattedTotalDuration: String?</code> to <code>TripDetailUiState</code></td></tr>
+      <tr><td>2 — ViewModel BDD</td><td>8</td><td>Sonnet</td><td>7 tests (RED confirmed), implementation GREEN. Extended <code>combine</code> collector to return <code>Pair&lt;String?, String?&gt;</code>; sums <code>durationSeconds</code> and calls <code>formatDuration</code></td></tr>
+      <tr><td>3 — TripTotalSummary BDD</td><td>5</td><td>Sonnet</td><td>4 androidTest cases written; composable restructured into both-null branch (combined message) and Row with two <code>weight(1f)</code> columns. 4 previews also added here (pre-completing §6.1)</td></tr>
+      <tr><td>4 — Screen Wiring</td><td>6</td><td>Sonnet</td><td>3 string resources added in 3 locales (en, it, es-rES); call site updated; 2 screen-level androidTests added. Agent also fixed a DEX compatibility issue (backtick test names at minSdk 24) and a stale import left by §3</td></tr>
+      <tr><td>5 — Analytics Follow-Up</td><td>1</td><td>Haiku</td><td>Verified pre-existing <code>// TODO</code> comment added in §2; marked done</td></tr>
+      <tr><td>6 — Preview Coverage</td><td>3</td><td>Haiku</td><td>Updated <code>PreviewTripDetailScreenWithLegs</code> (non-null duration) and partial-legs preview (null duration). §6.1 was already done by §3 agent</td></tr>
+      <tr><td>7 — Verification</td><td>7</td><td>Sonnet</td><td>All gates passed; AGENTS.md and index.md updated; story renamed to <code>-DONE</code></td></tr>
+    </table>
+
+    <h3>Test Results</h3>
+    <ul>
+      <li>Unit tests (<code>./gradlew test</code>): <span class="badge badge-pass">PASS</span> — 92 tests in <code>TripDetailViewModelTest</code>, all green</li>
+      <li>Instrumented tests (<code>./gradlew connectedDebugAndroidTest</code>): <span class="badge badge-pass">PASS</span> — 101 tests on Pixel 6a (Android 16). Note: device keyguard must be dismissed before running; <code>adb shell wm dismiss-keyguard</code> resolves the pre-existing "No compose hierarchies found" failure seen when screen is locked</li>
+      <li>Static analysis (<code>./gradlew check</code>): <span class="badge badge-pass">PASS</span> — no regressions, coverage ≥ 95%</li>
+    </ul>
+
+    <h3>On-Device Verification</h3>
+    <ul>
+      <li>Total distance (465,1 km) and Est. driving time (6h 15min) displayed side by side after route calculation — values match the single leg's distance and duration ✓</li>
+      <li>After removing the destination stop, "Trip totals unavailable" appeared immediately (combined message, not per-metric) ✓</li>
+      <li>Label reads "Est. driving time" — driving-time-specific wording confirmed ✓</li>
+      <li>No new network calls or persisted fields — computation is purely derived from existing leg flow ✓</li>
+    </ul>
+
+    <h3>TODO Review</h3>
+    <p>4 TODOs found in <code>app/src/</code>, all classified <strong>ACKNOWLEDGED</strong> (no RESOLVE NOW):</p>
+    <ul>
+      <li><code>TripDetailViewModel.kt:139</code> — Analytics event for total-duration display; intentionally deferred per task 5.1</li>
+      <li><code>TripDetailUiIntent.kt:9</code> — PlaceDetail question in UI intents; unrelated to this story</li>
+      <li><code>DirectionsApiService.kt:24</code> / <code>NetworkModule.kt:18</code> — Replace with Retrofit; precondition (additional endpoints) not met</li>
+    </ul>
+
+    <h3>Security Review</h3>
+    <p><span class="badge badge-pass">PASS</span> — No findings. All changes are display-only: a new nullable <code>String?</code> field derived from existing persisted leg data, a composable restructuring with no new inputs, and string resources. No new network calls, persistence, or user input surfaces introduced.</p>
+
+    <h3>Documentation</h3>
+    <ul>
+      <li><strong>README.md</strong>: Updated "The App" paragraph to describe trip totals (distance + estimated driving time side by side, combined unavailable message)</li>
+      <li><strong>AGENTS.md</strong>: Extended Epic 3 / Feature 3.2 entry to record story 3.2.2 as complete</li>
+    </ul>
+
+    <div class="outcome outcome-passed">Implementation PASSED — all 31 tasks complete, all gates green.</div>
+  </section>
+
+  <section class="report-section" data-source="verify_user_story" data-timestamp="2026-07-09T00:00:00Z">
+    <header>
+      <h2>Verification &amp; Archive</h2>
+      <time datetime="2026-07-09">9 Jul 2026</time>
+    </header>
+    <p class="section-source">Source: verify_user_story</p>
+
+    <h3>Verification Gates</h3>
+    <table>
+      <tr><th>Gate</th><th>Status</th><th>Details</th></tr>
+      <tr><td>OpenSpec Verify</td><td><span class="badge badge-pass">PASS</span></td><td>31/31 tasks complete, no critical issues</td></tr>
+      <tr><td>TODO Scan</td><td><span class="badge badge-pass">PASS</span></td><td>4 TODOs found, all acknowledged as unrelated to this story</td></tr>
+      <tr><td>Security Review</td><td><span class="badge badge-pass">PASS</span></td><td>No findings of any severity</td></tr>
+      <tr><td>Clean Build &amp; Static Analysis</td><td><span class="badge badge-pass">PASS</span></td><td>BUILD SUCCESSFUL, koverVerify passed, minor non-blocking warnings only</td></tr>
+      <tr><td>Unit Tests</td><td><span class="badge badge-pass">PASS</span></td><td>All tests passed</td></tr>
+      <tr><td>Coverage Report</td><td><span class="badge badge-pass">PASS</span></td><td>See table below</td></tr>
+      <tr><td>Test File Coverage</td><td><span class="badge badge-pass">PASS</span></td><td><code>TripDetailViewModel</code>, <code>TripDetailScreen</code>, <code>TripTotalSummary</code> all have test files</td></tr>
+      <tr><td>Compose Preview Coverage</td><td><span class="badge badge-pass">PASS</span></td><td>15/15 UiState fields covered, all 4 TripTotalSummary combinations previewed</td></tr>
+      <tr><td>On-Device Tests</td><td><span class="badge badge-pass">PASS</span></td><td>101 instrumented tests passed; on-device verified (see details below)</td></tr>
+      <tr><td>Definition of Done</td><td><span class="badge badge-pass">PASS</span></td><td>All 11 criteria met</td></tr>
+      <tr><td>Story Closed</td><td><span class="badge badge-pass">PASS</span></td><td>File at <code>docs/userstories/3.2.2-see-total-duration-DONE.md</code></td></tr>
+      <tr><td>Spec Sync</td><td><span class="badge badge-pass">PASS</span></td><td>2 capabilities synced (route-display, trip-detail)</td></tr>
+      <tr><td>Archive</td><td><span class="badge badge-pass">PASS</span></td><td>Archived to <code>openspec/changes/archive/2026-07-09-see-total-duration/</code></td></tr>
+      <tr><td>README/AGENTS Sync</td><td><span class="badge badge-pass">PASS</span></td><td>Both files already in sync</td></tr>
+    </table>
+
+    <h3>Coverage Report</h3>
+    <table>
+      <tr><th>Category</th><th>Coverage</th></tr>
+      <tr><td>Instructions</td><td>99.37%</td></tr>
+      <tr><td>Branches</td><td>93.81%</td></tr>
+      <tr><td>Lines</td><td>98.90%</td></tr>
+      <tr><td>Methods</td><td>98.15%</td></tr>
+      <tr><td>Classes</td><td>99.12%</td></tr>
+    </table>
+
+    <h3>On-Device Verification</h3>
+    <ul>
+      <li>101 instrumented tests passed on connected device</li>
+      <li>Visual confirmation: "Est. driving time: 3h 6min" displayed alongside "Total distance: 271,0 km" after route calculation ✓</li>
+      <li>After stop removal: "Trip totals unavailable" message confirmed (combined state) ✓</li>
+      <li>Label wording and layout match design specification ✓</li>
+    </ul>
+
+    <h3>Archive Details</h3>
+    <ul>
+      <li><strong>Change:</strong> see-total-duration</li>
+      <li><strong>Archive Path:</strong> <code>openspec/changes/archive/2026-07-09-see-total-duration/</code></li>
+      <li><strong>Specs Synced:</strong>
+        <ul>
+          <li>route-display (string resources)</li>
+          <li>trip-detail (TripDetailUiState, ViewModel, Screen)</li>
+        </ul>
+      </li>
+    </ul>
+
+    <div class="outcome outcome-passed">Verification and Archive PASSED — All 14 gates passed. Story closed and changes archived.</div>
+  </section>
+  </main>
+
+</body>
+</html>
