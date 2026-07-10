@@ -78,4 +78,36 @@ class TripRepositoryImplTest {
         val expectedSecondStopCount = 0
         assertEquals(expectedSecondStopCount, trips[1].stopCount)
     }
+
+    @Test
+    fun `GIVEN TripDao observeById emits a TripWithStopCount WHEN observeTripById is called THEN a mapped domain Trip is emitted`() = runTest {
+        val tripId = "trip-123"
+        val entity = TripWithStopCount(
+            trip = TripEntity(id = tripId, name = "Summer Drive", createdAt = 1000L, updatedAt = 2000L),
+            stopCount = 5,
+        )
+        every { tripDao.observeById(tripId) } returns flowOf(entity)
+
+        val result = repository.observeTripById(tripId).first()
+
+        val expectedName = "Summer Drive"
+        val expectedCreatedAt = 1000L
+        val expectedUpdatedAt = 2000L
+        val expectedStopCount = 5
+        assertEquals(tripId, result?.id)
+        assertEquals(expectedName, result?.name)
+        assertEquals(expectedCreatedAt, result?.createdAt)
+        assertEquals(expectedUpdatedAt, result?.updatedAt)
+        assertEquals(expectedStopCount, result?.stopCount)
+    }
+
+    @Test
+    fun `GIVEN TripDao observeById emits null WHEN observeTripById is called THEN null is emitted`() = runTest {
+        val tripId = "non-existent-trip"
+        every { tripDao.observeById(tripId) } returns flowOf(null)
+
+        val result = repository.observeTripById(tripId).first()
+
+        assertEquals(null, result)
+    }
 }

@@ -6,4 +6,5 @@ import kotlinx.coroutines.flow.Flow
 interface TripRepository {
     suspend fun createTrip(name: String): Result<Trip>
     fun observeTrips(): Flow<List<Trip>>
+    fun observeTripById(tripId: String): Flow<Trip?>
 }

@@ -15,6 +15,7 @@ import com.guidovezzoni.venice.domain.usecase.MarkStopDepartedUseCase
 import com.guidovezzoni.venice.domain.usecase.MoveStopUseCase
 import com.guidovezzoni.venice.domain.usecase.ObserveLegsUseCase
 import com.guidovezzoni.venice.domain.usecase.ObserveStopsUseCase
+import com.guidovezzoni.venice.domain.usecase.ObserveTripUseCase
 import com.guidovezzoni.venice.domain.usecase.RemoveStopUseCase
 import com.guidovezzoni.venice.domain.usecase.SearchPlacesUseCase
 import com.guidovezzoni.venice.domain.usecase.SetStopUseCase
@@ -46,6 +47,12 @@ import kotlinx.coroutines.launch
 import java.util.Locale
 import javax.inject.Inject
 
+private data class TripTotalsAndPromptState(
+    val formattedTotalDistance: String?,
+    val formattedTotalDuration: String?,
+    val isRouteRecalculationPromptVisible: Boolean,
+)
+
 private const val ARG_TRIP_ID = "tripId"
 private const val STARTING_POINT_ORDER = 0
 private const val MAX_STOP_COUNT = 25
@@ -65,6 +72,7 @@ class TripDetailViewModel @Inject constructor(
     private val calculateRouteUseCase: CalculateRouteUseCase,
     observeStopsUseCase: ObserveStopsUseCase,
     observeLegsUseCase: ObserveLegsUseCase,
+    observeTripUseCase: ObserveTripUseCase,
     private val searchPlacesUseCase: SearchPlacesUseCase,
     private val getPlaceDetailUseCase: GetPlaceDetailUseCase,
     private val placeSearchRepository: PlaceSearchRepository,
@@ -141,17 +149,34 @@ class TripDetailViewModel @Inject constructor(
                 //  display-only change (per user clarification; no new AnalyticsEvent subtype is
                 //  introduced by this change)
                 val formattedTotalDuration = formatDuration(totalDurationSeconds, application.resources)
-                formattedTotalDistance to formattedTotalDuration
+                TripTotalsAndPromptState(
+                    formattedTotalDistance = formattedTotalDistance,
+                    formattedTotalDuration = formattedTotalDuration,
+                    isRouteRecalculationPromptVisible = false,
+                )
             } else {
-                null to null
+                TripTotalsAndPromptState(
+                    formattedTotalDistance = null,
+                    formattedTotalDuration = null,
+                    isRouteRecalculationPromptVisible = stops.size >= 2,
+                )
             }
         }
-            .onEach { (formattedTotalDistance, formattedTotalDuration) ->
+            .onEach { result ->
                 _uiState.update {
                     it.copy(
-                        formattedTotalDistance = formattedTotalDistance,
-                        formattedTotalDuration = formattedTotalDuration,
+                        formattedTotalDistance = result.formattedTotalDistance,
+                        formattedTotalDuration = result.formattedTotalDuration,
+                        isRouteRecalculationPromptVisible = result.isRouteRecalculationPromptVisible,
                     )
+                }
+            }
+            .launchIn(viewModelScope)
+
+        observeTripUseCase(tripId)
+            .onEach { trip ->
+                if (trip != null) {
+                    _uiState.update { it.copy(tripName = trip.name) }
                 }
             }
             .launchIn(viewModelScope)

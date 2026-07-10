@@ -597,6 +597,18 @@ class TripDetailScreenTest {
             .assertIsDisplayed()
     }
 
+    @Test
+    fun withTripName_topAppBarDisplaysTripName() {
+        setContent(uiState = TripDetailUiState(tripName = "Summer Roadtrip"))
+        composeTestRule.onNodeWithText("Summer Roadtrip").assertIsDisplayed()
+    }
+
+    @Test
+    fun withNullTripName_topAppBarDisplaysFallbackTitle() {
+        setContent(uiState = TripDetailUiState(tripName = null))
+        composeTestRule.onNodeWithText("Trip Detail").assertIsDisplayed()
+    }
+
     // endregion
 
     // region Stop progress — mark departed / undo
@@ -857,6 +869,71 @@ class TripDetailScreenTest {
         )
 
         composeTestRule.onNodeWithText("Trip totals unavailable").performScrollTo().assertIsDisplayed()
+    }
+
+    // endregion
+
+    // region Route recalculation prompt
+
+    @Test
+    fun givenPromptVisible_whenRendered_thenRouteRecalculationPromptIsDisplayed() {
+        setContent(
+            uiState = TripDetailUiState(isRouteRecalculationPromptVisible = true),
+        )
+
+        composeTestRule
+            .onNodeWithText("Route not calculated")
+            .assertIsDisplayed()
+    }
+
+    @Test
+    fun givenPromptNotVisible_whenRendered_thenRouteRecalculationPromptIsNotDisplayed() {
+        setContent(
+            uiState = TripDetailUiState(isRouteRecalculationPromptVisible = false),
+        )
+
+        composeTestRule
+            .onNodeWithText("Route not calculated")
+            .assertDoesNotExist()
+    }
+
+    @Test
+    fun givenPromptVisibleAndEnabled_whenTapped_thenOnCalculateRouteClickedIsDispatched() {
+        val capturedIntents = mutableListOf<TripDetailUiIntent>()
+        setContent(
+            uiState = TripDetailUiState(
+                isRouteRecalculationPromptVisible = true,
+                routeCalculationState = RouteCalculationState.Idle,
+                isLoading = false,
+            ),
+            onIntent = { capturedIntents.add(it) },
+        )
+
+        composeTestRule
+            .onNodeWithText("Route not calculated")
+            .performScrollTo()
+            .performClick()
+
+        assertTrue(capturedIntents.any { it is TripDetailUiIntent.OnCalculateRouteClicked })
+    }
+
+    @Test
+    fun givenPromptVisibleAndLoading_whenTapped_thenOnCalculateRouteClickedIsNotDispatched() {
+        val capturedIntents = mutableListOf<TripDetailUiIntent>()
+        setContent(
+            uiState = TripDetailUiState(
+                isRouteRecalculationPromptVisible = true,
+                isLoading = true,
+            ),
+            onIntent = { capturedIntents.add(it) },
+        )
+
+        composeTestRule
+            .onNodeWithText("Route not calculated")
+            .performScrollTo()
+            .performClick()
+
+        assertTrue(capturedIntents.none { it is TripDetailUiIntent.OnCalculateRouteClicked })
     }
 
     // endregion

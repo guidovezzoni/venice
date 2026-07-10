@@ -80,4 +80,6 @@
     <string name="trip_detail_total_duration_label">Est. driving time</string>
     <string name="trip_detail_total_duration_unavailable">Est. driving time unavailable</string>
     <string name="trip_detail_totals_unavailable">Trip totals unavailable</string>
+    <string name="trip_detail_recalculation_prompt_message">Route not calculated</string>
+    <string name="trip_detail_recalculation_prompt_action">Tap to calculate</string>
 </resources>
