@@ -130,6 +130,77 @@
       <h3>Branch Created</h3>
       <p><code>feature/4.1.1-trip-overview</code></p>
     </section>
+    <section class="report-section" data-source="propose_change" data-timestamp="2026-07-10T00:00:00Z">
+      <header>
+        <h2>Change Proposed</h2>
+        <time datetime="2026-07-10">10 July 2026</time>
+      </header>
+      <p class="section-source">Source: propose_change</p>
+
+      <h3>Exploration Findings</h3>
+      <ul>
+        <li><code>TripDetailScreen</code> top bar hardcoded to "Trip Detail" &mdash; no trip name observation exists in the ViewModel</li>
+        <li><code>TripDetailViewModel</code> already computes route completeness (<code>legs.size == stops.size - 1 &amp;&amp; stops.size >= 2</code>) for totals &mdash; the same signal drives the new prompt</li>
+        <li><code>TripDao.getById</code> exists as a one-shot <code>suspend</code> query &mdash; a new <code>Flow</code>-returning <code>observeById</code> is needed</li>
+        <li><code>TripRepository</code> has no single-trip read method &mdash; needs <code>observeTripById</code> + a new <code>ObserveTripUseCase</code></li>
+        <li>Route invalidation hard-deletes all legs &mdash; no "stale" flag exists; missing and stale are identical in the data model</li>
+      </ul>
+
+      <h3>Questions &amp; Clarifications</h3>
+      <table>
+        <tr><th>Question</th><th>Answer</th></tr>
+        <tr>
+          <td>Should "never calculated" and "stale after edit" show different messages?</td>
+          <td>No &mdash; single generic prompt, no schema change</td>
+        </tr>
+        <tr>
+          <td>Should the prompt appear with fewer than 2 stops?</td>
+          <td>No &mdash; only when 2+ stops (same guard as Calculate route button)</td>
+        </tr>
+        <tr>
+          <td>Should the prompt be tappable or purely informational?</td>
+          <td>Tappable &mdash; dispatches existing <code>OnCalculateRouteClicked</code> intent</td>
+        </tr>
+        <tr>
+          <td>What should the top bar show while trip name is loading?</td>
+          <td>Static fallback "Trip Detail" until the real name arrives</td>
+        </tr>
+      </table>
+
+      <h3>Artifacts Created</h3>
+      <table>
+        <tr><th>Artifact</th><th>Path</th></tr>
+        <tr><td>Proposal</td><td><code>openspec/changes/see-trip-overview/proposal.md</code></td></tr>
+        <tr><td>Design</td><td><code>openspec/changes/see-trip-overview/design.md</code></td></tr>
+        <tr><td>Delta spec: trip-detail</td><td><code>openspec/changes/see-trip-overview/specs/trip-detail/spec.md</code></td></tr>
+        <tr><td>Delta spec: trip-creation</td><td><code>openspec/changes/see-trip-overview/specs/trip-creation/spec.md</code></td></tr>
+        <tr><td>Delta spec: trip-persistence</td><td><code>openspec/changes/see-trip-overview/specs/trip-persistence/spec.md</code></td></tr>
+        <tr><td>Delta spec: route-display</td><td><code>openspec/changes/see-trip-overview/specs/route-display/spec.md</code></td></tr>
+        <tr><td>Tasks</td><td><code>openspec/changes/see-trip-overview/tasks.md</code></td></tr>
+      </table>
+
+      <h3>Task Structure</h3>
+      <ul>
+        <li><strong>2 prerequisite tasks</strong> &mdash; DAO query, UiState fields</li>
+        <li><strong>7 BDD sections (27 tasks)</strong> &mdash; repository, use case, ViewModel trip-name, ViewModel prompt-visibility, RouteRecalculationPrompt composable, top-bar wiring, prompt wiring</li>
+        <li><strong>2 integration sections (5 tasks)</strong> &mdash; strings/i18n, preview coverage</li>
+        <li><strong>1 verification section (7 tasks)</strong> &mdash; unit tests, UI tests, on-device, documentation</li>
+        <li><strong>Total: 41 tasks</strong></li>
+      </ul>
+
+      <h3>Key Design Decisions</h3>
+      <ol>
+        <li><code>TripDao.observeById</code> is a new <code>Flow</code>-returning query (existing <code>getById</code> left untouched)</li>
+        <li><code>tripName: String?</code> (null = not yet loaded) with null-coalescing fallback in the composable</li>
+        <li><code>isRouteRecalculationPromptVisible: Boolean</code> derived in the existing <code>combine</code> collector alongside totals</li>
+        <li>Extended combine result uses a private data class (<code>TripTotalsAndPromptState</code>) instead of positionally ambiguous <code>Triple</code></li>
+        <li><code>RouteRecalculationPrompt</code> in its own file, mirroring <code>TripTotalSummary</code> / <code>TripProgressSummary</code></li>
+        <li>No new intents &mdash; prompt reuses <code>OnCalculateRouteClicked</code></li>
+        <li>No schema/migration change &mdash; purely additive DAO query</li>
+      </ol>
+
+      <div class="outcome outcome-passed">Proposal complete &mdash; ready for implementation</div>
+    </section>
   </main>
 
 </body>
