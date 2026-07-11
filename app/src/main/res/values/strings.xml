@@ -82,4 +82,6 @@
     <string name="trip_detail_totals_unavailable">Trip totals unavailable</string>
     <string name="trip_detail_recalculation_prompt_message">Route not calculated</string>
     <string name="trip_detail_recalculation_prompt_action">Tap to calculate</string>
+    <string name="nav_action_navigate_content_description">Navigate to %1$s</string>
+    <string name="nav_action_no_app_available_error">No navigation app found</string>
 </resources>

@@ -334,6 +334,8 @@ class TripDetailViewModel @Inject constructor(
             }
 
             TripDetailUiIntent.OnCalculateRouteClicked -> calculateRoute()
+
+            is TripDetailUiIntent.OnNavigateToStopClicked -> navigateToStop(intent.stopId)
         }
     }
 
@@ -483,6 +485,25 @@ class TripDetailViewModel @Inject constructor(
                     )
                 }
             }
+        }
+    }
+
+    private fun navigateToStop(stopId: String) {
+        val state = _uiState.value
+        val allStops = buildList {
+            state.startingPoint?.let { add(it) }
+            addAll(state.intermediateStops)
+            state.destination?.let { add(it) }
+        }
+        val stop = allStops.firstOrNull { it.id == stopId } ?: return
+        viewModelScope.launch {
+            _uiEffect.emit(
+                TripDetailUiEffect.LaunchNavigation(
+                    latitude = stop.latitude,
+                    longitude = stop.longitude,
+                    placeName = stop.placeName,
+                ),
+            )
         }
     }
 

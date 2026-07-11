@@ -141,6 +141,9 @@ fun TripDetailScreen(
                     onUndoDeparted = startingPoint?.takeIf { it.id == lastDepartedStopId }?.let {
                         { onIntent(TripDetailUiIntent.OnUndoMarkStopDepartedClicked(it.id)) }
                     },
+                    onNavigate = startingPoint?.takeIf { it.status == StopStatus.PENDING }?.let { stop ->
+                        { onIntent(TripDetailUiIntent.OnNavigateToStopClicked(stop.id)) }
+                    },
                 )
                 startingPoint?.let { stop ->
                     legByFromStopId[stop.id]?.let {
@@ -187,6 +190,11 @@ fun TripDetailScreen(
                     },
                     onUndoDeparted = if (stop.id == lastDepartedStopId) {
                         { onIntent(TripDetailUiIntent.OnUndoMarkStopDepartedClicked(stop.id)) }
+                    } else {
+                        null
+                    },
+                    onNavigate = if (stop.status == StopStatus.PENDING) {
+                        { onIntent(TripDetailUiIntent.OnNavigateToStopClicked(stop.id)) }
                     } else {
                         null
                     },
@@ -246,6 +254,9 @@ fun TripDetailScreen(
                     },
                     onUndoDeparted = destination?.takeIf { it.id == lastDepartedStopId }?.let {
                         { onIntent(TripDetailUiIntent.OnUndoMarkStopDepartedClicked(it.id)) }
+                    },
+                    onNavigate = destination?.takeIf { it.status == StopStatus.PENDING }?.let { stop ->
+                        { onIntent(TripDetailUiIntent.OnNavigateToStopClicked(stop.id)) }
                     },
                 )
             }
