@@ -59,6 +59,7 @@ private const val MAX_STOP_COUNT = 25
 private const val UNKNOWN_ERROR = "Unknown error"
 private const val SEARCH_DEBOUNCE_MILLIS = 300L
 
+// TODO remove Android references that could be abstracted out
 @HiltViewModel
 @Suppress("LongParameterList")
 class TripDetailViewModel @Inject constructor(

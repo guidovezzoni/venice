@@ -119,6 +119,50 @@
         Story refined and ready for specification and implementation planning
       </div>
     </section>
+    <section class="report-section" data-source="sdlc_propose_change" data-timestamp="2026-07-11T00:00:00Z">
+      <header>
+        <h2>Propose Change</h2>
+        <time datetime="2026-07-11T00:00:00Z">July 11, 2026</time>
+      </header>
+      <p class="section-source">Source: sdlc_propose_change</p>
+
+      <h3>Exploration Summary</h3>
+      <ul>
+        <li>Explored MVI stack: <code>TripDetailViewModel</code>, <code>TripDetailUiIntent</code> (22 entries), <code>TripDetailUiEffect</code> (1 entry), <code>TripDetailUiState</code></li>
+        <li><code>StopSection</code> uses null-hides-button convention for action lambdas</li>
+        <li><code>MainScreen.kt</code> is the only place with Android Context for intent launching</li>
+        <li>No existing intent/startActivity code in codebase — first external intent feature</li>
+        <li><code>AndroidManifest.xml</code> has no <code>&lt;queries&gt;</code> block (required for API 30+)</li>
+        <li>Stop model already carries latitude, longitude, placeName</li>
+      </ul>
+
+      <h3>Questions Asked and Answers</h3>
+      <ol>
+        <li><strong>Icon choice:</strong> <code>Icons.Filled.Navigation</code> (arrow/compass) — chosen by user</li>
+        <li><strong>Error message delivery:</strong> ViewModel resolves string resource via <code>application.resources</code>, passes final localized string in <code>ShowNavigationError(message)</code> — chosen by user (consistent with formatDistance pattern)</li>
+        <li><strong>URI builder extraction:</strong> Extract to <code>ui/util/NavigationUriBuilder.kt</code> utility file — chosen by user (follows CoordinateFormatter/DistanceFormatter pattern)</li>
+      </ol>
+
+      <h3>Artifacts Created</h3>
+      <ul>
+        <li><code>openspec/changes/navigate-to-stop/proposal.md</code> — Change proposal with capabilities and impact</li>
+        <li><code>openspec/changes/navigate-to-stop/design.md</code> — Technical design with 5 key decisions, risks, trade-offs</li>
+        <li><code>openspec/changes/navigate-to-stop/specs/stop-navigation/spec.md</code> — Delta spec with 7 ADDED requirements</li>
+        <li><code>openspec/changes/navigate-to-stop/tasks.md</code> — 27 tasks in 8 sections (5 BDD groups, prerequisites, integration, verification)</li>
+      </ul>
+
+      <h3>Task Structure</h3>
+      <ul>
+        <li>2 prerequisite tasks (MVI contracts)</li>
+        <li>11 test tasks + 5 implementation tasks across 5 BDD groups</li>
+        <li>5 integration tasks (manifest, strings, previews)</li>
+        <li>4 verification tasks</li>
+      </ul>
+
+      <div class="outcome outcome-passed">
+        Change design complete with comprehensive task breakdown ready for implementation
+      </div>
+    </section>
   </main>
 
 </body>
