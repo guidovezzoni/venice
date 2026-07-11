@@ -9,6 +9,7 @@ Defines the requirements for the trip detail screen, covering the MVI contract (
 ### Requirement: TripDetailUiState represents the screen state
 `TripDetailUiState` SHALL be a data class with:
 - `tripId: String` (default `""`)
+- `tripName: String?` (default `null`) — the trip's persisted name, observed live via `ObserveTripUseCase`. `null` means the name has not arrived yet (e.g. first composition, or the trip is not yet found); the composable falls back to the `trip_detail_title` string resource while `tripName` is `null`. No loading indicator is associated with this field.
 - `startingPoint: Stop?` (default `null`)
 - `destination: Stop?` (default `null`)
 - `intermediateStops: List<Stop>` (default `emptyList()`)
@@ -42,10 +43,18 @@ Defines the requirements for the trip detail screen, covering the MVI contract (
   completeness check on the same emission. Formatting and completeness for both totals are
   computed entirely in the ViewModel; the composable performs no arithmetic, locale
   detection, or string-resource resolution.
+- `isRouteRecalculationPromptVisible: Boolean` (default `false`) — pre-computed in the
+  ViewModel from the same `stops`/`legs` inputs and the same completeness check as
+  `formattedTotalDistance` / `formattedTotalDuration`, plus the same 2+-stops guard already
+  used by the "Calculate route" button: `stops.size >= 2 && legs.size != stops.size - 1`.
+  `true` means the route has never been calculated, or has gone stale after a stop mutation
+  (both cases are indistinguishable and handled by a single generic prompt, since
+  `InvalidateRouteUseCase` always deletes all legs at once). The composable performs no
+  completeness or stop-count arithmetic of its own to decide the prompt's visibility.
 
 #### Scenario: Default initial state
 - **WHEN** `TripDetailUiState()` is created with defaults
-- **THEN** `tripId` is `""`, `startingPoint` is `null`, `destination` is `null`, `intermediateStops` is empty, `isLoading` is `false`, `isSetStartingPointDialogVisible` is `false`, `isSetDestinationDialogVisible` is `false`, `isAddStopDialogVisible` is `false`, `isEditStopDialogVisible` is `false`, `editingStop` is `null`, `canAddMoreStops` is `false`, `isRemoveStopDialogVisible` is `false`, `stopToRemove` is `null`, `placeSuggestions` is empty, `isSearchingPlaces` is `false`, `searchError` is `null`, `selectedPlaceDetail` is `null`, `isResolvingPlace` is `false`, `placeDetailError` is `null`, `legs` is empty, `isCalculatingRoute` is `false`, `routeError` is `null`, `formattedTotalDistance` is `null`, and `formattedTotalDuration` is `null`
+- **THEN** `tripId` is `""`, `tripName` is `null`, `startingPoint` is `null`, `destination` is `null`, `intermediateStops` is empty, `isLoading` is `false`, `isSetStartingPointDialogVisible` is `false`, `isSetDestinationDialogVisible` is `false`, `isAddStopDialogVisible` is `false`, `isEditStopDialogVisible` is `false`, `editingStop` is `null`, `canAddMoreStops` is `false`, `isRemoveStopDialogVisible` is `false`, `stopToRemove` is `null`, `placeSuggestions` is empty, `isSearchingPlaces` is `false`, `searchError` is `null`, `selectedPlaceDetail` is `null`, `isResolvingPlace` is `false`, `placeDetailError` is `null`, `legs` is empty, `isCalculatingRoute` is `false`, `routeError` is `null`, `formattedTotalDistance` is `null`, `formattedTotalDuration` is `null`, and `isRouteRecalculationPromptVisible` is `false`
 
 #### Scenario: Total distance present when route is complete
 - **WHEN** `legs.size == stops.size - 1` and `stops.size >= 2`
@@ -62,6 +71,30 @@ Defines the requirements for the trip detail screen, covering the MVI contract (
 #### Scenario: Total duration unavailable when route is incomplete or absent
 - **WHEN** `legs` is empty, or `legs.size` is neither `0` nor `stops.size - 1`, or `stops.size < 2`
 - **THEN** `formattedTotalDuration` is `null`, and `formattedTotalDistance` is simultaneously `null`
+
+#### Scenario: Trip name reflects the observed trip
+- **WHEN** `ObserveTripUseCase(tripId)` emits a `Trip` with `name = "Summer Roadtrip"`
+- **THEN** `uiState.tripName` becomes `"Summer Roadtrip"`
+
+#### Scenario: Trip name stays null while the trip has not been observed yet
+- **WHEN** the ViewModel has just initialised and `ObserveTripUseCase(tripId)` has not yet emitted
+- **THEN** `uiState.tripName` remains `null`
+
+#### Scenario: Recalculation prompt visible when route incomplete with 2+ stops
+- **WHEN** `stops.size >= 2` and `legs.size != stops.size - 1` (including the no-legs-at-all case)
+- **THEN** `isRouteRecalculationPromptVisible` is `true`
+
+#### Scenario: Recalculation prompt hidden when route is complete
+- **WHEN** `legs.size == stops.size - 1` and `stops.size >= 2`
+- **THEN** `isRouteRecalculationPromptVisible` is `false`
+
+#### Scenario: Recalculation prompt hidden with fewer than two stops
+- **WHEN** `stops.size < 2`
+- **THEN** `isRouteRecalculationPromptVisible` is `false`, regardless of any legs present
+
+#### Scenario: Recalculation prompt becomes visible after a route-invalidating stop mutation
+- **WHEN** `isRouteRecalculationPromptVisible` is `false` (route complete) and a stop mutation (add, remove, move, or edit) invalidates all legs for the trip, leaving `stops.size >= 2`
+- **THEN** `isRouteRecalculationPromptVisible` transitions to `true` once the legs flow emits the now-empty list, at the same time `formattedTotalDistance` / `formattedTotalDuration` transition to `null`
 
 ### Requirement: TripDetailUiIntent models user actions
 `TripDetailUiIntent` SHALL be a sealed class with:
@@ -125,6 +158,7 @@ Defines the requirements for the trip detail screen, covering the MVI contract (
 - Accept `tripId` from `SavedStateHandle`.
 - Expose `uiState: StateFlow<TripDetailUiState>` and `uiEffect: SharedFlow<TripDetailUiEffect>`.
 - Provide `fun onIntent(intent: TripDetailUiIntent)`.
+- On initialisation, collect `ObserveTripUseCase(tripId)` and update `tripName` with the emitted `Trip?`'s `name` (or leave `tripName` at its current value if the emission is `null`, i.e. the trip is not found — the "Trip Detail" fallback title is a composable-level default and is never written back into `tripName` by the ViewModel). This collector is independent of the stops-only, legs-only, and combined stops+legs collectors described below.
 - On initialisation, collect `ObserveStopsUseCase(tripId)` and update:
   - `startingPoint` with the stop where `order = 0` (or `null` if absent).
   - `destination` with the stop having the highest `order` where `order > 0` (or `null` if absent).
@@ -154,11 +188,11 @@ Defines the requirements for the trip detail screen, covering the MVI contract (
 - On `OnSuggestionSelected(suggestion)`: set `isResolvingPlace = true` and clear `placeDetailError`; call `GetPlaceDetailUseCase(suggestion.placeId)`; on success set `selectedPlaceDetail`, clear `placeSuggestions`, set `isResolvingPlace = false`; on failure set `placeDetailError` with the error message, set `isResolvingPlace = false`. SHALL NOT emit `ShowError` effect on Place Details failure.
 - On initialisation, collect `ObserveLegsUseCase(tripId)` and update `legs` in the UI state.
 - On `OnCalculateRouteClicked`: set `isCalculatingRoute = true` and clear `routeError`; build the ordered list of all stops (starting point + intermediate + destination); call `CalculateRouteUseCase(tripId, stops)` with `withMinimumDuration`; on success set `isCalculatingRoute = false` (legs update via `ObserveLegsUseCase` Flow); on failure set `isCalculatingRoute = false` and set `routeError` to the error message.
-- On initialisation, also maintain a single `combine(ObserveStopsUseCase(tripId), ObserveLegsUseCase(tripId))` collector that computes and updates **both** `formattedTotalDistance` and `formattedTotalDuration` on every emission from either source, in one lambda invocation applied via one state update (no separate collector is added for duration):
+- On initialisation, also maintain a single `combine(ObserveStopsUseCase(tripId), ObserveLegsUseCase(tripId))` collector that computes and updates `formattedTotalDistance`, `formattedTotalDuration`, **and** `isRouteRecalculationPromptVisible` on every emission from either source, in one lambda invocation applied via one state update (no separate collector is added for any of the three):
   - Completeness: `legs.size == stops.size - 1 && stops.size >= 2`.
-  - When complete: sum `leg.distanceMetres` across all `legs`, format the sum via the existing `formatDistance(sum, Locale.getDefault(), application.resources)`, and set `formattedTotalDistance` to the formatted string; sum `leg.durationSeconds` across all `legs` (accumulated as `Long` to guard against overflow, then narrowed to `Int`), format the sum via the existing `formatDuration(totalDurationSeconds, application.resources)`, and set `formattedTotalDuration` to the formatted string.
-  - When not complete: set both `formattedTotalDistance = null` and `formattedTotalDuration = null`.
-  - This collector is independent of, and does not alter, the existing stops-only collector (`startingPoint`, `destination`, `intermediateStops`, `canAddMoreStops`, `formattedStopCoordinates`) or the existing legs-only collector (`legs`, `formattedLegDistances`, `formattedLegDurations`).
+  - When complete: sum `leg.distanceMetres` across all `legs`, format the sum via the existing `formatDistance(sum, Locale.getDefault(), application.resources)`, and set `formattedTotalDistance` to the formatted string; sum `leg.durationSeconds` across all `legs` (accumulated as `Long` to guard against overflow, then narrowed to `Int`), format the sum via the existing `formatDuration(totalDurationSeconds, application.resources)`, and set `formattedTotalDuration` to the formatted string; set `isRouteRecalculationPromptVisible = false`.
+  - When not complete: set both `formattedTotalDistance = null` and `formattedTotalDuration = null`; set `isRouteRecalculationPromptVisible = (stops.size >= 2)` (i.e. the prompt is shown only when there are enough stops to calculate a route in the first place, matching the same guard used by the "Calculate route" button).
+  - This collector is independent of, and does not alter, the existing stops-only collector (`startingPoint`, `destination`, `intermediateStops`, `canAddMoreStops`, `formattedStopCoordinates`), the existing legs-only collector (`legs`, `formattedLegDistances`, `formattedLegDurations`), or the new trip-name collector (`tripName`).
 
 #### Scenario: Calculate route — success
 - **WHEN** `OnCalculateRouteClicked` is dispatched and `CalculateRouteUseCase` succeeds
@@ -419,6 +453,10 @@ Defines the requirements for the trip detail screen, covering the MVI contract (
 #### Scenario: Long operation not artificially delayed
 - **WHEN** any async operation takes longer than 500 ms
 - **THEN** `isLoading` remains `true` for the full duration of the operation and is set to `false` immediately upon completion
+
+#### Scenario: Trip name collector is independent of stops/legs collectors
+- **WHEN** `ObserveTripUseCase(tripId)` emits a new `Trip` while `ObserveStopsUseCase` and `ObserveLegsUseCase` have not re-emitted
+- **THEN** only `tripName` changes in `uiState`; `startingPoint`, `destination`, `intermediateStops`, `legs`, `formattedTotalDistance`, `formattedTotalDuration`, and `isRouteRecalculationPromptVisible` are unaffected
 
 ### Requirement: Stop sections use consolidated StopSection composable
 The trip detail screen SHALL use `StopSection` (defined in destination-ui spec) for both the starting point and destination sections, parameterised with the appropriate icon, labels, and string resources for each.
@@ -815,6 +853,8 @@ The trip detail screen previews SHALL include:
 - A preview with `routeError` set
 - A preview with a non-null `formattedTotalDistance` and non-null `formattedTotalDuration` (satisfying non-default `UiState`-field preview coverage)
 - A preview with `formattedTotalDistance = null` and `formattedTotalDuration = null` alongside a populated stop/leg set, showing the combined unavailable state
+- A preview with a non-null `tripName` (satisfying non-default `UiState`-field preview coverage), showing the trip's real name in the `TopAppBar`
+- A preview with `isRouteRecalculationPromptVisible = true` alongside a 2+-stop, route-incomplete state, showing the `RouteRecalculationPrompt`
 
 `TripTotalSummary` SHALL itself have previews covering all four reachable-or-defensive availability combinations, each private, wrapped in `HeadingToVeniceTheme`, with `showBackground = true`:
 - Both `formattedTotalDistance` and `formattedTotalDuration` available (side by side)
@@ -822,10 +862,52 @@ The trip detail screen previews SHALL include:
 - `formattedTotalDistance` available, `formattedTotalDuration` unavailable
 - `formattedTotalDuration` available, `formattedTotalDistance` unavailable
 
+`RouteRecalculationPrompt` SHALL itself have previews, each private, wrapped in `HeadingToVeniceTheme`, with `showBackground = true`, covering:
+- Enabled (tappable) state
+- Disabled state (while `isCalculatingRoute` or `isLoading` is `true`)
+
 #### Scenario: Route previews exist
 - **WHEN** the composable is inspected in Android Studio
-- **THEN** preview variants for legs, calculating state, error state, both-totals-present state, and both-totals-unavailable state are all visible
+- **THEN** preview variants for legs, calculating state, error state, both-totals-present state, both-totals-unavailable state, non-null trip name, and the recalculation prompt are all visible
 
 #### Scenario: TripTotalSummary previews exist
 - **WHEN** `TripTotalSummary` is inspected in Android Studio
 - **THEN** four preview variants are visible, covering both-available, both-unavailable, distance-only-available, and duration-only-available
+
+#### Scenario: RouteRecalculationPrompt previews exist
+- **WHEN** `RouteRecalculationPrompt` is inspected in Android Studio
+- **THEN** two preview variants are visible, covering the enabled and disabled states
+
+### Requirement: TripDetailScreen top bar shows the trip name
+`TripDetailScreen`'s `TopAppBar` SHALL display `uiState.tripName` as its title when non-null. When `uiState.tripName` is `null`, it SHALL display the existing `trip_detail_title` string resource ("Trip Detail") instead. No loading spinner or additional visual state is shown for the fallback case — it is a plain string substitution performed with a null-coalescing expression (`uiState.tripName ?: stringResource(R.string.trip_detail_title)`).
+
+#### Scenario: Top bar shows the real trip name
+- **WHEN** `uiState.tripName` is `"Summer Roadtrip"`
+- **THEN** the `TopAppBar` title displays "Summer Roadtrip"
+
+#### Scenario: Top bar falls back to the placeholder title
+- **WHEN** `uiState.tripName` is `null`
+- **THEN** the `TopAppBar` title displays the `trip_detail_title` string resource ("Trip Detail")
+
+### Requirement: TripDetailScreen renders route recalculation prompt
+`TripDetailScreen` SHALL render a `RouteRecalculationPrompt` composable, defined in `ui/screens/tripdetail/RouteRecalculationPrompt.kt`, as a `LazyColumn` item placed immediately before the `TripTotalSummary` item, visible only when `uiState.isRouteRecalculationPromptVisible` is `true`.
+
+`RouteRecalculationPrompt` accepts `modifier: Modifier = Modifier`, `isEnabled: Boolean`, and `onClick: () -> Unit = {}`. It renders a tappable container (e.g. `Card` or `Row` with a clickable modifier) showing the `trip_detail_recalculation_prompt_message` text and the `trip_detail_recalculation_prompt_action` call-to-action text. It performs no completeness or stop-count logic of its own — visibility and enablement are both supplied pre-computed by the caller.
+
+`TripDetailScreen` SHALL pass `isEnabled = !isCalculatingRoute && !uiState.isLoading` (the same enablement rule already used by the "Calculate route" button) and `onClick = { onIntent(TripDetailUiIntent.OnCalculateRouteClicked) }` — no new `TripDetailUiIntent` subclass is introduced; the prompt reuses the existing `OnCalculateRouteClicked` intent.
+
+#### Scenario: Prompt visible when route incomplete with 2+ stops
+- **WHEN** `uiState.isRouteRecalculationPromptVisible` is `true`
+- **THEN** `RouteRecalculationPrompt` is rendered above `TripTotalSummary`, displaying the recalculation message and call-to-action
+
+#### Scenario: Prompt hidden when route is complete or fewer than 2 stops
+- **WHEN** `uiState.isRouteRecalculationPromptVisible` is `false`
+- **THEN** `RouteRecalculationPrompt` is not rendered
+
+#### Scenario: Tapping the prompt dispatches the existing calculate-route intent
+- **WHEN** the user taps `RouteRecalculationPrompt` while it is enabled
+- **THEN** `OnCalculateRouteClicked` is dispatched (the same intent dispatched by the "Calculate route" button)
+
+#### Scenario: Prompt disabled while calculating or loading
+- **WHEN** `uiState.isCalculatingRoute` is `true`, or `uiState.isLoading` is `true`
+- **THEN** `RouteRecalculationPrompt` is rendered with `isEnabled = false` and tapping it does not dispatch `OnCalculateRouteClicked`

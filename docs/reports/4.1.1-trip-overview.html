@@ -281,6 +281,56 @@
 
       <div class="outcome outcome-passed">Implementation complete — all 41 tasks done, all tests pass, on-device verified</div>
     </section>
+    <section class="report-section" data-source="verify_user_story" data-timestamp="2026-07-11T00:00:00Z">
+      <header>
+        <h2>Verification & Archive</h2>
+        <time datetime="2026-07-11">11 July 2026</time>
+      </header>
+      <p class="section-source">Source: verify_user_story</p>
+
+      <h3>Verification Gates</h3>
+      <table>
+        <tr><th>Gate</th><th>Status</th><th>Details</th></tr>
+        <tr><td>OpenSpec verify</td><td><span class="badge badge-pass">PASS</span></td><td>41/41 tasks complete, all requirements verified</td></tr>
+        <tr><td>TODO scan</td><td><span class="badge badge-pass">PASS</span></td><td>4 TODOs found, all ACKNOWLEDGED (none blocking)</td></tr>
+        <tr><td>Security review</td><td><span class="badge badge-pass">PASS</span></td><td>No critical or high-severity findings</td></tr>
+        <tr><td>Clean build</td><td><span class="badge badge-pass">PASS</span></td><td><code>./gradlew clean check</code> succeeded; <code>exportSchema = false</code> fix applied to AppDatabase.kt</td></tr>
+        <tr><td>Unit tests</td><td><span class="badge badge-pass">PASS</span></td><td>287 tests passed</td></tr>
+        <tr><td>Coverage report</td><td><span class="badge badge-pass">PASS</span></td><td>All metrics ≥93.94% (see table below)</td></tr>
+        <tr><td>Test file coverage</td><td><span class="badge badge-pass">PASS</span></td><td>All required test files present</td></tr>
+        <tr><td>Compose preview coverage</td><td><span class="badge badge-pass">PASS</span></td><td>17/17 UiState fields covered across 20 previews</td></tr>
+        <tr><td>On-device tests</td><td><span class="badge badge-pass">PASS</span></td><td>110 instrumented tests passed on device</td></tr>
+        <tr><td>Definition of Done</td><td><span class="badge badge-pass">PASS</span></td><td>All 9 criteria confirmed met</td></tr>
+      </table>
+
+      <h3>Code Coverage Report</h3>
+      <table>
+        <tr><th>Category</th><th>Coverage</th></tr>
+        <tr><td>Instructions</td><td>99.38%</td></tr>
+        <tr><td>Branches</td><td>93.94%</td></tr>
+        <tr><td>Lines</td><td>98.92%</td></tr>
+        <tr><td>Methods</td><td>98.19%</td></tr>
+        <tr><td>Classes</td><td>99.13%</td></tr>
+      </table>
+
+      <h3>Specification Sync</h3>
+      <p><span class="badge badge-pass">PASS</span> — 4 capabilities synced to main specs:</p>
+      <ul>
+        <li><code>openspec/specs/route-display/spec.md</code></li>
+        <li><code>openspec/specs/trip-creation/spec.md</code></li>
+        <li><code>openspec/specs/trip-detail/spec.md</code></li>
+        <li><code>openspec/specs/trip-persistence/spec.md</code></li>
+      </ul>
+
+      <h3>Documentation Sync</h3>
+      <p><span class="badge badge-pass">PASS</span> — README.md and AGENTS.md already in sync with implementation. No additional updates required.</p>
+
+      <h3>Archive</h3>
+      <p>OpenSpec change archived at <code>openspec/changes/archive/2026-07-11-see-trip-overview/</code></p>
+      <p>User story renamed to <code>docs/userstories/4.1.1-trip-overview-DONE.md</code></p>
+
+      <div class="outcome outcome-passed">VERIFICATION PASSED — All gates green, specs synced, change archived. Story is complete and ready for release.</div>
+    </section>
   </main>
 
 </body>
