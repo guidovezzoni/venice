@@ -80,7 +80,7 @@ A summary screen showing the full trip with per-leg breakdowns.
 
 | ID | User Story | Details |
 |----|------------|---------|
-| 4.1.1 | As a user, I want to see a trip overview with all stops and per-leg breakdowns | [4.1.1-trip-overview](4.1.1-trip-overview.md) |
+| 4.1.1 | As a user, I want to see a trip overview with all stops and per-leg breakdowns | [4.1.1-trip-overview](4.1.1-trip-overview-DONE.md) ✅ |
 
 ---
 

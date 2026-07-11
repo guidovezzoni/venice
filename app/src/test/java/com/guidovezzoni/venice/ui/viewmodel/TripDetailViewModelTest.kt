@@ -18,8 +18,10 @@ import com.guidovezzoni.venice.domain.usecase.EditStopUseCase
 import com.guidovezzoni.venice.domain.usecase.GetPlaceDetailUseCase
 import com.guidovezzoni.venice.domain.usecase.MarkStopDepartedUseCase
 import com.guidovezzoni.venice.domain.usecase.MoveStopUseCase
+import com.guidovezzoni.venice.domain.model.Trip
 import com.guidovezzoni.venice.domain.usecase.ObserveLegsUseCase
 import com.guidovezzoni.venice.domain.usecase.ObserveStopsUseCase
+import com.guidovezzoni.venice.domain.usecase.ObserveTripUseCase
 import com.guidovezzoni.venice.domain.usecase.RemoveStopUseCase
 import com.guidovezzoni.venice.domain.usecase.SearchPlacesUseCase
 import com.guidovezzoni.venice.domain.usecase.SetStopUseCase
@@ -124,10 +126,12 @@ class TripDetailViewModelTest {
     private fun createViewModel(
         stops: List<Stop> = emptyList(),
         legs: List<Leg> = emptyList(),
+        observeTripUseCase: ObserveTripUseCase = mockk(),
     ): TripDetailViewModel {
         every { observeStopsUseCase(TRIP_ID) } returns flowOf(stops)
         every { observeLegsUseCase(TRIP_ID) } returns flowOf(legs)
-        return TripDetailViewModel(application, setStopUseCase, moveStopUseCase, editStopUseCase, removeStopUseCase, markStopDepartedUseCase, undoMarkStopDepartedUseCase, calculateRouteUseCase, observeStopsUseCase, observeLegsUseCase, searchPlacesUseCase, getPlaceDetailUseCase, placeSearchRepository, analyticsTracker, savedStateHandle)
+        every { observeTripUseCase(TRIP_ID) } returns flowOf(null)
+        return TripDetailViewModel(application, setStopUseCase, moveStopUseCase, editStopUseCase, removeStopUseCase, markStopDepartedUseCase, undoMarkStopDepartedUseCase, calculateRouteUseCase, observeStopsUseCase, observeLegsUseCase, observeTripUseCase, searchPlacesUseCase, getPlaceDetailUseCase, placeSearchRepository, analyticsTracker, savedStateHandle)
     }
 
     @Test
@@ -1314,11 +1318,14 @@ class TripDetailViewModelTest {
 
         legsFlow.emit(listOf(completeLeg))
 
+        val localObserveTripUseCase = mockk<ObserveTripUseCase>()
+        every { localObserveTripUseCase(TRIP_ID) } returns flowOf(null)
+
         val viewModel = TripDetailViewModel(
             application, setStopUseCase, moveStopUseCase, editStopUseCase, removeStopUseCase,
             markStopDepartedUseCase, undoMarkStopDepartedUseCase, calculateRouteUseCase,
-            observeStopsUseCase, observeLegsUseCase, searchPlacesUseCase, getPlaceDetailUseCase,
-            placeSearchRepository, analyticsTracker, savedStateHandle,
+            observeStopsUseCase, observeLegsUseCase, localObserveTripUseCase, searchPlacesUseCase,
+            getPlaceDetailUseCase, placeSearchRepository, analyticsTracker, savedStateHandle,
         )
 
         assertNotNull(viewModel.uiState.value.formattedTotalDistance)
@@ -1442,11 +1449,14 @@ class TripDetailViewModelTest {
 
         legsFlow.emit(listOf(completeLeg))
 
+        val localObserveTripUseCase = mockk<ObserveTripUseCase>()
+        every { localObserveTripUseCase(TRIP_ID) } returns flowOf(null)
+
         val viewModel = TripDetailViewModel(
             application, setStopUseCase, moveStopUseCase, editStopUseCase, removeStopUseCase,
             markStopDepartedUseCase, undoMarkStopDepartedUseCase, calculateRouteUseCase,
-            observeStopsUseCase, observeLegsUseCase, searchPlacesUseCase, getPlaceDetailUseCase,
-            placeSearchRepository, analyticsTracker, savedStateHandle,
+            observeStopsUseCase, observeLegsUseCase, localObserveTripUseCase, searchPlacesUseCase,
+            getPlaceDetailUseCase, placeSearchRepository, analyticsTracker, savedStateHandle,
         )
 
         assertNotNull(viewModel.uiState.value.formattedTotalDuration)
@@ -1493,4 +1503,155 @@ class TripDetailViewModelTest {
         )
         assertEquals(expectedFormattedLegDurations, viewModel.uiState.value.formattedLegDurations)
     }
+
+    // --- Section 4: ViewModel — Trip Name Observation ---
+
+    @Test
+    fun `GIVEN ObserveTripUseCase emits a Trip with name Summer Roadtrip WHEN observed THEN uiState tripName becomes Summer Roadtrip`() = runTest(testDispatcher) {
+        val trip = Trip(id = TRIP_ID, name = "Summer Roadtrip", createdAt = 0L, updatedAt = 0L)
+        val localObserveTripUseCase = mockk<ObserveTripUseCase>()
+        every { observeStopsUseCase(TRIP_ID) } returns flowOf(emptyList())
+        every { observeLegsUseCase(TRIP_ID) } returns flowOf(emptyList())
+        every { localObserveTripUseCase(TRIP_ID) } returns flowOf(trip)
+
+        val viewModel = TripDetailViewModel(
+            application, setStopUseCase, moveStopUseCase, editStopUseCase, removeStopUseCase,
+            markStopDepartedUseCase, undoMarkStopDepartedUseCase, calculateRouteUseCase,
+            observeStopsUseCase, observeLegsUseCase, localObserveTripUseCase, searchPlacesUseCase,
+            getPlaceDetailUseCase, placeSearchRepository, analyticsTracker, savedStateHandle,
+        )
+
+        val expectedTripName = "Summer Roadtrip"
+        assertEquals(expectedTripName, viewModel.uiState.value.tripName)
+    }
+
+    @Test
+    fun `GIVEN ViewModel has just initialised and ObserveTripUseCase has not yet emitted a non-null Trip WHEN uiState is read THEN tripName remains null`() = runTest(testDispatcher) {
+        val viewModel = createViewModel()
+
+        assertNull(viewModel.uiState.value.tripName)
+    }
+
+    @Test
+    fun `GIVEN ObserveTripUseCase emits a Trip WHEN observed THEN tripName updates and other uiState fields are unaffected`() = runTest(testDispatcher) {
+        val trip = Trip(id = TRIP_ID, name = "Summer Roadtrip", createdAt = 0L, updatedAt = 0L)
+        val localObserveTripUseCase = mockk<ObserveTripUseCase>()
+        every { observeStopsUseCase(TRIP_ID) } returns flowOf(emptyList())
+        every { observeLegsUseCase(TRIP_ID) } returns flowOf(emptyList())
+        every { localObserveTripUseCase(TRIP_ID) } returns flowOf(trip)
+
+        val viewModel = TripDetailViewModel(
+            application, setStopUseCase, moveStopUseCase, editStopUseCase, removeStopUseCase,
+            markStopDepartedUseCase, undoMarkStopDepartedUseCase, calculateRouteUseCase,
+            observeStopsUseCase, observeLegsUseCase, localObserveTripUseCase, searchPlacesUseCase,
+            getPlaceDetailUseCase, placeSearchRepository, analyticsTracker, savedStateHandle,
+        )
+
+        val expectedTripName = "Summer Roadtrip"
+        assertEquals(expectedTripName, viewModel.uiState.value.tripName)
+        assertNull(viewModel.uiState.value.startingPoint)
+        assertNull(viewModel.uiState.value.destination)
+        assertEquals(emptyList<Stop>(), viewModel.uiState.value.intermediateStops)
+        assertEquals(emptyList<Leg>(), viewModel.uiState.value.legs)
+        assertNull(viewModel.uiState.value.formattedTotalDistance)
+        assertNull(viewModel.uiState.value.formattedTotalDuration)
+        assertFalse(viewModel.uiState.value.isRouteRecalculationPromptVisible)
+    }
+
+    // --- Section 5: Route Recalculation Prompt Visibility ---
+
+    @Test
+    fun `GIVEN stops size is at least 2 and no legs exist for the trip WHEN observed THEN uiState isRouteRecalculationPromptVisible is true`() = runTest(testDispatcher) {
+        val stops = listOf(
+            Stop("s0", TRIP_ID, "Start", 0.0, 0.0, 0, StopStatus.PENDING),
+            Stop("s1", TRIP_ID, "End", 1.0, 1.0, 1, StopStatus.PENDING),
+        )
+        val viewModel = createViewModel(stops = stops, legs = emptyList())
+
+        val expectedIsRouteRecalculationPromptVisible = true
+        assertEquals(expectedIsRouteRecalculationPromptVisible, viewModel.uiState.value.isRouteRecalculationPromptVisible)
+    }
+
+    @Test
+    fun `GIVEN stops size is at least 2 and legs size is neither 0 nor stops size minus 1 WHEN observed THEN uiState isRouteRecalculationPromptVisible is true`() = runTest(testDispatcher) {
+        val stops = listOf(
+            Stop("s0", TRIP_ID, "Start", 0.0, 0.0, 0, StopStatus.PENDING),
+            Stop("s1", TRIP_ID, "Mid", 1.0, 1.0, 1, StopStatus.PENDING),
+            Stop("s2", TRIP_ID, "End", 2.0, 2.0, 2, StopStatus.PENDING),
+        )
+        val legs = listOf(
+            Leg("leg-1", TRIP_ID, "s0", "s1", 5000, 120, ""),
+        )
+        val viewModel = createViewModel(stops = stops, legs = legs)
+
+        val expectedIsRouteRecalculationPromptVisible = true
+        assertEquals(expectedIsRouteRecalculationPromptVisible, viewModel.uiState.value.isRouteRecalculationPromptVisible)
+    }
+
+    @Test
+    fun `GIVEN legs size equals stops size minus 1 and stops size is at least 2 WHEN observed THEN uiState isRouteRecalculationPromptVisible is false`() = runTest(testDispatcher) {
+        val stops = listOf(
+            Stop("s0", TRIP_ID, "Start", 0.0, 0.0, 0, StopStatus.PENDING),
+            Stop("s1", TRIP_ID, "End", 1.0, 1.0, 1, StopStatus.PENDING),
+        )
+        val legs = listOf(
+            Leg("leg-1", TRIP_ID, "s0", "s1", 5000, 120, ""),
+        )
+        val viewModel = createViewModel(stops = stops, legs = legs)
+
+        val expectedIsRouteRecalculationPromptVisible = false
+        assertEquals(expectedIsRouteRecalculationPromptVisible, viewModel.uiState.value.isRouteRecalculationPromptVisible)
+    }
+
+    @Test
+    fun `GIVEN stops size is less than 2 WHEN observed THEN uiState isRouteRecalculationPromptVisible is false regardless of any legs present`() = runTest(testDispatcher) {
+        val stops = listOf(
+            Stop("s0", TRIP_ID, "Start", 0.0, 0.0, 0, StopStatus.PENDING),
+        )
+        val legs = listOf(
+            Leg("leg-1", TRIP_ID, "s0", "s1", 5000, 120, ""),
+        )
+        val viewModel = createViewModel(stops = stops, legs = legs)
+
+        val expectedIsRouteRecalculationPromptVisible = false
+        assertEquals(expectedIsRouteRecalculationPromptVisible, viewModel.uiState.value.isRouteRecalculationPromptVisible)
+    }
+
+    @Test
+    fun `GIVEN complete route WHEN stop mutation invalidates all legs THEN isRouteRecalculationPromptVisible transitions to true and totals transition to null`() = runTest(testDispatcher) {
+        val stops = listOf(
+            Stop("s0", TRIP_ID, "Start", 0.0, 0.0, 0, StopStatus.PENDING),
+            Stop("s1", TRIP_ID, "End", 1.0, 1.0, 1, StopStatus.PENDING),
+        )
+        val completeLeg = Leg("leg-1", TRIP_ID, "s0", "s1", 5000, 120, "")
+        val legsFlow = MutableSharedFlow<List<Leg>>(replay = 1)
+
+        every { observeStopsUseCase(TRIP_ID) } returns flowOf(stops)
+        every { observeLegsUseCase(TRIP_ID) } returns legsFlow
+
+        legsFlow.emit(listOf(completeLeg))
+
+        val localObserveTripUseCase = mockk<ObserveTripUseCase>()
+        every { localObserveTripUseCase(TRIP_ID) } returns flowOf(null)
+
+        val viewModel = TripDetailViewModel(
+            application, setStopUseCase, moveStopUseCase, editStopUseCase, removeStopUseCase,
+            markStopDepartedUseCase, undoMarkStopDepartedUseCase, calculateRouteUseCase,
+            observeStopsUseCase, observeLegsUseCase, localObserveTripUseCase, searchPlacesUseCase,
+            getPlaceDetailUseCase, placeSearchRepository, analyticsTracker, savedStateHandle,
+        )
+
+        val expectedIsRouteRecalculationPromptVisibleBefore = false
+        assertEquals(expectedIsRouteRecalculationPromptVisibleBefore, viewModel.uiState.value.isRouteRecalculationPromptVisible)
+        assertNotNull(viewModel.uiState.value.formattedTotalDistance)
+        assertNotNull(viewModel.uiState.value.formattedTotalDuration)
+
+        legsFlow.emit(emptyList())
+
+        val expectedIsRouteRecalculationPromptVisibleAfter = true
+        assertEquals(expectedIsRouteRecalculationPromptVisibleAfter, viewModel.uiState.value.isRouteRecalculationPromptVisible)
+        assertNull(viewModel.uiState.value.formattedTotalDistance)
+        assertNull(viewModel.uiState.value.formattedTotalDuration)
+    }
 }
+

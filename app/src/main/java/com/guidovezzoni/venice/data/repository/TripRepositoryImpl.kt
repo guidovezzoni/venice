@@ -29,4 +29,7 @@ class TripRepositoryImpl @Inject constructor(
 
     override fun observeTrips(): Flow<List<Trip>> =
         tripDao.observeAll().map { entities -> entities.map { it.toDomain() } }
+
+    override fun observeTripById(tripId: String): Flow<Trip?> =
+        tripDao.observeById(tripId).map { it?.toDomain() }
 }

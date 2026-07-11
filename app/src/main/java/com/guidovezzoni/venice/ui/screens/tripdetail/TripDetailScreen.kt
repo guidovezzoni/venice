@@ -72,7 +72,7 @@ fun TripDetailScreen(
         modifier = modifier,
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.trip_detail_title)) },
+                title = { Text(uiState.tripName ?: stringResource(R.string.trip_detail_title)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
@@ -286,6 +286,16 @@ fun TripDetailScreen(
                             )
                         }
                     }
+                }
+            }
+            if (uiState.isRouteRecalculationPromptVisible) {
+                item {
+                    val isCalculating =
+                        uiState.routeCalculationState is RouteCalculationState.Calculating
+                    RouteRecalculationPrompt(
+                        isEnabled = !isCalculating && !uiState.isLoading,
+                        onClick = { onIntent(TripDetailUiIntent.OnCalculateRouteClicked) },
+                    )
                 }
             }
             item {
@@ -1065,6 +1075,7 @@ private fun PreviewTripDetailScreenTotalUnavailable() {
                 formattedLegDurations = mapOf("stop-1" to "10 min"),
                 formattedTotalDistance = null,
                 formattedTotalDuration = null,
+                isRouteRecalculationPromptVisible = true,
             ),
         )
     }
@@ -1077,6 +1088,7 @@ private fun PreviewTripDetailScreenWithLegs() {
         TripDetailScreen(
             uiState = TripDetailUiState(
                 tripId = "trip-1",
+                tripName = "Rome to Barcelona",
                 startingPoint = Stop(
                     id = "stop-1",
                     tripId = "trip-1",

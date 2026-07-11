@@ -29,4 +29,14 @@ interface TripDao {
         """
     )
     suspend fun getById(id: String): TripWithStopCount?
+
+    @Query(
+        """
+        SELECT t.*, (SELECT COUNT(*) FROM stops s WHERE s.tripId = t.id) AS stopCount
+        FROM trips t
+        WHERE t.id = :id
+        """
+    )
+    fun observeById(id: String): Flow<TripWithStopCount?>
 }
+

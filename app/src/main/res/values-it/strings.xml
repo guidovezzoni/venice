@@ -79,4 +79,6 @@
     <string name="trip_detail_total_duration_label">Tempo di guida stimato</string>
     <string name="trip_detail_total_duration_unavailable">Tempo di guida stimato non disponibile</string>
     <string name="trip_detail_totals_unavailable">Totali del viaggio non disponibili</string>
+    <string name="trip_detail_recalculation_prompt_message">Percorso non calcolato</string>
+    <string name="trip_detail_recalculation_prompt_action">Tocca per calcolare</string>
 </resources>

@@ -11,7 +11,7 @@ import com.guidovezzoni.venice.data.database.entity.LegEntity
 import com.guidovezzoni.venice.data.database.entity.StopEntity
 import com.guidovezzoni.venice.data.database.entity.TripEntity
 
-@Database(entities = [TripEntity::class, StopEntity::class, LegEntity::class], version = 3)
+@Database(entities = [TripEntity::class, StopEntity::class, LegEntity::class], version = 3, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun tripDao(): TripDao
     abstract fun stopDao(): StopDao

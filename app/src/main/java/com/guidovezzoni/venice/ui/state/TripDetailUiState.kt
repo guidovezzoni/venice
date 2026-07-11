@@ -25,4 +25,23 @@ data class TripDetailUiState(
     val formattedTotalDuration: String? = null,
     val formattedStopCoordinates: Map<String, String> = emptyMap(),
     val routeCalculationState: RouteCalculationState = RouteCalculationState.Idle,
+    /**
+     * The name of the trip being viewed.
+     * null means "trip not yet loaded / not yet known".
+     * The composable falls back to the string resource `trip_detail_title` ("Trip Detail")
+     * while this is null. Using null (not "") distinguishes "not loaded yet" from a
+     * hypothetically blank name.
+     */
+    val tripName: String? = null,
+    /**
+     * Whether to display the route recalculation prompt.
+     * Derived in the ViewModel's `combine(stops, legs)` collector.
+     * True when the route is incomplete AND `stops.size >= 2`.
+     * False otherwise (route is complete, or there are fewer than 2 stops).
+     * Transitions in lockstep with [formattedTotalDistance] and [formattedTotalDuration]
+     * becoming null, but has an additional `stops.size >= 2` guard that the total fields
+     * do not have.
+     */
+    val isRouteRecalculationPromptVisible: Boolean = false,
 )
+

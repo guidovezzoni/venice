@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Report: 4.1.1 — Trip Overview with Per-Leg Breakdowns</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.6;
+      color: #1a1a1a;
+      background: #fafafa;
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+
+    .report-header {
+      border-bottom: 3px solid #2563eb;
+      padding-bottom: 1rem;
+      margin-bottom: 2rem;
+    }
+    .report-header h1 { font-size: 1.75rem; color: #1e293b; }
+    .report-meta {
+      display: flex; gap: 2rem; flex-wrap: wrap;
+      margin-top: 0.5rem; font-size: 0.875rem; color: #64748b;
+    }
+    .report-meta span { display: inline-flex; align-items: center; gap: 0.25rem; }
+
+    .report-section {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .report-section header {
+      display: flex; justify-content: space-between; align-items: baseline;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 0.75rem; margin-bottom: 1rem;
+    }
+    .report-section header h2 { font-size: 1.25rem; color: #1e293b; }
+    .report-section header time { font-size: 0.8rem; color: #94a3b8; white-space: nowrap; }
+    .section-source { font-size: 0.75rem; color: #94a3b8; font-style: italic; margin-bottom: 0.75rem; }
+
+    h3 { font-size: 1.05rem; color: #334155; margin: 1rem 0 0.5rem; }
+    p { margin-bottom: 0.75rem; }
+    ul, ol { margin: 0.5rem 0 0.75rem 1.5rem; }
+    li { margin-bottom: 0.25rem; }
+    code {
+      background: #f1f5f9; padding: 0.15rem 0.35rem; border-radius: 3px;
+      font-size: 0.875em;
+      font-family: "SF Mono", "Fira Code", Menlo, Consolas, monospace;
+    }
+
+    table { width: 100%; border-collapse: collapse; margin: 0.75rem 0; font-size: 0.9rem; }
+    th, td { text-align: left; padding: 0.5rem 0.75rem; border: 1px solid #e2e8f0; }
+    th { background: #f8fafc; font-weight: 600; color: #475569; }
+
+    .badge {
+      display: inline-block; padding: 0.15rem 0.5rem;
+      border-radius: 4px; font-size: 0.8rem; font-weight: 600;
+    }
+    .badge-pass { background: #dcfce7; color: #166534; }
+    .badge-fail { background: #fee2e2; color: #991b1b; }
+    .badge-warn { background: #fef9c3; color: #854d0e; }
+    .badge-info { background: #dbeafe; color: #1e40af; }
+
+    .outcome { margin-top: 1rem; padding: 0.75rem 1rem; border-radius: 6px; font-weight: 600; }
+    .outcome-passed { background: #dcfce7; color: #166534; border-left: 4px solid #22c55e; }
+    .outcome-failed { background: #fee2e2; color: #991b1b; border-left: 4px solid #ef4444; }
+  </style>
+</head>
+<body>
+
+  <div class="report-header">
+    <h1>4.1.1 — Trip Overview with Per-Leg Breakdowns</h1>
+    <div class="report-meta">
+      <span><strong>Story:</strong> 4.1.1</span>
+      <span><strong>Branch:</strong> feature/4.1.1-trip-overview</span>
+      <span><strong>Created:</strong> 2026-07-10</span>
+    </div>
+  </div>
+
+  <main id="report-sections">
+    <section class="report-section" data-source="open_user_story" data-timestamp="2026-07-10T00:00:00Z">
+      <header>
+        <h2>Story Refined & Opened</h2>
+        <time datetime="2026-07-10">10 July 2026</time>
+      </header>
+      <p class="section-source">Source: open_user_story</p>
+
+      <h3>Acceptance Criteria Analysis</h3>
+      <p>Most acceptance criteria are already satisfied by the existing <code>TripDetailScreen</code> composable:</p>
+      <ul>
+        <li>Stop list with progress status</li>
+        <li>Per-leg distance and duration display</li>
+        <li>Trip totals (distance and duration)</li>
+        <li>Entry points for stop management features</li>
+        <li>Calculate route button</li>
+      </ul>
+
+      <h3>Genuine New Work</h3>
+      <p>Two concrete work items identified:</p>
+      <ol>
+        <li><strong>Display real trip name in header:</strong> Currently the header displays a hardcoded "Trip Detail" string. Must be replaced with the actual trip name from the Trip domain model.</li>
+        <li><strong>Explicit route-not-calculated / stale prompt:</strong> Add user-facing guidance when the route has not been calculated or is stale relative to stop changes.</li>
+      </ol>
+
+      <h3>Out of Scope</h3>
+      <ul>
+        <li><strong>Navigation to stop details:</strong> Deferred to Epic 5 (stories 5.1.1 and 5.1.2)</li>
+        <li><strong>Editing trip name:</strong> Not part of this story; would require a separate feature</li>
+      </ul>
+
+      <h3>Data and API</h3>
+      <p>No new API endpoints required. Work uses existing local data sources (Trip domain model, existing Directions API integration) and existing composable infrastructure.</p>
+
+      <h3>Security & Privacy Considerations</h3>
+      <ul>
+        <li><strong>GDPR:</strong> Trip names and coordinates are personal data. Must never be logged or transmitted to analytics services.</li>
+        <li><strong>Security:</strong> Trip name rendered as plain text only; no user input or rich formatting.</li>
+      </ul>
+
+      <h3>Performance Considerations</h3>
+      <p>Adding a third observed data stream (Trip) to the screen's ViewModel must not cause redundant recomposition. Verify that the Trip state is only emitted when relevant data actually changes, not on every domain operation.</p>
+
+      <h3>Branch Created</h3>
+      <p><code>feature/4.1.1-trip-overview</code></p>
+    </section>
+    <section class="report-section" data-source="propose_change" data-timestamp="2026-07-10T00:00:00Z">
+      <header>
+        <h2>Change Proposed</h2>
+        <time datetime="2026-07-10">10 July 2026</time>
+      </header>
+      <p class="section-source">Source: propose_change</p>
+
+      <h3>Exploration Findings</h3>
+      <ul>
+        <li><code>TripDetailScreen</code> top bar hardcoded to "Trip Detail" &mdash; no trip name observation exists in the ViewModel</li>
+        <li><code>TripDetailViewModel</code> already computes route completeness (<code>legs.size == stops.size - 1 &amp;&amp; stops.size >= 2</code>) for totals &mdash; the same signal drives the new prompt</li>
+        <li><code>TripDao.getById</code> exists as a one-shot <code>suspend</code> query &mdash; a new <code>Flow</code>-returning <code>observeById</code> is needed</li>
+        <li><code>TripRepository</code> has no single-trip read method &mdash; needs <code>observeTripById</code> + a new <code>ObserveTripUseCase</code></li>
+        <li>Route invalidation hard-deletes all legs &mdash; no "stale" flag exists; missing and stale are identical in the data model</li>
+      </ul>
+
+      <h3>Questions &amp; Clarifications</h3>
+      <table>
+        <tr><th>Question</th><th>Answer</th></tr>
+        <tr>
+          <td>Should "never calculated" and "stale after edit" show different messages?</td>
+          <td>No &mdash; single generic prompt, no schema change</td>
+        </tr>
+        <tr>
+          <td>Should the prompt appear with fewer than 2 stops?</td>
+          <td>No &mdash; only when 2+ stops (same guard as Calculate route button)</td>
+        </tr>
+        <tr>
+          <td>Should the prompt be tappable or purely informational?</td>
+          <td>Tappable &mdash; dispatches existing <code>OnCalculateRouteClicked</code> intent</td>
+        </tr>
+        <tr>
+          <td>What should the top bar show while trip name is loading?</td>
+          <td>Static fallback "Trip Detail" until the real name arrives</td>
+        </tr>
+      </table>
+
+      <h3>Artifacts Created</h3>
+      <table>
+        <tr><th>Artifact</th><th>Path</th></tr>
+        <tr><td>Proposal</td><td><code>openspec/changes/see-trip-overview/proposal.md</code></td></tr>
+        <tr><td>Design</td><td><code>openspec/changes/see-trip-overview/design.md</code></td></tr>
+        <tr><td>Delta spec: trip-detail</td><td><code>openspec/changes/see-trip-overview/specs/trip-detail/spec.md</code></td></tr>
+        <tr><td>Delta spec: trip-creation</td><td><code>openspec/changes/see-trip-overview/specs/trip-creation/spec.md</code></td></tr>
+        <tr><td>Delta spec: trip-persistence</td><td><code>openspec/changes/see-trip-overview/specs/trip-persistence/spec.md</code></td></tr>
+        <tr><td>Delta spec: route-display</td><td><code>openspec/changes/see-trip-overview/specs/route-display/spec.md</code></td></tr>
+        <tr><td>Tasks</td><td><code>openspec/changes/see-trip-overview/tasks.md</code></td></tr>
+      </table>
+
+      <h3>Task Structure</h3>
+      <ul>
+        <li><strong>2 prerequisite tasks</strong> &mdash; DAO query, UiState fields</li>
+        <li><strong>7 BDD sections (27 tasks)</strong> &mdash; repository, use case, ViewModel trip-name, ViewModel prompt-visibility, RouteRecalculationPrompt composable, top-bar wiring, prompt wiring</li>
+        <li><strong>2 integration sections (5 tasks)</strong> &mdash; strings/i18n, preview coverage</li>
+        <li><strong>1 verification section (7 tasks)</strong> &mdash; unit tests, UI tests, on-device, documentation</li>
+        <li><strong>Total: 41 tasks</strong></li>
+      </ul>
+
+      <h3>Key Design Decisions</h3>
+      <ol>
+        <li><code>TripDao.observeById</code> is a new <code>Flow</code>-returning query (existing <code>getById</code> left untouched)</li>
+        <li><code>tripName: String?</code> (null = not yet loaded) with null-coalescing fallback in the composable</li>
+        <li><code>isRouteRecalculationPromptVisible: Boolean</code> derived in the existing <code>combine</code> collector alongside totals</li>
+        <li>Extended combine result uses a private data class (<code>TripTotalsAndPromptState</code>) instead of positionally ambiguous <code>Triple</code></li>
+        <li><code>RouteRecalculationPrompt</code> in its own file, mirroring <code>TripTotalSummary</code> / <code>TripProgressSummary</code></li>
+        <li>No new intents &mdash; prompt reuses <code>OnCalculateRouteClicked</code></li>
+        <li>No schema/migration change &mdash; purely additive DAO query</li>
+      </ol>
+
+      <div class="outcome outcome-passed">Proposal complete &mdash; ready for implementation</div>
+    </section>
+    <section class="report-section" data-source="implement_change" data-timestamp="2026-07-10T12:00:00Z">
+      <header>
+        <h2>Change Implemented</h2>
+        <time datetime="2026-07-10">10 July 2026</time>
+      </header>
+      <p class="section-source">Source: implement_change</p>
+
+      <h3>What Was Applied</h3>
+      <p>All 41 tasks from the <code>see-trip-overview</code> OpenSpec change were implemented across 11 sections using sub-agent orchestration. The implementation added two new user-facing capabilities to <code>TripDetailScreen</code>:</p>
+      <ol>
+        <li><strong>Real trip name in TopAppBar:</strong> Added <code>TripDao.observeById</code> (new <code>Flow</code>-returning Room query), <code>TripRepository.observeTripById</code>, and <code>ObserveTripUseCase</code>. The ViewModel collects the trip name independently from the existing stops/legs collectors and updates <code>TripDetailUiState.tripName</code>. The composable renders <code>uiState.tripName ?: stringResource(R.string.trip_detail_title)</code>.</li>
+        <li><strong>Route recalculation prompt:</strong> Added <code>isRouteRecalculationPromptVisible: Boolean</code> to <code>TripDetailUiState</code>, derived in the existing <code>combine(stops, legs)</code> collector (extended to return <code>TripTotalsAndPromptState</code>). New <code>RouteRecalculationPrompt</code> composable shown in the <code>LazyColumn</code> immediately above <code>TripTotalSummary</code>, reusing <code>OnCalculateRouteClicked</code> with no new intent. Guard: 2+ stops required; prompt disappears once route is complete.</li>
+      </ol>
+
+      <h3>Task Execution</h3>
+      <table>
+        <tr><th>Section</th><th>Model</th><th>Tasks</th><th>Status</th></tr>
+        <tr><td>1 — Prerequisites</td><td>Haiku</td><td>2</td><td><span class="badge badge-pass">DONE</span></td></tr>
+        <tr><td>2 — Repository (BDD)</td><td>Sonnet</td><td>3</td><td><span class="badge badge-pass">DONE</span></td></tr>
+        <tr><td>3 — ObserveTripUseCase (BDD)</td><td>Sonnet</td><td>2</td><td><span class="badge badge-pass">DONE</span></td></tr>
+        <tr><td>4 — ViewModel trip name (BDD)</td><td>Sonnet</td><td>4</td><td><span class="badge badge-pass">DONE</span></td></tr>
+        <tr><td>5 — ViewModel prompt visibility (BDD)</td><td>Sonnet</td><td>6</td><td><span class="badge badge-pass">DONE</span></td></tr>
+        <tr><td>9 — Strings (executed before 6)</td><td>Haiku</td><td>2</td><td><span class="badge badge-pass">DONE</span></td></tr>
+        <tr><td>6 — RouteRecalculationPrompt composable (BDD)</td><td>Sonnet</td><td>4</td><td><span class="badge badge-pass">DONE</span></td></tr>
+        <tr><td>7 — TripDetailScreen top bar (BDD)</td><td>Sonnet</td><td>3</td><td><span class="badge badge-pass">DONE</span></td></tr>
+        <tr><td>8 — TripDetailScreen prompt wiring (BDD)</td><td>Sonnet</td><td>5</td><td><span class="badge badge-pass">DONE</span></td></tr>
+        <tr><td>10 — Preview coverage</td><td>Haiku</td><td>3</td><td><span class="badge badge-pass">DONE</span></td></tr>
+        <tr><td>11 — Verification</td><td>Sonnet</td><td>7</td><td><span class="badge badge-pass">DONE</span></td></tr>
+      </table>
+
+      <h3>Iteration Cycles</h3>
+      <ul>
+        <li><strong>Section ordering:</strong> Section 9 (string resources) was executed before Section 6 (composable) because the composable references <code>R.string.*</code> at compile time — executing in task-list order would have caused a build failure.</li>
+        <li><strong>AndroidTest method naming:</strong> All androidTest method names were written in camelCase (not Kotlin backtick-space format) because the dexer rejects space characters in <code>SimpleName</code> prior to DEX version 040.</li>
+        <li><strong>On-device keyboard handling:</strong> During on-device verification, keyboard dismissal via <code>KEYCODE_BACK</code> was found to close dialogs too. Workaround: focus the next field to dismiss the keyboard without closing the dialog.</li>
+      </ul>
+
+      <h3>TODO Scan</h3>
+      <p>4 pre-existing TODOs found in source — all classified <strong>ACKNOWLEDGED</strong> (no RESOLVE NOW items):</p>
+      <ul>
+        <li><code>NetworkModule.kt</code> — Retrofit refactor (unrelated to this story)</li>
+        <li><code>TripDetailViewModel.kt</code> — analytics event for total-duration (pre-existing from 3.2.2, not triggered by this story)</li>
+        <li><code>DirectionsApiService.kt</code> — Retrofit refactor (unrelated)</li>
+        <li><code>TripDetailUiIntent.kt</code> — PlaceDetail design question (unrelated)</li>
+      </ul>
+
+      <h3>Test Results</h3>
+      <table>
+        <tr><th>Gate</th><th>Result</th><th>Notes</th></tr>
+        <tr><td>Unit tests (<code>./gradlew test</code>)</td><td><span class="badge badge-pass">PASS</span></td><td>All new tests green: TripRepositoryImplTest, ObserveTripUseCaseTest, TripDetailViewModelTest</td></tr>
+        <tr><td>Instrumented tests (<code>./gradlew connectedDebugAndroidTest</code>)</td><td><span class="badge badge-pass">PASS</span></td><td>110 tests pass; new: RouteRecalculationPromptTest (3), TripDetailScreenTest additions (6)</td></tr>
+        <tr><td>Static analysis (<code>./gradlew check</code>)</td><td><span class="badge badge-pass">PASS</span></td><td>No regressions; coverage ≥95% on new code</td></tr>
+      </table>
+
+      <h3>On-Device Verification</h3>
+      <p>Verified on Pixel 6a (Android 16) via UIAutomator:</p>
+      <ul>
+        <li>Real trip name displayed in TopAppBar ✓</li>
+        <li>Recalculation prompt visible with 2+ stops and no route ✓</li>
+        <li>Prompt disappears after successful route calculation (Rome → Barcelona, 1340.4 km) ✓</li>
+        <li>Prompt reappears after stop mutation invalidates the route ✓</li>
+      </ul>
+
+      <h3>Security Review</h3>
+      <p><span class="badge badge-pass">PASS</span> — No findings. 0 fix cycles required.</p>
+      <ul>
+        <li>SQL: Room parameterised binding on new <code>observeById</code> query — injection not possible</li>
+        <li>Rendering: trip name passed to Compose <code>Text</code> as plain string — no HTML/markup interpretation</li>
+        <li>PII: trip name not passed to analytics or logs</li>
+      </ul>
+
+      <h3>Documentation Updates</h3>
+      <ul>
+        <li><strong>AGENTS.md:</strong> Updated — Epic 4 / Feature 4.1 / 4.1.1 added to completed stories list</li>
+        <li><strong>README.md:</strong> Updated — "The App" section extended with trip name observation and recalculation prompt behaviour</li>
+        <li><strong>docs/userstories/index.md:</strong> Updated — entry renamed to <code>4.1.1-trip-overview-DONE.md ✅</code></li>
+      </ul>
+
+      <div class="outcome outcome-passed">Implementation complete — all 41 tasks done, all tests pass, on-device verified</div>
+    </section>
+    <section class="report-section" data-source="verify_user_story" data-timestamp="2026-07-11T00:00:00Z">
+      <header>
+        <h2>Verification & Archive</h2>
+        <time datetime="2026-07-11">11 July 2026</time>
+      </header>
+      <p class="section-source">Source: verify_user_story</p>
+
+      <h3>Verification Gates</h3>
+      <table>
+        <tr><th>Gate</th><th>Status</th><th>Details</th></tr>
+        <tr><td>OpenSpec verify</td><td><span class="badge badge-pass">PASS</span></td><td>41/41 tasks complete, all requirements verified</td></tr>
+        <tr><td>TODO scan</td><td><span class="badge badge-pass">PASS</span></td><td>4 TODOs found, all ACKNOWLEDGED (none blocking)</td></tr>
+        <tr><td>Security review</td><td><span class="badge badge-pass">PASS</span></td><td>No critical or high-severity findings</td></tr>
+        <tr><td>Clean build</td><td><span class="badge badge-pass">PASS</span></td><td><code>./gradlew clean check</code> succeeded; <code>exportSchema = false</code> fix applied to AppDatabase.kt</td></tr>
+        <tr><td>Unit tests</td><td><span class="badge badge-pass">PASS</span></td><td>287 tests passed</td></tr>
+        <tr><td>Coverage report</td><td><span class="badge badge-pass">PASS</span></td><td>All metrics ≥93.94% (see table below)</td></tr>
+        <tr><td>Test file coverage</td><td><span class="badge badge-pass">PASS</span></td><td>All required test files present</td></tr>
+        <tr><td>Compose preview coverage</td><td><span class="badge badge-pass">PASS</span></td><td>17/17 UiState fields covered across 20 previews</td></tr>
+        <tr><td>On-device tests</td><td><span class="badge badge-pass">PASS</span></td><td>110 instrumented tests passed on device</td></tr>
+        <tr><td>Definition of Done</td><td><span class="badge badge-pass">PASS</span></td><td>All 9 criteria confirmed met</td></tr>
+      </table>
+
+      <h3>Code Coverage Report</h3>
+      <table>
+        <tr><th>Category</th><th>Coverage</th></tr>
+        <tr><td>Instructions</td><td>99.38%</td></tr>
+        <tr><td>Branches</td><td>93.94%</td></tr>
+        <tr><td>Lines</td><td>98.92%</td></tr>
+        <tr><td>Methods</td><td>98.19%</td></tr>
+        <tr><td>Classes</td><td>99.13%</td></tr>
+      </table>
+
+      <h3>Specification Sync</h3>
+      <p><span class="badge badge-pass">PASS</span> — 4 capabilities synced to main specs:</p>
+      <ul>
+        <li><code>openspec/specs/route-display/spec.md</code></li>
+        <li><code>openspec/specs/trip-creation/spec.md</code></li>
+        <li><code>openspec/specs/trip-detail/spec.md</code></li>
+        <li><code>openspec/specs/trip-persistence/spec.md</code></li>
+      </ul>
+
+      <h3>Documentation Sync</h3>
+      <p><span class="badge badge-pass">PASS</span> — README.md and AGENTS.md already in sync with implementation. No additional updates required.</p>
+
+      <h3>Archive</h3>
+      <p>OpenSpec change archived at <code>openspec/changes/archive/2026-07-11-see-trip-overview/</code></p>
+      <p>User story renamed to <code>docs/userstories/4.1.1-trip-overview-DONE.md</code></p>
+
+      <div class="outcome outcome-passed">VERIFICATION PASSED — All gates green, specs synced, change archived. Story is complete and ready for release.</div>
+    </section>
+  </main>
+
+</body>
+</html>
