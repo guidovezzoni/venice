@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Report: 5.1.1 — Open Google Maps Navigation to a Stop</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.6;
+      color: #1a1a1a;
+      background: #fafafa;
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+
+    .report-header {
+      border-bottom: 3px solid #2563eb;
+      padding-bottom: 1rem;
+      margin-bottom: 2rem;
+    }
+    .report-header h1 { font-size: 1.75rem; color: #1e293b; }
+    .report-meta {
+      display: flex; gap: 2rem; flex-wrap: wrap;
+      margin-top: 0.5rem; font-size: 0.875rem; color: #64748b;
+    }
+    .report-meta span { display: inline-flex; align-items: center; gap: 0.25rem; }
+
+    .report-section {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .report-section header {
+      display: flex; justify-content: space-between; align-items: baseline;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 0.75rem; margin-bottom: 1rem;
+    }
+    .report-section header h2 { font-size: 1.25rem; color: #1e293b; }
+    .report-section header time { font-size: 0.8rem; color: #94a3b8; white-space: nowrap; }
+    .section-source { font-size: 0.75rem; color: #94a3b8; font-style: italic; margin-bottom: 0.75rem; }
+
+    h3 { font-size: 1.05rem; color: #334155; margin: 1rem 0 0.5rem; }
+    p { margin-bottom: 0.75rem; }
+    ul, ol { margin: 0.5rem 0 0.75rem 1.5rem; }
+    li { margin-bottom: 0.25rem; }
+    code {
+      background: #f1f5f9; padding: 0.15rem 0.35rem; border-radius: 3px;
+      font-size: 0.875em;
+      font-family: "SF Mono", "Fira Code", Menlo, Consolas, monospace;
+    }
+
+    table { width: 100%; border-collapse: collapse; margin: 0.75rem 0; font-size: 0.9rem; }
+    th, td { text-align: left; padding: 0.5rem 0.75rem; border: 1px solid #e2e8f0; }
+    th { background: #f8fafc; font-weight: 600; color: #475569; }
+
+    .badge {
+      display: inline-block; padding: 0.15rem 0.5rem;
+      border-radius: 4px; font-size: 0.8rem; font-weight: 600;
+    }
+    .badge-pass { background: #dcfce7; color: #166534; }
+    .badge-fail { background: #fee2e2; color: #991b1b; }
+    .badge-warn { background: #fef9c3; color: #854d0e; }
+    .badge-info { background: #dbeafe; color: #1e40af; }
+
+    .outcome { margin-top: 1rem; padding: 0.75rem 1rem; border-radius: 6px; font-weight: 600; }
+    .outcome-passed { background: #dcfce7; color: #166534; border-left: 4px solid #22c55e; }
+    .outcome-failed { background: #fee2e2; color: #991b1b; border-left: 4px solid #ef4444; }
+  </style>
+</head>
+<body>
+
+  <div class="report-header">
+    <h1>5.1.1 — Open Google Maps Navigation to a Stop</h1>
+    <div class="report-meta">
+      <span><strong>Story:</strong> 5.1.1</span>
+      <span><strong>Branch:</strong> feature/5.1.1-navigate-to-stop</span>
+      <span><strong>Created:</strong> July 11, 2026</span>
+    </div>
+  </div>
+
+  <main id="report-sections">
+    <section class="report-section" data-source="open_user_story" data-timestamp="2026-07-11T00:00:00Z">
+      <header>
+        <h2>Opening</h2>
+        <time datetime="2026-07-11T00:00:00Z">July 11, 2026</time>
+      </header>
+      <p class="section-source">Source: open_user_story</p>
+
+      <h3>Story Summary</h3>
+      <p>
+        User story <strong>5.1.1: Open Google Maps Navigation to a Stop</strong> enables users to launch native Google Maps navigation directly from a stop in the Venice app, with automatic fallback to a geo: URI scheme if Google Maps is unavailable.
+      </p>
+
+      <h3>Branch Created</h3>
+      <p>
+        Feature branch <code>feature/5.1.1-navigate-to-stop</code> has been created for development.
+      </p>
+
+      <h3>Refinement Summary</h3>
+      <ul>
+        <li><strong>Acceptance Criteria Expansion:</strong> Acceptance criteria expanded from 4 to 10 specific, testable criteria covering successful navigation launch, fallback behavior, error states, permissions, and platform compatibility</li>
+        <li><strong>MVI Artefacts Defined:</strong> Intent <code>OnNavigateToStopClicked</code>, effects <code>LaunchNavigation</code> (with Google Maps URI) and <code>ShowNavigationError</code> (error message + optional retry action)</li>
+        <li><strong>Intent URI Schemes Documented:</strong> Primary scheme <code>google.navigation://q=latitude,longitude</code> with fallback to <code>geo:latitude,longitude</code> for devices without Google Maps</li>
+        <li><strong>Files to Modify Identified:</strong> Trip Detail screen, navigation ViewModel, effects handler, and utility function for URI construction, all with clear intent descriptions</li>
+        <li><strong>Unit Testing Strategy:</strong> GIVEN/WHEN/THEN scenarios covering successful launches, permission denials, missing coordinates, app unavailability, and error handling</li>
+        <li><strong>Security & Compliance Analysis:</strong> No new permissions required; no external data processing; GDPR compliant (user location handled entirely on-device)</li>
+        <li><strong>Performance & NFR:</strong> Instant URI launch (no API calls); seamless fallback mechanism; clear error messaging</li>
+        <li><strong>Definition of Done:</strong> 16-item comprehensive checklist covering implementation, testing, UI polish, documentation, and verification</li>
+        <li><strong>Risk Assessment:</strong> Low-risk feature — no new APIs, permissions, or data processing required; straightforward Intent-based navigation</li>
+      </ul>
+
+      <div class="outcome outcome-passed">
+        Story refined and ready for specification and implementation planning
+      </div>
+    </section>
+  </main>
+
+</body>
+</html>
