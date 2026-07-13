@@ -163,6 +163,69 @@
         Change design complete with comprehensive task breakdown ready for implementation
       </div>
     </section>
+  <section class="report-section" data-source="sdlc_implement_change" data-timestamp="2026-07-13T08:30:00Z">
+    <header>
+      <h2>Implementation</h2>
+      <time datetime="2026-07-13T08:30:00Z">13 July 2026</time>
+    </header>
+    <p class="section-source">Source: sdlc_implement_change</p>
+
+    <h3>Summary</h3>
+    <p>Implemented story 5.1.1 — Navigate to Stop — using sub-agent orchestration across 8 sections (31 tasks total). All 31 tasks are now complete.</p>
+
+    <h3>What Was Applied</h3>
+    <table>
+      <tr><th>Section</th><th>Model</th><th>Tasks</th><th>Key Deliverable</th></tr>
+      <tr><td>1 — MVI Contracts</td><td>Haiku</td><td>2</td><td><code>OnNavigateToStopClicked</code> intent; <code>LaunchNavigation</code> and <code>ShowNavigationError</code> effects</td></tr>
+      <tr><td>2 — NavigationUriBuilder (BDD)</td><td>Sonnet</td><td>3</td><td><code>NavigationUriBuilder.kt</code> with <code>buildGeoUri()</code>; 2 unit tests (RED → GREEN)</td></tr>
+      <tr><td>3 — ViewModel Handling (BDD)</td><td>Sonnet</td><td>3</td><td><code>TripDetailViewModel</code> resolves stop by id and emits <code>LaunchNavigation</code>; 2 new ViewModel tests (RED → GREEN)</td></tr>
+      <tr><td>4 — Stop Card Navigate Button (BDD)</td><td>Sonnet</td><td>6</td><td><code>onNavigate</code> parameter on <code>FilledStop</code>/<code>StopSection</code>; 5 Compose UI tests; string resources added</td></tr>
+      <tr><td>5 — TripDetailScreen Wiring (BDD)</td><td>Sonnet</td><td>3</td><td><code>onNavigate</code> wired at all 3 <code>StopSection</code> call sites; 2 Compose UI tests</td></tr>
+      <tr><td>6 — MainScreen Effect Handling (BDD)</td><td>Sonnet</td><td>4</td><td><code>TripDetailEffectHandler</code> composable handles <code>LaunchNavigation</code> and <code>ShowNavigationError</code>; 3 Compose UI tests</td></tr>
+      <tr><td>7 — Integration Tasks</td><td>Haiku</td><td>5</td><td><code>&lt;queries&gt;</code> manifest block; EN/IT/ES strings; previews</td></tr>
+      <tr><td>8 — Verification</td><td>orchestrator</td><td>5</td><td>Unit tests, instrumented tests, on-device verification, Detekt (1 fix), <code>./gradlew check</code></td></tr>
+    </table>
+
+    <h3>BDD Cycles</h3>
+    <ul>
+      <li>Section 2: RED (unresolved reference) → GREEN (2 unit tests passing)</li>
+      <li>Section 3: RED (no-op stub failed assertion) → GREEN (104 unit tests passing)</li>
+      <li>Sections 4–6: RED (compilation failure / runtime assertion failure) → GREEN compilation confirmed</li>
+    </ul>
+
+    <h3>Iteration Cycles</h3>
+    <p>1 cycle. All sections implemented in one pass. One Detekt fix was needed after implementation (<code>MaxLineLength</code> on <code>LaunchNavigation</code> — resolved by splitting constructor parameters to separate lines).</p>
+
+    <h3>Acknowledged TODOs</h3>
+    <ul>
+      <li><code>DirectionsApiService.kt:24</code> — Replace with Retrofit when additional API endpoints are added (precondition not met by this story)</li>
+      <li><code>TripDetailUiIntent.kt:9</code> — Design question about PlaceDetail usage (pre-existing, unrelated)</li>
+      <li><code>TripDetailViewModel.kt:62</code> — Remove Android references from ViewModel (pre-existing tech debt)</li>
+      <li><code>TripDetailViewModel.kt:148</code> — Analytics event for total-duration (pre-existing, unrelated)</li>
+      <li><code>NetworkModule.kt:18</code> — Replace with Retrofit module (same precondition as above)</li>
+    </ul>
+
+    <h3>Instrumented Tests</h3>
+    <p><span class="badge badge-pass">PASS</span> 121/121 tests on Pixel 6a (Android 16). New tests: <code>StopSectionTest</code> (6 new), <code>TripDetailScreenTest</code> (2 new), <code>MainScreenTest</code> (3 new, using injectable <code>TripDetailEffectHandler</code> to avoid Espresso Intents dependency).</p>
+
+    <h3>On-Device Verification</h3>
+    <ul>
+      <li><span class="badge badge-pass">PASS</span> Tapped Navigate button on a PENDING stop ("Milan") → Google Maps launched with correct coordinates (45.4642, 9.1900). <code>&lt;queries&gt;</code> manifest block confirmed effective on API 36.</li>
+      <li><span class="badge badge-pass">PASS</span> Marked stop as departed → Navigate button disappeared from the card (VISITED stops show no navigate affordance).</li>
+    </ul>
+
+    <h3>Security Review</h3>
+    <p><span class="badge badge-pass">PASS</span> — 0 findings. URI construction uses <code>URLEncoder.encode</code> to prevent injection; coordinates are typed as <code>Double</code>; error messages sourced from string resources only; intent checked for resolvability before launch.</p>
+
+    <h3>Documentation</h3>
+    <ul>
+      <li><strong>README.md</strong> — Updated: added description of Navigate button feature to the app section.</li>
+      <li><strong>AGENTS.md</strong> — Updated: added Epic 5 / Feature 5.1 / Story 5.1.1 to the Completed Stories section.</li>
+    </ul>
+
+    <div class="outcome outcome-passed">Implementation complete — 31/31 tasks, all tests green, security PASS, on-device verified.</div>
+  </section>
+
   </main>
 
 </body>

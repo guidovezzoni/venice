@@ -48,8 +48,8 @@
 
 ## 8. Verification
 
-- [ ] 8.1 Run `./gradlew test` and confirm `NavigationUriBuilderTest` and the new `TripDetailViewModelTest` cases pass with the rest of the unit test suite green
-- [ ] 8.2 Run `./gradlew connectedDebugAndroidTest` and confirm the new `StopSectionTest`, `TripDetailScreenTest`, and `MainScreenTest` cases pass on a connected device/emulator
-- [ ] 8.3 On a connected device or emulator running API 30+, install the app, open a trip with at least one `PENDING` stop, tap Navigate, and confirm the system app picker (or the single installed navigation app) launches with the correct destination pre-filled — verifying the `<queries>` manifest entry is effective in practice, not just in code
-- [ ] 8.4 On the same device, verify a `VISITED` stop shows no Navigate button, and that the Navigate button is visibly disabled while `isLoading` is `true` (e.g. during another in-flight action)
-- [ ] 8.5 Run `./gradlew check` to confirm static analysis and full verification pass
+- [x] 8.1 Run `./gradlew test` and confirm `NavigationUriBuilderTest` and the new `TripDetailViewModelTest` cases pass with the rest of the unit test suite green
+- [x] 8.2 Run `./gradlew connectedDebugAndroidTest` and confirm the new `StopSectionTest`, `TripDetailScreenTest`, and `MainScreenTest` cases pass on a connected device/emulator
+- [x] 8.3 On a connected device or emulator running API 30+, install the app, open a trip with at least one `PENDING` stop, tap Navigate, and confirm the system app picker (or the single installed navigation app) launches with the correct destination pre-filled — verifying the `<queries>` manifest entry is effective in practice, not just in code
+- [x] 8.4 On the same device, verify a `VISITED` stop shows no Navigate button, and that the Navigate button is visibly disabled while `isLoading` is `true` (e.g. during another in-flight action)
+- [x] 8.5 Run `./gradlew check` to confirm static analysis and full verification pass
