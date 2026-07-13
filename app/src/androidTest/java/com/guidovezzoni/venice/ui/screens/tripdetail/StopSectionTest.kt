@@ -8,6 +8,7 @@ import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import com.guidovezzoni.venice.R
 import com.guidovezzoni.venice.domain.model.Stop
 import com.guidovezzoni.venice.domain.model.StopStatus
@@ -41,6 +42,7 @@ class StopSectionTest {
         onDelete: (() -> Unit)? = null,
         onMarkDeparted: (() -> Unit)? = null,
         onUndoDeparted: (() -> Unit)? = null,
+        onNavigate: (() -> Unit)? = null,
     ) {
         composeTestRule.setContent {
             HeadingToVeniceTheme {
@@ -59,6 +61,7 @@ class StopSectionTest {
                     onDelete = onDelete,
                     onMarkDeparted = onMarkDeparted,
                     onUndoDeparted = onUndoDeparted,
+                    onNavigate = onNavigate,
                 )
             }
         }
@@ -142,6 +145,114 @@ class StopSectionTest {
         composeTestRule.onNodeWithContentDescription("Move down").assertIsEnabled()
         composeTestRule.onNodeWithContentDescription("Remove stop").assertIsEnabled()
         composeTestRule.onNodeWithText("Mark as departed").assertIsEnabled()
+    }
+
+    // endregion
+
+    // region Navigate button visibility and enablement
+
+    @Test
+    fun pendingStop_withNonNullOnNavigate_navigateButtonIsDisplayed() {
+        val navigateContentDescription = "Navigate to Florence, Italy"
+        setContent(
+            stop = SAMPLE_STOP,
+            onNavigate = {},
+        )
+
+        composeTestRule
+            .onNodeWithContentDescription(navigateContentDescription)
+            .assertIsDisplayed()
+    }
+
+    @Test
+    fun nullOnNavigate_navigateButtonDoesNotExist() {
+        val navigateContentDescription = "Navigate to Florence, Italy"
+        setContent(
+            stop = SAMPLE_STOP,
+            onNavigate = null,
+        )
+
+        composeTestRule
+            .onNodeWithContentDescription(navigateContentDescription)
+            .assertDoesNotExist()
+    }
+
+    @Test
+    fun navigateButton_loadingTrue_isDisabled() {
+        val navigateContentDescription = "Navigate to Florence, Italy"
+        setContent(
+            stop = SAMPLE_STOP,
+            isLoading = true,
+            onNavigate = {},
+        )
+
+        composeTestRule
+            .onNodeWithContentDescription(navigateContentDescription)
+            .assertIsNotEnabled()
+    }
+
+    @Test
+    fun navigateButton_loadingFalse_isEnabled() {
+        val navigateContentDescription = "Navigate to Florence, Italy"
+        setContent(
+            stop = SAMPLE_STOP,
+            isLoading = false,
+            onNavigate = {},
+        )
+
+        composeTestRule
+            .onNodeWithContentDescription(navigateContentDescription)
+            .assertIsEnabled()
+    }
+
+    @Test
+    fun navigateButton_contentDescription_includesPlaceName() {
+        val milanStop = Stop(
+            id = "s2",
+            tripId = "trip-1",
+            placeName = "Milan",
+            latitude = 45.4642,
+            longitude = 9.1900,
+            order = 1,
+            status = StopStatus.PENDING,
+        )
+        val expectedContentDescription = "Navigate to Milan"
+        composeTestRule.setContent {
+            HeadingToVeniceTheme {
+                StopSection(
+                    stop = milanStop,
+                    icon = Icons.Filled.Place,
+                    titleRes = R.string.trip_detail_intermediate_stop_label,
+                    setButtonTextRes = R.string.trip_detail_add_stop,
+                    changeDescriptionRes = R.string.trip_detail_change_intermediate_stop,
+                    filledLabelRes = R.string.trip_detail_intermediate_stop_label,
+                    onNavigate = {},
+                )
+            }
+        }
+
+        composeTestRule
+            .onNodeWithContentDescription(expectedContentDescription)
+            .assertIsDisplayed()
+    }
+
+    @Test
+    fun navigateButton_onClick_lambdaInvokedOnce() {
+        val navigateContentDescription = "Navigate to Florence, Italy"
+        val invokedEvents = mutableListOf<Unit>()
+        setContent(
+            stop = SAMPLE_STOP,
+            onNavigate = { invokedEvents.add(Unit) },
+        )
+
+        composeTestRule
+            .onNodeWithContentDescription(navigateContentDescription)
+            .performClick()
+
+        val expectedInvocationCount = 1
+        assert(invokedEvents.size == expectedInvocationCount) {
+            "Expected navigate lambda to be invoked $expectedInvocationCount time(s) but was invoked ${invokedEvents.size} time(s)"
+        }
     }
 
     // endregion

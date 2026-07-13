@@ -59,6 +59,7 @@ private const val MAX_STOP_COUNT = 25
 private const val UNKNOWN_ERROR = "Unknown error"
 private const val SEARCH_DEBOUNCE_MILLIS = 300L
 
+// TODO remove Android references that could be abstracted out
 @HiltViewModel
 @Suppress("LongParameterList")
 class TripDetailViewModel @Inject constructor(
@@ -333,6 +334,8 @@ class TripDetailViewModel @Inject constructor(
             }
 
             TripDetailUiIntent.OnCalculateRouteClicked -> calculateRoute()
+
+            is TripDetailUiIntent.OnNavigateToStopClicked -> navigateToStop(intent.stopId)
         }
     }
 
@@ -482,6 +485,25 @@ class TripDetailViewModel @Inject constructor(
                     )
                 }
             }
+        }
+    }
+
+    private fun navigateToStop(stopId: String) {
+        val state = _uiState.value
+        val allStops = buildList {
+            state.startingPoint?.let { add(it) }
+            addAll(state.intermediateStops)
+            state.destination?.let { add(it) }
+        }
+        val stop = allStops.firstOrNull { it.id == stopId } ?: return
+        viewModelScope.launch {
+            _uiEffect.emit(
+                TripDetailUiEffect.LaunchNavigation(
+                    latitude = stop.latitude,
+                    longitude = stop.longitude,
+                    placeName = stop.placeName,
+                ),
+            )
         }
     }
 

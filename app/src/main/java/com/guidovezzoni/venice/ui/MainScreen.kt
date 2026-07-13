@@ -1,11 +1,15 @@
 package com.guidovezzoni.venice.ui
 
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.ViewModelStoreOwner
@@ -20,8 +24,10 @@ import com.guidovezzoni.venice.ui.intent.TripListUiIntent
 import com.guidovezzoni.venice.ui.screens.tripdetail.TripDetailScreen
 import com.guidovezzoni.venice.ui.state.DialogState
 import com.guidovezzoni.venice.ui.screens.triplist.TripListScreen
+import com.guidovezzoni.venice.ui.util.buildGeoUri
 import com.guidovezzoni.venice.ui.viewmodel.TripDetailViewModel
 import com.guidovezzoni.venice.ui.viewmodel.TripListViewModel
+import kotlinx.coroutines.flow.Flow
 
 private const val ROUTE_TRIP_LIST = "tripList"
 private const val ROUTE_TRIP_DETAIL = "tripDetail/{tripId}"
@@ -69,21 +75,16 @@ fun MainScreen() {
             val snackbarHostState = remember { SnackbarHostState() }
             val startingPointErrorMessage = stringResource(R.string.trip_detail_starting_point_error)
             val destinationErrorMessage = stringResource(R.string.trip_detail_destination_error)
+            val noAppAvailableError = stringResource(R.string.nav_action_no_app_available_error)
 
-            LaunchedEffect(Unit) {
-                viewModel.uiEffect.collect { effect ->
-                    when (effect) {
-                        is TripDetailUiEffect.ShowError -> {
-                            val message = if (uiState.dialogState is DialogState.SetDestination) {
-                                destinationErrorMessage
-                            } else {
-                                startingPointErrorMessage
-                            }
-                            snackbarHostState.showSnackbar(message)
-                        }
-                    }
-                }
-            }
+            TripDetailEffectHandler(
+                effects = viewModel.uiEffect,
+                snackbarHostState = snackbarHostState,
+                startingPointErrorMessage = startingPointErrorMessage,
+                destinationErrorMessage = destinationErrorMessage,
+                noAppAvailableError = noAppAvailableError,
+                getDialogState = { uiState.dialogState },
+            )
 
             TripDetailScreen(
                 uiState = uiState,
@@ -91,6 +92,54 @@ fun MainScreen() {
                 onIntent = viewModel::onIntent,
                 onNavigateBack = { navController.popBackStack() },
             )
+        }
+    }
+}
+
+@Composable
+internal fun TripDetailEffectHandler(
+    effects: Flow<TripDetailUiEffect>,
+    snackbarHostState: SnackbarHostState,
+    startingPointErrorMessage: String,
+    destinationErrorMessage: String,
+    noAppAvailableError: String,
+    getDialogState: () -> DialogState,
+    resolveActivity: ((Intent) -> Boolean)? = null,
+    startActivity: ((Intent) -> Unit)? = null,
+) {
+    val context = LocalContext.current
+    LaunchedEffect(Unit) {
+        effects.collect { effect ->
+            when (effect) {
+                is TripDetailUiEffect.ShowError -> {
+                    val message = if (getDialogState() is DialogState.SetDestination) {
+                        destinationErrorMessage
+                    } else {
+                        startingPointErrorMessage
+                    }
+                    snackbarHostState.showSnackbar(message)
+                }
+                is TripDetailUiEffect.LaunchNavigation -> {
+                    val uri = buildGeoUri(effect.latitude, effect.longitude, effect.placeName)
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(uri))
+                    val canResolve = resolveActivity?.invoke(intent)
+                        ?: (context.packageManager.resolveActivity(
+                            intent,
+                            PackageManager.MATCH_DEFAULT_ONLY,
+                        ) != null)
+                    if (canResolve) {
+                        if (startActivity != null) {
+                            startActivity(intent)
+                        } else {
+                            context.startActivity(intent)
+                        }
+                    } else {
+                        snackbarHostState.showSnackbar(noAppAvailableError)
+                    }
+                }
+                is TripDetailUiEffect.ShowNavigationError ->
+                    snackbarHostState.showSnackbar(effect.message)
+            }
         }
     }
 }

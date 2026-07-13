@@ -92,7 +92,7 @@ Delegating turn-by-turn navigation to Google Maps via Android Intent.
 
 | ID | User Story | Details |
 |----|------------|---------|
-| 5.1.1 | As a user, I want to tap a stop and open Google Maps navigation to it | [5.1.1-navigate-to-stop](5.1.1-navigate-to-stop.md) |
+| 5.1.1 | As a user, I want to tap a stop and open Google Maps navigation to it | [5.1.1-navigate-to-stop](5.1.1-navigate-to-stop-DONE.md) |
 | 5.1.2 | As a user, I want to tap a leg and open Google Maps navigation for that segment | [5.1.2-navigate-leg-segment](5.1.2-navigate-leg-segment.md) |
 
 ---

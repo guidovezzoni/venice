@@ -1617,6 +1617,54 @@ class TripDetailViewModelTest {
         assertEquals(expectedIsRouteRecalculationPromptVisible, viewModel.uiState.value.isRouteRecalculationPromptVisible)
     }
 
+    // --- Section 3: ViewModel Navigation Handling ---
+
+    @Test
+    fun `GIVEN a loaded trip with a PENDING stop at a known id WHEN OnNavigateToStopClicked is dispatched THEN LaunchNavigation effect is emitted with that stop's coordinates and placeName`() = runTest(testDispatcher) {
+        val navigationStop = Stop(
+            id = "stop-nav",
+            tripId = TRIP_ID,
+            placeName = PLACE_NAME,
+            latitude = LATITUDE,
+            longitude = LONGITUDE,
+            order = 1,
+            status = StopStatus.PENDING,
+        )
+        val viewModel = createViewModel(stops = listOf(navigationStop))
+
+        val effects = mutableListOf<TripDetailUiEffect>()
+        val collectJob = launch {
+            viewModel.uiEffect.collect { effects.add(it) }
+        }
+
+        viewModel.onIntent(TripDetailUiIntent.OnNavigateToStopClicked("stop-nav"))
+        advanceUntilIdle()
+
+        val expectedEffect = TripDetailUiEffect.LaunchNavigation(
+            latitude = LATITUDE,
+            longitude = LONGITUDE,
+            placeName = PLACE_NAME,
+        )
+        assertTrue(effects.any { it == expectedEffect })
+        collectJob.cancel()
+    }
+
+    @Test
+    fun `GIVEN OnNavigateToStopClicked is dispatched with a stopId that does not match any stop in the current state WHEN the intent is processed THEN no LaunchNavigation effect is emitted`() = runTest(testDispatcher) {
+        val viewModel = createViewModel()
+
+        val effects = mutableListOf<TripDetailUiEffect>()
+        val collectJob = launch {
+            viewModel.uiEffect.collect { effects.add(it) }
+        }
+
+        viewModel.onIntent(TripDetailUiIntent.OnNavigateToStopClicked("unknown-stop-id"))
+        advanceUntilIdle()
+
+        assertTrue(effects.none { it is TripDetailUiEffect.LaunchNavigation })
+        collectJob.cancel()
+    }
+
     @Test
     fun `GIVEN complete route WHEN stop mutation invalidates all legs THEN isRouteRecalculationPromptVisible transitions to true and totals transition to null`() = runTest(testDispatcher) {
         val stops = listOf(

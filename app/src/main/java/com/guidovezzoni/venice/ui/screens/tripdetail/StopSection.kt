@@ -16,6 +16,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.Navigation
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.TripOrigin
 import androidx.compose.material.icons.outlined.Delete
@@ -66,6 +67,7 @@ fun StopSection(
     stopDisplayState: StopDisplayState = StopDisplayState.UPCOMING,
     onMarkDeparted: (() -> Unit)? = null,
     onUndoDeparted: (() -> Unit)? = null,
+    onNavigate: (() -> Unit)? = null,
 ) {
     Column(modifier = modifier.fillMaxWidth().padding(horizontal = SECTION_PADDING)) {
         Text(
@@ -89,6 +91,7 @@ fun StopSection(
                 stopDisplayState = stopDisplayState,
                 onMarkDeparted = onMarkDeparted,
                 onUndoDeparted = onUndoDeparted,
+                onNavigate = onNavigate,
             )
         } else {
             EmptyStop(
@@ -115,6 +118,7 @@ private fun FilledStop(
     stopDisplayState: StopDisplayState = StopDisplayState.UPCOMING,
     onMarkDeparted: (() -> Unit)? = null,
     onUndoDeparted: (() -> Unit)? = null,
+    onNavigate: (() -> Unit)? = null,
 ) {
     val changeDescription = stringResource(changeDescriptionRes)
     val departedDescription = stringResource(R.string.trip_detail_stop_departed_icon_description)
@@ -197,6 +201,17 @@ private fun FilledStop(
                     Icon(
                         imageVector = Icons.Outlined.Delete,
                         contentDescription = stringResource(R.string.trip_detail_remove_stop),
+                    )
+                }
+            }
+            if (onNavigate != null) {
+                IconButton(onClick = onNavigate, enabled = !isLoading) {
+                    Icon(
+                        imageVector = Icons.Filled.Navigation,
+                        contentDescription = stringResource(
+                            R.string.nav_action_navigate_content_description,
+                            stop.placeName,
+                        ),
                     )
                 }
             }
@@ -457,6 +472,33 @@ private fun PreviewStopSectionCurrent() {
             filledLabelRes = R.string.trip_detail_intermediate_stop_label,
             stopDisplayState = StopDisplayState.CURRENT,
             onMarkDeparted = {},
+            onNavigate = {},
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PreviewStopSectionWithNavigate() {
+    HeadingToVeniceTheme {
+        StopSection(
+            stop = Stop(
+                id = "3",
+                tripId = "trip-1",
+                placeName = "Milan, Italy",
+                latitude = 45.4642,
+                longitude = 9.1900,
+                order = 2,
+                status = StopStatus.PENDING,
+            ),
+            coordinatesText = formatCoordinates(45.4642, 9.1900),
+            icon = Icons.Filled.Place,
+            titleRes = R.string.trip_detail_intermediate_stop_label,
+            setButtonTextRes = R.string.trip_detail_add_stop,
+            changeDescriptionRes = R.string.trip_detail_change_intermediate_stop,
+            filledLabelRes = R.string.trip_detail_intermediate_stop_label,
+            stopDisplayState = StopDisplayState.UPCOMING,
+            onNavigate = {},
         )
     }
 }

@@ -938,6 +938,39 @@ class TripDetailScreenTest {
 
     // endregion
 
+    // region Navigate to stop
+
+    @Test
+    fun pendingStop_navigateButtonTapped_firesOnNavigateToStopClicked() {
+        val intents = mutableListOf<TripDetailUiIntent>()
+        setContent(
+            uiState = TripDetailUiState(startingPoint = STARTING_POINT),
+            onIntent = { intents.add(it) },
+        )
+
+        composeTestRule
+            .onNodeWithContentDescription("Navigate to ${STARTING_POINT.placeName}")
+            .performClick()
+
+        val intent = intents.filterIsInstance<TripDetailUiIntent.OnNavigateToStopClicked>().first()
+        assertEquals(STARTING_POINT.id, intent.stopId)
+    }
+
+    @Test
+    fun visitedStop_navigateButtonIsNotPresent() {
+        setContent(
+            uiState = TripDetailUiState(
+                startingPoint = STARTING_POINT.copy(status = StopStatus.VISITED),
+            ),
+        )
+
+        composeTestRule
+            .onNodeWithContentDescription("Navigate to ${STARTING_POINT.placeName}")
+            .assertDoesNotExist()
+    }
+
+    // endregion
+
     // region Loading state
 
     @Test

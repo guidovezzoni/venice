@@ -41,6 +41,7 @@ sealed class TripDetailUiIntent {
     data object OnDismissRemoveStopDialog : TripDetailUiIntent()
     data class OnMarkStopDepartedClicked(val stopId: String) : TripDetailUiIntent()
     data class OnUndoMarkStopDepartedClicked(val stopId: String) : TripDetailUiIntent()
+    data class OnNavigateToStopClicked(val stopId: String) : TripDetailUiIntent()
     data class OnSearchQueryChanged(val query: String) : TripDetailUiIntent()
     data class OnSuggestionSelected(val suggestion: PlaceSuggestion) : TripDetailUiIntent()
     data object OnCalculateRouteClicked : TripDetailUiIntent()
