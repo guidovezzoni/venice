@@ -1,10 +1,13 @@
 package com.guidovezzoni.venice.ui
 
 import android.content.Intent
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
@@ -36,8 +39,8 @@ class MainScreenTest {
         composeTestRule.setContent {
             HeadingToVeniceTheme {
                 val snackbarHostState = remember { SnackbarHostState() }
-                Scaffold(snackbarHost = { SnackbarHost(hostState = snackbarHostState) }) { _ ->
-                    TripDetailEffectHandler(
+                Scaffold(snackbarHost = { SnackbarHost(hostState = snackbarHostState) }) { paddingValues ->
+                    Box(modifier = Modifier.padding(paddingValues)) { TripDetailEffectHandler(
                         effects = effectFlow,
                         snackbarHostState = snackbarHostState,
                         startingPointErrorMessage = TEST_START_ERROR,
@@ -46,7 +49,7 @@ class MainScreenTest {
                         getDialogState = { DialogState.None },
                         resolveActivity = resolveActivity,
                         startActivity = startActivity,
-                    )
+                    ) }
                 }
             }
         }
