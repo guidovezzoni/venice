@@ -166,6 +166,7 @@ private fun PreviewComponentName() {
 - When adding a new user facing string, always extract it in the strings.xml file for easy translation
 - Common strings, like button names, should be listed at the top of strings.xml and have this prefix: "global_"
 - When a new string is added or modified to strings.xml, you should always update the same string in other languages that might be present, translating it accordingly.
+- **Locale directories**: Before creating a new `values-xx` directory for a language, always run `ls app/src/main/res/` to check whether a region-qualified variant (e.g. `values-es-rES`) already exists. If it does, add strings there — never create a plain `values-xx` alongside it. Creating both causes Android to serve different string sets depending on device region, producing inconsistent translations.
 - **Ellipsis**: Always replace three dots with ellipsis
 
 ### Kotlin Best Practices
