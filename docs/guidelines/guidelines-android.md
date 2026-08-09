@@ -269,3 +269,263 @@ Unit tests should follow these criteria:
 - Wrap the composable in the app theme (`HeadingToVeniceTheme`) for accurate rendering.
 - Cover at minimum: empty/default state, populated state, visibility toggles for dialogs, button click intents, and dismiss intents.
 - **Execution**: tests run on a connected device (physical or emulator) via `./gradlew connectedDebugAndroidTest`.
+
+## Detekt
+
+Static analysis via [Detekt](https://detekt.dev/) with the [Compose rules plugin](https://github.com/mrmans0n/compose-rules).
+
+### Gradle setup
+
+Apply the plugin in the root `build.gradle.kts` (without `apply`), then apply it in the module and add the Compose rules plugin as a `detektPlugins` dependency:
+
+```kotlin
+// root build.gradle.kts
+plugins {
+    alias(libs.plugins.detekt) apply false
+}
+
+// app/build.gradle.kts
+plugins {
+    alias(libs.plugins.detekt)
+}
+
+dependencies {
+    detektPlugins(libs.detekt.compose.rules)
+}
+
+detekt {
+    buildUponDefaultConfig = true
+    config.setFrom(files("$rootDir/config/detekt/detekt.yml"))
+    baseline = file("detekt-baseline.xml")
+}
+```
+
+### Configuration file
+
+Place the configuration at `config/detekt/detekt.yml`. The settings below are the recommended baseline for a Compose + Kotlin project:
+
+```yaml
+build:
+  maxIssues: 0
+
+complexity:
+  CyclomaticComplexMethod:
+    ignoreAnnotated:
+      - 'Composable'
+  LongMethod:
+    ignoreAnnotated:
+      - 'Composable'
+  LongParameterList:
+    functionThreshold: 10
+    constructorThreshold: 10
+    ignoreAnnotated:
+      - 'Composable'
+  TooManyFunctions:
+    thresholdInClasses: 12
+    ignoreAnnotatedFunctions:
+      - 'Composable'
+      - 'Preview'
+
+naming:
+  FunctionNaming:
+    ignoreAnnotated:
+      - 'Composable'
+    excludes:
+      - '**/test/**'
+      - '**/androidTest/**'
+  TopLevelPropertyNaming:
+    constantPattern: '[A-Z][A-Za-z0-9_]*'
+
+style:
+  ForbiddenComment:
+    active: false
+  MagicNumber:
+    ignoreAnnotated:
+      - 'Composable'
+      - 'Preview'
+    ignorePropertyDeclaration: true
+    ignoreCompanionObjectPropertyDeclaration: true
+    ignoreEnums: true
+  MaxLineLength:
+    maxLineLength: 120
+    excludeCommentStatements: true
+    excludePackageStatements: true
+    excludeImportStatements: true
+    excludes:
+      - '**/test/**'
+      - '**/androidTest/**'
+  UnusedImports:
+    active: true
+  UnusedPrivateMember:
+    ignoreAnnotated:
+      - 'Preview'
+  WildcardImport:
+    active: true
+
+Compose:
+  active: true
+```
+
+Key decisions:
+- `maxIssues: 0` — zero tolerance; any violation fails the build.
+- Complexity thresholds and `LongMethod` / `CyclomaticComplexMethod` exempt `@Composable` functions, which are inherently larger by design.
+- `FunctionNaming` exempts composables and test functions (composables use PascalCase by Compose convention).
+- `MaxLineLength` is 120 and excludes test files, imports, and package statements.
+- A `detekt-baseline.xml` can be generated to suppress pre-existing issues when adopting Detekt on a legacy codebase.
+
+## Kover
+
+Code coverage via [Kover](https://kotlin.github.io/kotlinx-kover/).
+
+### Gradle setup
+
+Apply the plugin in the root `build.gradle.kts` (without `apply`), then apply it in the module and configure the `kover` block:
+
+```kotlin
+// root build.gradle.kts
+plugins {
+    alias(libs.plugins.kover) apply false
+}
+
+// app/build.gradle.kts
+plugins {
+    alias(libs.plugins.kover)
+}
+
+kover {
+    reports {
+        filters {
+            excludes {
+                classes(
+                    "*.BuildConfig",
+                    "*.ComposableSingletons*",
+                    "*_Factory*",
+                    "*_HiltModules*",
+                    "*_Impl",
+                    "*_MembersInjector",
+                    "hilt_aggregated_deps.*",
+                    "dagger.hilt.*",
+                    "*.Hilt_*",
+                    "*.di.*",
+                    "*.database.*Dao_Impl*",
+                    "*.database.AppDatabase*",
+                    "*.ui.theme.*",
+                    "*.ui.screens.*",       // composable screens — tested via Compose UI tests
+                    "*.YourApplication",    // replace with your Application class
+                    "*.MainActivity",
+                )
+                annotatedBy(
+                    "androidx.compose.ui.tooling.preview.Preview",
+                    "androidx.compose.runtime.Composable",
+                    "dagger.hilt.android.lifecycle.HiltViewModel",
+                )
+            }
+        }
+        verify {
+            rule {
+                minBound(95)
+            }
+        }
+    }
+}
+```
+
+Key decisions:
+- Generated and DI glue classes (Hilt, Room DAO implementations, `_Factory`, `_Impl`) are excluded — they are not unit-testable and skew coverage metrics.
+- `@Composable` and `@Preview` annotated code is excluded; composables are covered by separate Compose UI tests.
+- `@HiltViewModel` annotated classes are excluded from the annotation filter because their constructor is generated; the ViewModel logic itself is tested via `UiIntent`/`UiState` assertions.
+- The minimum bound is **95%**; lower it only with a documented rationale.
+- Update `*.YourApplication` and `*.MainActivity` to match your actual package and class names.
+
+## Fastlane
+
+Automated build and release via [Fastlane](https://fastlane.tools/).
+
+### Setup
+
+`Gemfile` at the project root:
+
+```ruby
+source "https://rubygems.org"
+
+gem "fastlane"
+```
+
+`fastlane/Appfile`:
+
+```ruby
+json_key_file(ENV["PLAY_STORE_JSON_KEY_FILE"] || "play-store-key.json")
+package_name("com.your.package")   # replace with your application ID
+```
+
+- The Play Store JSON key path is read from the environment variable `PLAY_STORE_JSON_KEY_FILE`, falling back to `play-store-key.json` in the project root. Never commit the key file; add it to `.gitignore`.
+
+### Fastfile
+
+```ruby
+default_platform(:android)
+
+platform :android do
+  desc "Run unit tests, detekt, and lint"
+  lane :test do
+    gradle(
+      task: "check",
+      flags: "--console=plain --stacktrace"
+    )
+  end
+
+  desc "Build debug APK"
+  lane :build do
+    gradle(
+      task: "assembleDebug",
+      flags: "--console=plain --stacktrace"
+    )
+  end
+
+  desc "Build release AAB and upload to Play Store internal track"
+  lane :beta do
+    gradle(
+      task: "bundleRelease",
+      flags: "--console=plain --stacktrace"
+    )
+    upload_to_play_store(
+      track: "internal",
+      aab: "app/build/outputs/bundle/release/app-release.aab",
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+      skip_upload_apk: true
+    )
+  end
+
+  desc "Build release AAB and upload to Play Store production track"
+  lane :deploy do
+    gradle(
+      task: "bundleRelease",
+      flags: "--console=plain --stacktrace"
+    )
+    upload_to_play_store(
+      track: "production",
+      aab: "app/build/outputs/bundle/release/app-release.aab",
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+      skip_upload_apk: true
+    )
+  end
+end
+```
+
+### Lanes
+
+| Lane | Command | Purpose |
+|------|---------|---------|
+| `test` | `bundle exec fastlane test` | Runs `./gradlew check` (unit tests + detekt + lint) |
+| `build` | `bundle exec fastlane build` | Builds a debug APK |
+| `beta` | `bundle exec fastlane beta` | Builds release AAB and uploads to Play Store **internal** track |
+| `deploy` | `bundle exec fastlane deploy` | Builds release AAB and uploads to Play Store **production** track |
+
+Key decisions:
+- Metadata, images, and screenshots are skipped on upload — manage store listing assets separately.
+- `--console=plain` keeps Gradle output readable in CI logs; `--stacktrace` aids debugging.
+- The `beta` / `deploy` lanes upload only an AAB (`skip_upload_apk: true`), which is the required format for Play Store submissions.
