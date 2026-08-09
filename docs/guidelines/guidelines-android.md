@@ -302,63 +302,15 @@ detekt {
 
 ### Configuration file
 
-Place the configuration at `config/detekt/detekt.yml`. The settings below are the recommended baseline for a Compose + Kotlin project:
+Place the configuration at `config/detekt/detekt.yml`. Only settings that are stricter than Detekt's defaults are listed — everything else is left to the built-in defaults (enabled via `buildUponDefaultConfig = true`):
 
 ```yaml
 build:
   maxIssues: 0
 
-complexity:
-  CyclomaticComplexMethod:
-    ignoreAnnotated:
-      - 'Composable'
-  LongMethod:
-    ignoreAnnotated:
-      - 'Composable'
-  LongParameterList:
-    functionThreshold: 10
-    constructorThreshold: 10
-    ignoreAnnotated:
-      - 'Composable'
-  TooManyFunctions:
-    thresholdInClasses: 12
-    ignoreAnnotatedFunctions:
-      - 'Composable'
-      - 'Preview'
-
-naming:
-  FunctionNaming:
-    ignoreAnnotated:
-      - 'Composable'
-    excludes:
-      - '**/test/**'
-      - '**/androidTest/**'
-  TopLevelPropertyNaming:
-    constantPattern: '[A-Z][A-Za-z0-9_]*'
-
 style:
-  ForbiddenComment:
-    active: false
-  MagicNumber:
-    ignoreAnnotated:
-      - 'Composable'
-      - 'Preview'
-    ignorePropertyDeclaration: true
-    ignoreCompanionObjectPropertyDeclaration: true
-    ignoreEnums: true
-  MaxLineLength:
-    maxLineLength: 120
-    excludeCommentStatements: true
-    excludePackageStatements: true
-    excludeImportStatements: true
-    excludes:
-      - '**/test/**'
-      - '**/androidTest/**'
   UnusedImports:
     active: true
-  UnusedPrivateMember:
-    ignoreAnnotated:
-      - 'Preview'
   WildcardImport:
     active: true
 
@@ -368,9 +320,8 @@ Compose:
 
 Key decisions:
 - `maxIssues: 0` — zero tolerance; any violation fails the build.
-- Complexity thresholds and `LongMethod` / `CyclomaticComplexMethod` exempt `@Composable` functions, which are inherently larger by design.
-- `FunctionNaming` exempts composables and test functions (composables use PascalCase by Compose convention).
-- `MaxLineLength` is 120 and excludes test files, imports, and package statements.
+- `UnusedImports` and `WildcardImport` are inactive in Detekt's defaults; explicitly enabled here.
+- `Compose: active: true` enables all rules from the `detekt-compose-rules` plugin, which are off by default.
 - A `detekt-baseline.xml` can be generated to suppress pre-existing issues when adopting Detekt on a legacy codebase.
 
 ## Kover
