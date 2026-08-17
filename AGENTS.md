@@ -17,6 +17,11 @@ Instructions:
 
 For Native Android code style and best practices: @docs/guidelines/guidelines-android.md
 
+### Analytics Guidelines
+
+For analytics event design, naming, and delivery: @docs/guidelines/guidelines-analytics.md
+The event dictionary is the tracking plan: @docs/analytics/tracking-plan.md
+
 ### Git Guidelines
 
 For git operations and commit conventions: @docs/guidelines/guidelines-git.md
@@ -27,7 +32,7 @@ Read the following file immediately as it's relevant to all workflows: @docs/gui
 
 ## Project Overview
 
-**Venice** is a road trip planning app for Android, built in Kotlin with Jetpack Compose and Material 3. It follows Clean Architecture (data / domain / UI layers) with the MVI pattern per feature. DI is handled by Hilt, persistence by Room, and async work by Coroutines and Flow.
+**Venice** is a road trip planning app for Android, built in Kotlin with Jetpack Compose and Material 3. It follows Clean Architecture (data / domain / UI layers) with the MVI pattern per feature. DI is handled by Hilt, persistence by Room, and async work by Coroutines and Flow. Product analytics go through a provider-agnostic layer (`domain/analytics`, `data/analytics`) with one Hilt-multibound provider per backend.
 
 - **Package**: `com.guidovezzoni.venice`
 - **Min SDK**: 24 — **Target SDK**: 36
@@ -40,6 +45,7 @@ Read the following file immediately as it's relevant to all workflows: @docs/gui
 | Path | Contents |
 |------|----------|
 | `docs/userstories/` | User story backlog organised by epic and feature (see `index.md`) |
+| `docs/analytics/` | Tracking plan — the event dictionary and single source of truth for analytics events |
 | `docs/sdlc/commands/` | SDLC custom command definitions |
 | `docs/reports/` | Verification and archive reports |
 | `docs/improvements/` | Improvement proposals |

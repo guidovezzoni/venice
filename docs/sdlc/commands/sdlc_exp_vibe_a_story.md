@@ -135,6 +135,8 @@ user story, explore the codebase, and produce a task list — all in one pass.
 Read the user story file at: {USER_STORY_FILE_PATH}
 Read: docs/guidelines/guidelines-android.md
 Read: docs/guidelines/guidelines-process.md
+Read: docs/guidelines/guidelines-analytics.md
+Read: docs/analytics/tracking-plan.md
 
 Enrich the story with implementation-ready detail covering:
 1. Full functionality description
@@ -143,7 +145,11 @@ Enrich the story with implementation-ready detail covering:
 4. Files to modify (with brief rationale)
 5. Unit test strategy
 6. Security, performance, and GDPR concerns
-7. Non-functional requirements
+7. An `## Analytics` section defining the events this feature must emit — names, parameters,
+   and the product question each answers — per the analytics guidelines and tracking plan.
+   Analytics is a product requirement of the feature, not a follow-up. If no new event is
+   warranted, say so and give the reason.
+8. Non-functional requirements
 
 Write the refinement at the top of the story file. Preserve original content under
 "## Original user story".
