@@ -37,11 +37,13 @@ assert_check_fails "sdlc_open_story" "sdlc_open_story fails"
 assert_check_fails "sdlc_propose_change" "sdlc_propose_change fails"
 assert_check_fails "sdlc_implement_change" "sdlc_implement_change fails"
 assert_check_fails "sdlc_verify_story" "sdlc_verify_story fails"
+assert_check_fails "sdlc_exp_four_in_one" "sdlc_exp_four_in_one fails"
+assert_check_fails "sdlc_exp_vibe_a_story" "sdlc_exp_vibe_a_story fails"
 assert_check_fails "sdlc_doctor" "sdlc_doctor fails"
 assert_check_fails "sdlc_project_doctor" "sdlc_project_doctor fails"
 
-# At least 14 failures (file checks), possibly 15 if openspec CLI also missing
-assert_min_fail_count 14
+# At least 16 failures (file checks), possibly 17 if openspec CLI also missing
+assert_min_fail_count 16
 
 # Summary should indicate failures
 assert_output_contains "failed" "summary mentions failure"

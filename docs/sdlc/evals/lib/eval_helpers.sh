@@ -78,7 +78,7 @@ EOF
 
     local sdlc_dir="$dir/.claude/commands/sdlc"
     mkdir -p "$sdlc_dir"
-    for cmd in sdlc_open_story sdlc_propose_change sdlc_implement_change sdlc_verify_story sdlc_doctor sdlc_project_doctor; do
+    for cmd in sdlc_open_story sdlc_propose_change sdlc_implement_change sdlc_verify_story sdlc_exp_four_in_one sdlc_exp_vibe_a_story sdlc_doctor sdlc_project_doctor; do
         echo "# $cmd command placeholder" > "$sdlc_dir/$cmd.md"
     done
 }

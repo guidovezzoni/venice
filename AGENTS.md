@@ -25,7 +25,6 @@ For git operations and commit conventions: @docs/guidelines/guidelines-git.md
 
 Read the following file immediately as it's relevant to all workflows: @docs/guidelines/guidelines-process.md
 
-
 ## Project Overview
 
 **Venice** is a road trip planning app for Android, built in Kotlin with Jetpack Compose and Material 3. It follows Clean Architecture (data / domain / UI layers) with the MVI pattern per feature. DI is handled by Hilt, persistence by Room, and async work by Coroutines and Flow.

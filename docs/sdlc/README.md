@@ -147,6 +147,40 @@ Chains all four lifecycle commands into a single run with auto-commits between p
 
 ---
 
+### `/sdlc_exp_vibe_a_story` — Fast Two-Phase Run
+
+The fastest option — compresses the SDLC into two phases (Think, Build & Check) with minimal ceremony.
+
+**Recommended agent:** Opus (orchestrator) — delegates analysis to a single Opus sub-agent, implementation to Sonnet/Haiku.
+
+**What it keeps:**
+
+- Story refinement, codebase exploration, and task planning (merged into one Opus sub-agent call)
+- User Q&A gate for ambiguities
+- Sub-agent orchestration with model-tier classification
+- Build + test + security verification
+- On-device tests
+- Story lifecycle management
+
+**What it cuts:**
+
+- OpenSpec artifacts (proposal, design, delta specs) — replaced by a lightweight task list in `vibe/`
+- BDD RED/GREEN ceremony — tests and implementation can be in the same task
+- Reports at every phase
+- Redundant security/TODO scans (each runs once, not twice)
+- Preview coverage and test file coverage gates
+- README/AGENTS.md sync checks
+- Spec sync and change archival
+- Formal Definition of Done verification
+- Separate exploration and task-generation sub-agents (merged into one)
+- TODO resolution loop
+
+**Best for:** Small features, spikes, well-understood changes, solo projects.
+
+**Output:** 2 commits (analyze+plan, implement+verify), ~6 sub-agents, ~40-50% token cost of full SDLC.
+
+---
+
 ## End-to-End Flow
 
 ```
@@ -180,9 +214,17 @@ Chains all four lifecycle commands into a single run with auto-commits between p
 │    /sdlc_project_doctor          │  Project config health check
 └──────────────────────────────────┘
 
+
+
 ── Experimental ───────────────────────────────────
+
+
 ┌──────────────────────────────────┐
 │    /sdlc_exp_four_in_one         │  All four in one autonomous run
+└──────────────────────────────────┘
+
+┌──────────────────────────────────┐
+│    /sdlc_exp_vibe_a_story        │  Two-phase fast run
 └──────────────────────────────────┘
 ```
 
@@ -260,6 +302,9 @@ The other guidelines file are primarily used by the SDLC commands and describe h
 - Define how to handle changes/fix after propose change: every unexpected change on the code in an open story should update story and specs, or at least check if they are affected
 - Learn a lesson from a failure: the agent should be able to update the structure in case it spots a failure
 - create a guideline for readme
+- add PR review - other  LLM provider???
+- Lint is currently checked on verify, it should probably be executed on apply change, to group together all the changes
+- Define how to approach/solve the big PR issue
 
 ## Repeating errors to fix
 - opsx new change: Change name can only contain lowercase letters, numbers, and hyphens
@@ -277,9 +322,5 @@ The other guidelines file are primarily used by the SDLC commands and describe h
   - do not use for the expected value, the same internal function being tested -> this however conflicts with BDD's black box behaviour
   - insert a comment with the AAA?
 - There are several decisions that have been taken just "because it's a small project": that should not happen: all the projects I start are small and they will likely  become bigger, so they should use the expected architecture and structures.
-- Analytics !!!
+- Not sure what's best yet: When both Domain and UI require the same data type, f.i. an enum, where should this be defined? In Domain? Should it be duplicated in UI? Should it be defined in another root package?
 
-Not sure what's best yet:
-
-- When both Domain and UI require the same data type, f.i. an enum, where should this be defined? In Domain? Should it be duplicated in UI? Should it be defined in another root package?
-- add PR review - other  LLM provider???

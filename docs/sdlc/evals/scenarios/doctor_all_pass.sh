@@ -38,6 +38,8 @@ assert_check_passes "sdlc_open_story" "sdlc_open_story passes"
 assert_check_passes "sdlc_propose_change" "sdlc_propose_change passes"
 assert_check_passes "sdlc_implement_change" "sdlc_implement_change passes"
 assert_check_passes "sdlc_verify_story" "sdlc_verify_story passes"
+assert_check_passes "sdlc_exp_four_in_one" "sdlc_exp_four_in_one passes"
+assert_check_passes "sdlc_exp_vibe_a_story" "sdlc_exp_vibe_a_story passes"
 assert_check_passes "sdlc_doctor" "sdlc_doctor passes"
 assert_check_passes "sdlc_project_doctor" "sdlc_project_doctor passes"
 

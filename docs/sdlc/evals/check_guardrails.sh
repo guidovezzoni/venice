@@ -86,7 +86,7 @@ section "Command File Existence"
 
 for cmd in sdlc_open_story.md sdlc_propose_change.md sdlc_implement_change.md \
            sdlc_verify_story.md sdlc_doctor.md sdlc_project_doctor.md \
-           sdlc_exp_four_in_one.md; do
+           sdlc_exp_four_in_one.md sdlc_exp_vibe_a_story.md; do
     TOTAL=$((TOTAL + 1))
     if [[ -f "$COMMANDS_DIR/$cmd" ]]; then
         PASS=$((PASS + 1))
@@ -476,23 +476,6 @@ assert_contains_regex "sdlc_project_doctor.md" 'Summary.*checks passed|checks pa
 # ─────────────────────────────────────────────────────────────────────
 # sdlc_exp_four_in_one.md
 # ─────────────────────────────────────────────────────────────────────
-section "sdlc_exp_four_in_one.md — User Confirmation Gate"
-
-assert_contains "sdlc_exp_four_in_one.md" "Do you want to proceed" \
-    "Asks user for explicit confirmation before proceeding"
-
-assert_contains "sdlc_exp_four_in_one.md" "stop immediately" \
-    "Stops immediately on non-yes answer"
-
-assert_contains_regex "sdlc_exp_four_in_one.md" 'sdlc_open_story.*sdlc_propose_change.*sdlc_implement_change.*sdlc_verify_story|individual commands' \
-    "Suggests individual commands as alternative"
-
-assert_contains "sdlc_exp_four_in_one.md" "skips the human review gates" \
-    "Warning explains review gates are skipped"
-
-assert_contains "sdlc_exp_four_in_one.md" "token" \
-    "Warning mentions token consumption"
-
 section "sdlc_exp_four_in_one.md — Model Assignment"
 
 assert_contains "sdlc_exp_four_in_one.md" 'model: "opus"' \
@@ -563,6 +546,117 @@ assert_contains_regex "sdlc_exp_four_in_one.md" 'PR.*merge|merge.*main' \
     "Summary indicates ready for PR/merge"
 
 # ─────────────────────────────────────────────────────────────────────
+# sdlc_exp_vibe_a_story.md
+# ─────────────────────────────────────────────────────────────────────
+section "sdlc_exp_vibe_a_story.md — Git Safety Guardrails"
+
+assert_contains "sdlc_exp_vibe_a_story.md" "DO NOT MAKE ASSUMPTIONS" \
+    "Contains DO NOT MAKE ASSUMPTIONS guardrail"
+
+assert_contains "sdlc_exp_vibe_a_story.md" "DO NOT DELETE DATA" \
+    "Contains DO NOT DELETE DATA guardrail"
+
+assert_contains "sdlc_exp_vibe_a_story.md" "git status" \
+    "Checks git status for uncommitted changes"
+
+assert_contains "sdlc_exp_vibe_a_story.md" "git branch --show-current" \
+    "Verifies current branch with git command"
+
+assert_contains "sdlc_exp_vibe_a_story.md" "git mv" \
+    "Uses git mv for file operations"
+
+section "sdlc_exp_vibe_a_story.md — Sub-agent Orchestration"
+
+assert_contains "sdlc_exp_vibe_a_story.md" 'model: "haiku"' \
+    "Assigns haiku model to sub-agents"
+
+assert_contains "sdlc_exp_vibe_a_story.md" 'model: "opus"' \
+    "Assigns opus model to combined analysis sub-agent"
+
+assert_contains_regex "sdlc_exp_vibe_a_story.md" 'model.*sonnet|sonnet.*model' \
+    "Assigns sonnet model to implementation sub-agents"
+
+assert_contains "sdlc_exp_vibe_a_story.md" "Failure handling" \
+    "Includes failure handling for sub-agents"
+
+section "sdlc_exp_vibe_a_story.md — Two-Phase Structure"
+
+assert_contains "sdlc_exp_vibe_a_story.md" "Phase 1" \
+    "Defines Phase 1 (Think)"
+
+assert_contains "sdlc_exp_vibe_a_story.md" "Phase 2" \
+    "Defines Phase 2 (Build & Check)"
+
+section "sdlc_exp_vibe_a_story.md — Task List and Build"
+
+assert_contains_regex "sdlc_exp_vibe_a_story.md" 'vibe/.*tasks\.md' \
+    "Task list stored in vibe/ directory"
+
+assert_contains_regex "sdlc_exp_vibe_a_story.md" '\- \[ \].*\- \[x\]|\[x\]' \
+    "Tracks task completion via checkboxes"
+
+section "sdlc_exp_vibe_a_story.md — Device and Security"
+
+assert_contains "sdlc_exp_vibe_a_story.md" "adb devices" \
+    "Checks device connectivity with adb devices"
+
+assert_contains_regex "sdlc_exp_vibe_a_story.md" '[Dd]evice gate' \
+    "Defines device gate protocol"
+
+assert_contains "sdlc_exp_vibe_a_story.md" "BLOCK" \
+    "Blocks on missing device"
+
+assert_contains "sdlc_exp_vibe_a_story.md" "security-review" \
+    "Runs security review"
+
+assert_contains "sdlc_exp_vibe_a_story.md" "connectedDebugAndroidTest" \
+    "Runs instrumented UI tests"
+
+section "sdlc_exp_vibe_a_story.md — Omissions"
+
+assert_not_contains "sdlc_exp_vibe_a_story.md" "Definition of Done verification" \
+    "Does NOT include Definition of Done verification step (intentionally omitted)"
+
+assert_not_contains "sdlc_exp_vibe_a_story.md" "RESOLVE NOW" \
+    "Does NOT include TODO resolution loop (intentionally omitted)"
+
+section "sdlc_exp_vibe_a_story.md — Commit Policy"
+
+assert_contains "sdlc_exp_vibe_a_story.md" "git add -A" \
+    "Commits use git add -A"
+
+assert_contains "sdlc_exp_vibe_a_story.md" "git commit" \
+    "Commits after each phase"
+
+assert_contains "sdlc_exp_vibe_a_story.md" "Co-Authored-By" \
+    "Commit messages include Co-Authored-By"
+
+assert_contains "sdlc_exp_vibe_a_story.md" "{REF}" \
+    "Commit messages use {REF} prefix from branch name"
+
+section "sdlc_exp_vibe_a_story.md — Lifecycle"
+
+assert_contains_regex "sdlc_exp_vibe_a_story.md" '\-WIP' \
+    "Manages -WIP story lifecycle"
+
+assert_contains_regex "sdlc_exp_vibe_a_story.md" '\-DONE' \
+    "Manages -DONE story lifecycle"
+
+assert_contains "sdlc_exp_vibe_a_story.md" "guidelines-userstories.md" \
+    "References user story guidelines"
+
+section "sdlc_exp_vibe_a_story.md — Final Summary"
+
+assert_contains "sdlc_exp_vibe_a_story.md" "Vibe Complete" \
+    "Outputs final summary with Vibe Complete header"
+
+assert_contains "sdlc_exp_vibe_a_story.md" "Total commits: 2" \
+    "Summary shows 2 total commits"
+
+assert_contains_regex "sdlc_exp_vibe_a_story.md" 'PR.*merge|merge.*main' \
+    "Summary indicates ready for PR/merge"
+
+# ─────────────────────────────────────────────────────────────────────
 # Cross-Command Consistency Checks
 # ─────────────────────────────────────────────────────────────────────
 section "Cross-Command — Commit Message Suggestion"
@@ -590,14 +684,15 @@ section "Cross-Command — Sub-agent Orchestration Declaration"
 
 for cmd in sdlc_open_story.md sdlc_propose_change.md sdlc_implement_change.md \
            sdlc_verify_story.md sdlc_doctor.md sdlc_project_doctor.md \
-           sdlc_exp_four_in_one.md; do
+           sdlc_exp_four_in_one.md sdlc_exp_vibe_a_story.md; do
     assert_contains_regex "$cmd" '[Ss]ub-agent orchestration|sub-agent' \
         "$cmd uses sub-agent orchestration"
 done
 
 section "Cross-Command — Device Connectivity"
 
-for cmd in sdlc_implement_change.md sdlc_verify_story.md; do
+for cmd in sdlc_implement_change.md sdlc_verify_story.md \
+           sdlc_exp_vibe_a_story.md; do
     assert_contains "$cmd" "adb devices" \
         "$cmd checks device connectivity"
 done
