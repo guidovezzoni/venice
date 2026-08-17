@@ -3,13 +3,16 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
-TARGET_ROOT="$(cd "$PROJECT_ROOT/../SDLC" 2>/dev/null && pwd)" || {
-    echo "Error: ../SDLC/ directory not found relative to project root ($PROJECT_ROOT)"
+TARGET_ROOT="$HOME/dev/personal/SDLC"
+
+if [[ ! -d "$TARGET_ROOT" ]]; then
+    echo "Error: target directory not found: $TARGET_ROOT"
     exit 1
-}
+fi
 
 SDLC_EXCLUDES=(
-    "sync_sdlc.sh"
+    "push_update_to_sdlc.sh"
+    "get_update_from_sdlc.sh"
     ".claude"
 )
 
