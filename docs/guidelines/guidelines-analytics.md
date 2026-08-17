@@ -153,10 +153,21 @@ Scattered constants cannot be cross-checked against the tracking plan and are ho
 A sealed class makes the full event set readable in one file and makes an untracked event a compile
 error rather than a typo.
 
-**Enumerated parameter values are enums, one type per file**, each carrying an explicit
-`value: String` in `snake_case`. Always emit `.value`, **never** `.name` — Kotlin enum names are
-`SCREAMING_SNAKE_CASE` and leak into the data as casing inconsistencies. This is a structural fix: it
-makes the correct thing the easy thing.
+**Enumerated parameter values are enums carrying an explicit `value: String`** in `snake_case`. Always
+emit `.value`, **never** `.name` — Kotlin enum names are `SCREAMING_SNAKE_CASE` and would leak into an
+otherwise snake_case dataset. This is a structural fix rather than a convention to remember: it makes
+the correct thing the easy thing.
+
+**Each enum lives in its own file**, per the project's one-class-per-file rule — no exception for small
+ones, consistent with `StopStatus` and `StopType`, which are three-line files.
+
+Where such an enum **maps or classifies** — banding a continuous value, resolving a navigation route,
+translating a domain type — it is behaviour rather than a label list, and **requires boundary tests**
+covering zero, negative, and band-edge inputs. A flat vocabulary with no logic needs no such tests.
+This distinction governs test requirements only, never file layout.
+
+Values shared between an event parameter and a user property must be **top-level types**, not nested
+inside `AnalyticsEvent`. Nesting couples a shared vocabulary to one of its two consumers.
 
 ### Providers
 
