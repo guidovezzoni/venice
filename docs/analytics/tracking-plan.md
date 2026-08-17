@@ -9,6 +9,11 @@ Until those land, the code emits the legacy events in the [migration table](#mig
 **Rule:** every event in the code has an entry here, and every entry here is implemented. Drift in
 either direction is a defect.
 
+This includes events the app never explicitly sends. SDK **autocapture** — Firebase's automatic
+`screen_view`, PostHog's lifecycle and deep-link capture, Amplitude's screen and element-interaction
+capture — reaches the backend without appearing in any code review. Autocapture is disabled at provider
+initialisation; anything deliberately left on gets an entry here like any other event.
+
 ## Product Questions
 
 Every event exists to answer one of these four. An event answering none of them does not belong in the

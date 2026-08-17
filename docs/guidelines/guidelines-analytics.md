@@ -85,9 +85,13 @@ GOOD  operation_failed { error_type: "network" }
 
 ### Parameter values must be primitives
 
-Values are restricted to `String`, `Int`, `Long`, `Double`, `Boolean`. This is a hard platform
-constraint, not a style choice — Firebase carries parameters in a `Bundle`, which cannot hold
-arbitrary objects. Anything else is silently dropped or throws at runtime.
+Values are restricted to `String`, `Int`, `Long`, `Double`, `Boolean`.
+
+This is the **intersection of what backends accept**, not a universal rule. Firebase carries parameters
+in a `Bundle`, which cannot hold arbitrary objects — anything else is silently dropped or throws.
+Amplitude and PostHog both accept richer values including lists and nested structures. Holding the whole
+taxonomy to the strictest backend's limit is what keeps events portable: a second or third destination
+can then be added without reshaping any event.
 
 The constraint is enforced structurally by building every event from a typed sealed-class constructor
 rather than an ad-hoc map, so a non-primitive cannot reach a provider.
@@ -251,6 +255,29 @@ either one knowing about the other.
 Providers must be **thread-safe** — `logEvent` may be called from any thread or coroutine context.
 Document this on every implementation.
 
+### Autocapture must be switched off
+
+Analytics SDKs collect events **you did not ask for**, usually by default. Amplitude offers
+`SESSIONS`, `APP_LIFECYCLES`, `SCREEN_VIEWS`, `DEEP_LINKS` and `ELEMENT_INTERACTIONS`; PostHog defaults
+`captureApplicationLifecycleEvents` to `true`, has `captureScreenViews`, and `captureDeepLinks` captures
+a URL along with **every query parameter**; Firebase auto-collects `screen_view` among others.
+
+Every provider must **disable autocapture explicitly at initialisation**, and each option left enabled
+must be a recorded decision with a tracking-plan entry. Two reasons, both of which bypass code review
+entirely because no event is declared anywhere:
+
+- **Double counting.** Autocaptured screen views fire alongside a deliberate screen-view event,
+  inflating counts and corrupting any funnel built on them. Effort spent getting screen tracking to
+  fire at the right moment is wasted if the SDK is also firing its own.
+- **Privacy-floor bypass.** The privacy floor governs what the app sends; it has no authority over what
+  the SDK sends by itself. Deep-link and element-interaction capture can put URLs, query parameters, and
+  view labels into the pipeline — exactly the free text, identifiers, and coordinates the taxonomy exists
+  to exclude.
+
+Where a backend's automatic event genuinely duplicates a declared one, map the declared event onto the
+backend's reserved name rather than emitting both — and disable the automatic collection so the mapped
+event is the only source.
+
 ### Debug provider is debug-only
 
 The Logcat provider must be registered in **debug build variants only**. Logcat is readable over ADB
@@ -356,3 +383,5 @@ Venice has no settings screen, which is why this is blocked rather than merely p
 | Wiring the SDK before writing the plan | Locks in names you cannot change later |
 | Same name for an event parameter and a user property | Two same-named dimensions in different scopes; a mis-click returns a plausible wrong number |
 | A parameter whose sampling moment is undefined | "Count before or after this action?" — the two readings disagree and nothing errors |
+| Leaving SDK autocapture at its defaults | Double-counts declared events and can bypass the privacy floor, with no event declared anywhere to review |
+| Assuming a backend's limits are universal | Primitive-only params are a Firebase constraint; design to the strictest backend so events stay portable |
