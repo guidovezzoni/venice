@@ -56,19 +56,42 @@ app/src/main/java/<package-name>/
 │       ├── Color.kt
 │       └── Type.kt       
 ├── domain/                     # Business logic
+│   ├── model/                  # Domain models and value objects
 │   ├── usecase/
 │   │   ├── Usecase001UseCase.kt
 │   │   ├── Usecase002UseCase.kt
 │   │   └── Usecase003UseCase.kt
 │   └── repository/             # Repository interfaces
-└── data/                       # Data layer
-    ├── repository/             # Repository implementations
-    │   ├── Repository001Impl.kt
-    │   └── Repository002Impl.kt
-    ├── mapper/                 # DTO → domain mappers
-    │   └── EntityMapper.kt
-    └── database/
+├── data/                       # Data layer
+│   ├── repository/             # Repository implementations
+│   │   ├── Repository001Impl.kt
+│   │   └── Repository002Impl.kt
+│   ├── mapper/                 # DTO → domain mappers
+│   │   └── EntityMapper.kt
+│   └── database/
+└── core/                       # Cross-cutting concerns (see charter below)
+    ├── analytics/
+    └── network/
 ```
+
+- **The `core/` package**: holds concerns that are **cross-cutting, carry no business rules, and are
+  consumed by more than one layer** — analytics, logging, generic coroutine helpers, network
+  primitives. It sits parallel to `data/`, `domain/`, and `ui/`, not beneath them.
+
+  `core/` is the package most prone to becoming a junk drawer, so admission is gated by a single test:
+  **you must be able to name at least two unrelated consumers.** If you cannot, it belongs elsewhere.
+
+  | Question | Belongs in |
+  |----------|-----------|
+  | Does it express a business rule or concept? | `domain/` |
+  | Does it fetch, persist, or map external data? | `data/` |
+  | Does it render or hold screen state? | `ui/` |
+  | None of the above, and used by two or more layers? | `core/` |
+
+  A concern in `core/` keeps its contracts and its implementations together — splitting one cohesive
+  concern across `core/` and `data/` defeats the purpose. Where an implementation pulls in a heavy
+  third-party SDK, note it as the natural candidate for extraction into its own module if the project
+  is ever modularised, so `core/` stays dependency-light.
 
 - **Preserve meaningful domain concepts as value objects**: When an API response contains a nested object that represents a coherent domain concept (e.g. a rating with a score and count, an address with street and city), model it as a separate value object in the domain layer rather than flattening its fields into the parent entity. Flattening dissolves concept boundaries, making the model harder to reason about and extend. The DTO layer mirrors the API shape; the domain layer mirrors the business meaning.
 

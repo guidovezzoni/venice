@@ -133,16 +133,29 @@ rule and the privacy floor point the same way — which is the sign that the rul
 
 ### Layering
 
+**Analytics lives in `core/`, not `domain/`.** It carries no business rules, and no use case or
+repository should ever reference it — the domain layer must not know it is being observed. Putting the
+taxonomy in `domain/` would weaken what that layer communicates and set a precedent for the next
+cross-cutting concern. See the `core/` charter in `guidelines-android.md`.
+
+Contracts and implementations stay together, because analytics is one cohesive concern — the composite
+client is not a repository and the providers map no DTOs, so a `domain`/`data` split buys nothing.
+
 ```
-domain/analytics/    AnalyticsClient        interface — what call sites depend on
-                     AnalyticsProvider      interface — one implementation per backend
-                     AnalyticsEvent         sealed class — the event taxonomy, in code
-                     AnalyticsUserProperty  sealed class — the user properties, in code
-data/analytics/      CompositeAnalyticsClient   fans out to every registered provider
-                     DebugAnalyticsProvider     Logcat sink, debug builds only
-                     <Backend>AnalyticsProvider Firebase, Crashlytics, …
-di/                  AnalyticsModule      @Binds @IntoSet per provider
+core/analytics/   AnalyticsClient            interface — what call sites depend on
+                  AnalyticsProvider          interface — one implementation per backend
+                  AnalyticsEvent             sealed class — the event taxonomy, in code
+                  AnalyticsUserProperty      sealed class — the user properties, in code
+                  <enums>                    bounded parameter vocabularies, one per file
+                  CompositeAnalyticsClient   fans out to every registered provider
+                  DebugAnalyticsProvider     Logcat sink, debug builds only
+                  <Backend>AnalyticsProvider Firebase, Crashlytics, …
+di/               AnalyticsModule            @Binds @IntoSet per provider
 ```
+
+The backend providers are the only part carrying a heavy third-party dependency. In a single-module
+app that is invisible; if the project is ever modularised they are the natural extraction into their
+own module, so a `:core` module stays dependency-light.
 
 `AnalyticsClient` exposes two operations — `logEvent(event)` and `setUserProperty(property)` — and both
 fan out to every registered provider. `shouldLog` filters events only; a provider that wants to ignore a
@@ -176,7 +189,7 @@ Providers are registered by **compile-time DI multibinding** (`@Binds @IntoSet`)
 `Application.onCreate` and fails silently when they don't.
 
 Each provider owns its own backend's quirks — name-length limits, reserved prefixes, parameter
-mapping, event-name translation. The domain layer never knows which backends exist.
+mapping, event-name translation. No other layer knows which backends exist.
 
 `AnalyticsProvider.shouldLog(event)` is the per-provider filter. It is what lets a crash-reporting
 provider subscribe only to failure events while a product-analytics provider takes everything, without
@@ -194,7 +207,7 @@ access.
 The gate is the **DI binding placed in the `debug` source set**, not a runtime flag:
 
 ```
-app/src/main/java/…/data/analytics/DebugAnalyticsProvider.kt    class
+app/src/main/java/…/core/analytics/DebugAnalyticsProvider.kt    class
 app/src/debug/java/…/di/DebugAnalyticsModule.kt                 @Binds @IntoSet — debug only
 ```
 
