@@ -157,9 +157,53 @@ The backend providers are the only part carrying a heavy third-party dependency.
 app that is invisible; if the project is ever modularised they are the natural extraction into their
 own module, so a `:core` module stays dependency-light.
 
-`AnalyticsClient` exposes two operations — `logEvent(event)` and `setUserProperty(property)` — and both
-fan out to every registered provider. `shouldLog` filters events only; a provider that wants to ignore a
-user property no-ops its own implementation.
+**The tracking surface is declared once**, in a shared supertype that both the client and the providers
+implement. Declaring the same operations separately on each lets the two drift, and every added
+operation then has to be remembered twice:
+
+```kotlin
+interface AnalyticsTracking {
+    fun logEvent(event: AnalyticsEvent)
+    fun setUserProperty(property: AnalyticsUserProperty)
+    fun trackException(throwable: Throwable, operation: AnalyticsOperation)
+}
+
+interface AnalyticsClient : AnalyticsTracking
+
+interface AnalyticsProvider : AnalyticsTracking {
+    fun shouldLog(event: AnalyticsEvent): Boolean
+}
+```
+
+`AnalyticsClient` adds nothing of its own — it exists to name what call sites depend on, and to keep
+them from reaching for `AnalyticsProvider` and its filter. `shouldLog` gates events only; a provider
+that wants to ignore user properties or exceptions no-ops its own implementation.
+
+### Exceptions are a separate channel from events
+
+`trackException` carries a real `Throwable`, and it exists because **crash reporting needs a stack
+trace that the event taxonomy cannot carry.** A failure event is bounded to enum values by design —
+that is what keeps free text and PII out of product analytics — so it has nowhere to put a throwable.
+Routing exceptions through the event taxonomy would either strip the stack trace, making the crash
+report almost worthless, or smuggle an exception message into an event parameter, breaking the privacy
+floor.
+
+Both therefore fire on a failure path, and they answer different questions:
+
+| Channel | Goes to | Carries | Answers |
+|---------|---------|---------|---------|
+| `logEvent(OperationFailed(operation, errorType))` | product analytics | bounded enums only | *how often* does this fail, for how many users |
+| `trackException(throwable, operation)` | crash reporting only | full throwable and stack trace | *where and why* does it fail |
+
+The throwable **must never** become an event parameter, and product-analytics providers must ignore
+`trackException` entirely. Keeping the channels separate is what lets the diagnostic path be rich while
+the analytics path stays bounded.
+
+### The zero-provider case
+
+With no providers registered, every operation is a **silent no-op** — not an error, not a crash. This
+must be documented on the composite client, because it is a state the app genuinely reaches: a release
+build has no providers at all until a real backend is wired.
 
 **The taxonomy lives in one sealed class**, not as string constants scattered across call sites.
 Scattered constants cannot be cross-checked against the tracking plan and are how taxonomies rot.

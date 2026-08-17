@@ -135,7 +135,11 @@ Prerequisites (setup, models) come first, BDD pairs in the middle ordered by dep
 
 # This work:
 
-- mixpanel
+- amplitude/posthog
+- remove references to venice + evals?
+- count band double usage?
+- update band
+
+
 - mirai SDK
 - core?
-

@@ -71,8 +71,15 @@ the top result is good enough, which is the same question from the other side.
 |-------|-----------|---------|---------|
 | `operation_failed` | `operation`, `error_type` | Any tracked operation fails | Q3 |
 
-Covers handled failures only. Crashes are Crashlytics' job (story 9.2.2), though the same event feeds
-it as non-fatals.
+Covers handled failures only, and answers **how often** something fails.
+
+It is deliberately paired with a separate, non-analytics channel — `trackException(throwable, operation)`
+— which answers **where and why** by carrying the real throwable and stack trace to crash reporting
+only. Both fire on a failure path. The throwable never becomes an event parameter, which is what lets
+the diagnostic payload be rich while `operation_failed` stays bounded to two enum values.
+
+Nothing on the exception channel is part of this tracking plan: it never reaches product analytics, so it
+has no event name, no parameters, and no custom definitions to register.
 
 ### Screens
 
