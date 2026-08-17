@@ -1,4 +1,19 @@
 #!/usr/bin/env bash
+# Syncs SDLC framework files from this project to ~/dev/personal/SDLC.
+#
+# Sync behaviour (rsync --delete):
+#   - Files added locally are copied to SDLC.
+#   - Files removed locally are deleted from SDLC.
+#   - Files added/removed in SDLC are overwritten/restored from local.
+#
+# Exclusions (never pushed to SDLC):
+#   - push_update_to_sdlc.sh / get_update_from_sdlc.sh  — project-local sync scripts
+#   - .claude                                             — project-local Claude config
+#
+# AGENTS.md: only the framework section (above ## Project Overview) is pushed;
+#   a placeholder Project Overview is written in its place.
+#
+# See get_update_from_sdlc.sh for the reverse operation.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
