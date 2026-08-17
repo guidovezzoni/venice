@@ -357,7 +357,7 @@ Always use the variant-specific tasks instead of the plain `detekt` task:
 ./gradlew detektDebug    # or detektRelease
 ```
 
-The variant tasks (`detektDebug`, `detektRelease`) run with **type resolution** — they compile the code first and analyse it with the full classpath, enabling deeper rules such as `UnusedImport` and `UnusedPrivateFunction`. The plain `detekt` task runs without type resolution and misses these issues.
+The variant tasks (`detektDebug`, `detektRelease`) run with **type resolution** — they compile the code first and analyse it with the full classpath, enabling deeper rules such as the unused-import and unused-private-member rules (exact names vary by major — see below). The plain `detekt` task runs without type resolution and misses these issues.
 
 ### Gradle setup
 
@@ -385,13 +385,56 @@ detekt {
 }
 ```
 
+### Zero tolerance — differs by major version
+
+The invariant is the same in every project: **any rule violation fails the build.** The mechanism that
+achieves it changed between detekt majors, so the configuration is not portable and must match the
+version in use.
+
+| | detekt 1.x | detekt 2.x |
+|---|---|---|
+| Zero-tolerance gate | `build: maxIssues: 0` | fails on any `error`-severity issue; threshold set by `failOnSeverity` (defaults to `Error`) |
+| `maxIssues` | required | **removed** — a leftover key is ignored |
+| `warningsAsErrors` | available | available; needed so warnings reach `error` severity |
+
+Two things follow, and both are traps:
+
+- Carrying `build: maxIssues: 0` into a 2.x project leaves it **silently ineffective** — the key no
+  longer exists, so nothing enforces zero tolerance and the build passes with violations.
+- Relying on `warningsAsErrors` alone on 1.x does not replace `maxIssues`; they are different knobs.
+  `warningsAsErrors` escalates severity, `maxIssues` is the count gate.
+
+Set `config: validation: true` in both cases. Detekt then validates its own configuration and reports
+invalid or deprecated keys, which is what turns a stale `maxIssues` into a visible error rather than a
+silent no-op.
+
+> At the time of writing, detekt 2.x is still pre-release (`2.0.0-alpha.5`). Staying on the latest 1.x
+> is a legitimate choice; this section exists because different projects sit on different majors.
+
 ### Configuration file
 
-Place the configuration at `config/detekt/detekt.yml`. Only settings that are stricter than Detekt's defaults are listed — everything else is left to the built-in defaults (enabled via `buildUponDefaultConfig = true`):
+Place the configuration at `config/detekt/detekt.yml`. Only settings stricter than detekt's defaults are
+listed — everything else is left to the built-in defaults (enabled via `buildUponDefaultConfig = true`).
+
+**Shared by both versions** — only the `config` block is genuinely portable:
 
 ```yaml
 config:
+  validation: true
   warningsAsErrors: true
+```
+
+**Rule sections are NOT portable.** detekt 2.0 renamed a number of rules for consistency — for example
+`UnusedImports` became `UnusedImport`, `MayBeConst` became `MayBeConstant` — and removed others
+outright. A rule section written for the wrong major names a key that does not exist, and with
+`validation: true` that fails loudly rather than being ignored. That is the desired behaviour, but it
+means the rule configuration has to be written against the version in use.
+
+**detekt 1.x:**
+
+```yaml
+build:
+  maxIssues: 0
 
 naming:
   FunctionNaming:
@@ -399,13 +442,13 @@ naming:
       - 'Composable'
 
 style:
-  UnusedPrivateFunction:
+  UnusedImports:          # renamed to UnusedImport in 2.x
+    active: true
+  UnusedPrivateMember:    # split into UnusedPrivateFunction / UnusedPrivateProperty in 2.x
     ignoreAnnotated:
       - 'Preview'
   MagicNumber:
     ignorePropertyDeclaration: true
-  UnusedImport:
-    active: true
   WildcardImport:
     active: true
 
@@ -413,14 +456,55 @@ Compose:
   active: true
 ```
 
+**detekt 2.x:** omit the `build` block entirely, and use the renamed rules:
+
+```yaml
+naming:
+  FunctionNaming:
+    ignoreAnnotated:
+      - 'Composable'
+
+style:
+  UnusedImport:
+    active: true
+  UnusedPrivateFunction:
+    ignoreAnnotated:
+      - 'Preview'
+  MagicNumber:
+    ignorePropertyDeclaration: true
+  WildcardImport:
+    active: true
+
+Compose:
+  active: true
+```
+
+Zero tolerance on 2.x comes from severity, and `failOnSeverity` in the Gradle `detekt {}` block controls
+the threshold (default `Error`, which is what you want — set it explicitly only to loosen it).
+
+> Before enabling `validation: true` on an existing project, expect it to report keys you have been
+> carrying by accident. Run `./gradlew detektDebug` once and fix what it names, rather than turning it on
+> in the same change as something else.
+
 Key decisions:
-- `warningsAsErrors: true` — zero tolerance; any violation fails the build. (Detekt 2.x replaced the 1.x `build: maxIssues: 0` key with this setting.)
-- `FunctionNaming: ignoreAnnotated: ['Composable']` — Composable functions use PascalCase by convention, which would otherwise violate the default `[a-z][a-zA-Z0-9]*` naming pattern.
-- `UnusedPrivateFunction: ignoreAnnotated: ['Preview']` — `@Preview` composables are private by convention but only invoked by the IDE tooling, not by runtime code. Without this exclusion, type-resolution tasks (`detektDebug`) flag them as unused.
-- `MagicNumber: ignorePropertyDeclaration: true` — allows numeric literals in property declarations (e.g. `val Purple80 = Color(0xFFD0BCFF)`) without flagging them as magic numbers.
-- `UnusedImport` and `WildcardImport` are inactive in Detekt's defaults; explicitly enabled here.
-- `Compose: active: true` enables all rules from the `detekt-compose-rules` plugin, which are off by default.
-- A `detekt-baseline.xml` can be generated to suppress pre-existing issues when adopting Detekt on a legacy codebase.
+- `validation: true` — detekt polices its own config, so a key that does not exist in the running
+  version surfaces as an error instead of being ignored. This is what makes a version mismatch loud.
+- `warningsAsErrors: true` — warnings are treated as errors rather than advisory.
+- `FunctionNaming: ignoreAnnotated: ['Composable']` — Composable functions use PascalCase by convention,
+  which would otherwise violate the default `[a-z][a-zA-Z0-9]*` naming pattern.
+- The unused-private-member rule with `ignoreAnnotated: ['Preview']` — `@Preview` composables are private by
+  convention but only invoked by IDE tooling. Without this exclusion, type-resolution tasks
+  (`detektDebug`) flag them as unused.
+- `MagicNumber: ignorePropertyDeclaration: true` — allows numeric literals in property declarations
+  (e.g. `val Purple80 = Color(0xFFD0BCFF)`) without flagging them.
+- The unused-import rule and `WildcardImport` are inactive in detekt's defaults; explicitly enabled here.
+- `Compose: active: true` enables all rules from the `detekt-compose-rules` plugin, off by default.
+- A `detekt-baseline.xml` can be generated to suppress pre-existing issues when adopting detekt on a
+  legacy codebase.
+
+> Migrating 1.x → 2.x affects more than the `build` block: threshold-style rule keys were renamed to
+> `allowed*` prefixes, and YAML values that accepted comma-separated strings now require real lists.
+> Turn on `validation: true` before migrating and let detekt enumerate what needs changing.
 
 ## Kover
 

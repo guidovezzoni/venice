@@ -1,6 +1,6 @@
 Please run the project configuration health check.
 
-This command verifies that the project's quality tooling (static analysis, coverage, tests, CI/CD, deployment, Gradle wrapper) is properly configured. For SDLC framework checks (OpenSpec, security plugin, SDLC commands), use `/sdlc_doctor` instead.
+This command verifies that the project's quality tooling (static analysis, coverage, tests, analytics tracking plan, CI/CD, deployment, Gradle wrapper) is properly configured. For SDLC framework checks (OpenSpec, security plugin, SDLC commands, guidelines), use `/sdlc_doctor` instead.
 
 This command uses sub-agent orchestration: each check category is delegated to a Haiku sub-agent running in parallel. All checks are read-only — sub-agents must not modify any files, run builds, or install anything.
 
@@ -44,8 +44,25 @@ Follow these steps:
    1. Verify `gradle/libs.versions.toml` declares a plugin with id `io.gitlab.arturbosch.detekt` in the `[plugins]` section.
    2. Verify `app/build.gradle.kts` applies the detekt plugin (look for `alias(libs.plugins.detekt)` or equivalent).
    3. Verify the config file `config/detekt/detekt.yml` exists.
-   4. Read `config/detekt/detekt.yml` and verify `maxIssues` is set to `0` under the `build:` key.
-   5. Verify `gradle/libs.versions.toml` declares a library referencing `io.nlopez.compose.rules` (Compose detekt rules).
+   4. **Detect the detekt major version.** Read the detekt version string from `gradle/libs.versions.toml`
+      (the `[versions]` entry referenced by the detekt plugin's `version.ref`) and take the leading
+      integer as the major — e.g. `1.23.8` → major 1, `2.0.0-alpha.5` → major 2. Report the detected
+      version and major as a PASS line. If no version can be determined, report FAIL and skip check 5.
+   5. **Verify zero tolerance using the mechanism for the detected major.** The invariant is that any
+      rule violation fails the build; the mechanism changed between majors, so a config written for the
+      other major is silently ineffective rather than an error. Apply exactly one branch:
+      - **Major 1:** `config/detekt/detekt.yml` must set `maxIssues: 0` under the `build:` key. Report
+        FAIL if the `build` block or the `maxIssues: 0` value is absent.
+      - **Major 2:** `maxIssues` must **not** appear anywhere in `config/detekt/detekt.yml` — the key was
+        removed in detekt 2.x, so a leftover is ignored and enforces nothing. Report FAIL if present,
+        with the explanation that it is a stale 1.x key. Additionally verify `warningsAsErrors: true` is
+        set under the `config:` key, so warnings reach `error` severity and therefore fail the build.
+      Do not accept the other major's mechanism as a substitute — that is the specific defect this
+      check exists to catch.
+   6. Read `config/detekt/detekt.yml` and verify `validation: true` is set under the `config:` key. With
+      validation on, detekt reports keys that do not exist in the running version, which turns a
+      version mismatch into a visible error instead of a silent no-op.
+   7. Verify `gradle/libs.versions.toml` declares a library referencing `io.nlopez.compose.rules` (Compose detekt rules).
 
    ### Category: Kover
 
@@ -61,6 +78,22 @@ Follow these steps:
    2. Verify `gradle/libs.versions.toml` declares a MockK library (`io.mockk`).
    3. Verify `gradle/libs.versions.toml` declares a kotlinx-coroutines-test library (`kotlinx-coroutines-test`).
    4. Verify the directory `app/src/test/` exists and contains at least one `.kt` file (search recursively).
+
+   ### Category: Analytics
+
+   Checks to include in the sub-agent prompt (for compliance with @docs/guidelines/guidelines-analytics.md):
+   1. Verify the tracking plan `docs/analytics/tracking-plan.md` exists. The analytics guidelines make it
+      the single source of truth for which events exist; without it, event names get invented at each
+      call site and the taxonomy drifts.
+   2. Read `docs/analytics/tracking-plan.md` and verify it contains all three of these headings:
+      `## Event Dictionary`, `## Parameter Reference`, `## User Properties`.
+   3. Read `AGENTS.md` and verify it references `docs/analytics/tracking-plan.md`, so agents load it.
+   4. Read `docs/sdlc/commands/sdlc_open_story.md` and verify **both**: that it lists
+      `docs/guidelines/guidelines-analytics.md` among its Context Files, and that its refinement
+      requirements include an analytics requirement (search for the string `## Analytics` within the
+      refinement requirement list). This is the hook that makes every feature story define its own
+      events; it can be silently removed by an SDLC sync, after which stories quietly stop declaring
+      analytics with nothing failing.
 
    ### Category: Fastlane
 
@@ -96,6 +129,11 @@ Follow these steps:
 
     ### Kover
       ✅ Kover plugin declared in gradle/libs.versions.toml
+      ...
+
+    ### Analytics
+      ✅ docs/analytics/tracking-plan.md exists
+      ❌ sdlc_open_story.md includes an analytics refinement requirement — not found
       ...
 
     ### Gradle

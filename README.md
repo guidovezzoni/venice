@@ -137,3 +137,5 @@ Prerequisites (setup, models) come first, BDD pairs in the middle ordered by dep
 
 - evals for guidelines
 - udpate project doctor
+- detekt?!?!
+- guidelines?

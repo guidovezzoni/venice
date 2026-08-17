@@ -1,6 +1,6 @@
 Please run the SDLC framework health check.
 
-This command verifies that the SDLC tooling (OpenSpec, security plugin, SDLC commands) is properly installed and configured. For project-specific quality checks (Detekt, Kover, tests, CI/CD, Fastlane, Gradle wrapper), use `/sdlc_project_doctor` instead.
+This command verifies that the SDLC tooling (OpenSpec, security plugin, SDLC commands, guidelines) is properly installed and configured. For project-specific quality checks (Detekt, Kover, tests, CI/CD, Fastlane, Gradle wrapper), use `/sdlc_project_doctor` instead.
 
 This command uses sub-agent orchestration: each check category is delegated to a Haiku sub-agent running in parallel. All checks are read-only — sub-agents must not modify any files, run builds, or install anything.
 
@@ -69,6 +69,28 @@ Follow these steps:
       - `.claude/commands/sdlc/sdlc_doctor.md`
       - `.claude/commands/sdlc/sdlc_project_doctor.md`
 
+   ### Category: Guidelines
+
+   The guidelines files are the substrate every SDLC command and agent reads. A missing or
+   unreferenced guideline fails silently — the agent simply never receives those instructions — so
+   presence and wiring are both checked.
+
+   Checks to include in the sub-agent prompt:
+   1. Check that each of these guidelines files exists:
+      - `docs/guidelines/guidelines-android.md`
+      - `docs/guidelines/guidelines-git.md`
+      - `docs/guidelines/guidelines-process.md`
+      - `docs/guidelines/guidelines-analytics.md`
+      - `docs/guidelines/guidelines-userstories.md`
+      - `docs/guidelines/guidelines-reports.md`
+   2. Read `AGENTS.md` and verify it references each of these four, so they are lazy-loaded during
+      normal work: `guidelines-android.md`, `guidelines-git.md`, `guidelines-process.md`,
+      `guidelines-analytics.md`. (Do **not** expect `guidelines-userstories.md` or
+      `guidelines-reports.md` here — those describe artefact handling and are referenced by the SDLC
+      command files instead, which check 3 covers.)
+   3. Verify `docs/guidelines/guidelines-userstories.md` and `docs/guidelines/guidelines-reports.md`
+      are each referenced by at least one file in `docs/sdlc/commands/`.
+
 2. **Collect results.** After all sub-agents complete, gather their output. Each sub-agent returns a list of `✅`/`❌` lines.
 
 3. **Display the results.** Output the collected results grouped by category. Use this format:
@@ -89,6 +111,11 @@ Follow these steps:
     ### SDLC Commands
       ✅ .claude/commands/sdlc/sdlc_open_story.md exists
       ❌ .claude/commands/sdlc/sdlc_doctor.md exists — file not found
+      ...
+
+    ### Guidelines
+      ✅ docs/guidelines/guidelines-android.md exists
+      ❌ AGENTS.md references guidelines-analytics.md — no reference found
       ...
 
     ---
