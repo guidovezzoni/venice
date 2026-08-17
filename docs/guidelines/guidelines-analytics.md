@@ -63,8 +63,8 @@ numbers, unless the raw number is genuinely needed as a metric. Bands keep cardi
 what you actually chart.
 
 ```
-BAD   trip_created { trip_count: 47 }
-GOOD  trip_created { trip_count_band: "6_plus" }
+BAD   route_calculated { total_distance_metres: 431892 }
+GOOD  route_calculated { distance_band: "200_500km" }
 ```
 
 Small bounded counts (`stop_count`, `leg_count`) may be sent raw — they are naturally low-cardinality
@@ -113,9 +113,18 @@ Four consequences that follow from that and are easy to get wrong:
   value was different. That is a different question from "how did users in that state behave", and it
   is a common way to mislead yourself.
 
-Where the distinction matters for a value that changes, send it **both** ways: as an event parameter it
-freezes the value at that moment, as a user property it tracks the current state. Do this deliberately
-and document it, not by default.
+**Never give an event parameter and a user property the same name — no exceptions.** The temptation
+arises whenever a value both describes the user and matters at a moment in time, and it always looks
+harmless because the definitions genuinely match. It is not harmless: GA4's report builder lists
+dimensions by name, so two same-named entries in different scopes are a mis-click that silently answers
+a different question and returns a plausible-looking wrong number. That is the worst class of analytics
+defect, because nothing fails.
+
+When you want both the moment and the current state, model them as **two different questions with two
+different names**, and let each name say what it measures. Usually the event only needs a narrower
+question than the property: "is this their first?" rather than a full band. The narrower parameter is
+cheaper, unambiguous, and forces you to pin down semantics the shared name would have let you skip —
+such as whether a count includes the thing being created.
 
 Because a user property rides on every event, a high-cardinality one is effectively a persistent
 pseudo-identifier. Bound the values as strictly as event parameters — more strictly, if anything.
@@ -345,3 +354,5 @@ Venice has no settings screen, which is why this is blocked rather than merely p
 | Screen views in ViewModel `init` | Misses back-navigation, double-fires on process restore |
 | Logcat provider in release builds | Leaks the event stream over ADB |
 | Wiring the SDK before writing the plan | Locks in names you cannot change later |
+| Same name for an event parameter and a user property | Two same-named dimensions in different scopes; a mis-click returns a plausible wrong number |
+| A parameter whose sampling moment is undefined | "Count before or after this action?" — the two readings disagree and nothing errors |

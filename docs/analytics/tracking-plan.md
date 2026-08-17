@@ -30,7 +30,7 @@ coordinates, no place names — see the privacy floor in the guidelines.
 
 | Event | Parameters | Trigger | Answers |
 |-------|-----------|---------|---------|
-| `trip_created` | `trip_count_band` | A trip is successfully persisted | Q1, Q4 |
+| `trip_created` | `is_first_trip` | A trip is successfully persisted | Q1 |
 | `trip_opened` | `stop_count`, `route_state` | Trip detail screen is opened for an existing trip | Q1, Q4 |
 | `stop_added` | `stop_type`, `stop_count` | A starting point, destination, or intermediate stop is persisted | Q1, Q2 |
 | `route_calculated` | `stop_count`, `leg_count`, `distance_band`, `duration_band` | Route calculation succeeds | Q1, Q4 |
@@ -102,7 +102,7 @@ back-navigation and does not double-fire on process-death restore.
 | `direction` | String | `up`, `down` | Reorder direction |
 | `distance_band` | String | `under_50km`, `50_200km`, `200_500km`, `500_1000km`, `over_1000km` | Banded total route distance |
 | `duration_band` | String | `under_1h`, `1_3h`, `3_6h`, `6_12h`, `over_12h` | Banded total route duration |
-| `trip_count_band` | String | `0`, `1`, `2_5`, `6_plus` | Trips the user has after the action |
+| `is_first_trip` | Boolean | `true`, `false` | True when the user had no trips before this one |
 | `suggestion_count` | Int | 0–n | Places results returned |
 | `suggestion_position` | Int | 0-based ordinal | Which suggestion was chosen |
 | `operation` | String | `create_trip`, `set_stop`, `edit_stop`, `remove_stop`, `move_stop`, `mark_departed`, `undo_mark_departed`, `calculate_route`, `search_place`, `resolve_place` | From `AnalyticsOperation.value` |
@@ -140,14 +140,19 @@ be segmented by unit system.
 **No user ID.** There is no authentication until Epic 8. When it lands, revisit deliberately — a user
 ID is a significant privacy escalation and should not arrive as a side effect of adding auth.
 
-> `trip_count_band` appears as both an event parameter on `trip_created` and a user property. This is
-> the one intentional overlap, and the reason is that its value changes over time while the backend
-> stores only the **current** value, with no history. As a user property it answers "how do people who
-> are *now* power users behave?"; as a parameter on `trip_created` it freezes the value at the moment of
-> creation, answering "what did their trip count look like *when* they created this trip?" Filtering a
-> report on the property alone would include events emitted when the user was in a different band —
-> a genuine analytical trap, not a technicality. Do not extend this dual treatment to other parameters
-> without the same justification.
+**No name is shared between an event parameter and a user property.** The two lists above are disjoint,
+and must stay that way. In GA4's report builder dimensions are listed by name, so two same-named entries
+in different scopes are a mis-click that silently answers a different question and returns a
+plausible-looking wrong number.
+
+`trip_count_band` was briefly specified as both. The event parameter is now `is_first_trip`, which
+answers the funnel question directly ("is this their first trip?") and removes a second problem the
+shared name concealed: whether the band counted the trip being created was never defined, so the
+parameter and the property could legitimately disagree within one session. A boolean keyed on "had no
+trips before this one" has no such ambiguity.
+
+Present-state segmentation still works through the `trip_count_band` **property**; the funnel cut works
+through the `is_first_trip` **parameter**. Nothing was lost.
 
 ## Migration from the Legacy Taxonomy
 
@@ -156,7 +161,7 @@ Logcat sink — so this migration is free: no historical data, no dashboards, no
 
 | Legacy event | Legacy parameters | Fate | Target |
 |--------------|-------------------|------|--------|
-| `trip_created` | `trip_id` | Reparameterised | `trip_created { trip_count_band }` |
+| `trip_created` | `trip_id` | Reparameterised | `trip_created { is_first_trip }` |
 | `trip_opened` | `trip_id` | Reparameterised | `trip_opened { stop_count, route_state }` |
 | `stop_set` | `trip_id`, `stop_type` | **Renamed** + reparameterised | `stop_added { stop_type, stop_count }` |
 | `stop_edited` | `trip_id` | Reparameterised | `stop_edited { stop_type }` |
