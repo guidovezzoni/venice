@@ -1,12 +1,12 @@
 # Analytics Guidelines
 
-These are the standing decisions for product analytics. They are deliberately written to be
-project-agnostic so they can be reapplied to other apps — anything Venice-specific is called out as
-such.
+These are the standing decisions for product analytics. They are project-agnostic and contain no
+project-specific state, so they can be applied to any app unchanged.
 
-The companion artefact is the **tracking plan** at `docs/analytics/tracking-plan.md`, which is the
-single source of truth for *which* events exist. This file governs *how* events are designed, named,
-and delivered.
+The companion artefact is the **tracking plan** at `docs/analytics/tracking-plan.md`. That file is
+project-specific: it is the single source of truth for *which* events exist, and it is where a project
+records its own decisions — its event dictionary, its consent posture, its open questions. This file
+governs only *how* events are designed, named, and delivered.
 
 ## Core Principle
 
@@ -22,13 +22,13 @@ budget and review attention.
 
 | Dimension | Rule | Example |
 |-----------|------|---------|
-| Casing | `snake_case` | `route_calculated` |
-| Format | `object_action` — object first | `stop_added`, not `add_stop` |
-| Tense | Past simple — the event records something that happened | `trip_created`, not `trip_create` |
-| Vocabulary | One word per concept, always the same one | always `stop`, never `waypoint`/`location` |
+| Casing | `snake_case` | `checkout_completed` |
+| Format | `object_action` — object first | `item_added`, not `add_item` |
+| Tense | Past simple — the event records something that happened | `order_placed`, not `order_place` |
+| Vocabulary | One word per concept, always the same one | always `item`, never `product`/`article` |
 
-Object-first is what makes an alphabetically sorted event list group itself: every `stop_*` event sits
-together, every `trip_*` event sits together. Action-first scatters them.
+Object-first is what makes an alphabetically sorted event list group itself: every `item_*` event sits
+together, every `order_*` event sits together. Action-first scatters them.
 
 **Parameter and user-property names** follow the same `snake_case` rule. Event-parameter names and
 user-property names must be **mutually exclusive** — never reuse one name for both, or it becomes
@@ -46,14 +46,14 @@ it is a *usefulness* rule:
 - High-cardinality parameters collapse into an `(other)` bucket in GA4 and most analytics backends,
   making them unreportable.
 - Each distinct parameter name consumes one of a limited number of registered custom definitions.
-- An ID answers no aggregate question. "Which trip?" is not a product question; "how many stops did
-  trips have when the route was calculated?" is.
+- An ID answers no aggregate question. "Which order?" is not a product question; "how many items did
+  orders contain at checkout?" is.
 
 Replace identifiers with **aggregates** describing the shape of the thing:
 
 ```
-BAD   route_calculated { trip_id: "a3f9-8c21-…" }
-GOOD  route_calculated { stop_count: 4, leg_count: 3 }
+BAD   checkout_completed { order_id: "a3f9-8c21-…" }
+GOOD  checkout_completed { item_count: 4, category_count: 3 }
 ```
 
 ### Band continuous values
@@ -63,23 +63,23 @@ numbers, unless the raw number is genuinely needed as a metric. Bands keep cardi
 what you actually chart.
 
 ```
-BAD   route_calculated { total_distance_metres: 431892 }
-GOOD  route_calculated { distance_band: "200_500km" }
+BAD   checkout_completed { total_value_cents: 431892 }
+GOOD  checkout_completed { value_band: "1000_5000" }
 ```
 
-Small bounded counts (`stop_count`, `leg_count`) may be sent raw — they are naturally low-cardinality
-and useful as numeric metrics.
+Small bounded counts (`item_count`, `category_count`) may be sent raw — they are naturally
+low-cardinality and useful as numeric metrics.
 
 ### Never send free text
 
-No user-entered strings, ever: no place names, no trip names, no search queries, no error messages.
+No user-entered strings, ever: no names, no addresses, no search queries, no error messages.
 Free text is unbounded cardinality *and* the most common accidental-PII vector.
 
 Where a failure needs describing, classify it into a **bounded enum** rather than forwarding the
 exception message:
 
 ```
-BAD   operation_failed { error_message: "Unable to resolve host maps.googleapis.com" }
+BAD   operation_failed { error_message: "Unable to resolve host api.example.com" }
 GOOD  operation_failed { error_type: "network" }
 ```
 
@@ -100,7 +100,7 @@ rather than an ad-hoc map, so a non-primitive cannot reach a provider.
 
 A **user property** is a sticky attribute of the installation, set by its own call rather than passed
 with an event, and automatically attached by the backend to every event logged *afterwards*. It exists
-to segment the user base — "show me this funnel for imperial users versus metric users" — not to
+to segment the user base — "show me this funnel for paid users versus free users" — not to
 describe a single occurrence.
 
 Four consequences that follow from that and are easy to get wrong:
@@ -136,11 +136,12 @@ pseudo-identifier. Bound the values as strictly as event parameters — more str
 ### Privacy floor
 
 Events carry **no personal data**: no identifiers, no free text, no coordinates, no place names, no
-account details. This floor was set by stories 3.2.1, 3.2.2 and 4.1.1 and applies to every event
-added since.
+account details. Once set, this floor applies to every event added afterwards — a floor with exceptions
+is not a floor.
 
-Where a story's data is inherently sensitive (locations, in Venice's case), the aggregate-parameter
-rule and the privacy floor point the same way — which is the sign that the rule is right.
+Where an app's subject matter is inherently sensitive — locations, health, finances, messages — the
+aggregate-parameter rule and the privacy floor point the same way. Rules that agree from two independent
+directions are usually the right ones.
 
 ## Architecture
 
@@ -228,8 +229,8 @@ emit `.value`, **never** `.name` — Kotlin enum names are `SCREAMING_SNAKE_CASE
 otherwise snake_case dataset. This is a structural fix rather than a convention to remember: it makes
 the correct thing the easy thing.
 
-**Each enum lives in its own file**, per the project's one-class-per-file rule — no exception for small
-ones, consistent with `StopStatus` and `StopType`, which are three-line files.
+**Each enum lives in its own file**, per the one-class-per-file rule — no exception for small ones. A
+three-line file holding a single enum is normal and consistent with every other model in the codebase.
 
 Where such an enum **maps or classifies** — banding a continuous value, resolving a navigation route,
 translating a domain type — it is behaviour rather than a label list, and **requires boundary tests**
@@ -350,24 +351,31 @@ provider ships.
 
 ## Consent
 
-**Current status (Venice):** consent is **assumed granted**. Analytics ships without a consent gate
-until story 9.3.1 lands. This is a deliberate, temporary position, recorded here rather than left
-implicit.
+Consent is a **project-level decision that belongs in the tracking plan**, not here. What belongs here
+is what any project's decision has to satisfy.
 
-It is defensible only because of the privacy floor above — events carry no personal data — and because
-`docs/publishing/Privacy Policy.md` already discloses analytics SDK use. It is **not** a general
-recommendation: an app collecting identifiers, location, or account data needs consent before the
-first event fires.
+An app collecting identifiers, location, or account data needs consent **before the first event fires**.
+Where the privacy floor above genuinely holds — no identifiers, no free text, no coordinates — a project
+may have grounds to treat analytics differently, but that is a decision to reason about and write down,
+never a default to fall into.
 
-When 9.3.1 is implemented it must cover:
+Whatever the model, a consent implementation must cover:
 
-- A consent decorator over the provider set, so no provider is reached before consent is resolved.
-- `FirebaseAnalytics.setConsent(ANALYTICS_STORAGE, …)` and `setCrashlyticsCollectionEnabled`.
-- Persisted consent state and a user-accessible way to withdraw it.
-- No event fired before the user has interacted with the consent surface. Regulators test for exactly
-  this: SDKs firing during app start, before the consent dialog is answered.
+- A gate over the whole provider set, so no provider is reached before consent is resolved. Individual
+  providers checking consent is the version that eventually leaks.
+- Propagation to each SDK's own consent API, not only dropping events client-side. Backends infer
+  behaviour from their consent state; a silent client-side drop leaves them mis-informed.
+- Persisted state, and a user-accessible way to withdraw that takes effect without a restart.
+- **No event fired before the user has interacted with the consent surface.** Regulators test for exactly
+  this: SDKs firing during app start, before the consent dialog is answered. It is also the requirement
+  that fails silently, so verify it by observing traffic from a cold start on a fresh install rather than
+  by reading code.
+- A decision on whether crash reporting shares the analytics basis or gets its own. It commonly gets its
+  own; what is not acceptable is leaving it ungated because nobody considered it.
 
-Venice has no settings screen, which is why this is blocked rather than merely pending.
+Deferring consent is legitimate only as a **recorded, temporary position with a named owner and a story
+to close it** — in the tracking plan, where it is visible. An assumption that lives only in someone's
+head is how apps ship ungated collection.
 
 ## Anti-Patterns
 

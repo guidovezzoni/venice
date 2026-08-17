@@ -135,12 +135,5 @@ Prerequisites (setup, models) come first, BDD pairs in the middle ordered by dep
 
 # This work:
 
-- amplitude/posthog
-- remove references to venice + evals?
-
-
-- mirai SDK
-- core?
-- count band double usage?
-- update band
-
+- evals for guidelines
+- udpate project doctor

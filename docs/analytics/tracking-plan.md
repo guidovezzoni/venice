@@ -159,6 +159,28 @@ trips before this one" has no such ambiguity.
 Present-state segmentation still works through the `trip_count_band` **property**; the funnel cut works
 through the `is_first_trip` **parameter**. Nothing was lost.
 
+## Consent Posture
+
+**Current position: consent is assumed granted.** Analytics ships without a consent gate until story
+9.3.1 lands. This is a deliberate, temporary position, recorded here so it is visible rather than
+implicit — see the general requirements in `docs/guidelines/guidelines-analytics.md`.
+
+It is defensible, not correct. It rests on two things:
+
+- Every event above respects the privacy floor — no identifiers, no free text, no coordinates, no place
+  names — so what is collected is not personal data.
+- `docs/publishing/Privacy Policy.md` already discloses analytics SDK use, including that consent will be
+  obtained "where required by applicable law".
+
+The app ships Italian and Spanish localisations, so EU users are in scope and that disclosure is a
+promise story 9.3.1 has to keep.
+
+**Why it is deferred rather than pending:** the app has no settings screen, so there is nowhere for a
+consent control to live. Story 9.3.1 either creates one or waits for a Settings epic.
+
+**Owner of the assumption:** whoever schedules 9.3.1. It should not survive past the first release that
+ships a real analytics backend to EU users.
+
 ## Migration from the Legacy Taxonomy
 
 The 10 events currently in `AnalyticsEvent.kt`. Nothing consumes them — the only provider is the

@@ -22,8 +22,8 @@ Derived from the user story filename by stripping any `-WIP` or `-DONE` suffix a
 
 Examples:
 
-- User story `1.2.5-edit-stop-WIP.md` → report `1.2.5-edit-stop.html`
-- User story `1.2.3.1-consolidate-stop-usecases.md` → report `1.2.3.1-consolidate-stop-usecases.html`
+- User story `1.2.5-edit-item-WIP.md` → report `1.2.5-edit-item.html`
+- User story `1.2.3.1-consolidate-usecases.md` → report `1.2.3.1-consolidate-usecases.html`
 
 One report per user story — never create multiple report files for the same story.
 

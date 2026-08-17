@@ -179,7 +179,7 @@ fun ComponentName(
 @Preview(showBackground = true)
 @Composable
 private fun PreviewComponentName() {
-    WhatsappFilesFixerTheme {
+    MyAppTheme {
         ComponentName()
     }
 }
@@ -223,8 +223,8 @@ private fun PreviewComponentName() {
 - Use alphabetical ordering within each group
 
 ### Naming Conventions
-- **Composables**: PascalCase (e.g., `WhatsappScreen`, `MainScreen`)
-- **Functions**: camelCase (e.g., `findWhatsappFolder`, `checkPermission`)
+- **Composables**: PascalCase (e.g., `ProductListScreen`, `MainScreen`)
+- **Functions**: camelCase (e.g., `findDownloadFolder`, `checkPermission`)
 - **Variables**: camelCase, prefer descriptive names
 - **Constants**: UPPER_SNAKE_CASE for top-level constants
 - **No abbreviations or acronyms**: Use full, descriptive names for all variables, parameters, functions, and classes. Avoid shortened forms that require the reader to guess the meaning (e.g. use `destination` not `dest`, `startingPoint` not `sp`, `displayState` not `ds`).
@@ -292,7 +292,7 @@ Unit tests should follow these criteria:
 - cover all reasonable cases, but keeps the coverage over 95%
 - Target 95%+ coverage
 - **MVI ViewModel tests**: Test by dispatching `UiIntent` values via `onIntent()` and asserting the resulting `uiState` and any emitted `uiEffect`. Never test internal ViewModel methods directly.
-- **Consolidate test setup**: When a ViewModel (or any SUT) is instantiated in multiple tests, use a single `createViewModel(...)` factory method with default parameters for varied inputs (e.g. `stops: List<Stop> = emptyList()`, `legs: List<Leg> = emptyList()`). Tests should never inline the full constructor call — extend the factory helper instead.
+- **Consolidate test setup**: When a ViewModel (or any SUT) is instantiated in multiple tests, use a single `createViewModel(...)` factory method with default parameters for varied inputs (e.g. `items: List<Item> = emptyList()`, `isLoading: Boolean = false`). Tests should never inline the full constructor call — extend the factory helper instead.
 
 
 ### Compose UI Tests
