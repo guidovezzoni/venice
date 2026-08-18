@@ -349,19 +349,29 @@ When verifying features on-device via adb and UIAutomator, Jetpack Compose requi
 
 Static analysis via [Detekt](https://detekt.dev/) with the [Compose rules plugin](https://github.com/mrmans0n/compose-rules).
 
+**Use detekt 2.x or later, with a matching `detekt-compose-rules` build.** Earlier majors cannot run
+type resolution on a current AGP, which silently disables a whole class of rules, and the Compose rules
+line is published against 2.x only. `/sdlc_project_doctor` fails when a project is behind.
+
 ### Running detekt
 
-Always use the variant-specific tasks instead of the plain `detekt` task:
+Use the variant-specific tasks, never the plain `detekt` task:
 
 ```bash
 ./gradlew detektDebug    # or detektRelease
 ```
 
-The variant tasks (`detektDebug`, `detektRelease`) run with **type resolution** — they compile the code first and analyse it with the full classpath, enabling deeper rules such as the unused-import and unused-private-member rules (exact names vary by major — see below). The plain `detekt` task runs without type resolution and misses these issues.
+The variant tasks run with **type resolution** — they compile the code first and analyse it with the
+full classpath, which is what enables rules like `UnusedImport` and `UnusedPrivateFunction`. The plain
+`detekt` task runs without it and misses those issues entirely.
+
+If those tasks do not exist, type resolution is not running and neither are the rules that need it.
+Check with `./gradlew :app:tasks --all | grep detekt`.
 
 ### Gradle setup
 
-Apply the plugin in the root `build.gradle.kts` (without `apply`), then apply it in the module and add the Compose rules plugin as a `detektPlugins` dependency:
+Apply the plugin in the root `build.gradle.kts` (without `apply`), then apply it in the module and add
+the Compose rules plugin as a `detektPlugins` dependency:
 
 ```kotlin
 // root build.gradle.kts
@@ -381,84 +391,32 @@ dependencies {
 detekt {
     buildUponDefaultConfig = true
     config.setFrom(files("$rootDir/config/detekt/detekt.yml"))
-    baseline = file("detekt-baseline.xml")
 }
 ```
 
-### Zero tolerance — differs by major version
+`detekt-compose-rules` pins a specific detekt version, so bump the two together rather than taking the
+newest of each independently.
 
-The invariant is the same in every project: **any rule violation fails the build.** The mechanism that
-achieves it changed between detekt majors, so the configuration is not portable and must match the
-version in use.
+### Zero tolerance
 
-| | detekt 1.x | detekt 2.x |
-|---|---|---|
-| Zero-tolerance gate | `build: maxIssues: 0` | fails on any `error`-severity issue; threshold set by `failOnSeverity` (defaults to `Error`) |
-| `maxIssues` | required | **removed** — a leftover key is ignored |
-| `warningsAsErrors` | available | available; needed so warnings reach `error` severity |
+**Every detekt finding gets fixed.** Introducing detekt, upgrading it, or enabling a new rule means
+resolving what it reports — not recording it as accepted. No baseline file is used.
 
-Two things follow, and both are traps:
-
-- Carrying `build: maxIssues: 0` into a 2.x project leaves it **silently ineffective** — the key no
-  longer exists, so nothing enforces zero tolerance and the build passes with violations.
-- Relying on `warningsAsErrors` alone on 1.x does not replace `maxIssues`; they are different knobs.
-  `warningsAsErrors` escalates severity, `maxIssues` is the count gate.
-
-Set `config: validation: true` in both cases. Detekt then validates its own configuration and reports
-invalid or deprecated keys, which is what turns a stale `maxIssues` into a visible error rather than a
-silent no-op.
-
-> At the time of writing, detekt 2.x is still pre-release (`2.0.0-alpha.5`). Staying on the latest 1.x
-> is a legitimate choice; this section exists because different projects sit on different majors.
+**Any rule violation fails the build.** Detekt fails on any issue of `error` severity; `failOnSeverity`
+in the `detekt {}` block sets the threshold and defaults to `Error`, which is what you want — set it
+explicitly only to loosen it. `warningsAsErrors: true` is what promotes warnings to that severity, so
+both are needed.
 
 ### Configuration file
 
 Place the configuration at `config/detekt/detekt.yml`. Only settings stricter than detekt's defaults are
-listed — everything else is left to the built-in defaults (enabled via `buildUponDefaultConfig = true`).
-
-**Shared by both versions** — only the `config` block is genuinely portable:
+listed — everything else is left to the built-in defaults (enabled via `buildUponDefaultConfig = true`):
 
 ```yaml
 config:
   validation: true
   warningsAsErrors: true
-```
 
-**Rule sections are NOT portable.** detekt 2.0 renamed a number of rules for consistency — for example
-`UnusedImports` became `UnusedImport`, `MayBeConst` became `MayBeConstant` — and removed others
-outright. A rule section written for the wrong major names a key that does not exist, and with
-`validation: true` that fails loudly rather than being ignored. That is the desired behaviour, but it
-means the rule configuration has to be written against the version in use.
-
-**detekt 1.x:**
-
-```yaml
-build:
-  maxIssues: 0
-
-naming:
-  FunctionNaming:
-    ignoreAnnotated:
-      - 'Composable'
-
-style:
-  UnusedImports:          # renamed to UnusedImport in 2.x
-    active: true
-  UnusedPrivateMember:    # split into UnusedPrivateFunction / UnusedPrivateProperty in 2.x
-    ignoreAnnotated:
-      - 'Preview'
-  MagicNumber:
-    ignorePropertyDeclaration: true
-  WildcardImport:
-    active: true
-
-Compose:
-  active: true
-```
-
-**detekt 2.x:** omit the `build` block entirely, and use the renamed rules:
-
-```yaml
 naming:
   FunctionNaming:
     ignoreAnnotated:
@@ -479,32 +437,20 @@ Compose:
   active: true
 ```
 
-Zero tolerance on 2.x comes from severity, and `failOnSeverity` in the Gradle `detekt {}` block controls
-the threshold (default `Error`, which is what you want — set it explicitly only to loosen it).
-
-> Before enabling `validation: true` on an existing project, expect it to report keys you have been
-> carrying by accident. Run `./gradlew detektDebug` once and fix what it names, rather than turning it on
-> in the same change as something else.
-
 Key decisions:
-- `validation: true` — detekt polices its own config, so a key that does not exist in the running
-  version surfaces as an error instead of being ignored. This is what makes a version mismatch loud.
+- `validation: true` — detekt validates its own configuration, and a key that does not exist in the
+  running version **fails the build** rather than being ignored. Note it does not cover custom rulesets,
+  so a `Compose:` block is accepted whether or not the ruleset actually loaded.
 - `warningsAsErrors: true` — warnings are treated as errors rather than advisory.
 - `FunctionNaming: ignoreAnnotated: ['Composable']` — Composable functions use PascalCase by convention,
   which would otherwise violate the default `[a-z][a-zA-Z0-9]*` naming pattern.
-- The unused-private-member rule with `ignoreAnnotated: ['Preview']` — `@Preview` composables are private by
-  convention but only invoked by IDE tooling. Without this exclusion, type-resolution tasks
-  (`detektDebug`) flag them as unused.
+- `UnusedPrivateFunction: ignoreAnnotated: ['Preview']` — `@Preview` composables are private by
+  convention but only invoked by IDE tooling. Without this exclusion, type-resolution tasks flag them as
+  unused.
 - `MagicNumber: ignorePropertyDeclaration: true` — allows numeric literals in property declarations
   (e.g. `val Purple80 = Color(0xFFD0BCFF)`) without flagging them.
-- The unused-import rule and `WildcardImport` are inactive in detekt's defaults; explicitly enabled here.
+- `UnusedImport` and `WildcardImport` are inactive in detekt's defaults; explicitly enabled here.
 - `Compose: active: true` enables all rules from the `detekt-compose-rules` plugin, off by default.
-- A `detekt-baseline.xml` can be generated to suppress pre-existing issues when adopting detekt on a
-  legacy codebase.
-
-> Migrating 1.x → 2.x affects more than the `build` block: threshold-style rule keys were renamed to
-> `allowed*` prefixes, and YAML values that accepted comma-separated strings now require real lists.
-> Turn on `validation: true` before migrating and let detekt enumerate what needs changing.
 
 ## Kover
 

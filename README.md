@@ -136,6 +136,5 @@ Prerequisites (setup, models) come first, BDD pairs in the middle ordered by dep
 # This work:
 
 - evals for guidelines
-- udpate project doctor
-- detekt?!?!
-- guidelines?
+- break down guidelines-android
+- check all changes in the branch are consistent and OK

@@ -41,28 +41,42 @@ Follow these steps:
    ### Category: Detekt
 
    Checks to include in the sub-agent prompt (for compliance with @docs/guidelines/guidelines-android.md):
-   1. Verify `gradle/libs.versions.toml` declares a plugin with id `io.gitlab.arturbosch.detekt` in the `[plugins]` section.
+   1. Verify `gradle/libs.versions.toml` declares a detekt plugin in the `[plugins]` section.
    2. Verify `app/build.gradle.kts` applies the detekt plugin (look for `alias(libs.plugins.detekt)` or equivalent).
    3. Verify the config file `config/detekt/detekt.yml` exists.
-   4. **Detect the detekt major version.** Read the detekt version string from `gradle/libs.versions.toml`
+   4. **Require detekt 2.x or later.** Read the detekt version string from `gradle/libs.versions.toml`
       (the `[versions]` entry referenced by the detekt plugin's `version.ref`) and take the leading
-      integer as the major — e.g. `1.23.8` → major 1, `2.0.0-alpha.5` → major 2. Report the detected
-      version and major as a PASS line. If no version can be determined, report FAIL and skip check 5.
-   5. **Verify zero tolerance using the mechanism for the detected major.** The invariant is that any
-      rule violation fails the build; the mechanism changed between majors, so a config written for the
-      other major is silently ineffective rather than an error. Apply exactly one branch:
-      - **Major 1:** `config/detekt/detekt.yml` must set `maxIssues: 0` under the `build:` key. Report
-        FAIL if the `build` block or the `maxIssues: 0` value is absent.
-      - **Major 2:** `maxIssues` must **not** appear anywhere in `config/detekt/detekt.yml` — the key was
-        removed in detekt 2.x, so a leftover is ignored and enforces nothing. Report FAIL if present,
-        with the explanation that it is a stale 1.x key. Additionally verify `warningsAsErrors: true` is
-        set under the `config:` key, so warnings reach `error` severity and therefore fail the build.
-      Do not accept the other major's mechanism as a substitute — that is the specific defect this
-      check exists to catch.
-   6. Read `config/detekt/detekt.yml` and verify `validation: true` is set under the `config:` key. With
-      validation on, detekt reports keys that do not exist in the running version, which turns a
-      version mismatch into a visible error instead of a silent no-op.
+      integer as the major — e.g. `1.23.8` → major 1, `2.0.0-alpha.5` → major 2.
+      - Major **2 or higher**: PASS, naming the detected version.
+      - Major **1**: **FAIL** — "detekt 1.x runs no type resolution and loads no custom rulesets on a
+        current AGP; upgrade to 2.x." Include this detail in the explanation, because both failures are
+        silent and the build stays green while nothing runs:
+        * detekt 1.x registers its Android variant tasks (`detektDebug`, `detektRelease`) only when the
+          `kotlin-android` plugin is applied, which does not happen when AGP supplies Kotlin itself, and
+          its variant code targets `com.android.build.gradle.api.BaseVariant`, removed in AGP 8. Only the
+          plain `detekt` task exists, so every rule needing a full classpath is inactive.
+        * Custom rulesets published for 2.x register `META-INF/services/dev.detekt.api.RuleSetProvider`,
+          while 1.x looks for `io.gitlab.arturbosch.detekt.api.RuleSetProvider`. The ruleset contributes
+          zero rules with no error, and `validation` does not cover custom rulesets so nothing reports it.
+        * Applying `kotlin-android` is **not** a workaround.
+      - No version determinable: FAIL.
+      **If this check fails, skip checks 5 and 6** and say so, so a project that is simply behind gets one
+      actionable failure rather than a cascade of secondary ones.
+   5. **Verify zero tolerance.** `config/detekt/detekt.yml` must set `warningsAsErrors: true` under the
+      `config:` key, so warnings reach `error` severity and fail the build. Additionally verify that
+      `maxIssues` does **not** appear anywhere in the file — the key was removed in detekt 2.x, so a
+      leftover enforces nothing while looking like it does. Report FAIL for either condition.
+   6. Read `config/detekt/detekt.yml` and verify `validation: true` is set under the `config:` key. Detekt
+      then fails on any configuration key that does not exist in the running version, instead of ignoring
+      it. Note in the check description that this does not cover custom rulesets.
    7. Verify `gradle/libs.versions.toml` declares a library referencing `io.nlopez.compose.rules` (Compose detekt rules).
+   8. **Verify the Compose rules build matches the detekt major.** Read the `detekt-compose-rules` version
+      from `gradle/libs.versions.toml`. When detekt is 2.x, that version must be **0.6.0 or later** — the
+      0.6.x line is published against detekt 2.x, and earlier lines against 1.x. A mismatch in either
+      direction means the ruleset silently registers zero rules, so `Compose: active: true` is honoured in
+      config while nothing runs. Report FAIL with the detected pair if they do not match.
+      > Maintenance note: this floor is a hardcoded mapping and needs revisiting when either project
+      > releases a new major. It is kept because the failure it catches is otherwise invisible.
 
    ### Category: Kover
 
