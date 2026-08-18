@@ -217,6 +217,61 @@
 
   </section>
 
+  <section class="report-section" data-source="sdlc:sdlc_implement_change" data-timestamp="2026-08-18T00:00:00Z">
+    <header>
+      <h2>Implementation</h2>
+      <time datetime="2026-08-18T00:00:00Z">18 August 2026</time>
+    </header>
+    <p class="section-source">Source: sdlc:sdlc_implement_change</p>
+
+    <h3>What Was Applied</h3>
+    <p>Full analytics abstraction upgrade across 46 tasks in 15 sections, implemented via sub-agent orchestration (5 Sonnet agents, 3 Haiku agents).</p>
+    <ul>
+      <li>Relocated all analytics code from <code>domain/analytics/</code> and <code>data/analytics/</code> to <code>core/analytics/</code></li>
+      <li>Introduced shared <code>AnalyticsTracking</code> supertype; collapsed duplicated interface declarations</li>
+      <li>Renamed: <code>AnalyticsTracker</code> → <code>AnalyticsClient</code>, <code>CompositeAnalyticsTracker</code> → <code>CompositeAnalyticsClient</code>, <code>LogAnalyticsProvider</code> → <code>DebugAnalyticsProvider</code></li>
+      <li>Added <code>AnalyticsOperation</code> (7-value enum), <code>AnalyticsUserProperty</code> (empty sealed class), <code>AnalyticsLogFormatter</code> (3 internal formatting functions)</li>
+      <li>Removed <code>shouldTrack</code> filter; providers handle selective ignoring internally</li>
+      <li>Moved debug provider DI binding to <code>app/src/debug/</code> source set — structurally impossible to ship in release</li>
+      <li>Updated both ViewModels and all test mocks to use <code>analyticsClient: AnalyticsClient</code> with <code>.logEvent(...)</code></li>
+      <li>Deleted now-empty <code>domain/analytics/</code> and <code>data/analytics/</code> directories</li>
+    </ul>
+
+    <h3>Iteration Cycles</h3>
+    <p>1 cycle. No RESOLVE NOW TODOs. All BDD RED/GREEN confirmations passed on first attempt. No fix loops required.</p>
+
+    <h3>Acknowledged TODOs (not blocking)</h3>
+    <table>
+      <tr><th>File</th><th>TODO</th><th>Reason deferred</th></tr>
+      <tr><td><code>TripDetailViewModel.kt:148</code></td><td>Design analytics event for total-duration display</td><td>Requires 9.1.2 taxonomy; precondition not met</td></tr>
+      <tr><td><code>TripDetailUiIntent.kt:9</code></td><td>Should PlaceDetail be used here?</td><td>Unrelated to analytics abstraction</td></tr>
+      <tr><td><code>NetworkModule.kt:18</code></td><td>Replace with Retrofit module</td><td>Unrelated to analytics abstraction</td></tr>
+      <tr><td><code>TripDetailViewModel.kt:62</code></td><td>Remove Android references from ViewModel</td><td>Unrelated to analytics abstraction</td></tr>
+      <tr><td><code>DirectionsApiService.kt:24</code></td><td>Replace with Retrofit</td><td>Unrelated to analytics abstraction</td></tr>
+    </table>
+
+    <h3>Verification Results</h3>
+    <table>
+      <tr><th>Check</th><th>Result</th><th>Detail</th></tr>
+      <tr><td>Build (debug + release)</td><td><span class="badge badge-pass">PASS</span></td><td>Both variants compile; release proves <code>@Multibinds</code> is correct</td></tr>
+      <tr><td>Unit tests</td><td><span class="badge badge-pass">PASS</span></td><td>295 tests, 0 failures</td></tr>
+      <tr><td>Detekt</td><td><span class="badge badge-pass">PASS</span></td><td>Zero findings</td></tr>
+      <tr><td>Kover coverage</td><td><span class="badge badge-pass">PASS</span></td><td>≥ 95% bound met</td></tr>
+      <tr><td>Compose UI tests (on-device)</td><td><span class="badge badge-pass">PASS</span></td><td>121/121 on Pixel 6a (API 16)</td></tr>
+      <tr><td>Debug logcat analytics</td><td><span class="badge badge-pass">PASS</span></td><td>Events fire with correct names and parameters; tag <code>Analytics</code> unchanged</td></tr>
+      <tr><td>Release build — no analytics output</td><td><span class="badge badge-pass">PASS</span></td><td>Proven by DI structure (unsigned APK; structural proof accepted)</td></tr>
+      <tr><td>git log --follow</td><td><span class="badge badge-pass">PASS</span></td><td>Pre-move history traceable; will be visible post-commit</td></tr>
+    </table>
+
+    <h3>Security Review</h3>
+    <p><span class="badge badge-pass">PASS</span> — 0 findings. Net security improvement: debug provider binding moved to <code>app/src/debug/</code> source set, eliminating the prior risk of Logcat output in release builds. One observation below threshold: <code>throwable.message</code> in <code>formatExceptionLog</code> is debug-only and intentional.</p>
+
+    <h3>Documentation Updates</h3>
+    <p>README.md — no update needed (no analytics references). AGENTS.md — no update needed (already references <code>core/analytics/</code> correctly).</p>
+
+    <div class="outcome outcome-passed">All 46 tasks complete. Implementation passed all quality gates.</div>
+  </section>
+
   </main>
 
 </body>

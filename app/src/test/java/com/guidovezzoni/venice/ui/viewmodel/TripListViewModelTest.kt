@@ -1,7 +1,7 @@
 package com.guidovezzoni.venice.ui.viewmodel
 
-import com.guidovezzoni.venice.domain.analytics.AnalyticsEvent
-import com.guidovezzoni.venice.domain.analytics.AnalyticsTracker
+import com.guidovezzoni.venice.core.analytics.AnalyticsClient
+import com.guidovezzoni.venice.core.analytics.AnalyticsEvent
 import com.guidovezzoni.venice.domain.model.Trip
 import com.guidovezzoni.venice.domain.repository.TripRepository
 import com.guidovezzoni.venice.domain.usecase.CreateTripUseCase
@@ -33,7 +33,7 @@ class TripListViewModelTest {
     private val testDispatcher = UnconfinedTestDispatcher()
 
     private lateinit var createTripUseCase: CreateTripUseCase
-    private lateinit var analyticsTracker: AnalyticsTracker
+    private lateinit var analyticsClient: AnalyticsClient
     private lateinit var tripRepository: TripRepository
     private lateinit var viewModel: TripListViewModel
 
@@ -41,10 +41,10 @@ class TripListViewModelTest {
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
         createTripUseCase = mockk()
-        analyticsTracker = mockk(relaxed = true)
+        analyticsClient = mockk(relaxed = true)
         tripRepository = mockk()
         every { tripRepository.observeTrips() } returns flowOf(emptyList())
-        viewModel = TripListViewModel(createTripUseCase, analyticsTracker, tripRepository)
+        viewModel = TripListViewModel(createTripUseCase, analyticsClient, tripRepository)
     }
 
     @After
@@ -109,7 +109,7 @@ class TripListViewModelTest {
     @Test
     fun `GIVEN ViewModel initialised WHEN init completes THEN ScreenViewed is tracked`() = runTest(testDispatcher) {
         verify(exactly = 1) {
-            analyticsTracker.track(match { it is AnalyticsEvent.ScreenViewed && it.screenName == AnalyticsEvent.SCREEN_TRIP_LIST })
+            analyticsClient.logEvent(match { it is AnalyticsEvent.ScreenViewed && it.screenName == AnalyticsEvent.SCREEN_TRIP_LIST })
         }
     }
 
@@ -123,7 +123,7 @@ class TripListViewModelTest {
         advanceUntilIdle()
 
         verify(exactly = 1) {
-            analyticsTracker.track(match { it is AnalyticsEvent.TripCreated && it.tripId == "trip-id" })
+            analyticsClient.logEvent(match { it is AnalyticsEvent.TripCreated && it.tripId == "trip-id" })
         }
     }
 
@@ -132,7 +132,7 @@ class TripListViewModelTest {
         viewModel.onIntent(TripListUiIntent.OnTripClicked("trip-123"))
 
         verify(exactly = 1) {
-            analyticsTracker.track(match { it is AnalyticsEvent.TripOpened && it.tripId == "trip-123" })
+            analyticsClient.logEvent(match { it is AnalyticsEvent.TripOpened && it.tripId == "trip-123" })
         }
     }
 
@@ -145,7 +145,7 @@ class TripListViewModelTest {
         advanceUntilIdle()
 
         verify(exactly = 1) {
-            analyticsTracker.track(match { it is AnalyticsEvent.OperationFailed && it.operation == AnalyticsEvent.OPERATION_CREATE_TRIP })
+            analyticsClient.logEvent(match { it is AnalyticsEvent.OperationFailed && it.operation == AnalyticsEvent.OPERATION_CREATE_TRIP })
         }
     }
 
