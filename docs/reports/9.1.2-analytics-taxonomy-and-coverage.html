@@ -155,6 +155,76 @@
         <strong>route_state for trip_opened:</strong> Requires exploration in propose phase. TripListViewModel does not currently observe the legs/route to determine state (none/stale/complete). This will need architectural consideration to compute route state correctly when opening a trip from the list view.
       </p>
     </section>
+    <section class="report-section" data-source="sdlc:sdlc_propose_change" data-timestamp="2026-08-18T00:00:00Z">
+      <header>
+        <h2>Change Proposal</h2>
+        <time datetime="2026-08-18T00:00:00Z">18 August 2026</time>
+      </header>
+      <p class="section-source">Source: sdlc:sdlc_propose_change</p>
+
+      <h3>Exploration Findings</h3>
+      <ul>
+        <li><code>core/analytics/</code> carries 8 files from 9.1.1; <code>AnalyticsEvent.kt</code> has 10 legacy subtypes with raw IDs</li>
+        <li><code>AnalyticsOperation</code> has 7 values, needs 3 more: <code>UNDO_MARK_DEPARTED</code>, <code>SEARCH_PLACE</code>, <code>RESOLVE_PLACE</code></li>
+        <li><code>AnalyticsUserProperty</code> has only a <code>ForTesting</code> placeholder</li>
+        <li>Both ViewModels already inject <code>AnalyticsClient</code>; domain models carry all data needed for new parameters</li>
+        <li><code>TripListViewModel</code> has no leg/route data; <code>InvalidateRouteUseCase</code> deletes legs (no stale state)</li>
+        <li><code>DirectionsApiService</code> throws generic <code>IllegalStateException</code> with no structured status code</li>
+        <li><code>VeniceApplication</code> has no <code>AnalyticsClient</code> injection yet</li>
+      </ul>
+
+      <h3>Design Questions and Resolutions</h3>
+      <table>
+        <tr><th>Question</th><th>Resolution</th></tr>
+        <tr>
+          <td><code>route_state</code> for <code>trip_opened</code> — no data in <code>TripListViewModel</code>, and <code>stale</code> is unreachable</td>
+          <td>Move <code>trip_opened</code> to <code>TripDetailViewModel.init</code> where legs are observed. Accept <code>none</code>/<code>complete</code> only; document <code>stale</code> as unreachable.</td>
+        </tr>
+        <tr>
+          <td>Error classification — <code>DirectionsApiService</code> has no structured exceptions</td>
+          <td>Classify by exception type only: <code>SocketTimeoutException</code> → timeout, <code>IOException</code> → network, <code>SQLiteException</code> → persistence, else unknown. Defer finer classification.</td>
+        </tr>
+        <tr>
+          <td><code>route_calculated</code> banding — raw totals unavailable in <code>calculateRoute()</code></td>
+          <td>Change <code>CalculateRouteUseCase</code> return type to <code>Result&lt;List&lt;Leg&gt;&gt;</code>. Small, well-scoped domain change.</td>
+        </tr>
+        <tr>
+          <td><code>stop_position</code> sourcing for departure events</td>
+          <td>Change <code>MarkStopDepartedUseCase</code> and <code>UndoMarkStopDepartedUseCase</code> to return <code>Result&lt;Stop&gt;</code>.</td>
+        </tr>
+      </table>
+
+      <h3>Artifacts Created</h3>
+      <table>
+        <tr><th>Artifact</th><th>Path</th></tr>
+        <tr><td>Proposal</td><td><code>openspec/changes/analytics-taxonomy-coverage/proposal.md</code></td></tr>
+        <tr><td>Design</td><td><code>openspec/changes/analytics-taxonomy-coverage/design.md</code></td></tr>
+        <tr><td>Spec: analytics-taxonomy</td><td><code>openspec/changes/analytics-taxonomy-coverage/specs/analytics-taxonomy/spec.md</code></td></tr>
+        <tr><td>Spec: analytics-instrumentation</td><td><code>openspec/changes/analytics-taxonomy-coverage/specs/analytics-instrumentation/spec.md</code></td></tr>
+        <tr><td>Spec: analytics-abstraction (modified)</td><td><code>openspec/changes/analytics-taxonomy-coverage/specs/analytics-abstraction/spec.md</code></td></tr>
+        <tr><td>Tasks</td><td><code>openspec/changes/analytics-taxonomy-coverage/tasks.md</code></td></tr>
+      </table>
+
+      <h3>Task Structure</h3>
+      <ul>
+        <li><strong>37 sections</strong> with <strong>80 tasks</strong> total</li>
+        <li><strong>34 BDD pairs</strong> (68 tasks): test-first + implementation for all testable work</li>
+        <li><strong>1 prerequisite section</strong> (4 tasks): flat vocabulary enums, <code>AnalyticsOperation</code> extension</li>
+        <li><strong>1 integration section</strong> (2 tasks): <code>VeniceApplication</code> startup wiring</li>
+        <li><strong>1 verification section</strong> (6 tasks): detekt, unit tests, coverage, tracking-plan cross-check, on-device</li>
+      </ul>
+
+      <h3>Key Design Decisions</h3>
+      <ol>
+        <li>6 new enum files + <code>AnalyticsOperation</code> extended; <code>direction</code>/<code>route_state</code> stay as inline strings (no dedicated enums)</li>
+        <li>Error classification by exception type only — conservative, correct, deferring message parsing</li>
+        <li>3 domain return-type changes: <code>RouteRepository.calculateRoute</code> → <code>Result&lt;List&lt;Leg&gt;&gt;</code>, <code>MarkStopDepartedUseCase</code> → <code>Result&lt;Stop&gt;</code>, <code>UndoMarkStopDepartedUseCase</code> → <code>Result&lt;Stop&gt;</code></li>
+        <li><code>trip_opened</code> fires once from <code>TripDetailViewModel.init</code> via <code>.take(1)</code> on a separate combine block</li>
+        <li>Dual-channel failure emission: classify once, then <code>logEvent</code> + <code>trackException</code> in the same onFailure block</li>
+        <li><code>distance_unit</code> set immediately after <code>super.onCreate()</code> in <code>VeniceApplication</code>, before Places SDK init</li>
+        <li><code>AnalyticsLogFormatter</code> needs no code changes — operates generically</li>
+      </ol>
+    </section>
   </main>
 
 </body>
