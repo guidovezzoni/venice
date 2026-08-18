@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Scenario: All project doctor checks pass.
-# Fixture: complete project config — detekt, kover, unit tests, fastlane,
-#          CI/CD, gradle wrapper.
+# Fixture: complete project config — detekt (2.x, zero tolerance, validation),
+#          kover, unit tests, analytics tracking plan, fastlane, CI/CD,
+#          gradle wrapper.
 # Note: CLI checks (command -v fastlane, command -v bundle) depend on the host.
 set -euo pipefail
 
@@ -25,7 +26,11 @@ begin_assertions
 
 # Detekt category — at least one ✅ mentioning detekt
 assert_check_passes "detekt" "detekt checks pass"
-assert_check_passes "maxIssues|max.issues" "detekt maxIssues check passes"
+assert_check_passes "2\.0\.0|detekt 2|2\.x|major" \
+    "detekt 2.x version check passes"
+assert_check_passes "warningsAsErrors|warnings.*errors|zero.tolerance" \
+    "detekt zero-tolerance check passes"
+assert_check_passes "validation" "detekt config validation check passes"
 assert_check_passes "compose.*rules|nlopez|compose.*detekt" \
     "compose detekt rules check passes"
 
@@ -38,6 +43,14 @@ assert_check_passes "junit|JUnit" "junit declared"
 assert_check_passes "mockk|MockK" "mockk declared"
 assert_check_passes "coroutines" "coroutines-test declared"
 assert_check_passes "test.*kt|\.kt.*test" "test files exist"
+
+# Analytics category
+assert_check_passes "tracking-plan" "tracking plan exists"
+assert_check_passes "Event Dictionary|Parameter Reference|User Properties" \
+    "tracking plan headings present"
+assert_check_passes "AGENTS.md" "AGENTS.md references the tracking plan"
+assert_check_passes "sdlc_open_story|analytics.*refinement|refinement.*analytics" \
+    "sdlc_open_story analytics refinement hook present"
 
 # Fastlane category
 assert_check_passes "Fastfile|fastfile" "Fastfile exists"

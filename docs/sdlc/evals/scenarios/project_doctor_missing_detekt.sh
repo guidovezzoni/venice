@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Scenario: Detekt config file removed.
 # Fixture: complete except config/detekt/detekt.yml deleted.
-# Expected: ❌ for detekt config (and possibly maxIssues check since it reads
-#           the file), other categories pass.
+# Expected: ❌ for detekt config, and for the zero-tolerance and validation
+#           checks that read the same file. Other categories pass.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

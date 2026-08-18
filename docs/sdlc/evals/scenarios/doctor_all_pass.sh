@@ -43,6 +43,15 @@ assert_check_passes "sdlc_exp_vibe_a_story" "sdlc_exp_vibe_a_story passes"
 assert_check_passes "sdlc_doctor" "sdlc_doctor passes"
 assert_check_passes "sdlc_project_doctor" "sdlc_project_doctor passes"
 
+# Guidelines checks
+assert_check_passes "guidelines-android" "guidelines-android.md passes"
+assert_check_passes "guidelines-git" "guidelines-git.md passes"
+assert_check_passes "guidelines-process" "guidelines-process.md passes"
+assert_check_passes "guidelines-analytics" "guidelines-analytics.md passes"
+assert_check_passes "guidelines-userstories" "guidelines-userstories.md passes"
+assert_check_passes "guidelines-reports" "guidelines-reports.md passes"
+assert_check_passes "AGENTS.md" "AGENTS.md references the loaded guidelines"
+
 # Summary
 assert_output_contains "All checks passed" "summary shows all passed"
 

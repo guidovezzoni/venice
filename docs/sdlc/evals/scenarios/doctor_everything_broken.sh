@@ -41,9 +41,15 @@ assert_check_fails "sdlc_exp_four_in_one" "sdlc_exp_four_in_one fails"
 assert_check_fails "sdlc_exp_vibe_a_story" "sdlc_exp_vibe_a_story fails"
 assert_check_fails "sdlc_doctor" "sdlc_doctor fails"
 assert_check_fails "sdlc_project_doctor" "sdlc_project_doctor fails"
+assert_check_fails "guidelines-android" "guidelines-android.md fails"
+assert_check_fails "guidelines-analytics" "guidelines-analytics.md fails"
+assert_check_fails "AGENTS.md" "AGENTS.md guidelines references fail"
 
-# At least 16 failures (file checks), possibly 17 if openspec CLI also missing
-assert_min_fail_count 16
+# At least 22 failures: 1 openspec config + 6 opsx + 1 security + 8 sdlc
+# commands + 6 guidelines files. The AGENTS.md and command-reference checks
+# add more, but the sub-agent may report them as one line each or several,
+# so they are not counted here. One more if the openspec CLI is also missing.
+assert_min_fail_count 22
 
 # Summary should indicate failures
 assert_output_contains "failed" "summary mentions failure"

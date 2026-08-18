@@ -50,11 +50,108 @@ snapshot_fixture() {
 }
 
 # ---------------------------------------------------------------------------
+# Shared fixture: guidelines, AGENTS.md, tracking plan, and the SDLC command
+# files that reference them.
+#
+# Both doctors need these: sdlc_doctor has a Guidelines category (files exist,
+# AGENTS.md references them, the artefact guidelines are referenced by an SDLC
+# command), and sdlc_project_doctor has an Analytics category (tracking plan
+# exists with the expected headings, AGENTS.md references it, and
+# sdlc_open_story.md carries the analytics refinement hook).
+# ---------------------------------------------------------------------------
+
+create_guidelines_fixture() {
+    local dir="$1"
+
+    mkdir -p "$dir/docs/guidelines"
+    for guideline in android git process analytics userstories reports; do
+        echo "# guidelines-${guideline} placeholder" > "$dir/docs/guidelines/guidelines-${guideline}.md"
+    done
+
+    cat > "$dir/AGENTS.md" << 'EOF'
+# AGENTS.md
+
+## External File Loading
+
+### Android Guidelines
+
+For Native Android code style and best practices: @docs/guidelines/guidelines-android.md
+
+### Analytics Guidelines
+
+For analytics event design, naming, and delivery: @docs/guidelines/guidelines-analytics.md
+The event dictionary is the tracking plan: @docs/analytics/tracking-plan.md
+
+### Git Guidelines
+
+For git operations and commit conventions: @docs/guidelines/guidelines-git.md
+
+### General Guidelines
+
+Read the following file immediately as it's relevant to all workflows: @docs/guidelines/guidelines-process.md
+
+## Project Overview
+
+Eval fixture project.
+EOF
+
+    mkdir -p "$dir/docs/analytics"
+    cat > "$dir/docs/analytics/tracking-plan.md" << 'EOF'
+# Tracking Plan
+
+## Event Dictionary
+
+| Event | Parameters | Trigger |
+|-------|-----------|---------|
+| `item_added` | `item_count` | An item is persisted |
+
+## Parameter Reference
+
+| Parameter | Type | Allowed values |
+|-----------|------|----------------|
+| `item_count` | Int | 0–n |
+
+## User Properties
+
+| Property | Type | Allowed values |
+|----------|------|----------------|
+| `item_count_band` | String | `0`, `1`, `2_5`, `6_plus` |
+EOF
+
+    mkdir -p "$dir/docs/sdlc/commands"
+    cat > "$dir/docs/sdlc/commands/sdlc_open_story.md" << 'EOF'
+# sdlc_open_story placeholder
+
+   ## Context Files
+   - User story guidelines: docs/guidelines/guidelines-userstories.md
+   - Analytics guidelines: docs/guidelines/guidelines-analytics.md
+   - Tracking plan (event dictionary): docs/analytics/tracking-plan.md
+
+   ## Refinement Requirements
+
+   1. Acceptance criteria
+   2. An `## Analytics` section defining the events this feature must emit —
+      their names, parameters, and the product question each answers.
+   3. The steps required for the task to be considered complete
+EOF
+
+    cat > "$dir/docs/sdlc/commands/sdlc_verify_story.md" << 'EOF'
+# sdlc_verify_story placeholder
+
+   ## Context Files
+   - Report guidelines: docs/guidelines/guidelines-reports.md
+   - User story guidelines: docs/guidelines/guidelines-userstories.md
+EOF
+}
+
+# ---------------------------------------------------------------------------
 # Base fixture: sdlc_doctor (all checks passing)
 # ---------------------------------------------------------------------------
 
 create_doctor_base_fixture() {
     local dir="$1"
+
+    create_guidelines_fixture "$dir"
 
     mkdir -p "$dir/openspec"
     cat > "$dir/openspec/config.yaml" << 'EOF'
@@ -90,10 +187,15 @@ EOF
 create_project_doctor_base_fixture() {
     local dir="$1"
 
+    create_guidelines_fixture "$dir"
+
+    # detekt must be 2.x: 1.x registers no variant tasks on a current AGP and
+    # loads no custom ruleset, both silently. composeRules 0.6.x is the line
+    # published against detekt 2.x, so the pair has to move together.
     mkdir -p "$dir/gradle"
     cat > "$dir/gradle/libs.versions.toml" << 'EOF'
 [versions]
-detekt = "1.23.8"
+detekt = "2.0.0-alpha.5"
 composeRules = "0.6.2"
 kover = "0.9.8"
 junit = "4.13.2"
@@ -107,7 +209,7 @@ kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-cor
 detekt-compose-rules = { group = "io.nlopez.compose.rules", name = "detekt", version.ref = "composeRules" }
 
 [plugins]
-detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
+detekt = { id = "dev.detekt", version.ref = "detekt" }
 kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }
 EOF
 
@@ -139,10 +241,28 @@ kover {
 }
 EOF
 
+    # No `build: maxIssues` — the key was removed in detekt 2.x, where the gate
+    # is `failOnSeverity` (default Error) plus warningsAsErrors promoting
+    # warnings to it. validation makes an unknown key fail the build.
     mkdir -p "$dir/config/detekt"
     cat > "$dir/config/detekt/detekt.yml" << 'EOF'
-build:
-  maxIssues: 0
+config:
+  validation: true
+  warningsAsErrors: true
+
+naming:
+  FunctionNaming:
+    ignoreAnnotated:
+      - 'Composable'
+
+style:
+  UnusedImport:
+    active: true
+  WildcardImport:
+    active: true
+
+Compose:
+  active: true
 EOF
 
     mkdir -p "$dir/app/src/test/java"
