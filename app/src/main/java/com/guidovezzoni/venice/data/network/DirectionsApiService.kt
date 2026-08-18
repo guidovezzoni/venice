@@ -45,7 +45,9 @@ class DirectionsApiService @Inject constructor(
 
             val response = okHttpClient.newCall(request).execute()
             val responseBody = response.body?.string()
-                ?: throw IllegalStateException("Empty response body from Routes API")
+            if (responseBody.isNullOrEmpty()) {
+                throw IllegalStateException("Empty response body from Routes API")
+            }
 
             if (!response.isSuccessful) {
                 throw IllegalStateException("Routes API request failed with status ${response.code}: $responseBody")

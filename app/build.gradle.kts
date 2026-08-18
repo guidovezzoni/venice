@@ -1,3 +1,5 @@
+import com.android.sdklib.AndroidVersion.VersionCodes.BAKLAVA
+import com.android.sdklib.AndroidVersion.VersionCodes.N
 import java.util.Properties
 
 plugins {
@@ -28,15 +30,15 @@ val versionPatch = 4
 android {
     namespace = "com.guidovezzoni.venice"
     compileSdk {
-        version = release(36) {
+        version = release(37) {
             minorApiLevel = 1
         }
     }
 
     defaultConfig {
         applicationId = "com.guidovezzoni.venice"
-        minSdk = 24
-        targetSdk = 36
+        minSdk = N
+        targetSdk = BAKLAVA
         versionCode = versionMajor * 10000 + versionMinor * 100 + versionPatch
         versionName = "$versionMajor.$versionMinor.$versionPatch"
 

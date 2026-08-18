@@ -162,7 +162,7 @@ class DirectionsApiServiceTest {
             .protocol(Protocol.HTTP_1_1)
             .code(HTTP_OK)
             .message("OK")
-            .body(null)
+            .body("".toResponseBody())
             .build()
         every { call.execute() } returns response
 
