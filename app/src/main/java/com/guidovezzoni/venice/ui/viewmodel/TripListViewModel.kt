@@ -2,8 +2,8 @@ package com.guidovezzoni.venice.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.guidovezzoni.venice.domain.analytics.AnalyticsEvent
-import com.guidovezzoni.venice.domain.analytics.AnalyticsTracker
+import com.guidovezzoni.venice.core.analytics.AnalyticsClient
+import com.guidovezzoni.venice.core.analytics.AnalyticsEvent
 import com.guidovezzoni.venice.domain.repository.TripRepository
 import com.guidovezzoni.venice.domain.usecase.CreateTripUseCase
 import com.guidovezzoni.venice.ui.effect.TripListUiEffect
@@ -26,7 +26,7 @@ import javax.inject.Inject
 @HiltViewModel
 class TripListViewModel @Inject constructor(
     private val createTripUseCase: CreateTripUseCase,
-    private val analyticsTracker: AnalyticsTracker,
+    private val analyticsClient: AnalyticsClient,
     tripRepository: TripRepository,
 ) : ViewModel() {
 
@@ -37,7 +37,7 @@ class TripListViewModel @Inject constructor(
     val uiEffect: SharedFlow<TripListUiEffect> = _uiEffect.asSharedFlow()
 
     init {
-        analyticsTracker.track(AnalyticsEvent.ScreenViewed(AnalyticsEvent.SCREEN_TRIP_LIST))
+        analyticsClient.logEvent(AnalyticsEvent.ScreenViewed(AnalyticsEvent.SCREEN_TRIP_LIST))
         tripRepository.observeTrips()
             .onEach { trips -> _uiState.update { it.copy(trips = trips) } }
             .launchIn(viewModelScope)
@@ -56,7 +56,7 @@ class TripListViewModel @Inject constructor(
             }
             TripListUiIntent.ConfirmCreateTrip -> createTrip()
             is TripListUiIntent.OnTripClicked -> viewModelScope.launch {
-                analyticsTracker.track(AnalyticsEvent.TripOpened(intent.tripId))
+                analyticsClient.logEvent(AnalyticsEvent.TripOpened(intent.tripId))
                 _uiEffect.emit(TripListUiEffect.NavigateToTripDetail(intent.tripId))
             }
         }
@@ -68,7 +68,7 @@ class TripListViewModel @Inject constructor(
             _uiState.update { it.copy(isLoading = true) }
             withMinimumDuration { createTripUseCase(name) }
                 .onSuccess { trip ->
-                    analyticsTracker.track(AnalyticsEvent.TripCreated(trip.id))
+                    analyticsClient.logEvent(AnalyticsEvent.TripCreated(trip.id))
                     _uiState.update { it.copy(isLoading = false, isCreateDialogVisible = false, tripNameInput = "") }
                     _uiEffect.emit(TripListUiEffect.NavigateToTripDetail(trip.id))
                 }
@@ -77,7 +77,7 @@ class TripListViewModel @Inject constructor(
                         AnalyticsEvent.OPERATION_CREATE_TRIP,
                         error.message ?: UNKNOWN_ERROR,
                     )
-                    analyticsTracker.track(failedEvent)
+                    analyticsClient.logEvent(failedEvent)
                     _uiState.update { it.copy(isLoading = false) }
                     _uiEffect.emit(TripListUiEffect.ShowError(error.message ?: UNKNOWN_ERROR))
                 }

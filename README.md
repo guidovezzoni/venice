@@ -48,17 +48,20 @@ Venice helps users plan multi-stop road trips. The current version supports crea
 | **Testing**              | JUnit 4, MockK, Compose UI Test                 |
 
 
-The codebase follows Clean Architecture with three layers:
+The codebase follows Clean Architecture with four layers:
 
 - **Domain** — models, repository interfaces, and use cases
 - **Data** — Room database, DAOs, entities, mappers, and repository implementations
 - **UI** — Compose screens, ViewModels, and MVI contracts (UiState / UiIntent / UiEffect)
+- **Core** — cross-cutting concerns consumed by more than one layer (analytics, logging, generic utilities)
 
 Each feature exposes a strict MVI contract: the View observes an immutable `UiState`, sends user actions as `UiIntent` values to the ViewModel, and consumes one-shot side effects via `UiEffect`. This enforces unidirectional data flow and makes state easy to test.
 
 ```
 app/src/main/java/com/guidovezzoni/venice/
 ├── di/                  # Hilt modules
+├── core/                # Cross-cutting concerns (analytics, etc.)
+│   └── analytics/       # AnalyticsClient, providers, event taxonomy
 ├── domain/              # Models, repository interfaces, use cases
 ├── data/                # Room DB, DAOs, entities, repository impls
 └── ui/

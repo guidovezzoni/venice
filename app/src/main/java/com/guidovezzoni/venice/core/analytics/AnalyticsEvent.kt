@@ -1,4 +1,4 @@
-package com.guidovezzoni.venice.domain.analytics
+package com.guidovezzoni.venice.core.analytics
 
 sealed class AnalyticsEvent(
     val name: String,

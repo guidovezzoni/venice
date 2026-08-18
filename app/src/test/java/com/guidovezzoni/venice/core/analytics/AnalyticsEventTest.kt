@@ -1,4 +1,4 @@
-package com.guidovezzoni.venice.domain.analytics
+package com.guidovezzoni.venice.core.analytics
 
 import org.junit.Assert.assertEquals
 import org.junit.Test

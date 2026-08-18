@@ -4,8 +4,8 @@ import android.app.Application
 import android.content.res.Resources
 import androidx.lifecycle.SavedStateHandle
 import com.guidovezzoni.venice.R
-import com.guidovezzoni.venice.domain.analytics.AnalyticsEvent
-import com.guidovezzoni.venice.domain.analytics.AnalyticsTracker
+import com.guidovezzoni.venice.core.analytics.AnalyticsClient
+import com.guidovezzoni.venice.core.analytics.AnalyticsEvent
 import com.guidovezzoni.venice.domain.model.Leg
 import com.guidovezzoni.venice.domain.model.PlaceDetail
 import com.guidovezzoni.venice.domain.model.PlaceSuggestion
@@ -88,7 +88,7 @@ class TripDetailViewModelTest {
     private lateinit var searchPlacesUseCase: SearchPlacesUseCase
     private lateinit var getPlaceDetailUseCase: GetPlaceDetailUseCase
     private lateinit var placeSearchRepository: PlaceSearchRepository
-    private lateinit var analyticsTracker: AnalyticsTracker
+    private lateinit var analyticsClient: AnalyticsClient
     private lateinit var savedStateHandle: SavedStateHandle
 
     @Before
@@ -114,7 +114,7 @@ class TripDetailViewModelTest {
         searchPlacesUseCase = mockk()
         getPlaceDetailUseCase = mockk()
         placeSearchRepository = mockk(relaxed = true)
-        analyticsTracker = mockk(relaxed = true)
+        analyticsClient = mockk(relaxed = true)
         savedStateHandle = SavedStateHandle(mapOf("tripId" to TRIP_ID))
     }
 
@@ -131,7 +131,7 @@ class TripDetailViewModelTest {
         every { observeStopsUseCase(TRIP_ID) } returns flowOf(stops)
         every { observeLegsUseCase(TRIP_ID) } returns flowOf(legs)
         every { observeTripUseCase(TRIP_ID) } returns flowOf(null)
-        return TripDetailViewModel(application, setStopUseCase, moveStopUseCase, editStopUseCase, removeStopUseCase, markStopDepartedUseCase, undoMarkStopDepartedUseCase, calculateRouteUseCase, observeStopsUseCase, observeLegsUseCase, observeTripUseCase, searchPlacesUseCase, getPlaceDetailUseCase, placeSearchRepository, analyticsTracker, savedStateHandle)
+        return TripDetailViewModel(application, setStopUseCase, moveStopUseCase, editStopUseCase, removeStopUseCase, markStopDepartedUseCase, undoMarkStopDepartedUseCase, calculateRouteUseCase, observeStopsUseCase, observeLegsUseCase, observeTripUseCase, searchPlacesUseCase, getPlaceDetailUseCase, placeSearchRepository, analyticsClient, savedStateHandle)
     }
 
     @Test
@@ -1030,7 +1030,7 @@ class TripDetailViewModelTest {
         createViewModel()
 
         verify(exactly = 1) {
-            analyticsTracker.track(match { it is AnalyticsEvent.ScreenViewed && it.screenName == AnalyticsEvent.SCREEN_TRIP_DETAIL })
+            analyticsClient.logEvent(match { it is AnalyticsEvent.ScreenViewed && it.screenName == AnalyticsEvent.SCREEN_TRIP_DETAIL })
         }
     }
 
@@ -1045,7 +1045,7 @@ class TripDetailViewModelTest {
         advanceUntilIdle()
 
         verify(exactly = 1) {
-            analyticsTracker.track(match { it is AnalyticsEvent.StopSet && it.stopType == "STARTING_POINT" })
+            analyticsClient.logEvent(match { it is AnalyticsEvent.StopSet && it.stopType == "STARTING_POINT" })
         }
     }
 
@@ -1060,7 +1060,7 @@ class TripDetailViewModelTest {
         advanceUntilIdle()
 
         verify(exactly = 1) {
-            analyticsTracker.track(match { it is AnalyticsEvent.StopSet && it.stopType == "DESTINATION" })
+            analyticsClient.logEvent(match { it is AnalyticsEvent.StopSet && it.stopType == "DESTINATION" })
         }
     }
 
@@ -1075,7 +1075,7 @@ class TripDetailViewModelTest {
         advanceUntilIdle()
 
         verify(exactly = 1) {
-            analyticsTracker.track(match { it is AnalyticsEvent.StopSet && it.stopType == "INTERMEDIATE" })
+            analyticsClient.logEvent(match { it is AnalyticsEvent.StopSet && it.stopType == "INTERMEDIATE" })
         }
     }
 
@@ -1089,7 +1089,7 @@ class TripDetailViewModelTest {
         advanceUntilIdle()
 
         verify(exactly = 1) {
-            analyticsTracker.track(match { it is AnalyticsEvent.StopEdited && it.tripId == TRIP_ID })
+            analyticsClient.logEvent(match { it is AnalyticsEvent.StopEdited && it.tripId == TRIP_ID })
         }
     }
 
@@ -1104,7 +1104,7 @@ class TripDetailViewModelTest {
         advanceUntilIdle()
 
         verify(exactly = 1) {
-            analyticsTracker.track(match { it is AnalyticsEvent.StopRemoved && it.tripId == TRIP_ID })
+            analyticsClient.logEvent(match { it is AnalyticsEvent.StopRemoved && it.tripId == TRIP_ID })
         }
     }
 
@@ -1117,7 +1117,7 @@ class TripDetailViewModelTest {
         advanceUntilIdle()
 
         verify(exactly = 1) {
-            analyticsTracker.track(match { it is AnalyticsEvent.StopReordered && it.tripId == TRIP_ID })
+            analyticsClient.logEvent(match { it is AnalyticsEvent.StopReordered && it.tripId == TRIP_ID })
         }
     }
 
@@ -1130,7 +1130,7 @@ class TripDetailViewModelTest {
         advanceUntilIdle()
 
         verify(exactly = 1) {
-            analyticsTracker.track(match { it is AnalyticsEvent.StopDeparted && it.tripId == TRIP_ID && it.stopId == "s1" })
+            analyticsClient.logEvent(match { it is AnalyticsEvent.StopDeparted && it.tripId == TRIP_ID && it.stopId == "s1" })
         }
     }
 
@@ -1143,7 +1143,7 @@ class TripDetailViewModelTest {
         advanceUntilIdle()
 
         verify(exactly = 1) {
-            analyticsTracker.track(match { it is AnalyticsEvent.RouteCalculated && it.tripId == TRIP_ID })
+            analyticsClient.logEvent(match { it is AnalyticsEvent.RouteCalculated && it.tripId == TRIP_ID })
         }
     }
 
@@ -1156,7 +1156,7 @@ class TripDetailViewModelTest {
         advanceUntilIdle()
 
         verify(exactly = 1) {
-            analyticsTracker.track(match { it is AnalyticsEvent.OperationFailed && it.operation == AnalyticsEvent.OPERATION_SET_STOP })
+            analyticsClient.logEvent(match { it is AnalyticsEvent.OperationFailed && it.operation == AnalyticsEvent.OPERATION_SET_STOP })
         }
     }
 
@@ -1169,7 +1169,7 @@ class TripDetailViewModelTest {
         advanceUntilIdle()
 
         verify(exactly = 1) {
-            analyticsTracker.track(match { it is AnalyticsEvent.OperationFailed && it.operation == AnalyticsEvent.OPERATION_EDIT_STOP })
+            analyticsClient.logEvent(match { it is AnalyticsEvent.OperationFailed && it.operation == AnalyticsEvent.OPERATION_EDIT_STOP })
         }
     }
 
@@ -1184,7 +1184,7 @@ class TripDetailViewModelTest {
         advanceUntilIdle()
 
         verify(exactly = 1) {
-            analyticsTracker.track(match { it is AnalyticsEvent.OperationFailed && it.operation == AnalyticsEvent.OPERATION_REMOVE_STOP })
+            analyticsClient.logEvent(match { it is AnalyticsEvent.OperationFailed && it.operation == AnalyticsEvent.OPERATION_REMOVE_STOP })
         }
     }
 
@@ -1197,7 +1197,7 @@ class TripDetailViewModelTest {
         advanceUntilIdle()
 
         verify(exactly = 1) {
-            analyticsTracker.track(match { it is AnalyticsEvent.OperationFailed && it.operation == AnalyticsEvent.OPERATION_MOVE_STOP })
+            analyticsClient.logEvent(match { it is AnalyticsEvent.OperationFailed && it.operation == AnalyticsEvent.OPERATION_MOVE_STOP })
         }
     }
 
@@ -1210,7 +1210,7 @@ class TripDetailViewModelTest {
         advanceUntilIdle()
 
         verify(exactly = 1) {
-            analyticsTracker.track(match { it is AnalyticsEvent.OperationFailed && it.operation == AnalyticsEvent.OPERATION_MARK_DEPARTED })
+            analyticsClient.logEvent(match { it is AnalyticsEvent.OperationFailed && it.operation == AnalyticsEvent.OPERATION_MARK_DEPARTED })
         }
     }
 
@@ -1223,7 +1223,7 @@ class TripDetailViewModelTest {
         advanceUntilIdle()
 
         verify(exactly = 1) {
-            analyticsTracker.track(match { it is AnalyticsEvent.OperationFailed && it.operation == AnalyticsEvent.OPERATION_CALCULATE_ROUTE })
+            analyticsClient.logEvent(match { it is AnalyticsEvent.OperationFailed && it.operation == AnalyticsEvent.OPERATION_CALCULATE_ROUTE })
         }
     }
 
@@ -1325,7 +1325,7 @@ class TripDetailViewModelTest {
             application, setStopUseCase, moveStopUseCase, editStopUseCase, removeStopUseCase,
             markStopDepartedUseCase, undoMarkStopDepartedUseCase, calculateRouteUseCase,
             observeStopsUseCase, observeLegsUseCase, localObserveTripUseCase, searchPlacesUseCase,
-            getPlaceDetailUseCase, placeSearchRepository, analyticsTracker, savedStateHandle,
+            getPlaceDetailUseCase, placeSearchRepository, analyticsClient, savedStateHandle,
         )
 
         assertNotNull(viewModel.uiState.value.formattedTotalDistance)
@@ -1456,7 +1456,7 @@ class TripDetailViewModelTest {
             application, setStopUseCase, moveStopUseCase, editStopUseCase, removeStopUseCase,
             markStopDepartedUseCase, undoMarkStopDepartedUseCase, calculateRouteUseCase,
             observeStopsUseCase, observeLegsUseCase, localObserveTripUseCase, searchPlacesUseCase,
-            getPlaceDetailUseCase, placeSearchRepository, analyticsTracker, savedStateHandle,
+            getPlaceDetailUseCase, placeSearchRepository, analyticsClient, savedStateHandle,
         )
 
         assertNotNull(viewModel.uiState.value.formattedTotalDuration)
@@ -1518,7 +1518,7 @@ class TripDetailViewModelTest {
             application, setStopUseCase, moveStopUseCase, editStopUseCase, removeStopUseCase,
             markStopDepartedUseCase, undoMarkStopDepartedUseCase, calculateRouteUseCase,
             observeStopsUseCase, observeLegsUseCase, localObserveTripUseCase, searchPlacesUseCase,
-            getPlaceDetailUseCase, placeSearchRepository, analyticsTracker, savedStateHandle,
+            getPlaceDetailUseCase, placeSearchRepository, analyticsClient, savedStateHandle,
         )
 
         val expectedTripName = "Summer Roadtrip"
@@ -1544,7 +1544,7 @@ class TripDetailViewModelTest {
             application, setStopUseCase, moveStopUseCase, editStopUseCase, removeStopUseCase,
             markStopDepartedUseCase, undoMarkStopDepartedUseCase, calculateRouteUseCase,
             observeStopsUseCase, observeLegsUseCase, localObserveTripUseCase, searchPlacesUseCase,
-            getPlaceDetailUseCase, placeSearchRepository, analyticsTracker, savedStateHandle,
+            getPlaceDetailUseCase, placeSearchRepository, analyticsClient, savedStateHandle,
         )
 
         val expectedTripName = "Summer Roadtrip"
@@ -1686,7 +1686,7 @@ class TripDetailViewModelTest {
             application, setStopUseCase, moveStopUseCase, editStopUseCase, removeStopUseCase,
             markStopDepartedUseCase, undoMarkStopDepartedUseCase, calculateRouteUseCase,
             observeStopsUseCase, observeLegsUseCase, localObserveTripUseCase, searchPlacesUseCase,
-            getPlaceDetailUseCase, placeSearchRepository, analyticsTracker, savedStateHandle,
+            getPlaceDetailUseCase, placeSearchRepository, analyticsClient, savedStateHandle,
         )
 
         val expectedIsRouteRecalculationPromptVisibleBefore = false
