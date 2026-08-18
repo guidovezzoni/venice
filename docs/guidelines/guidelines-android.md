@@ -4,6 +4,18 @@
 - All dependencies managed via `gradle/libs.versions.toml`
 - Use version references (e.g., `version.ref = "kotlin"`)
 - Group related dependencies logically
+- **Convention plugins**: When the project has multiple Gradle modules, use a `build-logic` composite build with convention plugins to centralise shared build configuration (compileSdk, minSdk, Java/Kotlin compile options, detekt, kover). Each module should apply a convention plugin rather than duplicating configuration inline. Define at minimum an Android library plugin and a pure Kotlin (JVM) library plugin.
+  - **Version catalog in build-logic**: The `build-logic` composite build must share the root version catalog. Declare it in `build-logic/settings.gradle.kts`:
+    ```kotlin
+    dependencyResolutionManagement {
+        versionCatalogs {
+            create("libs") {
+                from(files("../gradle/libs.versions.toml"))
+            }
+        }
+    }
+    ```
+    Plugin artifacts declared as `dependencies` in `build-logic/build.gradle.kts` must be added as `[libraries]` entries in `libs.versions.toml` and referenced via `libs.*` — never as hardcoded strings with inline versions.
 
 ## Android Specific
 
@@ -44,19 +56,44 @@ app/src/main/java/<package-name>/
 │       ├── Color.kt
 │       └── Type.kt       
 ├── domain/                     # Business logic
+│   ├── model/                  # Domain models and value objects
 │   ├── usecase/
 │   │   ├── Usecase001UseCase.kt
 │   │   ├── Usecase002UseCase.kt
 │   │   └── Usecase003UseCase.kt
 │   └── repository/             # Repository interfaces
-└── data/                       # Data layer
-    ├── repository/             # Repository implementations
-    │   ├── Repository001Impl.kt
-    │   └── Repository002Impl.kt
-    ├── mapper/                 # DTO → domain mappers
-    │   └── EntityMapper.kt
-    └── database/
+├── data/                       # Data layer
+│   ├── repository/             # Repository implementations
+│   │   ├── Repository001Impl.kt
+│   │   └── Repository002Impl.kt
+│   ├── mapper/                 # DTO → domain mappers
+│   │   └── EntityMapper.kt
+│   └── database/
+└── core/                       # Cross-cutting concerns (see charter below)
+    ├── analytics/
+    └── network/
 ```
+
+- **The `core/` package**: holds concerns that are **cross-cutting, carry no business rules, and are
+  consumed by more than one layer** — analytics, logging, generic coroutine helpers, network
+  primitives. It sits parallel to `data/`, `domain/`, and `ui/`, not beneath them.
+
+  `core/` is the package most prone to becoming a junk drawer, so admission is gated by a single test:
+  **you must be able to name at least two unrelated consumers.** If you cannot, it belongs elsewhere.
+
+  | Question | Belongs in |
+  |----------|-----------|
+  | Does it express a business rule or concept? | `domain/` |
+  | Does it fetch, persist, or map external data? | `data/` |
+  | Does it render or hold screen state? | `ui/` |
+  | None of the above, and used by two or more layers? | `core/` |
+
+  A concern in `core/` keeps its contracts and its implementations together — splitting one cohesive
+  concern across `core/` and `data/` defeats the purpose. Where an implementation pulls in a heavy
+  third-party SDK, note it as the natural candidate for extraction into its own module if the project
+  is ever modularised, so `core/` stays dependency-light.
+
+- **Preserve meaningful domain concepts as value objects**: When an API response contains a nested object that represents a coherent domain concept (e.g. a rating with a score and count, an address with street and city), model it as a separate value object in the domain layer rather than flattening its fields into the parent entity. Flattening dissolves concept boundaries, making the model harder to reason about and extend. The DTO layer mirrors the API shape; the domain layer mirrors the business meaning.
 
 - **Clean Architecture layer boundaries**: The domain layer must not import or reference any data-layer types (DTOs, database entities, network models). Violations include domain repository interfaces returning DTOs, or mappers living in `domain/mapper/`.
   - **Repository interfaces** (in `domain/repository/`) must declare return types using only domain models.
@@ -142,7 +179,7 @@ fun ComponentName(
 @Preview(showBackground = true)
 @Composable
 private fun PreviewComponentName() {
-    WhatsappFilesFixerTheme {
+    MyAppTheme {
         ComponentName()
     }
 }
@@ -186,8 +223,8 @@ private fun PreviewComponentName() {
 - Use alphabetical ordering within each group
 
 ### Naming Conventions
-- **Composables**: PascalCase (e.g., `WhatsappScreen`, `MainScreen`)
-- **Functions**: camelCase (e.g., `findWhatsappFolder`, `checkPermission`)
+- **Composables**: PascalCase (e.g., `ProductListScreen`, `MainScreen`)
+- **Functions**: camelCase (e.g., `findDownloadFolder`, `checkPermission`)
 - **Variables**: camelCase, prefer descriptive names
 - **Constants**: UPPER_SNAKE_CASE for top-level constants
 - **No abbreviations or acronyms**: Use full, descriptive names for all variables, parameters, functions, and classes. Avoid shortened forms that require the reader to guess the meaning (e.g. use `destination` not `dest`, `startingPoint` not `sp`, `displayState` not `ds`).
@@ -255,7 +292,7 @@ Unit tests should follow these criteria:
 - cover all reasonable cases, but keeps the coverage over 95%
 - Target 95%+ coverage
 - **MVI ViewModel tests**: Test by dispatching `UiIntent` values via `onIntent()` and asserting the resulting `uiState` and any emitted `uiEffect`. Never test internal ViewModel methods directly.
-- **Consolidate test setup**: When a ViewModel (or any SUT) is instantiated in multiple tests, use a single `createViewModel(...)` factory method with default parameters for varied inputs (e.g. `stops: List<Stop> = emptyList()`, `legs: List<Leg> = emptyList()`). Tests should never inline the full constructor call — extend the factory helper instead.
+- **Consolidate test setup**: When a ViewModel (or any SUT) is instantiated in multiple tests, use a single `createViewModel(...)` factory method with default parameters for varied inputs (e.g. `items: List<Item> = emptyList()`, `isLoading: Boolean = false`). Tests should never inline the full constructor call — extend the factory helper instead.
 
 
 ### Compose UI Tests
@@ -266,6 +303,308 @@ Unit tests should follow these criteria:
 - Assert UI elements are displayed using `onNodeWithText`, `onNodeWithContentDescription`, etc.
 - Assert user interactions fire the correct `UiIntent` by collecting intents in a `mutableListOf` passed to `onIntent`.
 - When a text string appears in multiple nodes (e.g. a button label and a dialog title), use `onAllNodesWithText(...)[index]` instead of `onNodeWithText`.
-- Wrap the composable in the app theme (`HeadingToVeniceTheme`) for accurate rendering.
+- Wrap the composable in the app theme for accurate rendering.
 - Cover at minimum: empty/default state, populated state, visibility toggles for dialogs, button click intents, and dismiss intents.
+- **Test naming**: Backtick-quoted function names are not supported by the Android test runner. Use camelCase with underscores as GIVEN/WHEN/THEN separators instead, e.g. `givenProductList_whenScreenIsDisplayed_thenOneCardPerProduct`.
 - **Execution**: tests run on a connected device (physical or emulator) via `./gradlew connectedDebugAndroidTest`.
+
+### ADB Interaction with Compose UIs
+
+When verifying features on-device via adb and UIAutomator, Jetpack Compose requires specific handling because Compose nodes differ from traditional Android Views.
+
+#### Workflow
+
+1. **Dump the UI hierarchy** to discover element bounds:
+   ```bash
+   adb shell uiautomator dump /sdcard/ui.xml && adb pull /sdcard/ui.xml /tmp/ui.xml
+   ```
+   Parse the XML for `text`, `content-desc`, `bounds`, `clickable`, and `focused` attributes.
+
+2. **Tap an element** by computing the centre of its `bounds="[left,top][right,bottom]"`:
+   ```bash
+   adb shell input tap $((($left+$right)/2)) $((($top+$bottom)/2))
+   ```
+
+3. **Find clickable parents**: In Compose, text nodes (`TextView`) are typically not clickable. The clickable target is an ancestor `View` node. Walk up the hierarchy to find the nearest `clickable="true"` parent and use its bounds.
+
+4. **Enter text in a Compose EditText**:
+   - Tap the `EditText` to focus it (verify `focused="true"` in a fresh dump)
+   - Use `adb shell input text "<value>"` to type
+   - Special characters: use `adb shell input keyevent <code>` instead
+
+5. **Dismiss the keyboard** before tapping other elements:
+   ```bash
+   adb shell input keyevent 4   # BACK key
+   ```
+
+6. **Re-dump after every state change**: Whenever the UI changes (keyboard appears/dismisses, dialog opens/closes, screen navigates), the element bounds shift. Always dump the hierarchy again before the next interaction. Stale bounds from a previous dump will miss.
+
+#### Common Pitfalls
+
+- **Never estimate coordinates from screenshots** — display scaling makes pixel mapping unreliable. Always use bounds from `uiautomator dump`.
+- **Keyboard shifts dialog bounds**: When the keyboard appears, dialog elements move up. Dismiss the keyboard or re-dump before tapping dialog buttons.
+- **Confirm/Cancel buttons in Compose dialogs**: The `TextView` with "Confirm"/"Cancel" text is not clickable. Find the clickable `View` parent encompassing that text area.
+
+## Detekt
+
+Static analysis via [Detekt](https://detekt.dev/) with the [Compose rules plugin](https://github.com/mrmans0n/compose-rules).
+
+**Use detekt 2.x or later, with a matching `detekt-compose-rules` build.** Earlier majors cannot run
+type resolution on a current AGP, which silently disables a whole class of rules, and the Compose rules
+line is published against 2.x only. `/sdlc_project_doctor` fails when a project is behind.
+
+### Running detekt
+
+Use the variant-specific tasks, never the plain `detekt` task:
+
+```bash
+./gradlew detektDebug    # or detektRelease
+```
+
+The variant tasks run with **type resolution** — they compile the code first and analyse it with the
+full classpath, which is what enables rules like `UnusedImport` and `UnusedPrivateFunction`. The plain
+`detekt` task runs without it and misses those issues entirely.
+
+If those tasks do not exist, type resolution is not running and neither are the rules that need it.
+Check with `./gradlew :app:tasks --all | grep detekt`.
+
+### Gradle setup
+
+Apply the plugin in the root `build.gradle.kts` (without `apply`), then apply it in the module and add
+the Compose rules plugin as a `detektPlugins` dependency:
+
+```kotlin
+// root build.gradle.kts
+plugins {
+    alias(libs.plugins.detekt) apply false
+}
+
+// app/build.gradle.kts
+plugins {
+    alias(libs.plugins.detekt)
+}
+
+dependencies {
+    detektPlugins(libs.detekt.compose.rules)
+}
+
+detekt {
+    buildUponDefaultConfig = true
+    config.setFrom(files("$rootDir/config/detekt/detekt.yml"))
+}
+```
+
+`detekt-compose-rules` pins a specific detekt version, so bump the two together rather than taking the
+newest of each independently.
+
+### Zero tolerance
+
+**Every detekt finding gets fixed.** Introducing detekt, upgrading it, or enabling a new rule means
+resolving what it reports — not recording it as accepted. No baseline file is used.
+
+**Any rule violation fails the build.** Detekt fails on any issue of `error` severity; `failOnSeverity`
+in the `detekt {}` block sets the threshold and defaults to `Error`, which is what you want — set it
+explicitly only to loosen it. `warningsAsErrors: true` is what promotes warnings to that severity, so
+both are needed.
+
+### Configuration file
+
+Place the configuration at `config/detekt/detekt.yml`. Only settings stricter than detekt's defaults are
+listed — everything else is left to the built-in defaults (enabled via `buildUponDefaultConfig = true`):
+
+```yaml
+config:
+  validation: true
+  warningsAsErrors: true
+
+naming:
+  FunctionNaming:
+    ignoreAnnotated:
+      - 'Composable'
+
+style:
+  UnusedImport:
+    active: true
+  UnusedPrivateFunction:
+    ignoreAnnotated:
+      - 'Preview'
+  MagicNumber:
+    ignorePropertyDeclaration: true
+  WildcardImport:
+    active: true
+
+Compose:
+  active: true
+```
+
+Key decisions:
+- `validation: true` — detekt validates its own configuration, and a key that does not exist in the
+  running version **fails the build** rather than being ignored. Note it does not cover custom rulesets,
+  so a `Compose:` block is accepted whether or not the ruleset actually loaded.
+- `warningsAsErrors: true` — warnings are treated as errors rather than advisory.
+- `FunctionNaming: ignoreAnnotated: ['Composable']` — Composable functions use PascalCase by convention,
+  which would otherwise violate the default `[a-z][a-zA-Z0-9]*` naming pattern.
+- `UnusedPrivateFunction: ignoreAnnotated: ['Preview']` — `@Preview` composables are private by
+  convention but only invoked by IDE tooling. Without this exclusion, type-resolution tasks flag them as
+  unused.
+- `MagicNumber: ignorePropertyDeclaration: true` — allows numeric literals in property declarations
+  (e.g. `val Purple80 = Color(0xFFD0BCFF)`) without flagging them.
+- `UnusedImport` and `WildcardImport` are inactive in detekt's defaults; explicitly enabled here.
+- `Compose: active: true` enables all rules from the `detekt-compose-rules` plugin, off by default.
+
+## Kover
+
+Code coverage via [Kover](https://kotlin.github.io/kotlinx-kover/).
+
+### Gradle setup
+
+Apply the plugin in the root `build.gradle.kts` (without `apply`), then apply it in the module and configure the `kover` block:
+
+```kotlin
+// root build.gradle.kts
+plugins {
+    alias(libs.plugins.kover) apply false
+}
+
+// app/build.gradle.kts
+plugins {
+    alias(libs.plugins.kover)
+}
+
+kover {
+    reports {
+        filters {
+            excludes {
+                classes(
+                    "*.BuildConfig",
+                    "*.ComposableSingletons*",
+                    "*_Factory*",
+                    "*_HiltModules*",
+                    "*_Impl",
+                    "*_MembersInjector",
+                    "hilt_aggregated_deps.*",
+                    "dagger.hilt.*",
+                    "*.Hilt_*",
+                    "*.di.*",
+                    "*.database.*Dao_Impl*",
+                    "*.database.AppDatabase*",
+                    "*.ui.theme.*",
+                    "*.ui.screens.*",       // composable screens — tested via Compose UI tests
+                    "*.YourApplication",    // replace with your Application class
+                    "*.MainActivity",
+                )
+                annotatedBy(
+                    "androidx.compose.ui.tooling.preview.Preview",
+                    "androidx.compose.runtime.Composable",
+                    "dagger.hilt.android.lifecycle.HiltViewModel",
+                )
+            }
+        }
+        verify {
+            rule {
+                minBound(95)
+            }
+        }
+    }
+}
+```
+
+Key decisions:
+- Generated and DI glue classes (Hilt, Room DAO implementations, `_Factory`, `_Impl`) are excluded — they are not unit-testable and skew coverage metrics.
+- `@Composable` and `@Preview` annotated code is excluded; composables are covered by separate Compose UI tests.
+- `@HiltViewModel` annotated classes are excluded from the annotation filter because their constructor is generated; the ViewModel logic itself is tested via `UiIntent`/`UiState` assertions.
+- The minimum bound is **95%**; lower it only with a documented rationale.
+- Update `*.YourApplication` and `*.MainActivity` to match your actual package and class names.
+
+## Fastlane
+
+Automated build and release via [Fastlane](https://fastlane.tools/).
+
+### Setup
+
+`Gemfile` at the project root:
+
+```ruby
+source "https://rubygems.org"
+
+gem "fastlane"
+```
+
+`fastlane/Appfile`:
+
+```ruby
+json_key_file(ENV["PLAY_STORE_JSON_KEY_FILE"] || "play-store-key.json")
+package_name("com.your.package")   # replace with your application ID
+```
+
+- The Play Store JSON key path is read from the environment variable `PLAY_STORE_JSON_KEY_FILE`, falling back to `play-store-key.json` in the project root. Never commit the key file; add it to `.gitignore`.
+
+### Fastfile
+
+```ruby
+default_platform(:android)
+
+platform :android do
+  desc "Run unit tests, detekt, and lint"
+  lane :test do
+    gradle(
+      task: "check",
+      flags: "--console=plain --stacktrace"
+    )
+  end
+
+  desc "Build debug APK"
+  lane :build do
+    gradle(
+      task: "assembleDebug",
+      flags: "--console=plain --stacktrace"
+    )
+  end
+
+  desc "Build release AAB and upload to Play Store internal track"
+  lane :beta do
+    gradle(
+      task: "bundleRelease",
+      flags: "--console=plain --stacktrace"
+    )
+    upload_to_play_store(
+      track: "internal",
+      aab: "app/build/outputs/bundle/release/app-release.aab",
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+      skip_upload_apk: true
+    )
+  end
+
+  desc "Build release AAB and upload to Play Store production track"
+  lane :deploy do
+    gradle(
+      task: "bundleRelease",
+      flags: "--console=plain --stacktrace"
+    )
+    upload_to_play_store(
+      track: "production",
+      aab: "app/build/outputs/bundle/release/app-release.aab",
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+      skip_upload_apk: true
+    )
+  end
+end
+```
+
+### Lanes
+
+| Lane | Command | Purpose |
+|------|---------|---------|
+| `test` | `bundle exec fastlane test` | Runs `./gradlew check` (unit tests + detekt + lint) |
+| `build` | `bundle exec fastlane build` | Builds a debug APK |
+| `beta` | `bundle exec fastlane beta` | Builds release AAB and uploads to Play Store **internal** track |
+| `deploy` | `bundle exec fastlane deploy` | Builds release AAB and uploads to Play Store **production** track |
+
+Key decisions:
+- Metadata, images, and screenshots are skipped on upload — manage store listing assets separately.
+- `--console=plain` keeps Gradle output readable in CI logs; `--stacktrace` aids debugging.
+- The `beta` / `deploy` lanes upload only an AAB (`skip_upload_apk: true`), which is the required format for Play Store submissions.

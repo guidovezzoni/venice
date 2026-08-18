@@ -89,6 +89,8 @@ Follow these steps:
    - User story: {USER_STORY_FILE_PATH}
    - Android guidelines: docs/guidelines/guidelines-android.md
    - Process guidelines: docs/guidelines/guidelines-process.md
+   - Analytics guidelines: docs/guidelines/guidelines-analytics.md
+   - Tracking plan (event dictionary): docs/analytics/tracking-plan.md
 
    ## Refinement Requirements
 
@@ -102,8 +104,14 @@ Follow these steps:
    7. Security potential issues and mitigations
    8. Performance potential issues and mitigations
    9. GDPR and sensitive information potential issues and mitigations
-   10. Other non-functional requirement concerns and mitigations
-   11. The steps required for the task to be considered complete
+   10. An `## Analytics` section defining the events this feature must emit — their names,
+       parameters, and the product question each answers — following the naming and privacy
+       rules in the analytics guidelines and the existing entries in the tracking plan.
+       Analytics is a product requirement of the feature that generates the data, not a
+       follow-up task. If the feature genuinely warrants no new event, say so explicitly and
+       give the reason. A story with no `## Analytics` section is not refined.
+   11. Other non-functional requirement concerns and mitigations
+   12. The steps required for the task to be considered complete
 
    ## Critical Constraint
    Stay at the "what" level, not the "how." Focus on requirements, acceptance criteria,

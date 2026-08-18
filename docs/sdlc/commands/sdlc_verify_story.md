@@ -429,7 +429,7 @@ Follow these steps:
 
    3. Launch the app:
       ```
-      adb shell am start -n com.guidovezzoni.venice/.ui.MainActivity
+      adb shell am start -n <applicationId>/.ui.MainActivity
       ```
 
    4. Exercise the feature under test via adb:

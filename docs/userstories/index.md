@@ -154,3 +154,34 @@ Cloud storage via Supabase, user authentication, and trip sharing between users.
 | 8.3.1 | As a developer, I want to design the trip sharing model | [8.3.1-spike-sharing-model](8.3.1-spike-sharing-model.md) |
 | 8.3.2 | As a user, I want to share a trip with another person | [8.3.2-share-trip-with-user](8.3.2-share-trip-with-user.md) |
 | 8.3.3 | As a user, I want to see trips that others have shared with me | [8.3.3-view-shared-trips](8.3.3-view-shared-trips.md) |
+
+---
+
+## Epic 9: Analytics
+
+Understanding how the app is used: a consistent event taxonomy, real analytics and crash-reporting
+destinations, and user control over collection.
+
+Conventions live in [guidelines-analytics.md](../guidelines/guidelines-analytics.md); the event
+dictionary is the [tracking plan](../analytics/tracking-plan.md).
+
+### Feature 9.1: Analytics Foundation
+
+| ID | User Story | Details |
+|----|------------|---------|
+| 9.1.1 | As a developer, I want the analytics abstraction clearly named, documented, and safe by construction | [9.1.1-analytics-abstraction-upgrade](9.1.1-analytics-abstraction-upgrade.md) |
+| 9.1.2 | As a product owner, I want a consistent, analysable event taxonomy covering every user action | [9.1.2-analytics-taxonomy-and-coverage](9.1.2-analytics-taxonomy-and-coverage.md) |
+| 9.1.3 | As a product owner, I want screen view events to reflect what the user actually saw | [9.1.3-screen-view-tracking](9.1.3-screen-view-tracking.md) |
+
+### Feature 9.2: Analytics Destinations
+
+| ID | User Story | Details |
+|----|------------|---------|
+| 9.2.1 | As a product owner, I want events delivered to Firebase Analytics | [9.2.1-firebase-analytics-provider](9.2.1-firebase-analytics-provider.md) |
+| 9.2.2 | As a developer, I want handled failures and crashes reported to Crashlytics | [9.2.2-crashlytics-provider](9.2.2-crashlytics-provider.md) |
+
+### Feature 9.3: Analytics Privacy
+
+| ID | User Story | Details |
+|----|------------|---------|
+| 9.3.1 | As a user, I want to decide whether the app collects analytics about my usage | [9.3.1-analytics-consent](9.3.1-analytics-consent.md) |

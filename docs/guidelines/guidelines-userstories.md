@@ -27,9 +27,9 @@ A user story progresses through three states, reflected in its filename:
 
 | State       | Filename pattern        | Example                        |
 |-------------|-------------------------|--------------------------------|
-| New         | `{id}-{slug}.md`        | `1.2.5-edit-stop.md`          |
-| In Progress | `{id}-{slug}-WIP.md`    | `1.2.5-edit-stop-WIP.md`      |
-| Done        | `{id}-{slug}-DONE.md`   | `1.2.5-edit-stop-DONE.md`     |
+| New         | `{id}-{slug}.md`        | `1.2.5-edit-item.md`          |
+| In Progress | `{id}-{slug}-WIP.md`    | `1.2.5-edit-item-WIP.md`      |
+| Done        | `{id}-{slug}-DONE.md`   | `1.2.5-edit-item-DONE.md`     |
 
 ### Next User Story
 
@@ -42,7 +42,7 @@ Rename the file by appending `-WIP` before the `.md` extension.
 **Precondition:** The file must be in the **New** state. It cannot already be In Progress (`-WIP`) or Done (`-DONE`).
 
 ```
-1.2.5-edit-stop.md  -->  1.2.5-edit-stop-WIP.md
+1.2.5-edit-item.md  -->  1.2.5-edit-item-WIP.md
 ```
 
 ### Closing a User Story
@@ -52,7 +52,7 @@ Rename the file by replacing the `-WIP` suffix with `-DONE` before the `.md` ext
 **Precondition:** The file must be in the **In Progress** state (`-WIP`). It cannot be New or already Done (`-DONE`).
 
 ```
-1.2.5-edit-stop-WIP.md  -->  1.2.5-edit-stop-DONE.md
+1.2.5-edit-item-WIP.md  -->  1.2.5-edit-item-DONE.md
 ```
 
 ### Renaming

@@ -42,7 +42,7 @@ When verification requires running the app on a physical device or emulator:
 1. **Check connectivity first.** Run `adb devices` to see if a device is attached.
 2. **If a device is connected**, attempt automated verification autonomously:
    - Run `./gradlew connectedDebugAndroidTest` to execute instrumented Compose UI tests.
-   - Run `./gradlew installDebug` to install the app, then launch it with `adb shell am start -n com.guidovezzoni.venice/.ui.MainActivity`.
+   - Run `./gradlew installDebug` to install the app, then launch it with `adb shell am start -n <applicationId>/.ui.MainActivity`.
    - Exercise the feature under test using this **UIAutomator-first workflow**:
      1. **Discover elements** — run `adb shell uiautomator dump /sdcard/ui.xml && adb pull /sdcard/ui.xml /tmp/ui.xml` and parse the XML for element `text`, `content-desc`, `bounds`, and `clickable` attributes. Never estimate coordinates from screenshots — display scaling makes them unreliable.
      2. **Tap** — extract the `bounds="[left,top][right,bottom]"` of the target element, compute the centre `((left+right)/2, (top+bottom)/2)`, and run `adb shell input tap <x> <y>`.
