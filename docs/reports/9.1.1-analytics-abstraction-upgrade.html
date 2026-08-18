@@ -147,6 +147,76 @@
 
   </section>
 
+  <section class="report-section" data-source="propose_change" data-timestamp="2026-08-18T00:00:00Z">
+    <header>
+      <h2>Change Proposed</h2>
+      <time datetime="2026-08-18">18 Aug 2026</time>
+    </header>
+    <p class="section-source">Source: propose_change</p>
+
+    <h3>Exploration Findings</h3>
+    <ul>
+      <li><strong>5 analytics source files</strong> across <code>domain/analytics/</code> (3) and <code>data/analytics/</code> (2), wired by <code>di/AnalyticsModule.kt</code></li>
+      <li><strong>19 call sites</strong> across two ViewModels (<code>TripListViewModel</code>: 4, <code>TripDetailViewModel</code>: 15)</li>
+      <li><strong>3 existing test files</strong> for analytics classes, plus analytics assertions in both ViewModel test files</li>
+      <li><strong><code>core/</code> package does not exist</strong> — created for the first time by this story</li>
+      <li><strong><code>app/src/debug/java/</code> does not exist</strong> — only <code>app/src/debug/res/</code></li>
+      <li><strong>No Hilt instrumented-test infrastructure</strong> — <code>HiltTestRunner</code> not wired to <code>HiltTestApplication</code>, no <code>hilt-android-testing</code> dependency</li>
+    </ul>
+
+    <h3>Questions Asked and Answers</h3>
+    <table>
+      <tr><th>Question</th><th>Answer</th></tr>
+      <tr>
+        <td>Should AC 11 (<code>@TestInstallIn</code> recording fake) include standing up full Hilt instrumented-test infrastructure?</td>
+        <td><strong>Deferred to new story 9.1.4.</strong> The infrastructure effort is out of scope for a structural rename story.</td>
+      </tr>
+    </table>
+    <p>Additional design decisions resolved without user input:</p>
+    <ul>
+      <li><code>AnalyticsOperation</code> values: only the 7 existing constants promoted; new values (<code>search_place</code>, <code>resolve_place</code>, <code>undo_mark_departed</code>) are 9.1.2 scope</li>
+      <li><code>AnalyticsOperation</code> convention: <code>value: String</code> in <code>snake_case</code> applied immediately per analytics guidelines</li>
+      <li>Kover on interfaces/empty sealed classes: naturally exempt (no executable lines)</li>
+    </ul>
+
+    <h3>Artifacts Created</h3>
+    <table>
+      <tr><th>Artifact</th><th>Path</th></tr>
+      <tr><td>Proposal</td><td><code>openspec/changes/upgrade-analytics-abstraction/proposal.md</code></td></tr>
+      <tr><td>Design</td><td><code>openspec/changes/upgrade-analytics-abstraction/design.md</code></td></tr>
+      <tr><td>Spec</td><td><code>openspec/changes/upgrade-analytics-abstraction/specs/analytics-abstraction/spec.md</code></td></tr>
+      <tr><td>Tasks</td><td><code>openspec/changes/upgrade-analytics-abstraction/tasks.md</code></td></tr>
+    </table>
+
+    <h3>Task Structure</h3>
+    <p><strong>45 tasks</strong> across 15 sections:</p>
+    <ul>
+      <li><strong>8 prerequisite tasks</strong> — file moves via <code>git mv</code>, contract/data-type creation (non-testable)</li>
+      <li><strong>10 BDD pairs (20 tasks)</strong> — <code>CompositeAnalyticsClient</code> fan-out (events, user properties, exceptions, zero-provider), <code>AnalyticsLogFormatter</code> (3 message types), <code>DebugAnalyticsProvider</code> (3 logging methods)</li>
+      <li><strong>2 DI wiring tasks</strong> — <code>AnalyticsModule</code> update with <code>@Multibinds</code>, new <code>DebugAnalyticsModule</code> in debug source set</li>
+      <li><strong>4 call-site tasks</strong> — both ViewModels and their test files</li>
+      <li><strong>4 cleanup/doc tasks</strong> — delete empty directories, verify <code>core/</code> purity, grep for leftovers</li>
+      <li><strong>7 verification tasks</strong> — build both variants, unit tests, detekt, kover, on-device debug/release Logcat, <code>git log --follow</code></li>
+    </ul>
+
+    <h3>Scope Changes</h3>
+    <ul>
+      <li><span class="badge badge-info">Deferred</span> AC 11 (test double / <code>@TestInstallIn</code>) moved to new story <strong>9.1.4</strong></li>
+      <li><span class="badge badge-info">Created</span> Story 9.1.4: Hilt Instrumented Test Infrastructure (backlog)</li>
+    </ul>
+
+    <h3>Design Decisions</h3>
+    <ol>
+      <li>Package destination: <code>core/analytics/</code> with contracts and implementations together (not split)</li>
+      <li>Shared <code>AnalyticsTracking</code> supertype to prevent drift between client and provider surfaces</li>
+      <li><code>shouldTrack</code> removed entirely — filtering folds into each provider's own <code>logEvent</code></li>
+      <li><code>AnalyticsOperation</code> promoted to a typed enum with only the 7 existing values</li>
+      <li>Debug-only registration via source-set DI binding, not a runtime <code>BuildConfig</code> flag</li>
+      <li>Log formatting extracted to <code>AnalyticsLogFormatter.kt</code> for direct testability</li>
+    </ol>
+
+  </section>
+
   </main>
 
 </body>
