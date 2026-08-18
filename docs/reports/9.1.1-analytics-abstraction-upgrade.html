@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Report: 9.1.1 — Upgrade the Analytics Abstraction</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.6;
+      color: #1a1a1a;
+      background: #fafafa;
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+
+    .report-header {
+      border-bottom: 3px solid #2563eb;
+      padding-bottom: 1rem;
+      margin-bottom: 2rem;
+    }
+    .report-header h1 { font-size: 1.75rem; color: #1e293b; }
+    .report-meta {
+      display: flex; gap: 2rem; flex-wrap: wrap;
+      margin-top: 0.5rem; font-size: 0.875rem; color: #64748b;
+    }
+    .report-meta span { display: inline-flex; align-items: center; gap: 0.25rem; }
+
+    .report-section {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .report-section header {
+      display: flex; justify-content: space-between; align-items: baseline;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 0.75rem; margin-bottom: 1rem;
+    }
+    .report-section header h2 { font-size: 1.25rem; color: #1e293b; }
+    .report-section header time { font-size: 0.8rem; color: #94a3b8; white-space: nowrap; }
+    .section-source { font-size: 0.75rem; color: #94a3b8; font-style: italic; margin-bottom: 0.75rem; }
+
+    h3 { font-size: 1.05rem; color: #334155; margin: 1rem 0 0.5rem; }
+    p { margin-bottom: 0.75rem; }
+    ul, ol { margin: 0.5rem 0 0.75rem 1.5rem; }
+    li { margin-bottom: 0.25rem; }
+    code {
+      background: #f1f5f9; padding: 0.15rem 0.35rem; border-radius: 3px;
+      font-size: 0.875em;
+      font-family: "SF Mono", "Fira Code", Menlo, Consolas, monospace;
+    }
+
+    table { width: 100%; border-collapse: collapse; margin: 0.75rem 0; font-size: 0.9rem; }
+    th, td { text-align: left; padding: 0.5rem 0.75rem; border: 1px solid #e2e8f0; }
+    th { background: #f8fafc; font-weight: 600; color: #475569; }
+
+    .badge {
+      display: inline-block; padding: 0.15rem 0.5rem;
+      border-radius: 4px; font-size: 0.8rem; font-weight: 600;
+    }
+    .badge-pass { background: #dcfce7; color: #166534; }
+    .badge-fail { background: #fee2e2; color: #991b1b; }
+    .badge-warn { background: #fef9c3; color: #854d0e; }
+    .badge-info { background: #dbeafe; color: #1e40af; }
+
+    .outcome { margin-top: 1rem; padding: 0.75rem 1rem; border-radius: 6px; font-weight: 600; }
+    .outcome-passed { background: #dcfce7; color: #166534; border-left: 4px solid #22c55e; }
+    .outcome-failed { background: #fee2e2; color: #991b1b; border-left: 4px solid #ef4444; }
+  </style>
+</head>
+<body>
+
+  <div class="report-header">
+    <h1>9.1.1 — Upgrade the Analytics Abstraction</h1>
+    <div class="report-meta">
+      <span><strong>Story:</strong> 9.1.1</span>
+      <span><strong>Branch:</strong> feature/9.1.1-analytics-abstraction-upgrade</span>
+      <span><strong>Created:</strong> 2026-08-18</span>
+    </div>
+  </div>
+
+  <main id="report-sections">
+
+  <section class="report-section" data-source="open_user_story" data-timestamp="2026-08-18T00:00:00Z">
+    <header>
+      <h2>Story Refined</h2>
+      <time datetime="2026-08-18">18 Aug 2026</time>
+    </header>
+    <p class="section-source">Source: open_user_story</p>
+
+    <h3>Summary</h3>
+    <p>Story <strong>9.1.1: Upgrade the Analytics Abstraction</strong> refines the structural requirements for the analytics layer ahead of the taxonomy implementation in stories 9.1.2 and 9.1.3. This is a foundational change moving all analytics code from scattered locations into a unified <code>core/analytics/</code> package and establishing the contracts that will support both event taxonomy and user properties.</p>
+
+    <h3>Branch</h3>
+    <p><code>feature/9.1.1-analytics-abstraction-upgrade</code></p>
+
+    <h3>Scope: What Moves and What Changes</h3>
+    <ul>
+      <li><strong>Package relocation:</strong> all analytics code moves from <code>domain/analytics/</code> and <code>data/analytics/</code> to <code>core/analytics/</code>, following the cross-cutting-concerns charter in the Architecture guidelines</li>
+      <li><strong>Shared tracking surface:</strong> new <code>AnalyticsTracking</code> interface declares <code>logEvent()</code>, <code>setUserProperty()</code>, and <code>trackException()</code> once, eliminating duplication across client and providers</li>
+      <li><strong>Event and property taxonomy:</strong> <code>AnalyticsEvent</code> and <code>AnalyticsUserProperty</code> sealed classes hold the exhaustive list of trackable events and properties (populated in 9.1.2)</li>
+      <li><strong>Exception channel:</strong> <code>trackException(throwable, operation)</code> separates diagnostic data (full stack trace to crash reporting) from product analytics (bounded enums only), preventing free text and identifiers leaking into the analytics pipeline</li>
+      <li><strong>User property API:</strong> <code>setUserProperty(property)</code> is added to the tracking surface; its implementation is unused until story 9.1.2</li>
+      <li><strong>Debug-only Logcat provider:</strong> <code>DebugAnalyticsProvider</code> binding moves to the <code>debug</code> source set via `@TestInstallIn`, preventing the unencrypted event stream from shipping in release builds</li>
+      <li><strong>Naming alignment:</strong> method and class names updated to match Firebase SDK conventions (e.g. `logEvent` not `trackEvent`, `AnalyticsProvider` not `AnalyticsBackend`)</li>
+      <li><strong>KDoc documentation:</strong> every public type receives full KDoc following the fakestore reference implementation style</li>
+    </ul>
+
+    <h3>File Inventory</h3>
+    <p><strong>Files to move (10 total):</strong></p>
+    <ul>
+      <li>4 files from `domain/analytics/` to `core/analytics/` (renamed/refactored)</li>
+      <li>1 file from `data/analytics/` to `core/analytics/` (refactored)</li>
+      <li>3 test files from `src/test/` locations to consolidated `core/analytics/` test directory</li>
+      <li>2 DebugAnalyticsProvider files: class stays in `main`, DI binding moves to `debug` source set</li>
+    </ul>
+    <p><strong>Files to create (8 total):</strong></p>
+    <ul>
+      <li>5 new contract/model files in `core/analytics/` (AnalyticsTracking, event/property sealing, enums)</li>
+      <li>1 CompositeAnalyticsClient implementation</li>
+      <li>2 new test double and configuration files</li>
+    </ul>
+
+    <h3>Security & Privacy Concerns Identified</h3>
+    <ul>
+      <li><span class="badge badge-warn">High:</span> Debug Logcat provider accessible over ADB in release builds — **fixed by this story** by moving binding to `debug` source set</li>
+      <li><span class="badge badge-warn">Medium:</span> Current `error.message` exposure in operation_failed — classified to bounded enum in 9.1.2</li>
+      <li><span class="badge badge-info">GDPR:</span> Current analytics carries no identifiers; tracking plan enforces privacy floor</li>
+    </ul>
+
+    <h3>Definition of Done Checklist</h3>
+    <ul>
+      <li>All analytics code relocated to <code>core/analytics/</code> with no domain or data imports</li>
+      <li><code>AnalyticsTracking</code> supertype defined and implemented by both client and all providers</li>
+      <li><code>setUserProperty()</code> and <code>trackException()</code> APIs added to tracking surface</li>
+      <li>Logcat provider binding in `debug` source set only; release builds have no providers until 9.1.2</li>
+      <li>All public types documented with KDoc</li>
+      <li>100% test coverage on analytics layer; no uncovered lines</li>
+      <li>Detekt passes with zero violations</li>
+      <li>Security review passes; no identifiers or free text in any provider</li>
+    </ul>
+
+  </section>
+
+  </main>
+
+</body>
+</html>

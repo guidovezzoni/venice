@@ -169,7 +169,7 @@ dictionary is the [tracking plan](../analytics/tracking-plan.md).
 
 | ID | User Story | Details |
 |----|------------|---------|
-| 9.1.1 | As a developer, I want the analytics abstraction clearly named, documented, and safe by construction | [9.1.1-analytics-abstraction-upgrade](9.1.1-analytics-abstraction-upgrade.md) |
+| 9.1.1 | As a developer, I want the analytics abstraction clearly named, documented, and safe by construction | [9.1.1-analytics-abstraction-upgrade](9.1.1-analytics-abstraction-upgrade-WIP.md) |
 | 9.1.2 | As a product owner, I want a consistent, analysable event taxonomy covering every user action | [9.1.2-analytics-taxonomy-and-coverage](9.1.2-analytics-taxonomy-and-coverage.md) |
 | 9.1.3 | As a product owner, I want screen view events to reflect what the user actually saw | [9.1.3-screen-view-tracking](9.1.3-screen-view-tracking.md) |
 
