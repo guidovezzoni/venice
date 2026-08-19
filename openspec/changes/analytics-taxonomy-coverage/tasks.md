@@ -142,11 +142,9 @@ indirectly by the `AnalyticsEvent` construction tests in section 6.
 ## 14. TripListViewModel — Trip Creation Failure Dual-Channel (BDD)
 
 - [x] 14.1 Write test: GIVEN `createTripUseCase` fails with an `IOException` WHEN the failure branch
-  runs THEN `OperationFailed(operation = CREATE_TRIP, errorType = NETWORK)` is logged and
-  `trackException(throwable, CREATE_TRIP)` is called, in `TripListViewModelTest.kt`
-- [x] 14.2 Implement: update `createTrip()`'s failure branch to classify the error via
-  `AnalyticsErrorClassifier`, log `OperationFailed(CREATE_TRIP, errorType)`, and call
-  `trackException(error, AnalyticsOperation.CREATE_TRIP)`
+  runs THEN `trackFailure(CREATE_TRIP, NETWORK, throwable)` is called, in `TripListViewModelTest.kt`
+- [x] 14.2 Implement: update `createTrip()`'s failure branch to call
+  `analyticsClient.trackFailure(AnalyticsOperation.CREATE_TRIP, classifyAnalyticsError(error), error)`
 
 ## 15. TripListViewModel — Trip Opened Removal (BDD)
 
@@ -180,10 +178,8 @@ indirectly by the `AnalyticsEvent` construction tests in section 6.
 ## 18. TripDetailViewModel — Stop Added Failure (BDD)
 
 - [x] 18.1 Write test: GIVEN `setStopUseCase` fails with a persistence error WHEN the failure branch
-  runs THEN `OperationFailed(operation = SET_STOP, errorType = PERSISTENCE)` is logged and
-  `trackException(throwable, SET_STOP)` is called, in `TripDetailViewModelTest.kt`
-- [x] 18.2 Implement: update `setStop()`'s failure branch to classify via `AnalyticsErrorClassifier`
-  and call both `logEvent(OperationFailed(...))` and `trackException(...)`
+  runs THEN `trackFailure(SET_STOP, PERSISTENCE, throwable)` is called, in `TripDetailViewModelTest.kt`
+- [x] 18.2 Implement: update `setStop()`'s failure branch to call `analyticsClient.trackFailure(...)`
 
 ## 19. TripDetailViewModel — Stop Edited (BDD)
 
@@ -195,9 +191,8 @@ indirectly by the `AnalyticsEvent` construction tests in section 6.
 ## 20. TripDetailViewModel — Stop Edited Failure (BDD)
 
 - [x] 20.1 Write test: GIVEN `editStopUseCase` fails WHEN the failure branch runs THEN
-  `OperationFailed(operation = EDIT_STOP, errorType)` is logged and `trackException(throwable,
-  EDIT_STOP)` is called, in `TripDetailViewModelTest.kt`
-- [x] 20.2 Implement: update `editStop()`'s failure branch for dual-channel emission
+  `trackFailure(EDIT_STOP, errorType, throwable)` is called, in `TripDetailViewModelTest.kt`
+- [x] 20.2 Implement: update `editStop()`'s failure branch to call `analyticsClient.trackFailure(...)`
 
 ## 21. TripDetailViewModel — Stop Removed (BDD)
 
@@ -210,9 +205,8 @@ indirectly by the `AnalyticsEvent` construction tests in section 6.
 ## 22. TripDetailViewModel — Stop Removed Failure (BDD)
 
 - [x] 22.1 Write test: GIVEN `removeStopUseCase` fails WHEN the failure branch runs THEN
-  `OperationFailed(operation = REMOVE_STOP, errorType)` is logged and `trackException(throwable,
-  REMOVE_STOP)` is called, in `TripDetailViewModelTest.kt`
-- [x] 22.2 Implement: update `removeStop()`'s failure branch for dual-channel emission
+  `trackFailure(REMOVE_STOP, errorType, throwable)` is called, in `TripDetailViewModelTest.kt`
+- [x] 22.2 Implement: update `removeStop()`'s failure branch to call `analyticsClient.trackFailure(...)`
 
 ## 23. TripDetailViewModel — Stop Reordered (BDD)
 
@@ -225,9 +219,8 @@ indirectly by the `AnalyticsEvent` construction tests in section 6.
 ## 24. TripDetailViewModel — Stop Reordered Failure (BDD)
 
 - [x] 24.1 Write test: GIVEN `moveStopUseCase` fails WHEN the failure branch runs THEN
-  `OperationFailed(operation = MOVE_STOP, errorType)` is logged and `trackException(throwable,
-  MOVE_STOP)` is called, in `TripDetailViewModelTest.kt`
-- [x] 24.2 Implement: update `moveStop()`'s failure branch for dual-channel emission
+  `trackFailure(MOVE_STOP, errorType, throwable)` is called, in `TripDetailViewModelTest.kt`
+- [x] 24.2 Implement: update `moveStop()`'s failure branch to call `analyticsClient.trackFailure(...)`
 
 ## 25. TripDetailViewModel — Stop Departed (BDD)
 
@@ -241,10 +234,9 @@ indirectly by the `AnalyticsEvent` construction tests in section 6.
 ## 26. TripDetailViewModel — Stop Departed Failure (BDD)
 
 - [x] 26.1 Write test: GIVEN `markStopDepartedUseCase` fails WHEN the failure branch runs THEN
-  `OperationFailed(operation = MARK_DEPARTED, errorType)` is logged and `trackException(throwable,
-  MARK_DEPARTED)` is called, in `TripDetailViewModelTest.kt`
-- [x] 26.2 Implement: update `markStopDeparted()`'s failure branch for dual-channel emission (already
-  logs `OperationFailed`; add the missing `trackException` call)
+  `trackFailure(MARK_DEPARTED, errorType, throwable)` is called, in `TripDetailViewModelTest.kt`
+- [x] 26.2 Implement: update `markStopDeparted()`'s failure branch to call
+  `analyticsClient.trackFailure(...)`
 
 ## 27. TripDetailViewModel — Stop Departure Undone (BDD)
 
@@ -257,11 +249,10 @@ indirectly by the `AnalyticsEvent` construction tests in section 6.
 ## 28. TripDetailViewModel — Stop Departure Undone Failure (BDD)
 
 - [x] 28.1 Write test: GIVEN `undoMarkStopDepartedUseCase` fails WHEN the failure branch runs THEN
-  `OperationFailed(operation = UNDO_MARK_DEPARTED, errorType)` is logged and
-  `trackException(throwable, UNDO_MARK_DEPARTED)` is called — this failure path currently tracks
-  nothing, in `TripDetailViewModelTest.kt`
-- [x] 28.2 Implement: update `undoMarkStopDeparted()`'s failure branch (currently absent) for
-  dual-channel emission using `AnalyticsOperation.UNDO_MARK_DEPARTED`
+  `trackFailure(UNDO_MARK_DEPARTED, errorType, throwable)` is called — this failure path currently
+  tracks nothing, in `TripDetailViewModelTest.kt`
+- [x] 28.2 Implement: update `undoMarkStopDeparted()`'s failure branch to call
+  `analyticsClient.trackFailure(AnalyticsOperation.UNDO_MARK_DEPARTED, ...)`
 
 ## 29. TripDetailViewModel — Place Search Performed (BDD)
 
@@ -274,10 +265,10 @@ indirectly by the `AnalyticsEvent` construction tests in section 6.
 ## 30. TripDetailViewModel — Place Search Failure (BDD)
 
 - [x] 30.1 Write test: GIVEN `searchPlacesUseCase` fails WHEN the search failure branch runs THEN
-  `OperationFailed(operation = SEARCH_PLACE, errorType)` is logged and `trackException(throwable,
-  SEARCH_PLACE)` is called — this path currently tracks nothing, in `TripDetailViewModelTest.kt`
-- [x] 30.2 Implement: update the `OnSearchQueryChanged` failure branch (line ~287) for dual-channel
-  emission using the new `AnalyticsOperation.SEARCH_PLACE`
+  `trackFailure(SEARCH_PLACE, errorType, throwable)` is called — this path currently tracks nothing,
+  in `TripDetailViewModelTest.kt`
+- [x] 30.2 Implement: update the `OnSearchQueryChanged` failure branch to call
+  `analyticsClient.trackFailure(AnalyticsOperation.SEARCH_PLACE, ...)`
 
 ## 31. TripDetailViewModel — Place Suggestion Selected (BDD)
 
@@ -291,11 +282,10 @@ indirectly by the `AnalyticsEvent` construction tests in section 6.
 ## 32. TripDetailViewModel — Place Detail Resolution Failure (BDD)
 
 - [x] 32.1 Write test: GIVEN `getPlaceDetailUseCase` fails WHEN the resolution failure branch runs
-  THEN `OperationFailed(operation = RESOLVE_PLACE, errorType)` is logged and
-  `trackException(throwable, RESOLVE_PLACE)` is called — this path currently tracks nothing, in
-  `TripDetailViewModelTest.kt`
-- [x] 32.2 Implement: update the suggestion-resolution failure branch (line ~323) for dual-channel
-  emission using the new `AnalyticsOperation.RESOLVE_PLACE`
+  THEN `trackFailure(RESOLVE_PLACE, errorType, throwable)` is called — this path currently tracks
+  nothing, in `TripDetailViewModelTest.kt`
+- [x] 32.2 Implement: update the suggestion-resolution failure branch to call
+  `analyticsClient.trackFailure(AnalyticsOperation.RESOLVE_PLACE, ...)`
 
 ## 33. TripDetailViewModel — Route Calculated (BDD)
 
@@ -311,10 +301,9 @@ indirectly by the `AnalyticsEvent` construction tests in section 6.
 ## 34. TripDetailViewModel — Route Calculation Failure (BDD)
 
 - [x] 34.1 Write test: GIVEN `calculateRouteUseCase` fails WHEN the failure branch runs THEN
-  `OperationFailed(operation = CALCULATE_ROUTE, errorType)` is logged and `trackException(throwable,
-  CALCULATE_ROUTE)` is called, in `TripDetailViewModelTest.kt`
-- [x] 34.2 Implement: update `calculateRoute()`'s failure branch for dual-channel emission (already
-  logs `OperationFailed`; add the missing `trackException` call)
+  `trackFailure(CALCULATE_ROUTE, errorType, throwable)` is called, in `TripDetailViewModelTest.kt`
+- [x] 34.2 Implement: update `calculateRoute()`'s failure branch to call
+  `analyticsClient.trackFailure(...)`
 
 ## 35. TripDetailViewModel — Navigation Launched (BDD)
 

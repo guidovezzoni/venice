@@ -300,14 +300,11 @@ class TripDetailViewModel @Inject constructor(
                                 )
                             }
                         }.onFailure { error ->
-                            val errorType = classifyAnalyticsError(error)
-                            analyticsClient.logEvent(
-                                AnalyticsEvent.OperationFailed(
-                                    operation = AnalyticsOperation.SEARCH_PLACE,
-                                    errorType = errorType,
-                                ),
+                            analyticsClient.trackFailure(
+                                AnalyticsOperation.SEARCH_PLACE,
+                                classifyAnalyticsError(error),
+                                error,
                             )
-                            analyticsClient.trackException(error, AnalyticsOperation.SEARCH_PLACE)
                             _uiState.update {
                                 it.copy(
                                     placeSearchState = it.placeSearchState.copy(
@@ -348,14 +345,11 @@ class TripDetailViewModel @Inject constructor(
                             )
                         }
                     }.onFailure { error ->
-                        val errorType = classifyAnalyticsError(error)
-                        analyticsClient.logEvent(
-                            AnalyticsEvent.OperationFailed(
-                                operation = AnalyticsOperation.RESOLVE_PLACE,
-                                errorType = errorType,
-                            ),
+                        analyticsClient.trackFailure(
+                            AnalyticsOperation.RESOLVE_PLACE,
+                            classifyAnalyticsError(error),
+                            error,
                         )
-                        analyticsClient.trackException(error, AnalyticsOperation.RESOLVE_PLACE)
                         _uiState.update {
                             it.copy(
                                 placeSearchState = it.placeSearchState.copy(
@@ -383,14 +377,7 @@ class TripDetailViewModel @Inject constructor(
                     AnalyticsEvent.StopDeparted(stopPosition = stop.order, stopCount = currentStopCount()),
                 )
             }.onFailure { error ->
-                val errorType = classifyAnalyticsError(error)
-                analyticsClient.logEvent(
-                    AnalyticsEvent.OperationFailed(
-                        operation = AnalyticsOperation.MARK_DEPARTED,
-                        errorType = errorType,
-                    ),
-                )
-                analyticsClient.trackException(error, AnalyticsOperation.MARK_DEPARTED)
+                analyticsClient.trackFailure(AnalyticsOperation.MARK_DEPARTED, classifyAnalyticsError(error), error)
                 _uiEffect.emit(TripDetailUiEffect.ShowError(error.message ?: UNKNOWN_ERROR))
             }
             _uiState.update { it.copy(isLoading = false) }
@@ -404,14 +391,11 @@ class TripDetailViewModel @Inject constructor(
             result.onSuccess { stop ->
                 analyticsClient.logEvent(AnalyticsEvent.StopDepartureUndone(stopPosition = stop.order))
             }.onFailure { error ->
-                val errorType = classifyAnalyticsError(error)
-                analyticsClient.logEvent(
-                    AnalyticsEvent.OperationFailed(
-                        operation = AnalyticsOperation.UNDO_MARK_DEPARTED,
-                        errorType = errorType,
-                    ),
+                analyticsClient.trackFailure(
+                    AnalyticsOperation.UNDO_MARK_DEPARTED,
+                    classifyAnalyticsError(error),
+                    error,
                 )
-                analyticsClient.trackException(error, AnalyticsOperation.UNDO_MARK_DEPARTED)
                 _uiEffect.emit(TripDetailUiEffect.ShowError(error.message ?: UNKNOWN_ERROR))
             }
             _uiState.update { it.copy(isLoading = false) }
@@ -428,14 +412,7 @@ class TripDetailViewModel @Inject constructor(
                     AnalyticsEvent.StopReordered(direction = direction, stopCount = currentStopCount()),
                 )
             }.onFailure { error ->
-                val errorType = classifyAnalyticsError(error)
-                analyticsClient.logEvent(
-                    AnalyticsEvent.OperationFailed(
-                        operation = AnalyticsOperation.MOVE_STOP,
-                        errorType = errorType,
-                    ),
-                )
-                analyticsClient.trackException(error, AnalyticsOperation.MOVE_STOP)
+                analyticsClient.trackFailure(AnalyticsOperation.MOVE_STOP, classifyAnalyticsError(error), error)
                 _uiEffect.emit(TripDetailUiEffect.ShowError(error.message ?: UNKNOWN_ERROR))
             }
             _uiState.update { it.copy(isLoading = false) }
@@ -455,14 +432,7 @@ class TripDetailViewModel @Inject constructor(
                     _uiState.update { it.copy(dialogState = DialogState.None, isLoading = false) }
                 }
                 .onFailure { error ->
-                    val errorType = classifyAnalyticsError(error)
-                    analyticsClient.logEvent(
-                        AnalyticsEvent.OperationFailed(
-                            operation = AnalyticsOperation.EDIT_STOP,
-                            errorType = errorType,
-                        ),
-                    )
-                    analyticsClient.trackException(error, AnalyticsOperation.EDIT_STOP)
+                    analyticsClient.trackFailure(AnalyticsOperation.EDIT_STOP, classifyAnalyticsError(error), error)
                     _uiState.update { it.copy(isLoading = false) }
                     _uiEffect.emit(TripDetailUiEffect.ShowError(error.message ?: UNKNOWN_ERROR))
                 }
@@ -483,14 +453,7 @@ class TripDetailViewModel @Inject constructor(
                     _uiState.update { it.copy(dialogState = DialogState.None, isLoading = false) }
                 }
                 .onFailure { error ->
-                    val errorType = classifyAnalyticsError(error)
-                    analyticsClient.logEvent(
-                        AnalyticsEvent.OperationFailed(
-                            operation = AnalyticsOperation.REMOVE_STOP,
-                            errorType = errorType,
-                        ),
-                    )
-                    analyticsClient.trackException(error, AnalyticsOperation.REMOVE_STOP)
+                    analyticsClient.trackFailure(AnalyticsOperation.REMOVE_STOP, classifyAnalyticsError(error), error)
                     _uiState.update { it.copy(isLoading = false) }
                     _uiEffect.emit(TripDetailUiEffect.ShowError(error.message ?: UNKNOWN_ERROR))
                 }
@@ -517,14 +480,7 @@ class TripDetailViewModel @Inject constructor(
                     _uiState.update { it.copy(dialogState = DialogState.None, isLoading = false) }
                 }
                 .onFailure { error ->
-                    val errorType = classifyAnalyticsError(error)
-                    analyticsClient.logEvent(
-                        AnalyticsEvent.OperationFailed(
-                            operation = AnalyticsOperation.SET_STOP,
-                            errorType = errorType,
-                        ),
-                    )
-                    analyticsClient.trackException(error, AnalyticsOperation.SET_STOP)
+                    analyticsClient.trackFailure(AnalyticsOperation.SET_STOP, classifyAnalyticsError(error), error)
                     _uiState.update { it.copy(isLoading = false) }
                     _uiEffect.emit(TripDetailUiEffect.ShowError(error.message ?: UNKNOWN_ERROR))
                 }
@@ -554,14 +510,7 @@ class TripDetailViewModel @Inject constructor(
                 )
                 _uiState.update { it.copy(routeCalculationState = RouteCalculationState.Idle) }
             }.onFailure { error ->
-                val errorType = classifyAnalyticsError(error)
-                analyticsClient.logEvent(
-                    AnalyticsEvent.OperationFailed(
-                        operation = AnalyticsOperation.CALCULATE_ROUTE,
-                        errorType = errorType,
-                    ),
-                )
-                analyticsClient.trackException(error, AnalyticsOperation.CALCULATE_ROUTE)
+                analyticsClient.trackFailure(AnalyticsOperation.CALCULATE_ROUTE, classifyAnalyticsError(error), error)
                 _uiState.update {
                     it.copy(
                         routeCalculationState = RouteCalculationState.Error(

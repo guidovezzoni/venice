@@ -36,7 +36,11 @@ types. `core/` SHALL contain no package other than `analytics/` as a result of t
 ### Requirement: A single shared tracking surface declares every tracking operation once
 An `AnalyticsTracking` interface SHALL declare `logEvent(event: AnalyticsEvent)`,
 `setUserProperty(property: AnalyticsUserProperty)`, and
-`trackException(throwable: Throwable, operation: AnalyticsOperation)`. `AnalyticsClient` and
+`trackException(throwable: Throwable, operation: AnalyticsOperation)`. It SHALL also provide a
+default `trackFailure(operation: AnalyticsOperation, errorType: AnalyticsErrorType, throwable:
+Throwable)` method that calls `logEvent(AnalyticsEvent.OperationFailed(operation, errorType))`
+followed by `trackException(throwable, operation)` — encoding the dual-channel failure contract once
+so call sites cannot accidentally fire one without the other. `AnalyticsClient` and
 `AnalyticsProvider` SHALL both extend `AnalyticsTracking` and SHALL NOT redeclare any of its
 operations.
 
@@ -141,9 +145,11 @@ be implemented by `CompositeAnalyticsClient` and `DebugAnalyticsProvider`, but n
 - **WHEN** the codebase is searched for calls to `.setUserProperty(` outside `core/analytics/`
 - **THEN** zero matches are found
 
-#### Scenario: No call site outside core/analytics invokes trackException
+#### Scenario: No call site outside core/analytics invokes trackException directly
 - **WHEN** the codebase is searched for calls to `.trackException(` outside `core/analytics/`
-- **THEN** zero matches are found
+- **THEN** zero matches are found — all failure paths call `.trackFailure(` instead, and the
+  default `trackFailure` implementation in `AnalyticsTracking` calls `trackException` internally
+  within `core/analytics/`
 
 ### Requirement: Operation identifiers are a typed, bounded enum
 `AnalyticsOperation` SHALL be a top-level `enum class` in `core/analytics/`, each constant carrying an

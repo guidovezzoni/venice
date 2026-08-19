@@ -1165,35 +1165,38 @@ class TripDetailViewModelTest {
     }
 
     @Test
-    fun `GIVEN setStop fails WHEN OnStartingPointConfirmed is dispatched THEN OperationFailed is tracked`() = runTest(testDispatcher) {
-        coEvery { setStopUseCase(TRIP_ID, PLACE_NAME, LATITUDE, LONGITUDE, StopType.STARTING_POINT) } returns Result.failure(RuntimeException("error"))
+    fun `GIVEN setStop fails WHEN OnStartingPointConfirmed is dispatched THEN trackFailure is called`() = runTest(testDispatcher) {
+        val error = RuntimeException("error")
+        coEvery { setStopUseCase(TRIP_ID, PLACE_NAME, LATITUDE, LONGITUDE, StopType.STARTING_POINT) } returns Result.failure(error)
         val viewModel = createViewModel()
 
         viewModel.onIntent(TripDetailUiIntent.OnStartingPointConfirmed(PLACE_NAME, LATITUDE, LONGITUDE))
         advanceUntilIdle()
 
         verify(exactly = 1) {
-            analyticsClient.logEvent(match { it is AnalyticsEvent.OperationFailed && it.operation == AnalyticsOperation.SET_STOP })
+            analyticsClient.trackFailure(AnalyticsOperation.SET_STOP, AnalyticsErrorType.UNKNOWN, error)
         }
     }
 
     @Test
-    fun `GIVEN editStop fails WHEN OnEditStopConfirmed is dispatched THEN OperationFailed is tracked`() = runTest(testDispatcher) {
-        coEvery { editStopUseCase("s1", PLACE_NAME, LATITUDE, LONGITUDE) } returns Result.failure(RuntimeException("error"))
+    fun `GIVEN editStop fails WHEN OnEditStopConfirmed is dispatched THEN trackFailure is called`() = runTest(testDispatcher) {
+        val error = RuntimeException("error")
+        coEvery { editStopUseCase("s1", PLACE_NAME, LATITUDE, LONGITUDE) } returns Result.failure(error)
         val viewModel = createViewModel()
 
         viewModel.onIntent(TripDetailUiIntent.OnEditStopConfirmed("s1", PLACE_NAME, LATITUDE, LONGITUDE))
         advanceUntilIdle()
 
         verify(exactly = 1) {
-            analyticsClient.logEvent(match { it is AnalyticsEvent.OperationFailed && it.operation == AnalyticsOperation.EDIT_STOP })
+            analyticsClient.trackFailure(AnalyticsOperation.EDIT_STOP, AnalyticsErrorType.UNKNOWN, error)
         }
     }
 
     @Test
-    fun `GIVEN removeStop fails WHEN OnRemoveStopConfirmed is dispatched THEN OperationFailed is tracked`() = runTest(testDispatcher) {
+    fun `GIVEN removeStop fails WHEN OnRemoveStopConfirmed is dispatched THEN trackFailure is called`() = runTest(testDispatcher) {
         val stop = Stop("s1", TRIP_ID, PLACE_NAME, LATITUDE, LONGITUDE, 1, StopStatus.PENDING)
-        coEvery { removeStopUseCase(TRIP_ID, "s1") } returns Result.failure(RuntimeException("error"))
+        val error = RuntimeException("error")
+        coEvery { removeStopUseCase(TRIP_ID, "s1") } returns Result.failure(error)
         val viewModel = createViewModel()
 
         viewModel.onIntent(TripDetailUiIntent.OnRemoveStopClicked(stop))
@@ -1201,46 +1204,49 @@ class TripDetailViewModelTest {
         advanceUntilIdle()
 
         verify(exactly = 1) {
-            analyticsClient.logEvent(match { it is AnalyticsEvent.OperationFailed && it.operation == AnalyticsOperation.REMOVE_STOP })
+            analyticsClient.trackFailure(AnalyticsOperation.REMOVE_STOP, AnalyticsErrorType.UNKNOWN, error)
         }
     }
 
     @Test
-    fun `GIVEN moveStop fails WHEN OnMoveStopUp is dispatched THEN OperationFailed is tracked`() = runTest(testDispatcher) {
-        coEvery { moveStopUseCase(TRIP_ID, 2, 1) } returns Result.failure(RuntimeException("error"))
+    fun `GIVEN moveStop fails WHEN OnMoveStopUp is dispatched THEN trackFailure is called`() = runTest(testDispatcher) {
+        val error = RuntimeException("error")
+        coEvery { moveStopUseCase(TRIP_ID, 2, 1) } returns Result.failure(error)
         val viewModel = createViewModel()
 
         viewModel.onIntent(TripDetailUiIntent.OnMoveStopUp("s2", 2))
         advanceUntilIdle()
 
         verify(exactly = 1) {
-            analyticsClient.logEvent(match { it is AnalyticsEvent.OperationFailed && it.operation == AnalyticsOperation.MOVE_STOP })
+            analyticsClient.trackFailure(AnalyticsOperation.MOVE_STOP, AnalyticsErrorType.UNKNOWN, error)
         }
     }
 
     @Test
-    fun `GIVEN markStopDeparted fails WHEN OnMarkStopDepartedClicked is dispatched THEN OperationFailed is tracked`() = runTest(testDispatcher) {
-        coEvery { markStopDepartedUseCase(TRIP_ID, "s1") } returns Result.failure(RuntimeException("error"))
+    fun `GIVEN markStopDeparted fails WHEN OnMarkStopDepartedClicked is dispatched THEN trackFailure is called`() = runTest(testDispatcher) {
+        val error = RuntimeException("error")
+        coEvery { markStopDepartedUseCase(TRIP_ID, "s1") } returns Result.failure(error)
         val viewModel = createViewModel()
 
         viewModel.onIntent(TripDetailUiIntent.OnMarkStopDepartedClicked("s1"))
         advanceUntilIdle()
 
         verify(exactly = 1) {
-            analyticsClient.logEvent(match { it is AnalyticsEvent.OperationFailed && it.operation == AnalyticsOperation.MARK_DEPARTED })
+            analyticsClient.trackFailure(AnalyticsOperation.MARK_DEPARTED, AnalyticsErrorType.UNKNOWN, error)
         }
     }
 
     @Test
-    fun `GIVEN calculateRoute fails WHEN OnCalculateRouteClicked is dispatched THEN OperationFailed is tracked`() = runTest(testDispatcher) {
-        coEvery { calculateRouteUseCase(TRIP_ID, any()) } returns Result.failure(RuntimeException("error"))
+    fun `GIVEN calculateRoute fails WHEN OnCalculateRouteClicked is dispatched THEN trackFailure is called`() = runTest(testDispatcher) {
+        val error = RuntimeException("error")
+        coEvery { calculateRouteUseCase(TRIP_ID, any()) } returns Result.failure(error)
         val viewModel = createViewModel()
 
         viewModel.onIntent(TripDetailUiIntent.OnCalculateRouteClicked)
         advanceUntilIdle()
 
         verify(exactly = 1) {
-            analyticsClient.logEvent(match { it is AnalyticsEvent.OperationFailed && it.operation == AnalyticsOperation.CALCULATE_ROUTE })
+            analyticsClient.trackFailure(AnalyticsOperation.CALCULATE_ROUTE, AnalyticsErrorType.UNKNOWN, error)
         }
     }
 
@@ -1804,7 +1810,7 @@ class TripDetailViewModelTest {
     // --- Section 18: Stop Added Failure ---
 
     @Test
-    fun `GIVEN setStopUseCase fails with persistence error WHEN failure branch runs THEN OperationFailed with PERSISTENCE is logged and trackException is called`() = runTest(testDispatcher) {
+    fun `GIVEN setStopUseCase fails with persistence error WHEN failure branch runs THEN trackFailure is called with SET_STOP and PERSISTENCE`() = runTest(testDispatcher) {
         val persistenceError = SQLiteException("DB write failed")
         coEvery {
             setStopUseCase(TRIP_ID, PLACE_NAME, LATITUDE, LONGITUDE, StopType.STARTING_POINT)
@@ -1817,18 +1823,8 @@ class TripDetailViewModelTest {
         viewModel.onIntent(TripDetailUiIntent.OnStartingPointConfirmed(PLACE_NAME, LATITUDE, LONGITUDE))
         advanceUntilIdle()
 
-        val expectedErrorType = AnalyticsErrorType.PERSISTENCE
         verify(exactly = 1) {
-            analyticsClient.logEvent(
-                match {
-                    it is AnalyticsEvent.OperationFailed &&
-                        it.operation == AnalyticsOperation.SET_STOP &&
-                        it.errorType == expectedErrorType
-                },
-            )
-        }
-        verify(exactly = 1) {
-            analyticsClient.trackException(persistenceError, AnalyticsOperation.SET_STOP)
+            analyticsClient.trackFailure(AnalyticsOperation.SET_STOP, AnalyticsErrorType.PERSISTENCE, persistenceError)
         }
         collectJob.cancel()
     }
@@ -1861,7 +1857,7 @@ class TripDetailViewModelTest {
     // --- Section 20: Stop Edited Failure ---
 
     @Test
-    fun `GIVEN editStopUseCase fails WHEN failure branch runs THEN OperationFailed with EDIT_STOP is logged and trackException is called`() = runTest(testDispatcher) {
+    fun `GIVEN editStopUseCase fails WHEN failure branch runs THEN trackFailure is called with EDIT_STOP`() = runTest(testDispatcher) {
         val error = RuntimeException("edit failed")
         coEvery {
             editStopUseCase("s1", PLACE_NAME, LATITUDE, LONGITUDE)
@@ -1877,14 +1873,7 @@ class TripDetailViewModelTest {
         advanceUntilIdle()
 
         verify(exactly = 1) {
-            analyticsClient.logEvent(
-                match {
-                    it is AnalyticsEvent.OperationFailed && it.operation == AnalyticsOperation.EDIT_STOP
-                },
-            )
-        }
-        verify(exactly = 1) {
-            analyticsClient.trackException(error, AnalyticsOperation.EDIT_STOP)
+            analyticsClient.trackFailure(AnalyticsOperation.EDIT_STOP, AnalyticsErrorType.UNKNOWN, error)
         }
         collectJob.cancel()
     }
@@ -1918,7 +1907,7 @@ class TripDetailViewModelTest {
     // --- Section 22: Stop Removed Failure ---
 
     @Test
-    fun `GIVEN removeStopUseCase fails WHEN failure branch runs THEN OperationFailed with REMOVE_STOP is logged and trackException is called`() = runTest(testDispatcher) {
+    fun `GIVEN removeStopUseCase fails WHEN failure branch runs THEN trackFailure is called with REMOVE_STOP`() = runTest(testDispatcher) {
         val error = RuntimeException("remove failed")
         val stop = Stop("s1", TRIP_ID, PLACE_NAME, LATITUDE, LONGITUDE, 1, StopStatus.PENDING)
         coEvery { removeStopUseCase(TRIP_ID, "s1") } returns Result.failure(error)
@@ -1932,14 +1921,7 @@ class TripDetailViewModelTest {
         advanceUntilIdle()
 
         verify(exactly = 1) {
-            analyticsClient.logEvent(
-                match {
-                    it is AnalyticsEvent.OperationFailed && it.operation == AnalyticsOperation.REMOVE_STOP
-                },
-            )
-        }
-        verify(exactly = 1) {
-            analyticsClient.trackException(error, AnalyticsOperation.REMOVE_STOP)
+            analyticsClient.trackFailure(AnalyticsOperation.REMOVE_STOP, AnalyticsErrorType.UNKNOWN, error)
         }
         collectJob.cancel()
     }
@@ -2003,7 +1985,7 @@ class TripDetailViewModelTest {
     // --- Section 24: Stop Reordered Failure ---
 
     @Test
-    fun `GIVEN moveStopUseCase fails WHEN failure branch runs THEN OperationFailed with MOVE_STOP and classified error is logged and trackException is called`() = runTest(testDispatcher) {
+    fun `GIVEN moveStopUseCase fails WHEN failure branch runs THEN trackFailure is called with MOVE_STOP and classified error`() = runTest(testDispatcher) {
         val error = RuntimeException("move failed")
         coEvery { moveStopUseCase(TRIP_ID, 2, 1) } returns Result.failure(error)
         val viewModel = createViewModel()
@@ -2014,18 +1996,8 @@ class TripDetailViewModelTest {
         viewModel.onIntent(TripDetailUiIntent.OnMoveStopUp("s2", 2))
         advanceUntilIdle()
 
-        val expectedErrorType = AnalyticsErrorType.UNKNOWN
         verify(exactly = 1) {
-            analyticsClient.logEvent(
-                match {
-                    it is AnalyticsEvent.OperationFailed &&
-                        it.operation == AnalyticsOperation.MOVE_STOP &&
-                        it.errorType == expectedErrorType
-                },
-            )
-        }
-        verify(exactly = 1) {
-            analyticsClient.trackException(error, AnalyticsOperation.MOVE_STOP)
+            analyticsClient.trackFailure(AnalyticsOperation.MOVE_STOP, AnalyticsErrorType.UNKNOWN, error)
         }
         collectJob.cancel()
     }
@@ -2063,7 +2035,7 @@ class TripDetailViewModelTest {
     // --- Section 26: Stop Departed Failure ---
 
     @Test
-    fun `GIVEN markStopDepartedUseCase fails WHEN failure branch runs THEN OperationFailed with MARK_DEPARTED and classified error is logged and trackException is called`() = runTest(testDispatcher) {
+    fun `GIVEN markStopDepartedUseCase fails WHEN failure branch runs THEN trackFailure is called with MARK_DEPARTED and classified error`() = runTest(testDispatcher) {
         val error = RuntimeException("mark departed failed")
         coEvery { markStopDepartedUseCase(TRIP_ID, "s1") } returns Result.failure(error)
         val viewModel = createViewModel()
@@ -2074,18 +2046,8 @@ class TripDetailViewModelTest {
         viewModel.onIntent(TripDetailUiIntent.OnMarkStopDepartedClicked("s1"))
         advanceUntilIdle()
 
-        val expectedErrorType = AnalyticsErrorType.UNKNOWN
         verify(exactly = 1) {
-            analyticsClient.logEvent(
-                match {
-                    it is AnalyticsEvent.OperationFailed &&
-                        it.operation == AnalyticsOperation.MARK_DEPARTED &&
-                        it.errorType == expectedErrorType
-                },
-            )
-        }
-        verify(exactly = 1) {
-            analyticsClient.trackException(error, AnalyticsOperation.MARK_DEPARTED)
+            analyticsClient.trackFailure(AnalyticsOperation.MARK_DEPARTED, AnalyticsErrorType.UNKNOWN, error)
         }
         collectJob.cancel()
     }
@@ -2116,7 +2078,7 @@ class TripDetailViewModelTest {
     // --- Section 28: Stop Departure Undone Failure ---
 
     @Test
-    fun `GIVEN undoMarkStopDepartedUseCase fails WHEN failure branch runs THEN OperationFailed with UNDO_MARK_DEPARTED and classified error is logged and trackException is called`() = runTest(testDispatcher) {
+    fun `GIVEN undoMarkStopDepartedUseCase fails WHEN failure branch runs THEN trackFailure is called with UNDO_MARK_DEPARTED and classified error`() = runTest(testDispatcher) {
         val error = RuntimeException("undo mark departed failed")
         coEvery { undoMarkStopDepartedUseCase(TRIP_ID) } returns Result.failure(error)
         val viewModel = createViewModel()
@@ -2127,18 +2089,8 @@ class TripDetailViewModelTest {
         viewModel.onIntent(TripDetailUiIntent.OnUndoMarkStopDepartedClicked("s1"))
         advanceUntilIdle()
 
-        val expectedErrorType = AnalyticsErrorType.UNKNOWN
         verify(exactly = 1) {
-            analyticsClient.logEvent(
-                match {
-                    it is AnalyticsEvent.OperationFailed &&
-                        it.operation == AnalyticsOperation.UNDO_MARK_DEPARTED &&
-                        it.errorType == expectedErrorType
-                },
-            )
-        }
-        verify(exactly = 1) {
-            analyticsClient.trackException(error, AnalyticsOperation.UNDO_MARK_DEPARTED)
+            analyticsClient.trackFailure(AnalyticsOperation.UNDO_MARK_DEPARTED, AnalyticsErrorType.UNKNOWN, error)
         }
         collectJob.cancel()
     }
@@ -2171,7 +2123,7 @@ class TripDetailViewModelTest {
     // --- Section 30: Place Search Failure ---
 
     @Test
-    fun `GIVEN searchPlacesUseCase fails WHEN search failure branch runs THEN OperationFailed with SEARCH_PLACE is logged and trackException is called`() = runTest {
+    fun `GIVEN searchPlacesUseCase fails WHEN search failure branch runs THEN trackFailure is called with SEARCH_PLACE`() = runTest {
         val standardDispatcher = StandardTestDispatcher(testScheduler)
         Dispatchers.setMain(standardDispatcher)
         val error = RuntimeException("search failed")
@@ -2183,15 +2135,7 @@ class TripDetailViewModelTest {
         runCurrent()
 
         verify(exactly = 1) {
-            analyticsClient.logEvent(
-                match {
-                    it is AnalyticsEvent.OperationFailed &&
-                        it.operation == AnalyticsOperation.SEARCH_PLACE
-                },
-            )
-        }
-        verify(exactly = 1) {
-            analyticsClient.trackException(error, AnalyticsOperation.SEARCH_PLACE)
+            analyticsClient.trackFailure(AnalyticsOperation.SEARCH_PLACE, AnalyticsErrorType.UNKNOWN, error)
         }
     }
 
@@ -2231,7 +2175,7 @@ class TripDetailViewModelTest {
     // --- Section 32: Place Detail Resolution Failure ---
 
     @Test
-    fun `GIVEN getPlaceDetailUseCase fails WHEN resolution failure branch runs THEN OperationFailed with RESOLVE_PLACE is logged and trackException is called`() = runTest(testDispatcher) {
+    fun `GIVEN getPlaceDetailUseCase fails WHEN resolution failure branch runs THEN trackFailure is called with RESOLVE_PLACE`() = runTest(testDispatcher) {
         val error = RuntimeException("resolve failed")
         val suggestion = PlaceSuggestion("place-abc", "Colosseum", "Rome, Italy")
         coEvery { getPlaceDetailUseCase("place-abc") } returns Result.failure(error)
@@ -2241,15 +2185,7 @@ class TripDetailViewModelTest {
         advanceUntilIdle()
 
         verify(exactly = 1) {
-            analyticsClient.logEvent(
-                match {
-                    it is AnalyticsEvent.OperationFailed &&
-                        it.operation == AnalyticsOperation.RESOLVE_PLACE
-                },
-            )
-        }
-        verify(exactly = 1) {
-            analyticsClient.trackException(error, AnalyticsOperation.RESOLVE_PLACE)
+            analyticsClient.trackFailure(AnalyticsOperation.RESOLVE_PLACE, AnalyticsErrorType.UNKNOWN, error)
         }
     }
 
@@ -2283,7 +2219,7 @@ class TripDetailViewModelTest {
     // --- Section 34: Route Calculation Failure ---
 
     @Test
-    fun `GIVEN calculateRouteUseCase fails WHEN failure branch runs THEN OperationFailed with CALCULATE_ROUTE is logged and trackException is called`() = runTest(testDispatcher) {
+    fun `GIVEN calculateRouteUseCase fails WHEN failure branch runs THEN trackFailure is called with CALCULATE_ROUTE`() = runTest(testDispatcher) {
         val error = RuntimeException("route calculation failed")
         coEvery { calculateRouteUseCase(TRIP_ID, any()) } returns Result.failure(error)
         val viewModel = createViewModel()
@@ -2292,15 +2228,7 @@ class TripDetailViewModelTest {
         advanceUntilIdle()
 
         verify(exactly = 1) {
-            analyticsClient.logEvent(
-                match {
-                    it is AnalyticsEvent.OperationFailed &&
-                        it.operation == AnalyticsOperation.CALCULATE_ROUTE
-                },
-            )
-        }
-        verify(exactly = 1) {
-            analyticsClient.trackException(error, AnalyticsOperation.CALCULATE_ROUTE)
+            analyticsClient.trackFailure(AnalyticsOperation.CALCULATE_ROUTE, AnalyticsErrorType.UNKNOWN, error)
         }
     }
 

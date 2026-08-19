@@ -198,20 +198,7 @@ class TripListViewModelTest {
     }
 
     @Test
-    fun `GIVEN use case failure WHEN ConfirmCreateTrip is dispatched THEN OperationFailed is tracked`() = runTest(testDispatcher) {
-        coEvery { createTripUseCase(any()) } returns Result.failure(RuntimeException("error"))
-
-        viewModel.onIntent(TripListUiIntent.OnTripNameChanged("Trip"))
-        viewModel.onIntent(TripListUiIntent.ConfirmCreateTrip)
-        advanceUntilIdle()
-
-        verify(exactly = 1) {
-            analyticsClient.logEvent(match { it is AnalyticsEvent.OperationFailed && it.operation == AnalyticsOperation.CREATE_TRIP })
-        }
-    }
-
-    @Test
-    fun givenCreateTripUseCaseFailsWithIoException_whenConfirmCreateTrip_thenOperationFailedNetworkIsLoggedAndExceptionTracked() = runTest(testDispatcher) {
+    fun givenCreateTripUseCaseFailsWithIoException_whenConfirmCreateTrip_thenTrackFailureIsCalledWithNetworkError() = runTest(testDispatcher) {
         val exception = IOException("network error")
         coEvery { createTripUseCase(any()) } returns Result.failure(exception)
 
@@ -222,10 +209,7 @@ class TripListViewModelTest {
         val expectedOperation = AnalyticsOperation.CREATE_TRIP
         val expectedErrorType = AnalyticsErrorType.NETWORK
         verify(exactly = 1) {
-            analyticsClient.logEvent(AnalyticsEvent.OperationFailed(operation = expectedOperation, errorType = expectedErrorType))
-        }
-        verify(exactly = 1) {
-            analyticsClient.trackException(exception, expectedOperation)
+            analyticsClient.trackFailure(expectedOperation, expectedErrorType, exception)
         }
     }
 

@@ -139,4 +139,3 @@ Prerequisites (setup, models) come first, BDD pairs in the middle ordered by dep
 # This work:
 - tests names are not with back ticks
 - check what TripDetailVIewModel init do exactly
-- logEvent + trackException together?

@@ -164,15 +164,21 @@ any risk of an accidental resubscription re-firing it.
 2` (the same completeness condition already used for `formattedTotalDistance`/
 `isRouteRecalculationPromptVisible`), else `"none"`. `"stale"` is never emitted — see Non-Goals.
 
-### 5. Dual-channel failure emission: paired in the same `onFailure` block
+### 5. Dual-channel failure emission: via `trackFailure` on `AnalyticsTracking`
 
-Every existing and new failure path gets both calls in the same `onFailure { error -> ... }` lambda,
-in this order: classify once (`val errorType = AnalyticsErrorClassifier(error)`), then
-`analyticsClient.logEvent(AnalyticsEvent.OperationFailed(operation, errorType))` followed by
-`analyticsClient.trackException(error, operation)`. Classifying once and reusing the value avoids
-calling the classifier twice per failure. This touches all 8 existing `OperationFailed` sites (2 in
-`TripListViewModel`, 6 in `TripDetailViewModel`) plus the 2 new ones (`SEARCH_PLACE`,
-`RESOLVE_PLACE`).
+`AnalyticsTracking` provides a default `trackFailure(operation, errorType, throwable)` method that
+calls `logEvent(AnalyticsEvent.OperationFailed(operation, errorType))` then `trackException(throwable,
+operation)` — encoding the two-call contract once so no failure path can fire one without the other.
+
+Every existing and new failure path calls `trackFailure` in the same `onFailure { error -> ... }`
+lambda, in this order: classify once (`val errorType = classifyAnalyticsError(error)`), then
+`analyticsClient.trackFailure(operation, errorType, error)`. This touches all 8 existing
+`OperationFailed` sites (2 in `TripListViewModel`, 6 in `TripDetailViewModel`) plus the 2 new ones
+(`SEARCH_PLACE`, `RESOLVE_PLACE`).
+
+The `trackException` method remains on the interface (each implementation owns its own backend's
+exception handling) but is no longer called directly from ViewModels — only from `trackFailure`
+within `core/analytics/` itself.
 
 ### 6. `VeniceApplication` ordering
 

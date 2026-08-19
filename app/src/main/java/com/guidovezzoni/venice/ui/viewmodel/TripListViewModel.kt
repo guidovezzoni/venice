@@ -87,14 +87,7 @@ class TripListViewModel @Inject constructor(
                     _uiEffect.emit(TripListUiEffect.NavigateToTripDetail(trip.id))
                 }
                 .onFailure { error ->
-                    val errorType = classifyAnalyticsError(error)
-                    analyticsClient.logEvent(
-                        AnalyticsEvent.OperationFailed(
-                            operation = AnalyticsOperation.CREATE_TRIP,
-                            errorType = errorType,
-                        )
-                    )
-                    analyticsClient.trackException(error, AnalyticsOperation.CREATE_TRIP)
+                    analyticsClient.trackFailure(AnalyticsOperation.CREATE_TRIP, classifyAnalyticsError(error), error)
                     _uiState.update { it.copy(isLoading = false) }
                     _uiEffect.emit(TripListUiEffect.ShowError(error.message ?: UNKNOWN_ERROR))
                 }
