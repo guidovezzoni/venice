@@ -95,7 +95,7 @@ class AnalyticsLogFormatterTest {
 
     @Test
     fun givenNewUserPropertyDistanceUnit_whenFormatUserPropertyLogIsCalled_thenResultContainsPropertyData() {
-        val newProperty = AnalyticsUserProperty.DistanceUnit(unit = "metric")
+        val newProperty = AnalyticsUserProperty.DistanceUnit(unit = DistanceUnitParam.METRIC)
 
         val result = formatUserPropertyLog(newProperty)
 
@@ -111,7 +111,7 @@ class AnalyticsLogFormatterTest {
             distanceBand = DistanceBand.RANGE_50_200KM,
             durationBand = DurationBand.RANGE_1_3H,
         )
-        val newProperty = AnalyticsUserProperty.DistanceUnit(unit = "imperial")
+        val newProperty = AnalyticsUserProperty.DistanceUnit(unit = DistanceUnitParam.IMPERIAL)
 
         val eventResult = formatEventLog(newEvent)
         val propertyResult = formatUserPropertyLog(newProperty)

@@ -4,6 +4,7 @@ import android.app.Application
 import com.google.android.libraries.places.api.Places
 import com.guidovezzoni.venice.core.analytics.AnalyticsClient
 import com.guidovezzoni.venice.core.analytics.AnalyticsUserProperty
+import com.guidovezzoni.venice.core.analytics.DistanceUnitParam
 import com.guidovezzoni.venice.ui.util.isImperialLocale
 import dagger.hilt.android.HiltAndroidApp
 import java.util.Locale
@@ -16,7 +17,7 @@ class VeniceApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        val unit = if (isImperialLocale(Locale.getDefault())) "imperial" else "metric"
+        val unit = if (isImperialLocale(Locale.getDefault())) DistanceUnitParam.IMPERIAL else DistanceUnitParam.METRIC
         analyticsClient.setUserProperty(AnalyticsUserProperty.DistanceUnit(unit))
         Places.initializeWithNewPlacesApiEnabled(this, BuildConfig.MAPS_API_KEY)
     }

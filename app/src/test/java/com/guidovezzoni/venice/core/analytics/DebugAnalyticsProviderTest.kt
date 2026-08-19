@@ -39,7 +39,7 @@ class DebugAnalyticsProviderTest {
 
     @Test
     fun `GIVEN an AnalyticsUserProperty WHEN setUserProperty is called THEN Log d is invoked with the tag and the string produced by formatUserPropertyLog`() {
-        val property = AnalyticsUserProperty.DistanceUnit(unit = "metric")
+        val property = AnalyticsUserProperty.DistanceUnit(unit = DistanceUnitParam.METRIC)
         val expectedTag = "Analytics"
         val expectedMessage = formatUserPropertyLog(property)
 

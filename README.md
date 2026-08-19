@@ -137,8 +137,6 @@ Prerequisites (setup, models) come first, BDD pairs in the middle ordered by dep
 
 
 # This work:
-- AnalyticsUserProperty.DistanceUnit should use an enum
 - tests names are not with back ticks
 - check what TripDetailVIewModel init do exactly
-- trackException should be a Log.e
 - logEvent + trackException together?

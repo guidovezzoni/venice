@@ -4,5 +4,5 @@ sealed class AnalyticsUserProperty {
 
     data class TripCountBand(val band: CountBand) : AnalyticsUserProperty()
 
-    data class DistanceUnit(val unit: String) : AnalyticsUserProperty()
+    data class DistanceUnit(val unit: DistanceUnitParam) : AnalyticsUserProperty()
 }

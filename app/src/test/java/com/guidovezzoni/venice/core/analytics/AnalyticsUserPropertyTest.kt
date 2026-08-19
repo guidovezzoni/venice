@@ -15,19 +15,21 @@ class AnalyticsUserPropertyTest {
     }
 
     @Test
-    fun givenImperialUnit_whenDistanceUnitIsConstructed_thenItHoldsTheStringValue() {
-        val property = AnalyticsUserProperty.DistanceUnit(unit = "imperial")
+    fun givenImperialUnit_whenDistanceUnitIsConstructed_thenItHoldsTheTypedValueWithCorrectString() {
+        val property = AnalyticsUserProperty.DistanceUnit(unit = DistanceUnitParam.IMPERIAL)
 
-        val expectedUnit = "imperial"
+        val expectedUnit = DistanceUnitParam.IMPERIAL
         assertEquals(expectedUnit, property.unit)
+        assertEquals("imperial", property.unit.value)
     }
 
     @Test
-    fun givenMetricUnit_whenDistanceUnitIsConstructed_thenItHoldsTheStringValue() {
-        val property = AnalyticsUserProperty.DistanceUnit(unit = "metric")
+    fun givenMetricUnit_whenDistanceUnitIsConstructed_thenItHoldsTheTypedValueWithCorrectString() {
+        val property = AnalyticsUserProperty.DistanceUnit(unit = DistanceUnitParam.METRIC)
 
-        val expectedUnit = "metric"
+        val expectedUnit = DistanceUnitParam.METRIC
         assertEquals(expectedUnit, property.unit)
+        assertEquals("metric", property.unit.value)
     }
 
     @Test
