@@ -9,7 +9,6 @@ class AnalyticsLogFormatterTest {
     private val event = AnalyticsEvent.TripCreated(isFirstTrip = true)
     private val userProperty = AnalyticsUserProperty.TripCountBand(band = CountBand.RANGE_2_5)
     private val operation = AnalyticsOperation.CREATE_TRIP
-    private val throwable = RuntimeException("something went wrong")
 
     // Section 6 — event message formatting
 
@@ -42,7 +41,7 @@ class AnalyticsLogFormatterTest {
     fun givenThrowableAndAnalyticsOperation_whenFormatExceptionLogIsCalled_thenResultIdentifiesAsExceptionAndIsDistinguishableFromOtherFormats() {
         val eventResult = formatEventLog(event)
         val userPropertyResult = formatUserPropertyLog(userProperty)
-        val exceptionResult = formatExceptionLog(throwable, operation)
+        val exceptionResult = formatExceptionLog(operation)
 
         assertTrue("Result should identify as an exception: $exceptionResult", exceptionResult.contains("Exception", ignoreCase = true))
         assertTrue("Result should contain the operation value: $exceptionResult", exceptionResult.contains(operation.value))
