@@ -19,7 +19,7 @@ class AnalyticsEventTest {
     }
 
     @Test
-    fun givenIsFirstTripTrue_whenTripCreatedIsConstructed_thenNameAndPropertiesAreCorrect() {
+    fun `GIVEN isFirstTrip true WHEN TripCreated is constructed THEN name and properties match the tracking plan`() {
         val event = AnalyticsEvent.TripCreated(isFirstTrip = true)
 
         val expectedName = "trip_created"
@@ -30,7 +30,7 @@ class AnalyticsEventTest {
     }
 
     @Test
-    fun givenIsFirstTripFalse_whenTripCreatedIsConstructed_thenNameAndPropertiesAreCorrect() {
+    fun `GIVEN isFirstTrip false WHEN TripCreated is constructed THEN name and properties match the tracking plan`() {
         val event = AnalyticsEvent.TripCreated(isFirstTrip = false)
 
         val expectedName = "trip_created"
@@ -40,7 +40,7 @@ class AnalyticsEventTest {
     }
 
     @Test
-    fun givenStopCountAndRouteState_whenTripOpenedIsConstructed_thenNameAndPropertiesAreCorrect() {
+    fun `GIVEN stop count and route state WHEN TripOpened is constructed THEN name and properties match the tracking plan`() {
         val event = AnalyticsEvent.TripOpened(stopCount = 3, routeState = "complete")
 
         val expectedName = "trip_opened"
@@ -51,7 +51,7 @@ class AnalyticsEventTest {
     }
 
     @Test
-    fun givenStopTypeAndStopCount_whenStopAddedIsConstructed_thenNameAndPropertiesAreCorrect() {
+    fun `GIVEN stop type STARTING_POINT and stop count WHEN StopAdded is constructed THEN name and properties match the tracking plan`() {
         val event = AnalyticsEvent.StopAdded(stopType = StopTypeParam.STARTING_POINT, stopCount = 1)
 
         val expectedName = "stop_added"
@@ -62,7 +62,7 @@ class AnalyticsEventTest {
     }
 
     @Test
-    fun givenStopTypeDestination_whenStopAddedIsConstructed_thenStopTypeValueIsSnakeCase() {
+    fun `GIVEN stop type DESTINATION WHEN StopAdded is constructed THEN stop_type value is snake_case`() {
         val event = AnalyticsEvent.StopAdded(stopType = StopTypeParam.DESTINATION, stopCount = 2)
 
         assertEquals("destination", event.properties["stop_type"])
@@ -70,7 +70,7 @@ class AnalyticsEventTest {
     }
 
     @Test
-    fun givenStopTypeIntermediate_whenStopAddedIsConstructed_thenStopTypeValueIsSnakeCase() {
+    fun `GIVEN stop type INTERMEDIATE WHEN StopAdded is constructed THEN stop_type value is snake_case`() {
         val event = AnalyticsEvent.StopAdded(stopType = StopTypeParam.INTERMEDIATE, stopCount = 3)
 
         assertEquals("intermediate", event.properties["stop_type"])
@@ -78,7 +78,7 @@ class AnalyticsEventTest {
     }
 
     @Test
-    fun givenAllParams_whenRouteCalculatedIsConstructed_thenNameAndPropertiesAreCorrect() {
+    fun `GIVEN all params WHEN RouteCalculated is constructed THEN name and properties match the tracking plan`() {
         val event = AnalyticsEvent.RouteCalculated(
             stopCount = 4,
             legCount = 3,
@@ -99,7 +99,7 @@ class AnalyticsEventTest {
     }
 
     @Test
-    fun givenStopTypeAndPosition_whenNavigationLaunchedIsConstructed_thenNameAndPropertiesAreCorrect() {
+    fun `GIVEN stop type and position WHEN NavigationLaunched is constructed THEN name and properties match the tracking plan`() {
         val event = AnalyticsEvent.NavigationLaunched(
             stopType = StopTypeParam.DESTINATION,
             stopPosition = 2,
@@ -113,7 +113,7 @@ class AnalyticsEventTest {
     }
 
     @Test
-    fun givenStopType_whenStopEditedIsConstructed_thenNameAndPropertiesAreCorrect() {
+    fun `GIVEN stop type WHEN StopEdited is constructed THEN name and properties match the tracking plan`() {
         val event = AnalyticsEvent.StopEdited(stopType = StopTypeParam.INTERMEDIATE)
 
         val expectedName = "stop_edited"
@@ -124,7 +124,7 @@ class AnalyticsEventTest {
     }
 
     @Test
-    fun givenStopTypeAndStopCount_whenStopRemovedIsConstructed_thenNameAndPropertiesAreCorrect() {
+    fun `GIVEN stop type and stop count WHEN StopRemoved is constructed THEN name and properties match the tracking plan`() {
         val event = AnalyticsEvent.StopRemoved(stopType = StopTypeParam.DESTINATION, stopCount = 1)
 
         val expectedName = "stop_removed"
@@ -135,7 +135,7 @@ class AnalyticsEventTest {
     }
 
     @Test
-    fun givenDirectionAndStopCount_whenStopReorderedIsConstructed_thenNameAndPropertiesAreCorrect() {
+    fun `GIVEN direction and stop count WHEN StopReordered is constructed THEN name and properties match the tracking plan`() {
         val event = AnalyticsEvent.StopReordered(direction = "up", stopCount = 3)
 
         val expectedName = "stop_reordered"
@@ -146,7 +146,7 @@ class AnalyticsEventTest {
     }
 
     @Test
-    fun givenStopPositionAndStopCount_whenStopDepartedIsConstructed_thenNameAndPropertiesAreCorrect() {
+    fun `GIVEN stop position and stop count WHEN StopDeparted is constructed THEN name and properties match the tracking plan`() {
         val event = AnalyticsEvent.StopDeparted(stopPosition = 0, stopCount = 3)
 
         val expectedName = "stop_departed"
@@ -157,7 +157,7 @@ class AnalyticsEventTest {
     }
 
     @Test
-    fun givenStopPosition_whenStopDepartureUndoneIsConstructed_thenNameAndPropertiesAreCorrect() {
+    fun `GIVEN stop position WHEN StopDepartureUndone is constructed THEN name and properties match the tracking plan`() {
         val event = AnalyticsEvent.StopDepartureUndone(stopPosition = 1)
 
         val expectedName = "stop_departure_undone"
@@ -168,7 +168,7 @@ class AnalyticsEventTest {
     }
 
     @Test
-    fun givenSuggestionCount_whenPlaceSearchPerformedIsConstructed_thenNameAndPropertiesAreCorrect() {
+    fun `GIVEN suggestion count WHEN PlaceSearchPerformed is constructed THEN name and properties match the tracking plan`() {
         val event = AnalyticsEvent.PlaceSearchPerformed(suggestionCount = 5)
 
         val expectedName = "place_search_performed"
@@ -179,7 +179,7 @@ class AnalyticsEventTest {
     }
 
     @Test
-    fun givenSuggestionPosition_whenPlaceSuggestionSelectedIsConstructed_thenNameAndPropertiesAreCorrect() {
+    fun `GIVEN suggestion position WHEN PlaceSuggestionSelected is constructed THEN name and properties match the tracking plan`() {
         val event = AnalyticsEvent.PlaceSuggestionSelected(suggestionPosition = 0)
 
         val expectedName = "place_suggestion_selected"
@@ -190,7 +190,7 @@ class AnalyticsEventTest {
     }
 
     @Test
-    fun givenOperationAndErrorType_whenOperationFailedIsConstructed_thenNameAndPropertiesAreCorrect() {
+    fun `GIVEN operation and error type WHEN OperationFailed is constructed THEN name and properties match the tracking plan`() {
         val event = AnalyticsEvent.OperationFailed(
             operation = AnalyticsOperation.CREATE_TRIP,
             errorType = AnalyticsErrorType.NETWORK,
@@ -204,7 +204,7 @@ class AnalyticsEventTest {
     }
 
     @Test
-    fun givenScreen_whenScreenViewedIsConstructed_thenNameAndPropertiesAreCorrect() {
+    fun `GIVEN a screen WHEN ScreenViewed is constructed THEN name and properties match the tracking plan`() {
         val event = AnalyticsEvent.ScreenViewed(screen = AnalyticsScreen.TRIP_LIST)
 
         val expectedName = "screen_viewed"
@@ -215,7 +215,7 @@ class AnalyticsEventTest {
     }
 
     @Test
-    fun givenAllEnumTypedParams_whenInspectedAcrossAllEvents_thenNoScreamingSnakeCaseValueExists() {
+    fun `GIVEN all 14 event subtypes constructed WHEN properties are inspected THEN no value is SCREAMING_SNAKE_CASE`() {
         val events: List<AnalyticsEvent> = listOf(
             AnalyticsEvent.TripCreated(isFirstTrip = true),
             AnalyticsEvent.TripOpened(stopCount = 2, routeState = "none"),

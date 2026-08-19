@@ -10,35 +10,35 @@ import org.junit.Test
 class AnalyticsErrorClassifierTest {
 
     @Test
-    fun givenSocketTimeoutException_whenClassify_thenReturnsTimeout() {
+    fun `GIVEN a SocketTimeoutException WHEN classifyAnalyticsError is called THEN returns TIMEOUT`() {
         val expected = AnalyticsErrorType.TIMEOUT
         val actual = classifyAnalyticsError(SocketTimeoutException())
         assertEquals(expected, actual)
     }
 
     @Test
-    fun givenPlainIOException_whenClassify_thenReturnsNetwork() {
+    fun `GIVEN a plain IOException WHEN classifyAnalyticsError is called THEN returns NETWORK`() {
         val expected = AnalyticsErrorType.NETWORK
         val actual = classifyAnalyticsError(IOException())
         assertEquals(expected, actual)
     }
 
     @Test
-    fun givenUnknownHostException_whenClassify_thenReturnsNetwork() {
+    fun `GIVEN an UnknownHostException WHEN classifyAnalyticsError is called THEN returns NETWORK`() {
         val expected = AnalyticsErrorType.NETWORK
         val actual = classifyAnalyticsError(UnknownHostException())
         assertEquals(expected, actual)
     }
 
     @Test
-    fun givenSQLiteException_whenClassify_thenReturnsPersistence() {
+    fun `GIVEN a SQLiteException WHEN classifyAnalyticsError is called THEN returns PERSISTENCE`() {
         val expected = AnalyticsErrorType.PERSISTENCE
         val actual = classifyAnalyticsError(SQLiteException())
         assertEquals(expected, actual)
     }
 
     @Test
-    fun givenIllegalStateException_whenClassify_thenReturnsUnknown() {
+    fun `GIVEN an IllegalStateException WHEN classifyAnalyticsError is called THEN returns UNKNOWN`() {
         val expected = AnalyticsErrorType.UNKNOWN
         val actual = classifyAnalyticsError(IllegalStateException())
         assertEquals(expected, actual)

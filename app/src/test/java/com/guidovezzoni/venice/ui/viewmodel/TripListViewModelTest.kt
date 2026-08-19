@@ -124,7 +124,7 @@ class TripListViewModelTest {
     }
 
     @Test
-    fun givenObservedTripListEmits3Trips_whenInitCompletes_thenTripCountBandRange2To5IsSet() = runTest(testDispatcher) {
+    fun `GIVEN observed trip list emits 3 trips WHEN init completes THEN TripCountBand RANGE_2_5 is set`() = runTest(testDispatcher) {
         val trips = listOf(
             Trip(id = "1", name = "Trip 1", createdAt = 0L, updatedAt = 0L),
             Trip(id = "2", name = "Trip 2", createdAt = 0L, updatedAt = 0L),
@@ -153,7 +153,7 @@ class TripListViewModelTest {
     }
 
     @Test
-    fun given0TripsBeforeCreation_whenConfirmCreateTripSucceeds_thenTripCreatedIsFirstTripTrue() = runTest(testDispatcher) {
+    fun `GIVEN 0 trips before creation WHEN ConfirmCreateTrip succeeds THEN TripCreated is tracked with is_first_trip true`() = runTest(testDispatcher) {
         val newTrip = Trip(id = "new", name = "New Trip", createdAt = 0L, updatedAt = 0L)
         coEvery { createTripUseCase(any()) } returns Result.success(newTrip)
 
@@ -168,7 +168,7 @@ class TripListViewModelTest {
     }
 
     @Test
-    fun given1TripBeforeCreation_whenConfirmCreateTripSucceeds_thenTripCreatedIsFirstTripFalseAndTripCountBandRange2To5IsSet() = runTest(testDispatcher) {
+    fun `GIVEN 1 trip before creation WHEN ConfirmCreateTrip succeeds THEN TripCreated is tracked with is_first_trip false and TripCountBand RANGE_2_5 is set`() = runTest(testDispatcher) {
         val existingTrip = Trip(id = "existing", name = "Existing", createdAt = 0L, updatedAt = 0L)
         val newTrip = Trip(id = "new", name = "New Trip", createdAt = 0L, updatedAt = 0L)
         val localViewModel = createViewModel(trips = listOf(existingTrip))
@@ -189,7 +189,7 @@ class TripListViewModelTest {
     }
 
     @Test
-    fun givenOnTripClickedIsProcessed_whenAnalyticsCallsAreInspected_thenNoTripOpenedEventIsLogged() = runTest(testDispatcher) {
+    fun `GIVEN OnTripClicked is processed WHEN analytics calls are inspected THEN no TripOpened event is logged`() = runTest(testDispatcher) {
         viewModel.onIntent(TripListUiIntent.OnTripClicked("trip-123"))
 
         verify(exactly = 0) {
@@ -198,7 +198,7 @@ class TripListViewModelTest {
     }
 
     @Test
-    fun givenCreateTripUseCaseFailsWithIoException_whenConfirmCreateTrip_thenTrackFailureIsCalledWithNetworkError() = runTest(testDispatcher) {
+    fun `GIVEN createTripUseCase fails with IOException WHEN ConfirmCreateTrip is dispatched THEN trackFailure is called with NETWORK error type`() = runTest(testDispatcher) {
         val exception = IOException("network error")
         coEvery { createTripUseCase(any()) } returns Result.failure(exception)
 

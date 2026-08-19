@@ -10,10 +10,8 @@ class AnalyticsLogFormatterTest {
     private val userProperty = AnalyticsUserProperty.TripCountBand(band = CountBand.RANGE_2_5)
     private val operation = AnalyticsOperation.CREATE_TRIP
 
-    // Section 6 — event message formatting
-
     @Test
-    fun givenAnalyticsEventWithNameAndProperties_whenFormatEventLogIsCalled_thenResultIdentifiesAsEventAndIncludesNameAndProperties() {
+    fun `GIVEN an AnalyticsEvent WHEN formatEventLog is called THEN result identifies as an event and includes name and properties`() {
         val result = formatEventLog(event)
 
         assertTrue("Result should identify as an event: $result", result.contains("Event", ignoreCase = true))
@@ -21,10 +19,8 @@ class AnalyticsLogFormatterTest {
         assertTrue("Result should contain event properties: $result", result.contains(event.properties.toString()))
     }
 
-    // Section 7 — user property message formatting
-
     @Test
-    fun givenAnalyticsUserProperty_whenFormatUserPropertyLogIsCalled_thenResultIdentifiesAsUserPropertyAndIsDistinguishableFromEventFormat() {
+    fun `GIVEN an AnalyticsUserProperty WHEN formatUserPropertyLog is called THEN result identifies as a user property and is distinguishable from event format`() {
         val eventResult = formatEventLog(event)
         val userPropertyResult = formatUserPropertyLog(userProperty)
 
@@ -35,10 +31,8 @@ class AnalyticsLogFormatterTest {
         )
     }
 
-    // Section 8 — exception message formatting
-
     @Test
-    fun givenThrowableAndAnalyticsOperation_whenFormatExceptionLogIsCalled_thenResultIdentifiesAsExceptionAndIsDistinguishableFromOtherFormats() {
+    fun `GIVEN a Throwable and an AnalyticsOperation WHEN formatExceptionLog is called THEN result identifies as an exception and is distinguishable from other formats`() {
         val eventResult = formatEventLog(event)
         val userPropertyResult = formatUserPropertyLog(userProperty)
         val exceptionResult = formatExceptionLog(operation)
@@ -55,10 +49,8 @@ class AnalyticsLogFormatterTest {
         )
     }
 
-    // Section 8.1 — regression guard: new event subtypes and new user property subtypes
-
     @Test
-    fun givenNewEventSubtypeScreenViewed_whenFormatEventLogIsCalled_thenResultContainsEventNameAndScreenData() {
+    fun `GIVEN a ScreenViewed event WHEN formatEventLog is called THEN result contains event name and screen data`() {
         val newEvent = AnalyticsEvent.ScreenViewed(screen = AnalyticsScreen.TRIP_DETAIL)
 
         val result = formatEventLog(newEvent)
@@ -70,7 +62,7 @@ class AnalyticsLogFormatterTest {
     }
 
     @Test
-    fun givenNewEventSubtypeOperationFailed_whenFormatEventLogIsCalled_thenResultContainsOperationAndErrorTypeValues() {
+    fun `GIVEN an OperationFailed event WHEN formatEventLog is called THEN result contains operation and error type values`() {
         val newEvent = AnalyticsEvent.OperationFailed(
             operation = AnalyticsOperation.CALCULATE_ROUTE,
             errorType = AnalyticsErrorType.NETWORK,
@@ -84,7 +76,7 @@ class AnalyticsLogFormatterTest {
     }
 
     @Test
-    fun givenNewUserPropertyTripCountBand_whenFormatUserPropertyLogIsCalled_thenResultContainsPropertyData() {
+    fun `GIVEN a TripCountBand user property WHEN formatUserPropertyLog is called THEN result contains property data`() {
         val newProperty = AnalyticsUserProperty.TripCountBand(band = CountBand.SIX_PLUS)
 
         val result = formatUserPropertyLog(newProperty)
@@ -94,7 +86,7 @@ class AnalyticsLogFormatterTest {
     }
 
     @Test
-    fun givenNewUserPropertyDistanceUnit_whenFormatUserPropertyLogIsCalled_thenResultContainsPropertyData() {
+    fun `GIVEN a DistanceUnit user property WHEN formatUserPropertyLog is called THEN result contains property data`() {
         val newProperty = AnalyticsUserProperty.DistanceUnit(unit = DistanceUnitParam.METRIC)
 
         val result = formatUserPropertyLog(newProperty)
@@ -104,7 +96,7 @@ class AnalyticsLogFormatterTest {
     }
 
     @Test
-    fun givenNewEventAndNewUserProperty_whenFormatted_thenEachProducesDistinguishableLogLine() {
+    fun `GIVEN a new event and a new user property WHEN both are formatted THEN each produces a distinguishable log line`() {
         val newEvent = AnalyticsEvent.RouteCalculated(
             stopCount = 3,
             legCount = 2,

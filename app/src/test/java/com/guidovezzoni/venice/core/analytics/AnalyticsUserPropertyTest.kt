@@ -7,7 +7,7 @@ import org.junit.Test
 class AnalyticsUserPropertyTest {
 
     @Test
-    fun givenCountBandRange2_5_whenTripCountBandIsConstructed_thenItHoldsTheTypedValue() {
+    fun `GIVEN CountBand RANGE_2_5 WHEN TripCountBand is constructed THEN it holds the typed value`() {
         val property = AnalyticsUserProperty.TripCountBand(band = CountBand.RANGE_2_5)
 
         val expectedBand = CountBand.RANGE_2_5
@@ -15,7 +15,7 @@ class AnalyticsUserPropertyTest {
     }
 
     @Test
-    fun givenImperialUnit_whenDistanceUnitIsConstructed_thenItHoldsTheTypedValueWithCorrectString() {
+    fun `GIVEN IMPERIAL unit WHEN DistanceUnit is constructed THEN it holds the typed value with correct string`() {
         val property = AnalyticsUserProperty.DistanceUnit(unit = DistanceUnitParam.IMPERIAL)
 
         val expectedUnit = DistanceUnitParam.IMPERIAL
@@ -24,7 +24,7 @@ class AnalyticsUserPropertyTest {
     }
 
     @Test
-    fun givenMetricUnit_whenDistanceUnitIsConstructed_thenItHoldsTheTypedValueWithCorrectString() {
+    fun `GIVEN METRIC unit WHEN DistanceUnit is constructed THEN it holds the typed value with correct string`() {
         val property = AnalyticsUserProperty.DistanceUnit(unit = DistanceUnitParam.METRIC)
 
         val expectedUnit = DistanceUnitParam.METRIC
@@ -33,7 +33,7 @@ class AnalyticsUserPropertyTest {
     }
 
     @Test
-    fun givenAllEventParameterNames_whenCheckedAgainstUserPropertyNames_thenNoNameCollisionExists() {
+    fun `GIVEN all event parameter names and all user property names WHEN checked for collisions THEN no name appears in both sets`() {
         val eventParameterNames = setOf(
             "is_first_trip",
             "stop_count",
@@ -51,7 +51,6 @@ class AnalyticsUserPropertyTest {
             "screen_name",
         )
 
-        // User property names must not collide with event parameter names
         val userPropertyNames = setOf("trip_count_band", "distance_unit")
 
         userPropertyNames.forEach { propertyName ->
