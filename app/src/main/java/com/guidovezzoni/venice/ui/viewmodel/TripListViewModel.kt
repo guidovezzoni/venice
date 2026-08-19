@@ -4,6 +4,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.guidovezzoni.venice.core.analytics.AnalyticsClient
 import com.guidovezzoni.venice.core.analytics.AnalyticsEvent
+import com.guidovezzoni.venice.core.analytics.AnalyticsOperation
+import com.guidovezzoni.venice.core.analytics.AnalyticsScreen
+import com.guidovezzoni.venice.core.analytics.AnalyticsUserProperty
+import com.guidovezzoni.venice.core.analytics.CountBand
+import com.guidovezzoni.venice.core.analytics.classifyAnalyticsError
 import com.guidovezzoni.venice.domain.repository.TripRepository
 import com.guidovezzoni.venice.domain.usecase.CreateTripUseCase
 import com.guidovezzoni.venice.ui.effect.TripListUiEffect
@@ -37,9 +42,14 @@ class TripListViewModel @Inject constructor(
     val uiEffect: SharedFlow<TripListUiEffect> = _uiEffect.asSharedFlow()
 
     init {
-        analyticsClient.logEvent(AnalyticsEvent.ScreenViewed(AnalyticsEvent.SCREEN_TRIP_LIST))
+        analyticsClient.logEvent(AnalyticsEvent.ScreenViewed(AnalyticsScreen.TRIP_LIST))
         tripRepository.observeTrips()
-            .onEach { trips -> _uiState.update { it.copy(trips = trips) } }
+            .onEach { trips ->
+                _uiState.update { it.copy(trips = trips) }
+                analyticsClient.setUserProperty(
+                    AnalyticsUserProperty.TripCountBand(band = CountBand.fromCount(trips.size))
+                )
+            }
             .launchIn(viewModelScope)
     }
 
@@ -56,7 +66,6 @@ class TripListViewModel @Inject constructor(
             }
             TripListUiIntent.ConfirmCreateTrip -> createTrip()
             is TripListUiIntent.OnTripClicked -> viewModelScope.launch {
-                analyticsClient.logEvent(AnalyticsEvent.TripOpened(intent.tripId))
                 _uiEffect.emit(TripListUiEffect.NavigateToTripDetail(intent.tripId))
             }
         }
@@ -64,20 +73,28 @@ class TripListViewModel @Inject constructor(
 
     private fun createTrip() {
         val name = _uiState.value.tripNameInput
+        val preCreationTripCount = _uiState.value.trips.size
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             withMinimumDuration { createTripUseCase(name) }
                 .onSuccess { trip ->
-                    analyticsClient.logEvent(AnalyticsEvent.TripCreated(trip.id))
+                    val isFirstTrip = preCreationTripCount == 0
+                    analyticsClient.logEvent(AnalyticsEvent.TripCreated(isFirstTrip = isFirstTrip))
+                    analyticsClient.setUserProperty(
+                        AnalyticsUserProperty.TripCountBand(band = CountBand.fromCount(preCreationTripCount + 1))
+                    )
                     _uiState.update { it.copy(isLoading = false, isCreateDialogVisible = false, tripNameInput = "") }
                     _uiEffect.emit(TripListUiEffect.NavigateToTripDetail(trip.id))
                 }
                 .onFailure { error ->
-                    val failedEvent = AnalyticsEvent.OperationFailed(
-                        AnalyticsEvent.OPERATION_CREATE_TRIP,
-                        error.message ?: UNKNOWN_ERROR,
+                    val errorType = classifyAnalyticsError(error)
+                    analyticsClient.logEvent(
+                        AnalyticsEvent.OperationFailed(
+                            operation = AnalyticsOperation.CREATE_TRIP,
+                            errorType = errorType,
+                        )
                     )
-                    analyticsClient.logEvent(failedEvent)
+                    analyticsClient.trackException(error, AnalyticsOperation.CREATE_TRIP)
                     _uiState.update { it.copy(isLoading = false) }
                     _uiEffect.emit(TripListUiEffect.ShowError(error.message ?: UNKNOWN_ERROR))
                 }

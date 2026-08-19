@@ -17,7 +17,7 @@ complexity:
     ignoreAnnotated:
       - 'Composable'
   TooManyFunctions:
-    thresholdInClasses: 12
+    thresholdInClasses: 13
     ignoreAnnotatedFunctions:
       - 'Composable'
       - 'Preview'

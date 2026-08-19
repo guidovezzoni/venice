@@ -1,5 +1,6 @@
 package com.guidovezzoni.venice.domain.usecase
 
+import com.guidovezzoni.venice.domain.model.Leg
 import com.guidovezzoni.venice.domain.model.Stop
 import com.guidovezzoni.venice.domain.repository.RouteRepository
 import javax.inject.Inject
@@ -11,7 +12,7 @@ class CalculateRouteUseCase @Inject constructor(
     private val routeRepository: RouteRepository,
 ) {
 
-    suspend operator fun invoke(tripId: String, stops: List<Stop>): Result<Unit> {
+    suspend operator fun invoke(tripId: String, stops: List<Stop>): Result<List<Leg>> {
         if (stops.size < MINIMUM_STOP_COUNT) {
             return Result.failure(IllegalStateException(MINIMUM_STOP_COUNT_ERROR_MESSAGE))
         }

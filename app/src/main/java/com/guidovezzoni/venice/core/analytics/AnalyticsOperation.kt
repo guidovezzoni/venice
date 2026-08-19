@@ -8,4 +8,7 @@ enum class AnalyticsOperation(val value: String) {
     MOVE_STOP("move_stop"),
     MARK_DEPARTED("mark_departed"),
     CALCULATE_ROUTE("calculate_route"),
+    UNDO_MARK_DEPARTED("undo_mark_departed"),
+    SEARCH_PLACE("search_place"),
+    RESOLVE_PLACE("resolve_place"),
 }

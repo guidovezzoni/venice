@@ -27,7 +27,7 @@ class DebugAnalyticsProviderTest {
 
     @Test
     fun `GIVEN an AnalyticsEvent WHEN logEvent is called THEN Log d is invoked with the tag and the string produced by formatEventLog`() {
-        val event = AnalyticsEvent.TripCreated(tripId = "trip-1")
+        val event = AnalyticsEvent.TripCreated(isFirstTrip = true)
         val expectedTag = "Analytics"
         val expectedMessage = formatEventLog(event)
 
@@ -38,7 +38,7 @@ class DebugAnalyticsProviderTest {
 
     @Test
     fun `GIVEN an AnalyticsUserProperty WHEN setUserProperty is called THEN Log d is invoked with the tag and the string produced by formatUserPropertyLog`() {
-        val property = AnalyticsUserProperty.ForTesting
+        val property = AnalyticsUserProperty.DistanceUnit(unit = "metric")
         val expectedTag = "Analytics"
         val expectedMessage = formatUserPropertyLog(property)
 
