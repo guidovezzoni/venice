@@ -154,7 +154,7 @@ checks.
 #### Scenario: An imperial locale sets the imperial unit
 - **GIVEN** `DistanceFormatter.isImperialLocale(...)` returns `true`
 - **WHEN** `VeniceApplication.onCreate()` runs
-- **THEN** `DistanceUnit(unit = "imperial")` is set
+- **THEN** `DistanceUnit(unit = DistanceUnitParam.IMPERIAL)` is set
 
 ### Requirement: `trip_count_band` is set when the trip list loads and when a trip is created or removed
 `TripListViewModel` SHALL call `analyticsClient.setUserProperty(AnalyticsUserProperty.TripCountBand

@@ -262,8 +262,9 @@ Every `AnalyticsEvent` subclass constructor SHALL place an enum-typed parameter'
 
 ### Requirement: User properties are typed and bounded
 `AnalyticsUserProperty` SHALL be a sealed class in `core/analytics/` with exactly two concrete
-subclasses: `TripCountBand(band: CountBand)` and `DistanceUnit(unit: String)` restricted to
-`"metric"`/`"imperial"`. Neither subclass name SHALL collide with any `AnalyticsEvent` parameter name
+subclasses: `TripCountBand(band: CountBand)` and `DistanceUnit(unit: DistanceUnitParam)` where
+`DistanceUnitParam` is a top-level enum with constants `METRIC("metric")` and `IMPERIAL("imperial")`.
+Neither subclass name SHALL collide with any `AnalyticsEvent` parameter name
 (`is_first_trip`, `stop_count`, `route_state`, `stop_type`, `leg_count`, `distance_band`,
 `duration_band`, `stop_position`, `direction`, `suggestion_count`, `suggestion_position`, `operation`,
 `error_type`, `screen_name`).
@@ -273,5 +274,5 @@ subclasses: `TripCountBand(band: CountBand)` and `DistanceUnit(unit: String)` re
 - **THEN** it holds `CountBand.RANGE_2_5`, and no field on it is a raw `Int` trip count
 
 #### Scenario: DistanceUnit is restricted to metric or imperial
-- **WHEN** `AnalyticsUserProperty.DistanceUnit(unit = "imperial")` is constructed
-- **THEN** its `unit` value is `"imperial"`
+- **WHEN** `AnalyticsUserProperty.DistanceUnit(unit = DistanceUnitParam.IMPERIAL)` is constructed
+- **THEN** its `unit` is `DistanceUnitParam.IMPERIAL` and `unit.value` is `"imperial"`
