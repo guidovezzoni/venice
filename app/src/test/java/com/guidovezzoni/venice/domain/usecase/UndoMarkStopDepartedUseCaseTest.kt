@@ -43,6 +43,24 @@ class UndoMarkStopDepartedUseCaseTest {
     }
 
     @Test
+    fun `GIVEN the most recently departed stop at order 1 WHEN UndoMarkStopDepartedUseCase succeeds THEN Result success wrapping that Stop with status PENDING and order 1 unchanged is returned`() = runTest {
+        val stops = listOf(
+            Stop("s0", TRIP_ID, "Start", 0.0, 0.0, 0, StopStatus.VISITED),
+            Stop("s1", TRIP_ID, "Stop A", 1.0, 1.0, 1, StopStatus.VISITED),
+            Stop("s2", TRIP_ID, "Stop B", 2.0, 2.0, 2, StopStatus.PENDING),
+        )
+        every { stopRepository.observeStopsForTrip(TRIP_ID) } returns flowOf(stops)
+        coEvery { stopRepository.updateStopStatus("s1", StopStatus.PENDING) } returns Result.success(Unit)
+
+        val result = useCase(TRIP_ID)
+
+        assertTrue(result.isSuccess)
+        val revertedStop = result.getOrThrow()
+        val expectedStop = Stop("s1", TRIP_ID, "Stop A", 1.0, 1.0, 1, StopStatus.PENDING)
+        assertEquals(expectedStop, revertedStop)
+    }
+
+    @Test
     fun `GIVEN no VISITED stops exist WHEN invoke is called THEN Result failure is returned with No departed stop to undo`() = runTest {
         val stops = listOf(
             Stop("s0", TRIP_ID, "Start", 0.0, 0.0, 0, StopStatus.PENDING),

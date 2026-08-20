@@ -17,6 +17,7 @@ class DebugAnalyticsProviderTest {
     fun setUp() {
         mockkStatic(Log::class)
         every { Log.d(any(), any()) } returns 0
+        every { Log.e(any(), any(), any()) } returns 0
         provider = DebugAnalyticsProvider()
     }
 
@@ -27,7 +28,7 @@ class DebugAnalyticsProviderTest {
 
     @Test
     fun `GIVEN an AnalyticsEvent WHEN logEvent is called THEN Log d is invoked with the tag and the string produced by formatEventLog`() {
-        val event = AnalyticsEvent.TripCreated(tripId = "trip-1")
+        val event = AnalyticsEvent.TripCreated(isFirstTrip = true)
         val expectedTag = "Analytics"
         val expectedMessage = formatEventLog(event)
 
@@ -38,7 +39,7 @@ class DebugAnalyticsProviderTest {
 
     @Test
     fun `GIVEN an AnalyticsUserProperty WHEN setUserProperty is called THEN Log d is invoked with the tag and the string produced by formatUserPropertyLog`() {
-        val property = AnalyticsUserProperty.ForTesting
+        val property = AnalyticsUserProperty.DistanceUnit(unit = DistanceUnitParam.METRIC)
         val expectedTag = "Analytics"
         val expectedMessage = formatUserPropertyLog(property)
 
@@ -48,14 +49,14 @@ class DebugAnalyticsProviderTest {
     }
 
     @Test
-    fun `GIVEN a Throwable and an AnalyticsOperation WHEN trackException is called THEN Log d is invoked with the tag and the string produced by formatExceptionLog`() {
+    fun `GIVEN a Throwable and an AnalyticsOperation WHEN trackException is called THEN Log e is invoked with the tag, the string produced by formatExceptionLog, and the throwable`() {
         val throwable = RuntimeException("test error")
         val operation = AnalyticsOperation.CALCULATE_ROUTE
         val expectedTag = "Analytics"
-        val expectedMessage = formatExceptionLog(throwable, operation)
+        val expectedMessage = formatExceptionLog(operation)
 
         provider.trackException(throwable, operation)
 
-        verify(exactly = 1) { Log.d(expectedTag, expectedMessage) }
+        verify(exactly = 1) { Log.e(expectedTag, expectedMessage, throwable) }
     }
 }

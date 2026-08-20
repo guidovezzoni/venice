@@ -1,7 +1,12 @@
 package com.guidovezzoni.venice.ui.viewmodel
 
 import com.guidovezzoni.venice.core.analytics.AnalyticsClient
+import com.guidovezzoni.venice.core.analytics.AnalyticsErrorType
 import com.guidovezzoni.venice.core.analytics.AnalyticsEvent
+import com.guidovezzoni.venice.core.analytics.AnalyticsOperation
+import com.guidovezzoni.venice.core.analytics.AnalyticsScreen
+import com.guidovezzoni.venice.core.analytics.AnalyticsUserProperty
+import com.guidovezzoni.venice.core.analytics.CountBand
 import com.guidovezzoni.venice.domain.model.Trip
 import com.guidovezzoni.venice.domain.repository.TripRepository
 import com.guidovezzoni.venice.domain.usecase.CreateTripUseCase
@@ -26,6 +31,7 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import java.io.IOException
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class TripListViewModelTest {
@@ -43,13 +49,17 @@ class TripListViewModelTest {
         createTripUseCase = mockk()
         analyticsClient = mockk(relaxed = true)
         tripRepository = mockk()
-        every { tripRepository.observeTrips() } returns flowOf(emptyList())
-        viewModel = TripListViewModel(createTripUseCase, analyticsClient, tripRepository)
+        viewModel = createViewModel()
     }
 
     @After
     fun tearDown() {
         Dispatchers.resetMain()
+    }
+
+    private fun createViewModel(trips: List<Trip> = emptyList()): TripListViewModel {
+        every { tripRepository.observeTrips() } returns flowOf(trips)
+        return TripListViewModel(createTripUseCase, analyticsClient, tripRepository)
     }
 
     @Test
@@ -109,7 +119,22 @@ class TripListViewModelTest {
     @Test
     fun `GIVEN ViewModel initialised WHEN init completes THEN ScreenViewed is tracked`() = runTest(testDispatcher) {
         verify(exactly = 1) {
-            analyticsClient.logEvent(match { it is AnalyticsEvent.ScreenViewed && it.screenName == AnalyticsEvent.SCREEN_TRIP_LIST })
+            analyticsClient.logEvent(match { it is AnalyticsEvent.ScreenViewed && it.screen == AnalyticsScreen.TRIP_LIST })
+        }
+    }
+
+    @Test
+    fun `GIVEN observed trip list emits 3 trips WHEN init completes THEN TripCountBand RANGE_2_5 is set`() = runTest(testDispatcher) {
+        val trips = listOf(
+            Trip(id = "1", name = "Trip 1", createdAt = 0L, updatedAt = 0L),
+            Trip(id = "2", name = "Trip 2", createdAt = 0L, updatedAt = 0L),
+            Trip(id = "3", name = "Trip 3", createdAt = 0L, updatedAt = 0L),
+        )
+        createViewModel(trips = trips)
+
+        val expectedProperty = AnalyticsUserProperty.TripCountBand(band = CountBand.RANGE_2_5)
+        verify(exactly = 1) {
+            analyticsClient.setUserProperty(expectedProperty)
         }
     }
 
@@ -123,29 +148,68 @@ class TripListViewModelTest {
         advanceUntilIdle()
 
         verify(exactly = 1) {
-            analyticsClient.logEvent(match { it is AnalyticsEvent.TripCreated && it.tripId == "trip-id" })
+            analyticsClient.logEvent(match { it is AnalyticsEvent.TripCreated })
         }
     }
 
     @Test
-    fun `GIVEN a trip id WHEN OnTripClicked is dispatched THEN TripOpened is tracked`() = runTest(testDispatcher) {
+    fun `GIVEN 0 trips before creation WHEN ConfirmCreateTrip succeeds THEN TripCreated is tracked with is_first_trip true`() = runTest(testDispatcher) {
+        val newTrip = Trip(id = "new", name = "New Trip", createdAt = 0L, updatedAt = 0L)
+        coEvery { createTripUseCase(any()) } returns Result.success(newTrip)
+
+        viewModel.onIntent(TripListUiIntent.OnTripNameChanged("New Trip"))
+        viewModel.onIntent(TripListUiIntent.ConfirmCreateTrip)
+        advanceUntilIdle()
+
+        val expectedEvent = AnalyticsEvent.TripCreated(isFirstTrip = true)
+        verify(exactly = 1) {
+            analyticsClient.logEvent(expectedEvent)
+        }
+    }
+
+    @Test
+    fun `GIVEN 1 trip before creation WHEN ConfirmCreateTrip succeeds THEN TripCreated is tracked with is_first_trip false and TripCountBand RANGE_2_5 is set`() = runTest(testDispatcher) {
+        val existingTrip = Trip(id = "existing", name = "Existing", createdAt = 0L, updatedAt = 0L)
+        val newTrip = Trip(id = "new", name = "New Trip", createdAt = 0L, updatedAt = 0L)
+        val localViewModel = createViewModel(trips = listOf(existingTrip))
+        coEvery { createTripUseCase(any()) } returns Result.success(newTrip)
+
+        localViewModel.onIntent(TripListUiIntent.OnTripNameChanged("New Trip"))
+        localViewModel.onIntent(TripListUiIntent.ConfirmCreateTrip)
+        advanceUntilIdle()
+
+        val expectedEvent = AnalyticsEvent.TripCreated(isFirstTrip = false)
+        val expectedProperty = AnalyticsUserProperty.TripCountBand(band = CountBand.RANGE_2_5)
+        verify(exactly = 1) {
+            analyticsClient.logEvent(expectedEvent)
+        }
+        verify(exactly = 1) {
+            analyticsClient.setUserProperty(expectedProperty)
+        }
+    }
+
+    @Test
+    fun `GIVEN OnTripClicked is processed WHEN analytics calls are inspected THEN no TripOpened event is logged`() = runTest(testDispatcher) {
         viewModel.onIntent(TripListUiIntent.OnTripClicked("trip-123"))
 
-        verify(exactly = 1) {
-            analyticsClient.logEvent(match { it is AnalyticsEvent.TripOpened && it.tripId == "trip-123" })
+        verify(exactly = 0) {
+            analyticsClient.logEvent(match { it is AnalyticsEvent.TripOpened })
         }
     }
 
     @Test
-    fun `GIVEN use case failure WHEN ConfirmCreateTrip is dispatched THEN OperationFailed is tracked`() = runTest(testDispatcher) {
-        coEvery { createTripUseCase(any()) } returns Result.failure(RuntimeException("error"))
+    fun `GIVEN createTripUseCase fails with IOException WHEN ConfirmCreateTrip is dispatched THEN trackFailure is called with NETWORK error type`() = runTest(testDispatcher) {
+        val exception = IOException("network error")
+        coEvery { createTripUseCase(any()) } returns Result.failure(exception)
 
         viewModel.onIntent(TripListUiIntent.OnTripNameChanged("Trip"))
         viewModel.onIntent(TripListUiIntent.ConfirmCreateTrip)
         advanceUntilIdle()
 
+        val expectedOperation = AnalyticsOperation.CREATE_TRIP
+        val expectedErrorType = AnalyticsErrorType.NETWORK
         verify(exactly = 1) {
-            analyticsClient.logEvent(match { it is AnalyticsEvent.OperationFailed && it.operation == AnalyticsEvent.OPERATION_CREATE_TRIP })
+            analyticsClient.trackFailure(expectedOperation, expectedErrorType, exception)
         }
     }
 

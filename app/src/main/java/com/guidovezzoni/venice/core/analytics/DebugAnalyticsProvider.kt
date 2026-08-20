@@ -11,7 +11,7 @@ import javax.inject.Inject
  * build variant — Logcat output is readable over ADB on any connected device, which
  * leaks the full analytics event stream to anyone with physical access.
  *
- * Thread-safe: all calls delegate to [Log.d], which is thread-safe.
+ * Thread-safe: all calls delegate to [Log.d]/[Log.e], which are thread-safe.
  */
 class DebugAnalyticsProvider @Inject constructor() : AnalyticsProvider {
 
@@ -24,7 +24,7 @@ class DebugAnalyticsProvider @Inject constructor() : AnalyticsProvider {
     }
 
     override fun trackException(throwable: Throwable, operation: AnalyticsOperation) {
-        Log.d(LOG_TAG, formatExceptionLog(throwable, operation))
+        Log.e(LOG_TAG, formatExceptionLog(operation), throwable)
     }
 
     private companion object {

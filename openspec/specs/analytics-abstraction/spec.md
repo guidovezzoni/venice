@@ -36,7 +36,11 @@ types. `core/` SHALL contain no package other than `analytics/` as a result of t
 ### Requirement: A single shared tracking surface declares every tracking operation once
 An `AnalyticsTracking` interface SHALL declare `logEvent(event: AnalyticsEvent)`,
 `setUserProperty(property: AnalyticsUserProperty)`, and
-`trackException(throwable: Throwable, operation: AnalyticsOperation)`. `AnalyticsClient` and
+`trackException(throwable: Throwable, operation: AnalyticsOperation)`. It SHALL also provide a
+default `trackFailure(operation: AnalyticsOperation, errorType: AnalyticsErrorType, throwable:
+Throwable)` method that calls `logEvent(AnalyticsEvent.OperationFailed(operation, errorType))`
+followed by `trackException(throwable, operation)` — encoding the dual-channel failure contract once
+so call sites cannot accidentally fire one without the other. `AnalyticsClient` and
 `AnalyticsProvider` SHALL both extend `AnalyticsTracking` and SHALL NOT redeclare any of its
 operations.
 
@@ -141,34 +145,22 @@ be implemented by `CompositeAnalyticsClient` and `DebugAnalyticsProvider`, but n
 - **WHEN** the codebase is searched for calls to `.setUserProperty(` outside `core/analytics/`
 - **THEN** zero matches are found
 
-#### Scenario: No call site outside core/analytics invokes trackException
+#### Scenario: No call site outside core/analytics invokes trackException directly
 - **WHEN** the codebase is searched for calls to `.trackException(` outside `core/analytics/`
-- **THEN** zero matches are found
+- **THEN** zero matches are found — all failure paths call `.trackFailure(` instead, and the
+  default `trackFailure` implementation in `AnalyticsTracking` calls `trackException` internally
+  within `core/analytics/`
 
 ### Requirement: Operation identifiers are a typed, bounded enum
 `AnalyticsOperation` SHALL be a top-level `enum class` in `core/analytics/`, each constant carrying an
-explicit `value: String` in `snake_case`. It SHALL contain exactly the 7 operation values already in
-use as of this change: `create_trip`, `set_stop`, `edit_stop`, `remove_stop`, `move_stop`,
-`mark_departed`, `calculate_route`. The `trackException` member of `AnalyticsTracking` SHALL take an
-`AnalyticsOperation` as its `operation` parameter.
+explicit `value: String` in `snake_case`. It SHALL contain exactly the 10 operation values in use as
+of this change: `create_trip`, `set_stop`, `edit_stop`, `remove_stop`, `move_stop`, `mark_departed`,
+`undo_mark_departed`, `calculate_route`, `search_place`, `resolve_place`. The `trackException` member
+of `AnalyticsTracking` SHALL take an `AnalyticsOperation` as its `operation` parameter.
 
-#### Scenario: AnalyticsOperation carries exactly the existing seven values
+#### Scenario: AnalyticsOperation carries exactly the ten documented values
 - **WHEN** `AnalyticsOperation`'s constants are enumerated
 - **THEN** they are exactly `CREATE_TRIP`, `SET_STOP`, `EDIT_STOP`, `REMOVE_STOP`, `MOVE_STOP`,
-  `MARK_DEPARTED`, and `CALCULATE_ROUTE`, each with a `value` matching its documented snake_case string
+  `MARK_DEPARTED`, `UNDO_MARK_DEPARTED`, `CALCULATE_ROUTE`, `SEARCH_PLACE`, and `RESOLVE_PLACE`, each
+  with a `value` matching its documented snake_case string
 
-### Requirement: The analytics taxonomy is unchanged by this structural upgrade
-`AnalyticsEvent` and its sealed subclasses SHALL be relocated to `core/analytics/` with no change to
-event names, parameter names, parameter types, or parameter values. Call sites in
-`TripListViewModel` and `TripDetailViewModel` SHALL invoke `analyticsClient.logEvent(...)` with the
-same `AnalyticsEvent` construction as before the change.
-
-#### Scenario: AnalyticsEvent subclass count and shape are unchanged
-- **WHEN** `AnalyticsEvent`'s sealed subclasses are enumerated after the change
-- **THEN** the same 10 subclasses exist, with the same constructor parameters and the same `name` and
-  `properties` values as before the change
-
-#### Scenario: ViewModels call the renamed client with unchanged event data
-- **WHEN** `TripListViewModel` or `TripDetailViewModel` triggers an analytics call
-- **THEN** it calls `analyticsClient.logEvent(event)` where `event` is constructed identically to how
-  it was constructed before this change
