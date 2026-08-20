@@ -44,6 +44,24 @@ class MarkStopDepartedUseCaseTest {
     }
 
     @Test
+    fun `GIVEN the current pending stop at order 1 WHEN MarkStopDepartedUseCase succeeds THEN Result success wrapping that Stop with status VISITED and order 1 unchanged is returned`() = runTest {
+        val stops = listOf(
+            Stop("s0", TRIP_ID, "Start", 0.0, 0.0, 0, StopStatus.VISITED),
+            Stop("s1", TRIP_ID, "Stop A", 1.0, 1.0, 1, StopStatus.PENDING),
+            Stop("s2", TRIP_ID, "Stop B", 2.0, 2.0, 2, StopStatus.PENDING),
+        )
+        every { stopRepository.observeStopsForTrip(TRIP_ID) } returns flowOf(stops)
+        coEvery { stopRepository.updateStopStatus("s1", StopStatus.VISITED) } returns Result.success(Unit)
+
+        val result = useCase(TRIP_ID, "s1")
+
+        assertTrue(result.isSuccess)
+        val departedStop = result.getOrThrow()
+        val expectedStop = Stop("s1", TRIP_ID, "Stop A", 1.0, 1.0, 1, StopStatus.VISITED)
+        assertEquals(expectedStop, departedStop)
+    }
+
+    @Test
     fun `GIVEN the target stop is NOT the current stop WHEN invoke is called THEN Result failure is returned`() = runTest {
         val stops = listOf(
             Stop("s0", TRIP_ID, "Start", 0.0, 0.0, 0, StopStatus.VISITED),

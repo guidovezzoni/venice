@@ -5,84 +5,86 @@ sealed class AnalyticsEvent(
     val properties: Map<String, Any> = emptyMap(),
 ) {
 
-    data class TripCreated(val tripId: String) : AnalyticsEvent(
-        name = EVENT_TRIP_CREATED,
-        properties = mapOf(PROPERTY_TRIP_ID to tripId),
+    data class TripCreated(val isFirstTrip: Boolean) : AnalyticsEvent(
+        name = "trip_created",
+        properties = mapOf("is_first_trip" to isFirstTrip),
     )
 
-    data class TripOpened(val tripId: String) : AnalyticsEvent(
-        name = EVENT_TRIP_OPENED,
-        properties = mapOf(PROPERTY_TRIP_ID to tripId),
+    data class TripOpened(val stopCount: Int, val routeState: String) : AnalyticsEvent(
+        name = "trip_opened",
+        properties = mapOf("stop_count" to stopCount, "route_state" to routeState),
     )
 
-    data class StopSet(val tripId: String, val stopType: String) : AnalyticsEvent(
-        name = EVENT_STOP_SET,
-        properties = mapOf(PROPERTY_TRIP_ID to tripId, PROPERTY_STOP_TYPE to stopType),
+    data class StopAdded(val stopType: StopTypeParam, val stopCount: Int) : AnalyticsEvent(
+        name = "stop_added",
+        properties = mapOf("stop_type" to stopType.value, "stop_count" to stopCount),
     )
 
-    data class StopEdited(val tripId: String) : AnalyticsEvent(
-        name = EVENT_STOP_EDITED,
-        properties = mapOf(PROPERTY_TRIP_ID to tripId),
+    data class RouteCalculated(
+        val stopCount: Int,
+        val legCount: Int,
+        val distanceBand: DistanceBand,
+        val durationBand: DurationBand,
+    ) : AnalyticsEvent(
+        name = "route_calculated",
+        properties = mapOf(
+            "stop_count" to stopCount,
+            "leg_count" to legCount,
+            "distance_band" to distanceBand.value,
+            "duration_band" to durationBand.value,
+        ),
     )
 
-    data class StopRemoved(val tripId: String) : AnalyticsEvent(
-        name = EVENT_STOP_REMOVED,
-        properties = mapOf(PROPERTY_TRIP_ID to tripId),
+    data class NavigationLaunched(val stopType: StopTypeParam, val stopPosition: Int) : AnalyticsEvent(
+        name = "navigation_launched",
+        properties = mapOf("stop_type" to stopType.value, "stop_position" to stopPosition),
     )
 
-    data class StopReordered(val tripId: String) : AnalyticsEvent(
-        name = EVENT_STOP_REORDERED,
-        properties = mapOf(PROPERTY_TRIP_ID to tripId),
+    data class StopEdited(val stopType: StopTypeParam) : AnalyticsEvent(
+        name = "stop_edited",
+        properties = mapOf("stop_type" to stopType.value),
     )
 
-    data class StopDeparted(val tripId: String, val stopId: String) : AnalyticsEvent(
-        name = EVENT_STOP_DEPARTED,
-        properties = mapOf(PROPERTY_TRIP_ID to tripId, PROPERTY_STOP_ID to stopId),
+    data class StopRemoved(val stopType: StopTypeParam, val stopCount: Int) : AnalyticsEvent(
+        name = "stop_removed",
+        properties = mapOf("stop_type" to stopType.value, "stop_count" to stopCount),
     )
 
-    data class RouteCalculated(val tripId: String) : AnalyticsEvent(
-        name = EVENT_ROUTE_CALCULATED,
-        properties = mapOf(PROPERTY_TRIP_ID to tripId),
+    data class StopReordered(val direction: String, val stopCount: Int) : AnalyticsEvent(
+        name = "stop_reordered",
+        properties = mapOf("direction" to direction, "stop_count" to stopCount),
     )
 
-    data class ScreenViewed(val screenName: String) : AnalyticsEvent(
-        name = EVENT_SCREEN_VIEWED,
-        properties = mapOf(PROPERTY_SCREEN_NAME to screenName),
+    data class StopDeparted(val stopPosition: Int, val stopCount: Int) : AnalyticsEvent(
+        name = "stop_departed",
+        properties = mapOf("stop_position" to stopPosition, "stop_count" to stopCount),
     )
 
-    data class OperationFailed(val operation: String, val errorMessage: String) : AnalyticsEvent(
-        name = EVENT_OPERATION_FAILED,
-        properties = mapOf(PROPERTY_OPERATION to operation, PROPERTY_ERROR_MESSAGE to errorMessage),
+    data class StopDepartureUndone(val stopPosition: Int) : AnalyticsEvent(
+        name = "stop_departure_undone",
+        properties = mapOf("stop_position" to stopPosition),
     )
 
-    companion object {
-        private const val EVENT_TRIP_CREATED = "trip_created"
-        private const val EVENT_TRIP_OPENED = "trip_opened"
-        private const val EVENT_STOP_SET = "stop_set"
-        private const val EVENT_STOP_EDITED = "stop_edited"
-        private const val EVENT_STOP_REMOVED = "stop_removed"
-        private const val EVENT_STOP_REORDERED = "stop_reordered"
-        private const val EVENT_STOP_DEPARTED = "stop_departed"
-        private const val EVENT_ROUTE_CALCULATED = "route_calculated"
-        private const val EVENT_SCREEN_VIEWED = "screen_viewed"
-        private const val EVENT_OPERATION_FAILED = "operation_failed"
+    data class PlaceSearchPerformed(val suggestionCount: Int) : AnalyticsEvent(
+        name = "place_search_performed",
+        properties = mapOf("suggestion_count" to suggestionCount),
+    )
 
-        const val PROPERTY_TRIP_ID = "trip_id"
-        const val PROPERTY_STOP_ID = "stop_id"
-        const val PROPERTY_STOP_TYPE = "stop_type"
-        const val PROPERTY_SCREEN_NAME = "screen_name"
-        const val PROPERTY_OPERATION = "operation"
-        const val PROPERTY_ERROR_MESSAGE = "error_message"
+    data class PlaceSuggestionSelected(val suggestionPosition: Int) : AnalyticsEvent(
+        name = "place_suggestion_selected",
+        properties = mapOf("suggestion_position" to suggestionPosition),
+    )
 
-        const val SCREEN_TRIP_LIST = "trip_list"
-        const val SCREEN_TRIP_DETAIL = "trip_detail"
+    data class OperationFailed(
+        val operation: AnalyticsOperation,
+        val errorType: AnalyticsErrorType,
+    ) : AnalyticsEvent(
+        name = "operation_failed",
+        properties = mapOf("operation" to operation.value, "error_type" to errorType.value),
+    )
 
-        const val OPERATION_CREATE_TRIP = "create_trip"
-        const val OPERATION_SET_STOP = "set_stop"
-        const val OPERATION_EDIT_STOP = "edit_stop"
-        const val OPERATION_REMOVE_STOP = "remove_stop"
-        const val OPERATION_MOVE_STOP = "move_stop"
-        const val OPERATION_MARK_DEPARTED = "mark_departed"
-        const val OPERATION_CALCULATE_ROUTE = "calculate_route"
-    }
+    data class ScreenViewed(val screen: AnalyticsScreen) : AnalyticsEvent(
+        name = "screen_viewed",
+        properties = mapOf("screen_name" to screen.value),
+    )
 }

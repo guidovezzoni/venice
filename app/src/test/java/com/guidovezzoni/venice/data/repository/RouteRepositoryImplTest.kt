@@ -105,6 +105,56 @@ class RouteRepositoryImplTest {
     }
 
     @Test
+    fun `GIVEN fetchRoute succeeds and legs are persisted WHEN calculateRoute is called THEN Result success wrapping the persisted legs is returned`() = runTest {
+        val stops = listOf(
+            Stop(
+                id = STOP_ID_1,
+                tripId = TRIP_ID,
+                placeName = "Rome",
+                latitude = 41.9028,
+                longitude = 12.4964,
+                order = 0,
+                status = StopStatus.PENDING,
+            ),
+            Stop(
+                id = STOP_ID_2,
+                tripId = TRIP_ID,
+                placeName = "Florence",
+                latitude = 43.7696,
+                longitude = 11.2558,
+                order = 1,
+                status = StopStatus.PENDING,
+            ),
+        )
+        val directionsLeg1 = DirectionsLeg(
+            distanceMetres = DISTANCE_METRES_1,
+            durationSeconds = DURATION_SECONDS_1,
+            encodedPolyline = ENCODED_POLYLINE_1,
+        )
+        val directionsResponse = DirectionsResponse(legs = listOf(directionsLeg1))
+        coEvery { directionsApiService.fetchRoute(stops) } returns Result.success(directionsResponse)
+        coJustRun { legDao.deleteByTripId(TRIP_ID) }
+        coJustRun { legDao.insertAll(any()) }
+
+        val result = sut.calculateRoute(TRIP_ID, stops)
+
+        assertTrue(result.isSuccess)
+        val legs = result.getOrThrow()
+        val expectedLegs = listOf(
+            Leg(
+                id = legs[0].id,
+                tripId = TRIP_ID,
+                fromStopId = STOP_ID_1,
+                toStopId = STOP_ID_2,
+                distanceMetres = DISTANCE_METRES_1,
+                durationSeconds = DURATION_SECONDS_1,
+                encodedPolyline = ENCODED_POLYLINE_1,
+            )
+        )
+        assertEquals(expectedLegs, legs)
+    }
+
+    @Test
     fun `GIVEN API failure WHEN calculateRoute is called THEN Result failure is returned`() = runTest {
         val stops = listOf(
             Stop(

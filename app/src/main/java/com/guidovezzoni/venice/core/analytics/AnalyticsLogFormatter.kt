@@ -6,5 +6,5 @@ internal fun formatEventLog(event: AnalyticsEvent): String =
 internal fun formatUserPropertyLog(property: AnalyticsUserProperty): String =
     "UserProperty: $property"
 
-internal fun formatExceptionLog(throwable: Throwable, operation: AnalyticsOperation): String =
-    "Exception: ${operation.value} | ${throwable.message}"
+internal fun formatExceptionLog(operation: AnalyticsOperation): String =
+    "Exception: ${operation.value}"

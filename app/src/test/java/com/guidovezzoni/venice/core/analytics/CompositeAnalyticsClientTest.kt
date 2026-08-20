@@ -11,10 +11,10 @@ import org.junit.Test
 
 class CompositeAnalyticsClientTest {
 
-    private val event = AnalyticsEvent.TripCreated(tripId = "trip-1")
+    private val event = AnalyticsEvent.TripCreated(isFirstTrip = true)
     private val operation = AnalyticsOperation.CREATE_TRIP
     private val throwable = RuntimeException("test error")
-    private val userProperty = AnalyticsUserProperty.ForTesting
+    private val userProperty = AnalyticsUserProperty.TripCountBand(band = CountBand.ZERO)
 
     private lateinit var providerOne: AnalyticsProvider
     private lateinit var providerTwo: AnalyticsProvider
