@@ -35,7 +35,7 @@ Read the following file immediately as it's relevant to all workflows: @docs/gui
 **Venice** is a road trip planning app for Android, built in Kotlin with Jetpack Compose and Material 3. It follows Clean Architecture (data / domain / UI layers, plus `core/` for cross-cutting concerns) with the MVI pattern per feature. DI is handled by Hilt, persistence by Room, and async work by Coroutines and Flow. Product analytics go through a provider-agnostic layer in `core/analytics/` with one Hilt-multibound provider per backend.
 
 - **Package**: `com.guidovezzoni.venice`
-- **Min SDK**: 24 — **Target SDK**: 36
+- **Min SDK**: 24 — **Target SDK**: 37
 - **Source root**: `app/src/main/java/com/guidovezzoni/venice/`
 - **Tests**: `app/src/test/` (unit, JUnit 4 + MockK), `app/src/androidTest/` (instrumentation)
 - **Dependencies**: managed in `gradle/libs.versions.toml`

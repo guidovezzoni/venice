@@ -12,14 +12,14 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-abstract class AnalyticsModule {
+interface AnalyticsModule {
 
     @Binds
     @Singleton
-    abstract fun bindAnalyticsClient(
+    fun bindAnalyticsClient(
         implementation: CompositeAnalyticsClient,
     ): AnalyticsClient
 
     @Multibinds
-    abstract fun bindAnalyticsProviderSet(): Set<AnalyticsProvider>
+    fun bindAnalyticsProviderSet(): Set<AnalyticsProvider>
 }

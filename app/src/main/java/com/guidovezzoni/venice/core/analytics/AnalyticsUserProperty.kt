@@ -1,8 +1,8 @@
 package com.guidovezzoni.venice.core.analytics
 
-sealed class AnalyticsUserProperty {
+sealed interface AnalyticsUserProperty {
 
-    data class TripCountBand(val band: CountBand) : AnalyticsUserProperty()
+    data class TripCountBand(val band: CountBand) : AnalyticsUserProperty
 
-    data class DistanceUnit(val unit: DistanceUnitParam) : AnalyticsUserProperty()
+    data class DistanceUnit(val unit: DistanceUnitParam) : AnalyticsUserProperty
 }

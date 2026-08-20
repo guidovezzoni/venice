@@ -32,8 +32,8 @@ import com.guidovezzoni.venice.ui.theme.HeadingToVeniceTheme
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TripListScreen(
-    modifier: Modifier = Modifier,
     uiState: TripListUiState,
+    modifier: Modifier = Modifier,
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     onTripClicked: (tripId: String) -> Unit = {},
     onCreateTripClicked: () -> Unit = {},

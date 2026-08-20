@@ -19,9 +19,9 @@ private val TRIP_TOTAL_SUMMARY_VERTICAL_PADDING = 8.dp
 
 @Composable
 fun TripTotalSummary(
-    modifier: Modifier = Modifier,
     formattedTotalDistance: String?,
     formattedTotalDuration: String?,
+    modifier: Modifier = Modifier,
 ) {
     Column(
         modifier = modifier

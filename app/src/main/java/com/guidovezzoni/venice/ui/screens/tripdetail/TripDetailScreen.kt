@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AddLocation
@@ -148,8 +147,8 @@ fun TripDetailScreen(
                 startingPoint?.let { stop ->
                     legByFromStopId[stop.id]?.let {
                         LegSummary(
-                            formattedDistance = uiState.formattedLegDistances[stop.id] ?: "",
-                            formattedDuration = uiState.formattedLegDurations[stop.id] ?: "",
+                            formattedDistance = uiState.formattedLegDistances[stop.id] .orEmpty(),
+                            formattedDuration = uiState.formattedLegDurations[stop.id] .orEmpty(),
                         )
                     }
                 }
@@ -201,8 +200,8 @@ fun TripDetailScreen(
                 )
                 legByFromStopId[stop.id]?.let {
                     LegSummary(
-                        formattedDistance = uiState.formattedLegDistances[stop.id] ?: "",
-                        formattedDuration = uiState.formattedLegDurations[stop.id] ?: "",
+                        formattedDistance = uiState.formattedLegDistances[stop.id] .orEmpty(),
+                        formattedDuration = uiState.formattedLegDurations[stop.id] .orEmpty(),
                     )
                 }
             }
@@ -341,9 +340,9 @@ fun TripDetailScreen(
                 latitudeErrorRes = R.string.trip_detail_starting_point_latitude_error,
                 longitudeHintRes = R.string.trip_detail_starting_point_longitude_hint,
                 longitudeErrorRes = R.string.trip_detail_starting_point_longitude_error,
-                initialPlaceName = uiState.startingPoint?.placeName ?: "",
-                initialLatitude = uiState.startingPoint?.latitude?.toString() ?: "",
-                initialLongitude = uiState.startingPoint?.longitude?.toString() ?: "",
+                initialPlaceName = uiState.startingPoint?.placeName .orEmpty(),
+                initialLatitude = uiState.startingPoint?.latitude?.toString() .orEmpty(),
+                initialLongitude = uiState.startingPoint?.longitude?.toString() .orEmpty(),
                 suggestions = uiState.placeSearchState.suggestions,
                 isSearchingPlaces = uiState.placeSearchState.isSearching,
                 searchError = uiState.placeSearchState.searchError,
@@ -369,9 +368,9 @@ fun TripDetailScreen(
                 latitudeErrorRes = R.string.trip_detail_destination_latitude_error,
                 longitudeHintRes = R.string.trip_detail_destination_longitude_hint,
                 longitudeErrorRes = R.string.trip_detail_destination_longitude_error,
-                initialPlaceName = uiState.destination?.placeName ?: "",
-                initialLatitude = uiState.destination?.latitude?.toString() ?: "",
-                initialLongitude = uiState.destination?.longitude?.toString() ?: "",
+                initialPlaceName = uiState.destination?.placeName .orEmpty(),
+                initialLatitude = uiState.destination?.latitude?.toString() .orEmpty(),
+                initialLongitude = uiState.destination?.longitude?.toString() .orEmpty(),
                 suggestions = uiState.placeSearchState.suggestions,
                 isSearchingPlaces = uiState.placeSearchState.isSearching,
                 searchError = uiState.placeSearchState.searchError,

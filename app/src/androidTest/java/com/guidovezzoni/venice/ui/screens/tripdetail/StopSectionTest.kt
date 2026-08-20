@@ -59,8 +59,8 @@ class StopSectionTest {
                     onMoveUp = onMoveUp,
                     onMoveDown = onMoveDown,
                     onDelete = onDelete,
-                    onMarkDeparted = onMarkDeparted,
-                    onUndoDeparted = onUndoDeparted,
+                    onMarkDeparted = onMarkDepart,
+                    onUndoDeparted = onUndoDepart,
                     onNavigate = onNavigate,
                 )
             }

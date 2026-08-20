@@ -52,7 +52,7 @@ interface StopDao {
     @Transaction
     suspend fun deleteAndReorder(tripId: String, stopId: String) {
         val stop = getStopById(stopId)
-            ?: throw IllegalStateException("Stop not found: $stopId")
+            ?: error("Stop not found: $stopId")
         deleteById(stopId)
         decrementOrderAbove(tripId, stop.order)
     }
@@ -75,9 +75,9 @@ interface StopDao {
         toOrder: Int,
     ) {
         val fromStop = getStopByTripIdAndOrder(tripId, fromOrder)
-            ?: throw IllegalStateException("No stop found at order $fromOrder")
+            ?: error("No stop found at order $fromOrder")
         val toStop = getStopByTripIdAndOrder(tripId, toOrder)
-            ?: throw IllegalStateException("No stop found at order $toOrder")
+            ?: error("No stop found at order $toOrder")
         updateStopOrder(fromStop.id, toOrder)
         updateStopOrder(toStop.id, fromOrder)
     }

@@ -2,8 +2,9 @@ package com.guidovezzoni.venice.data.network
 
 import com.guidovezzoni.venice.BuildConfig
 import com.guidovezzoni.venice.data.network.dto.DirectionsResponse
+import com.guidovezzoni.venice.di.IoDispatcher
 import com.guidovezzoni.venice.domain.model.Stop
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
@@ -24,10 +25,11 @@ private const val MINIMUM_STOP_COUNT = 2
 // TODO: Replace with Retrofit when additional API endpoints are added
 class DirectionsApiService @Inject constructor(
     private val okHttpClient: OkHttpClient,
+    @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 ) {
     private val mapsApiKey: String = BuildConfig.MAPS_API_KEY
 
-    suspend fun fetchRoute(stops: List<Stop>): Result<DirectionsResponse> = withContext(Dispatchers.IO) {
+    suspend fun fetchRoute(stops: List<Stop>): Result<DirectionsResponse> = withContext(ioDispatcher) {
         runCatching {
             require(stops.size >= MINIMUM_STOP_COUNT) { "At least 2 stops are required to calculate a route" }
             val origin = stops.first()
@@ -44,11 +46,10 @@ class DirectionsApiService @Inject constructor(
                 .build()
 
             val response = okHttpClient.newCall(request).execute()
-            val responseBody = response.body?.string()
-                ?: throw IllegalStateException("Empty response body from Routes API")
-
-            if (!response.isSuccessful) {
-                throw IllegalStateException("Routes API request failed with status ${response.code}: $responseBody")
+            val responseBody = response.body.string()
+            check(responseBody.isNotEmpty()) { "Empty response body from Routes API" }
+            check(response.isSuccessful) {
+                "Routes API request failed with status ${response.code}: $responseBody"
             }
 
             DirectionsResponse.fromJson(responseBody)

@@ -78,6 +78,7 @@ private const val LONGITUDE = 12.4964
 private const val DEBOUNCE_MILLIS = 300L
 
 @OptIn(ExperimentalCoroutinesApi::class)
+@Suppress("LargeClass")
 class TripDetailViewModelTest {
 
     private val testDispatcher = UnconfinedTestDispatcher()

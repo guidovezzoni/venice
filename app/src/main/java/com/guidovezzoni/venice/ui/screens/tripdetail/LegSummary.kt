@@ -24,9 +24,9 @@ private val LEG_SUMMARY_ICON_SPACING = 6.dp
 
 @Composable
 fun LegSummary(
-    modifier: Modifier = Modifier,
     formattedDistance: String,
     formattedDuration: String,
+    modifier: Modifier = Modifier,
 ) {
     Row(
         modifier = modifier

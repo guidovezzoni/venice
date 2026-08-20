@@ -435,6 +435,8 @@ style:
 
 Compose:
   active: true
+  ParameterNaming:
+    active: false
 ```
 
 Key decisions:
@@ -451,6 +453,11 @@ Key decisions:
   (e.g. `val Purple80 = Color(0xFFD0BCFF)`) without flagging them.
 - `UnusedImport` and `WildcardImport` are inactive in detekt's defaults; explicitly enabled here.
 - `Compose: active: true` enables all rules from the `detekt-compose-rules` plugin, off by default.
+- `ParameterNaming: active: false` disables the Compose rule that enforces present-tense lambda
+  parameter names (e.g. `onClick` instead of `onClicked`). The official
+  [Android API guidelines](https://source.android.com/docs/setup/contribute/api-guidelines#callback-tense)
+  prescribe past tense for callbacks that fire after the event has occurred (`onClicked`, `onChanged`,
+  `onDeparted`), which directly contradicts this rule.
 
 ## Kover
 

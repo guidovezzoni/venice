@@ -19,8 +19,8 @@ private val ROUTE_RECALCULATION_PROMPT_PADDING = 16.dp
 
 @Composable
 fun RouteRecalculationPrompt(
-    modifier: Modifier = Modifier,
     isEnabled: Boolean,
+    modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
 ) {
     Card(

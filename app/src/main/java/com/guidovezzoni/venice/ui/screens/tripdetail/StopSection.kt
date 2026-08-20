@@ -51,16 +51,16 @@ private const val DEPARTED_ALPHA = 0.6f
 
 @Composable
 fun StopSection(
-    modifier: Modifier = Modifier,
-    isLoading: Boolean = false,
-    stop: Stop? = null,
-    coordinatesText: String? = null,
-    onSetStopClicked: () -> Unit = {},
     icon: ImageVector,
     @StringRes titleRes: Int,
     @StringRes setButtonTextRes: Int,
     @StringRes changeDescriptionRes: Int,
     @StringRes filledLabelRes: Int,
+    modifier: Modifier = Modifier,
+    isLoading: Boolean = false,
+    stop: Stop? = null,
+    coordinatesText: String? = null,
+    onSetStopClicked: () -> Unit = {},
     onMoveUp: (() -> Unit)? = null,
     onMoveDown: (() -> Unit)? = null,
     onDelete: (() -> Unit)? = null,
@@ -106,11 +106,11 @@ fun StopSection(
 @Composable
 private fun FilledStop(
     stop: Stop,
-    coordinatesText: String? = null,
     onClick: () -> Unit,
     icon: ImageVector,
     @StringRes changeDescriptionRes: Int,
     @StringRes filledLabelRes: Int,
+    coordinatesText: String? = null,
     isLoading: Boolean = false,
     onMoveUp: (() -> Unit)? = null,
     onMoveDown: (() -> Unit)? = null,

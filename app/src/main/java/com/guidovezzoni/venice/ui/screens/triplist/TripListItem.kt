@@ -12,9 +12,9 @@ import com.guidovezzoni.venice.ui.theme.HeadingToVeniceTheme
 
 @Composable
 fun TripListItem(
-    modifier: Modifier = Modifier,
     tripName: String,
     stopCount: Int,
+    modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
 ) {
     ListItem(

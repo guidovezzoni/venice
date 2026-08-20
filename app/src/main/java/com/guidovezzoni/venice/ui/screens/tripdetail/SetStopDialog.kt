@@ -53,10 +53,6 @@ private const val MAX_LONGITUDE = 180.0
 
 @Composable
 fun SetStopDialog(
-    modifier: Modifier = Modifier,
-    isLoading: Boolean = false,
-    isResolvingPlace: Boolean = false,
-    placeDetailError: String? = null,
     @StringRes dialogTitleRes: Int,
     @StringRes placeNameHintRes: Int,
     @StringRes placeNameErrorRes: Int,
@@ -64,6 +60,10 @@ fun SetStopDialog(
     @StringRes latitudeErrorRes: Int,
     @StringRes longitudeHintRes: Int,
     @StringRes longitudeErrorRes: Int,
+    modifier: Modifier = Modifier,
+    isLoading: Boolean = false,
+    isResolvingPlace: Boolean = false,
+    placeDetailError: String? = null,
     initialPlaceName: String = "",
     initialLatitude: String = "",
     initialLongitude: String = "",
@@ -93,9 +93,11 @@ fun SetStopDialog(
 
     val placeNameError = hasAttemptedSubmit && placeName.isBlank()
     val latitude = parseCoordinate(latitudeText)
-    val latitudeError = hasAttemptedSubmit && (latitude == null || latitude < MIN_LATITUDE || latitude > MAX_LATITUDE)
+    val isLatitudeValid = latitude != null && latitude in MIN_LATITUDE..MAX_LATITUDE
+    val latitudeError = hasAttemptedSubmit && !isLatitudeValid
     val longitude = parseCoordinate(longitudeText)
-    val longitudeError = hasAttemptedSubmit && (longitude == null || longitude < MIN_LONGITUDE || longitude > MAX_LONGITUDE)
+    val isLongitudeValid = longitude != null && longitude in MIN_LONGITUDE..MAX_LONGITUDE
+    val longitudeError = hasAttemptedSubmit && !isLongitudeValid
 
     AlertDialog(
         modifier = modifier,
@@ -149,11 +151,10 @@ fun SetStopDialog(
                     onClick = {
                         hasAttemptedSubmit = true
                         val lat = parseCoordinate(latitudeText)
+                            ?.takeIf { value -> value in MIN_LATITUDE..MAX_LATITUDE }
                         val lng = parseCoordinate(longitudeText)
-                        if (placeName.isNotBlank() &&
-                            lat != null && lat in MIN_LATITUDE..MAX_LATITUDE &&
-                            lng != null && lng in MIN_LONGITUDE..MAX_LONGITUDE
-                        ) {
+                            ?.takeIf { value -> value in MIN_LONGITUDE..MAX_LONGITUDE }
+                        if (placeName.isNotBlank() && lat != null && lng != null) {
                             onConfirm(placeName, lat, lng)
                         }
                     },

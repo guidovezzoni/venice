@@ -14,6 +14,7 @@ import com.guidovezzoni.venice.core.analytics.StopTypeParam
 import com.guidovezzoni.venice.core.analytics.toStopTypeParam
 import com.guidovezzoni.venice.core.analytics.classifyAnalyticsError
 import com.guidovezzoni.venice.domain.model.Leg
+import com.guidovezzoni.venice.domain.model.PlaceSuggestion
 import com.guidovezzoni.venice.domain.model.Stop
 import com.guidovezzoni.venice.domain.model.StopType
 import com.guidovezzoni.venice.domain.repository.PlaceSearchRepository
@@ -211,172 +212,138 @@ class TripDetailViewModel @Inject constructor(
         when (intent) {
             TripDetailUiIntent.OnSetStartingPointClicked ->
                 _uiState.update { it.copy(dialogState = DialogState.SetStartingPoint) }
-
-            TripDetailUiIntent.OnDismissStartingPointDialog -> {
-                searchJob?.cancel()
-                _uiState.update { it.copy(dialogState = DialogState.None) }
-                clearSearchState()
-                placeSearchRepository.resetSession()
-            }
-
+            TripDetailUiIntent.OnDismissStartingPointDialog -> dismissDialog()
             is TripDetailUiIntent.OnStartingPointConfirmed ->
                 setStop(intent.placeName, intent.latitude, intent.longitude, StopType.STARTING_POINT)
-
             TripDetailUiIntent.OnSetDestinationClicked ->
                 _uiState.update { it.copy(dialogState = DialogState.SetDestination) }
-
-            TripDetailUiIntent.OnDismissDestinationDialog -> {
-                searchJob?.cancel()
-                _uiState.update { it.copy(dialogState = DialogState.None) }
-                clearSearchState()
-                placeSearchRepository.resetSession()
-            }
-
+            TripDetailUiIntent.OnDismissDestinationDialog -> dismissDialog()
             is TripDetailUiIntent.OnDestinationConfirmed ->
                 setStop(intent.placeName, intent.latitude, intent.longitude, StopType.DESTINATION)
-
             TripDetailUiIntent.OnAddStopClicked ->
                 _uiState.update { it.copy(dialogState = DialogState.AddStop) }
-
-            TripDetailUiIntent.OnDismissAddStopDialog -> {
-                searchJob?.cancel()
-                _uiState.update { it.copy(dialogState = DialogState.None) }
-                clearSearchState()
-                placeSearchRepository.resetSession()
-            }
-
+            TripDetailUiIntent.OnDismissAddStopDialog -> dismissDialog()
             is TripDetailUiIntent.OnAddStopConfirmed ->
                 setStop(intent.placeName, intent.latitude, intent.longitude, StopType.INTERMEDIATE)
-
             is TripDetailUiIntent.OnMoveStopUp ->
                 moveStop(intent.currentOrder, intent.currentOrder - 1)
-
             is TripDetailUiIntent.OnMoveStopDown ->
                 moveStop(intent.currentOrder, intent.currentOrder + 1)
-
             is TripDetailUiIntent.OnEditStopClicked ->
                 _uiState.update { it.copy(dialogState = DialogState.EditStop(intent.stop)) }
-
-            TripDetailUiIntent.OnDismissEditStopDialog -> {
-                searchJob?.cancel()
-                _uiState.update { it.copy(dialogState = DialogState.None) }
-                clearSearchState()
-                placeSearchRepository.resetSession()
-            }
-
+            TripDetailUiIntent.OnDismissEditStopDialog -> dismissDialog()
             is TripDetailUiIntent.OnEditStopConfirmed ->
                 editStop(intent.stopId, intent.placeName, intent.latitude, intent.longitude)
-
             is TripDetailUiIntent.OnRemoveStopClicked ->
                 _uiState.update { it.copy(dialogState = DialogState.RemoveStop(intent.stop)) }
-
-            TripDetailUiIntent.OnRemoveStopConfirmed ->
-                removeStop()
-
+            TripDetailUiIntent.OnRemoveStopConfirmed -> removeStop()
             TripDetailUiIntent.OnDismissRemoveStopDialog ->
                 _uiState.update { it.copy(dialogState = DialogState.None) }
+            is TripDetailUiIntent.OnMarkStopDepartedClicked -> markStopDeparted(intent.stopId)
+            is TripDetailUiIntent.OnUndoMarkStopDepartedClicked -> undoMarkStopDeparted()
+            is TripDetailUiIntent.OnSearchQueryChanged -> handleSearchQueryChanged(intent.query)
+            is TripDetailUiIntent.OnSuggestionSelected -> handleSuggestionSelected(intent.suggestion)
+            TripDetailUiIntent.OnCalculateRouteClicked -> calculateRoute()
+            is TripDetailUiIntent.OnNavigateToStopClicked -> navigateToStop(intent.stopId)
+        }
+    }
 
-            is TripDetailUiIntent.OnMarkStopDepartedClicked ->
-                markStopDeparted(intent.stopId)
+    private fun dismissDialog() {
+        searchJob?.cancel()
+        _uiState.update { it.copy(dialogState = DialogState.None) }
+        clearSearchState()
+        placeSearchRepository.resetSession()
+    }
 
-            is TripDetailUiIntent.OnUndoMarkStopDepartedClicked ->
-                undoMarkStopDeparted()
-
-            is TripDetailUiIntent.OnSearchQueryChanged -> {
-                searchJob?.cancel()
-                if (intent.query.isBlank()) {
-                    clearSearchState()
-                } else {
-                    searchJob = viewModelScope.launch {
-                        _uiState.update {
-                            it.copy(
-                                placeSearchState = it.placeSearchState.copy(
-                                    isSearching = true,
-                                    placeDetailError = null,
-                                ),
-                            )
-                        }
-                        delay(SEARCH_DEBOUNCE_MILLIS)
-                        val result = searchPlacesUseCase(intent.query)
-                        result.onSuccess { suggestions ->
-                            analyticsClient.logEvent(
-                                AnalyticsEvent.PlaceSearchPerformed(suggestionCount = suggestions.size),
-                            )
-                            _uiState.update {
-                                it.copy(
-                                    placeSearchState = it.placeSearchState.copy(
-                                        suggestions = suggestions,
-                                        isSearching = false,
-                                        searchError = null,
-                                    ),
-                                )
-                            }
-                        }.onFailure { error ->
-                            analyticsClient.trackFailure(
-                                AnalyticsOperation.SEARCH_PLACE,
-                                classifyAnalyticsError(error),
-                                error,
-                            )
-                            _uiState.update {
-                                it.copy(
-                                    placeSearchState = it.placeSearchState.copy(
-                                        isSearching = false,
-                                        searchError = error.message,
-                                        suggestions = emptyList(),
-                                    ),
-                                )
-                            }
-                        }
-                    }
+    private fun handleSearchQueryChanged(query: String) {
+        searchJob?.cancel()
+        if (query.isBlank()) {
+            clearSearchState()
+        } else {
+            searchJob = viewModelScope.launch {
+                _uiState.update {
+                    it.copy(
+                        placeSearchState = it.placeSearchState.copy(
+                            isSearching = true,
+                            placeDetailError = null,
+                        ),
+                    )
                 }
-            }
-
-            is TripDetailUiIntent.OnSuggestionSelected -> {
-                val suggestionPosition = _uiState.value.placeSearchState.suggestions.indexOf(intent.suggestion)
-                viewModelScope.launch {
+                delay(SEARCH_DEBOUNCE_MILLIS)
+                val result = searchPlacesUseCase(query)
+                result.onSuccess { suggestions ->
+                    analyticsClient.logEvent(
+                        AnalyticsEvent.PlaceSearchPerformed(suggestionCount = suggestions.size),
+                    )
                     _uiState.update {
                         it.copy(
                             placeSearchState = it.placeSearchState.copy(
-                                isResolvingPlace = true,
-                                placeDetailError = null,
+                                suggestions = suggestions,
+                                isSearching = false,
+                                searchError = null,
                             ),
                         )
                     }
-                    val result = getPlaceDetailUseCase(intent.suggestion.placeId)
-                    result.onSuccess { detail ->
-                        analyticsClient.logEvent(
-                            AnalyticsEvent.PlaceSuggestionSelected(suggestionPosition = suggestionPosition),
+                }.onFailure { error ->
+                    analyticsClient.trackFailure(
+                        AnalyticsOperation.SEARCH_PLACE,
+                        classifyAnalyticsError(error),
+                        error,
+                    )
+                    _uiState.update {
+                        it.copy(
+                            placeSearchState = it.placeSearchState.copy(
+                                isSearching = false,
+                                searchError = error.message,
+                                suggestions = emptyList(),
+                            ),
                         )
-                        _uiState.update {
-                            it.copy(
-                                placeSearchState = it.placeSearchState.copy(
-                                    isResolvingPlace = false,
-                                    selectedPlaceDetail = detail,
-                                    suggestions = emptyList(),
-                                ),
-                            )
-                        }
-                    }.onFailure { error ->
-                        analyticsClient.trackFailure(
-                            AnalyticsOperation.RESOLVE_PLACE,
-                            classifyAnalyticsError(error),
-                            error,
-                        )
-                        _uiState.update {
-                            it.copy(
-                                placeSearchState = it.placeSearchState.copy(
-                                    isResolvingPlace = false,
-                                    placeDetailError = error.message ?: UNKNOWN_ERROR,
-                                ),
-                            )
-                        }
                     }
                 }
             }
+        }
+    }
 
-            TripDetailUiIntent.OnCalculateRouteClicked -> calculateRoute()
-
-            is TripDetailUiIntent.OnNavigateToStopClicked -> navigateToStop(intent.stopId)
+    private fun handleSuggestionSelected(suggestion: PlaceSuggestion) {
+        val suggestionPosition = _uiState.value.placeSearchState.suggestions.indexOf(suggestion)
+        viewModelScope.launch {
+            _uiState.update {
+                it.copy(
+                    placeSearchState = it.placeSearchState.copy(
+                        isResolvingPlace = true,
+                        placeDetailError = null,
+                    ),
+                )
+            }
+            val result = getPlaceDetailUseCase(suggestion.placeId)
+            result.onSuccess { detail ->
+                analyticsClient.logEvent(
+                    AnalyticsEvent.PlaceSuggestionSelected(suggestionPosition = suggestionPosition),
+                )
+                _uiState.update {
+                    it.copy(
+                        placeSearchState = it.placeSearchState.copy(
+                            isResolvingPlace = false,
+                            selectedPlaceDetail = detail,
+                            suggestions = emptyList(),
+                        ),
+                    )
+                }
+            }.onFailure { error ->
+                analyticsClient.trackFailure(
+                    AnalyticsOperation.RESOLVE_PLACE,
+                    classifyAnalyticsError(error),
+                    error,
+                )
+                _uiState.update {
+                    it.copy(
+                        placeSearchState = it.placeSearchState.copy(
+                            isResolvingPlace = false,
+                            placeDetailError = error.message ?: UNKNOWN_ERROR,
+                        ),
+                    )
+                }
+            }
         }
     }
 
@@ -436,7 +403,7 @@ class TripDetailViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             withMinimumDuration { editStopUseCase(stopId, placeName, latitude, longitude) }
-                .onSuccess {
+                .onSuccess { _ ->
                     analyticsClient.logEvent(AnalyticsEvent.StopEdited(stopTypeParam))
                     searchJob?.cancel()
                     clearSearchState()
@@ -458,7 +425,7 @@ class TripDetailViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             withMinimumDuration { removeStopUseCase(tripId, stop.id) }
-                .onSuccess {
+                .onSuccess { _ ->
                     analyticsClient.logEvent(
                         AnalyticsEvent.StopRemoved(stopTypeParam, stopCountBeforeRemove - 1),
                     )
@@ -482,7 +449,7 @@ class TripDetailViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             withMinimumDuration { setStopUseCase(tripId, placeName, latitude, longitude, stopType) }
-                .onSuccess {
+                .onSuccess { _ ->
                     analyticsClient.logEvent(
                         AnalyticsEvent.StopAdded(stopType.toStopTypeParam(), stopCountBeforeAdd + 1),
                     )

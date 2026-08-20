@@ -7,10 +7,8 @@ import javax.inject.Inject
 class PlaceDetailMapper @Inject constructor() {
 
     fun map(place: Place): PlaceDetail {
-        val displayName = place.displayName
-            ?: throw IllegalStateException("Place displayName is null")
-        val location = place.location
-            ?: throw IllegalStateException("Place location is null")
+        val displayName = checkNotNull(place.displayName) { "Place displayName is null" }
+        val location = checkNotNull(place.location) { "Place location is null" }
 
         return PlaceDetail(
             name = displayName,
