@@ -13,6 +13,8 @@ import com.guidovezzoni.venice.core.analytics.DurationBand
 import com.guidovezzoni.venice.core.analytics.StopTypeParam
 import com.guidovezzoni.venice.core.analytics.toStopTypeParam
 import com.guidovezzoni.venice.core.analytics.classifyAnalyticsError
+import com.guidovezzoni.venice.domain.model.Leg
+import com.guidovezzoni.venice.domain.model.Stop
 import com.guidovezzoni.venice.domain.model.StopType
 import com.guidovezzoni.venice.domain.repository.PlaceSearchRepository
 import com.guidovezzoni.venice.domain.usecase.CalculateRouteUseCase
@@ -46,9 +48,12 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -93,6 +98,12 @@ class TripDetailViewModel @Inject constructor(
 
     private var searchJob: Job? = null
 
+    private val stops: StateFlow<List<Stop>> = observeStopsUseCase(tripId)
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
+    private val legs: StateFlow<List<Leg>> = observeLegsUseCase(tripId)
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
     private val _uiState = MutableStateFlow(TripDetailUiState(tripId = tripId))
     val uiState: StateFlow<TripDetailUiState> = _uiState.asStateFlow()
 
@@ -101,7 +112,7 @@ class TripDetailViewModel @Inject constructor(
 
     init {
         analyticsClient.logEvent(AnalyticsEvent.ScreenViewed(AnalyticsScreen.TRIP_DETAIL))
-        observeStopsUseCase(tripId)
+        stops
             .onEach { stops ->
                 val startingPoint = stops.firstOrNull { it.order == STARTING_POINT_ORDER }
                 val destination = stops.filter { it.order > STARTING_POINT_ORDER }
@@ -127,7 +138,7 @@ class TripDetailViewModel @Inject constructor(
             }
             .launchIn(viewModelScope)
 
-        observeLegsUseCase(tripId)
+        legs
             .onEach { legs ->
                 val locale = Locale.getDefault()
                 val resources = application.resources
@@ -145,7 +156,7 @@ class TripDetailViewModel @Inject constructor(
             }
             .launchIn(viewModelScope)
 
-        combine(observeStopsUseCase(tripId), observeLegsUseCase(tripId)) { stops, legs ->
+        combine(stops, legs) { stops, legs ->
             if (legs.size == stops.size - 1 && stops.size >= 2) {
                 val formattedTotalDistance = formatDistance(
                     legs.sumOf { it.distanceMetres },
@@ -186,11 +197,12 @@ class TripDetailViewModel @Inject constructor(
             }
             .launchIn(viewModelScope)
 
-        combine(observeStopsUseCase(tripId), observeLegsUseCase(tripId)) { stops, legs ->
+        combine(stops, legs) { stops, legs ->
             val isComplete = legs.size == stops.size - 1 && stops.size >= 2
             val routeState = if (isComplete) "complete" else "none"
             analyticsClient.logEvent(AnalyticsEvent.TripOpened(stops.size, routeState))
         }
+            .drop(1)
             .take(1)
             .launchIn(viewModelScope)
     }
