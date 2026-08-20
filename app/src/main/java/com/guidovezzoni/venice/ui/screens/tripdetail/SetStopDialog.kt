@@ -71,8 +71,8 @@ fun SetStopDialog(
     isSearchingPlaces: Boolean = false,
     searchError: String? = null,
     selectedPlaceDetail: PlaceDetail? = null,
-    onSearchQueryChange: (String) -> Unit = {},
-    onSuggestionSelect: (PlaceSuggestion) -> Unit = {},
+    onSearchQueryChanged: (String) -> Unit = {},
+    onSuggestionSelected: (PlaceSuggestion) -> Unit = {},
     onConfirm: (placeName: String, latitude: Double, longitude: Double) -> Unit = { _, _, _ -> },
     onDismiss: () -> Unit = {},
 ) {
@@ -108,7 +108,7 @@ fun SetStopDialog(
                 placeName = placeName,
                 onPlaceNameChange = { newValue ->
                     placeName = newValue
-                    onSearchQueryChange(newValue)
+                    onSearchQueryChanged(newValue)
                     if (coordinatesFromAutocomplete && newValue != selectedPlaceDetail?.name) {
                         coordinatesFromAutocomplete = false
                     }
@@ -132,7 +132,7 @@ fun SetStopDialog(
                 searchError = searchError,
                 isResolvingPlace = isResolvingPlace,
                 placeDetailError = placeDetailError,
-                onSuggestionSelect = onSuggestionSelect,
+                onSuggestionSelected = onSuggestionSelected,
             )
         },
         confirmButton = {
@@ -195,7 +195,7 @@ private fun StopForm(
     searchError: String? = null,
     isResolvingPlace: Boolean = false,
     placeDetailError: String? = null,
-    onSuggestionSelect: (PlaceSuggestion) -> Unit = {},
+    onSuggestionSelected: (PlaceSuggestion) -> Unit = {},
 ) {
     val searchingPlacesDescription = stringResource(R.string.global_searching_places)
     val resolvingPlaceDescription = stringResource(R.string.global_resolving_place)
@@ -239,7 +239,7 @@ private fun StopForm(
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable { onSuggestionSelect(suggestion) }
+                            .clickable { onSuggestionSelected(suggestion) }
                             .padding(vertical = FIELD_SPACING),
                     ) {
                         Text(

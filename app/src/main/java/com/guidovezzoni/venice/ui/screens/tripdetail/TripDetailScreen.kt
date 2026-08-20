@@ -122,7 +122,7 @@ fun TripDetailScreen(
                     isLoading = uiState.isLoading,
                     stop = startingPoint,
                     coordinatesText = startingPoint?.let { uiState.formattedStopCoordinates[it.id] },
-                    onSetStopClick = {
+                    onSetStopClicked = {
                         onIntent(TripDetailUiIntent.OnSetStartingPointClicked)
                     },
                     icon = Icons.Filled.TripOrigin,
@@ -134,10 +134,10 @@ fun TripDetailScreen(
                         { onIntent(TripDetailUiIntent.OnRemoveStopClicked(stop)) }
                     },
                     stopDisplayState = startingPointDisplayState,
-                    onMarkDepart = startingPoint?.takeIf { it.id == currentStopId }?.let {
+                    onMarkDeparted = startingPoint?.takeIf { it.id == currentStopId }?.let {
                         { onIntent(TripDetailUiIntent.OnMarkStopDepartedClicked(it.id)) }
                     },
-                    onUndoDepart = startingPoint?.takeIf { it.id == lastDepartedStopId }?.let {
+                    onUndoDeparted = startingPoint?.takeIf { it.id == lastDepartedStopId }?.let {
                         { onIntent(TripDetailUiIntent.OnUndoMarkStopDepartedClicked(it.id)) }
                     },
                     onNavigate = startingPoint?.takeIf { it.status == StopStatus.PENDING }?.let { stop ->
@@ -162,7 +162,7 @@ fun TripDetailScreen(
                     isLoading = uiState.isLoading,
                     stop = stop,
                     coordinatesText = uiState.formattedStopCoordinates[stop.id],
-                    onSetStopClick = {
+                    onSetStopClicked = {
                         onIntent(TripDetailUiIntent.OnEditStopClicked(stop))
                     },
                     icon = Icons.Filled.LocationOn,
@@ -182,12 +182,12 @@ fun TripDetailScreen(
                     },
                     onDelete = { onIntent(TripDetailUiIntent.OnRemoveStopClicked(stop)) },
                     stopDisplayState = displayState,
-                    onMarkDepart = if (stop.id == currentStopId) {
+                    onMarkDeparted = if (stop.id == currentStopId) {
                         { onIntent(TripDetailUiIntent.OnMarkStopDepartedClicked(stop.id)) }
                     } else {
                         null
                     },
-                    onUndoDepart = if (stop.id == lastDepartedStopId) {
+                    onUndoDeparted = if (stop.id == lastDepartedStopId) {
                         { onIntent(TripDetailUiIntent.OnUndoMarkStopDepartedClicked(stop.id)) }
                     } else {
                         null
@@ -236,7 +236,7 @@ fun TripDetailScreen(
                     isLoading = uiState.isLoading,
                     stop = destination,
                     coordinatesText = destination?.let { uiState.formattedStopCoordinates[it.id] },
-                    onSetStopClick = {
+                    onSetStopClicked = {
                         onIntent(TripDetailUiIntent.OnSetDestinationClicked)
                     },
                     icon = Icons.Filled.Place,
@@ -248,10 +248,10 @@ fun TripDetailScreen(
                         { onIntent(TripDetailUiIntent.OnRemoveStopClicked(stop)) }
                     },
                     stopDisplayState = destinationDisplayState,
-                    onMarkDepart = destination?.takeIf { it.id == currentStopId }?.let {
+                    onMarkDeparted = destination?.takeIf { it.id == currentStopId }?.let {
                         { onIntent(TripDetailUiIntent.OnMarkStopDepartedClicked(it.id)) }
                     },
-                    onUndoDepart = destination?.takeIf { it.id == lastDepartedStopId }?.let {
+                    onUndoDeparted = destination?.takeIf { it.id == lastDepartedStopId }?.let {
                         { onIntent(TripDetailUiIntent.OnUndoMarkStopDepartedClicked(it.id)) }
                     },
                     onNavigate = destination?.takeIf { it.status == StopStatus.PENDING }?.let { stop ->
@@ -347,8 +347,8 @@ fun TripDetailScreen(
                 isSearchingPlaces = uiState.placeSearchState.isSearching,
                 searchError = uiState.placeSearchState.searchError,
                 selectedPlaceDetail = uiState.placeSearchState.selectedPlaceDetail,
-                onSearchQueryChange = { query -> onIntent(TripDetailUiIntent.OnSearchQueryChanged(query)) },
-                onSuggestionSelect = { suggestion -> onIntent(TripDetailUiIntent.OnSuggestionSelected(suggestion)) },
+                onSearchQueryChanged = { query -> onIntent(TripDetailUiIntent.OnSearchQueryChanged(query)) },
+                onSuggestionSelected = { suggestion -> onIntent(TripDetailUiIntent.OnSuggestionSelected(suggestion)) },
                 onConfirm = { placeName, latitude, longitude ->
                     onIntent(TripDetailUiIntent.OnStartingPointConfirmed(placeName, latitude, longitude))
                 },
@@ -375,8 +375,8 @@ fun TripDetailScreen(
                 isSearchingPlaces = uiState.placeSearchState.isSearching,
                 searchError = uiState.placeSearchState.searchError,
                 selectedPlaceDetail = uiState.placeSearchState.selectedPlaceDetail,
-                onSearchQueryChange = { query -> onIntent(TripDetailUiIntent.OnSearchQueryChanged(query)) },
-                onSuggestionSelect = { suggestion -> onIntent(TripDetailUiIntent.OnSuggestionSelected(suggestion)) },
+                onSearchQueryChanged = { query -> onIntent(TripDetailUiIntent.OnSearchQueryChanged(query)) },
+                onSuggestionSelected = { suggestion -> onIntent(TripDetailUiIntent.OnSuggestionSelected(suggestion)) },
                 onConfirm = { placeName, latitude, longitude ->
                     onIntent(TripDetailUiIntent.OnDestinationConfirmed(placeName, latitude, longitude))
                 },
@@ -400,8 +400,8 @@ fun TripDetailScreen(
                 isSearchingPlaces = uiState.placeSearchState.isSearching,
                 searchError = uiState.placeSearchState.searchError,
                 selectedPlaceDetail = uiState.placeSearchState.selectedPlaceDetail,
-                onSearchQueryChange = { query -> onIntent(TripDetailUiIntent.OnSearchQueryChanged(query)) },
-                onSuggestionSelect = { suggestion -> onIntent(TripDetailUiIntent.OnSuggestionSelected(suggestion)) },
+                onSearchQueryChanged = { query -> onIntent(TripDetailUiIntent.OnSearchQueryChanged(query)) },
+                onSuggestionSelected = { suggestion -> onIntent(TripDetailUiIntent.OnSuggestionSelected(suggestion)) },
                 onConfirm = { placeName, latitude, longitude ->
                     onIntent(TripDetailUiIntent.OnAddStopConfirmed(placeName, latitude, longitude))
                 },
@@ -428,8 +428,8 @@ fun TripDetailScreen(
                 isSearchingPlaces = uiState.placeSearchState.isSearching,
                 searchError = uiState.placeSearchState.searchError,
                 selectedPlaceDetail = uiState.placeSearchState.selectedPlaceDetail,
-                onSearchQueryChange = { query -> onIntent(TripDetailUiIntent.OnSearchQueryChanged(query)) },
-                onSuggestionSelect = { suggestion -> onIntent(TripDetailUiIntent.OnSuggestionSelected(suggestion)) },
+                onSearchQueryChanged = { query -> onIntent(TripDetailUiIntent.OnSearchQueryChanged(query)) },
+                onSuggestionSelected = { suggestion -> onIntent(TripDetailUiIntent.OnSuggestionSelected(suggestion)) },
                 onConfirm = { placeName, latitude, longitude ->
                     onIntent(
                         TripDetailUiIntent.OnEditStopConfirmed(

@@ -40,8 +40,8 @@ class StopSectionTest {
         onMoveUp: (() -> Unit)? = null,
         onMoveDown: (() -> Unit)? = null,
         onDelete: (() -> Unit)? = null,
-        onMarkDepart: (() -> Unit)? = null,
-        onUndoDepart: (() -> Unit)? = null,
+        onMarkDeparted: (() -> Unit)? = null,
+        onUndoDeparted: (() -> Unit)? = null,
         onNavigate: (() -> Unit)? = null,
     ) {
         composeTestRule.setContent {
@@ -59,8 +59,8 @@ class StopSectionTest {
                     onMoveUp = onMoveUp,
                     onMoveDown = onMoveDown,
                     onDelete = onDelete,
-                    onMarkDepart = onMarkDepart,
-                    onUndoDepart = onUndoDepart,
+                    onMarkDeparted = onMarkDepart,
+                    onUndoDeparted = onUndoDepart,
                     onNavigate = onNavigate,
                 )
             }
@@ -121,7 +121,7 @@ class StopSectionTest {
             onMoveUp = {},
             onMoveDown = {},
             onDelete = {},
-            onMarkDepart = {},
+            onMarkDeparted = {},
         )
 
         composeTestRule.onNodeWithContentDescription("Move up").assertIsNotEnabled()
@@ -138,7 +138,7 @@ class StopSectionTest {
             onMoveUp = {},
             onMoveDown = {},
             onDelete = {},
-            onMarkDepart = {},
+            onMarkDeparted = {},
         )
 
         composeTestRule.onNodeWithContentDescription("Move up").assertIsEnabled()

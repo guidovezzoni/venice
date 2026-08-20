@@ -60,13 +60,13 @@ fun StopSection(
     isLoading: Boolean = false,
     stop: Stop? = null,
     coordinatesText: String? = null,
-    onSetStopClick: () -> Unit = {},
+    onSetStopClicked: () -> Unit = {},
     onMoveUp: (() -> Unit)? = null,
     onMoveDown: (() -> Unit)? = null,
     onDelete: (() -> Unit)? = null,
     stopDisplayState: StopDisplayState = StopDisplayState.UPCOMING,
-    onMarkDepart: (() -> Unit)? = null,
-    onUndoDepart: (() -> Unit)? = null,
+    onMarkDeparted: (() -> Unit)? = null,
+    onUndoDeparted: (() -> Unit)? = null,
     onNavigate: (() -> Unit)? = null,
 ) {
     Column(modifier = modifier.fillMaxWidth().padding(horizontal = SECTION_PADDING)) {
@@ -80,7 +80,7 @@ fun StopSection(
             FilledStop(
                 stop = stop,
                 coordinatesText = coordinatesText,
-                onClick = onSetStopClick,
+                onClick = onSetStopClicked,
                 icon = icon,
                 changeDescriptionRes = changeDescriptionRes,
                 filledLabelRes = filledLabelRes,
@@ -89,13 +89,13 @@ fun StopSection(
                 onMoveDown = onMoveDown,
                 onDelete = onDelete,
                 stopDisplayState = stopDisplayState,
-                onMarkDepart = onMarkDepart,
-                onUndoDepart = onUndoDepart,
+                onMarkDeparted = onMarkDeparted,
+                onUndoDeparted = onUndoDeparted,
                 onNavigate = onNavigate,
             )
         } else {
             EmptyStop(
-                onClick = onSetStopClick,
+                onClick = onSetStopClicked,
                 setButtonTextRes = setButtonTextRes,
                 isLoading = isLoading,
             )
@@ -116,8 +116,8 @@ private fun FilledStop(
     onMoveDown: (() -> Unit)? = null,
     onDelete: (() -> Unit)? = null,
     stopDisplayState: StopDisplayState = StopDisplayState.UPCOMING,
-    onMarkDepart: (() -> Unit)? = null,
-    onUndoDepart: (() -> Unit)? = null,
+    onMarkDeparted: (() -> Unit)? = null,
+    onUndoDeparted: (() -> Unit)? = null,
     onNavigate: (() -> Unit)? = null,
 ) {
     val changeDescription = stringResource(changeDescriptionRes)
@@ -216,9 +216,9 @@ private fun FilledStop(
                 }
             }
         }
-        if (onMarkDepart != null) {
+        if (onMarkDeparted != null) {
             OutlinedButton(
-                onClick = onMarkDepart,
+                onClick = onMarkDeparted,
                 enabled = !isLoading,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -228,9 +228,9 @@ private fun FilledStop(
                 Text(text = stringResource(R.string.trip_detail_mark_departed))
             }
         }
-        if (onUndoDepart != null) {
+        if (onUndoDeparted != null) {
             OutlinedButton(
-                onClick = onUndoDepart,
+                onClick = onUndoDeparted,
                 enabled = !isLoading,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -445,7 +445,7 @@ private fun PreviewStopSectionDeparted() {
             changeDescriptionRes = R.string.trip_detail_change_starting_point,
             filledLabelRes = R.string.trip_detail_starting_point_start_label,
             stopDisplayState = StopDisplayState.DEPARTED,
-            onUndoDepart = {},
+            onUndoDeparted = {},
         )
     }
 }
@@ -471,7 +471,7 @@ private fun PreviewStopSectionCurrent() {
             changeDescriptionRes = R.string.trip_detail_change_intermediate_stop,
             filledLabelRes = R.string.trip_detail_intermediate_stop_label,
             stopDisplayState = StopDisplayState.CURRENT,
-            onMarkDepart = {},
+            onMarkDeparted = {},
             onNavigate = {},
         )
     }
@@ -528,7 +528,7 @@ private fun PreviewStopSectionLoading() {
             onMoveUp = {},
             onMoveDown = {},
             onDelete = {},
-            onMarkDepart = {},
+            onMarkDeparted = {},
         )
     }
 }

@@ -35,8 +35,8 @@ fun TripListScreen(
     uiState: TripListUiState,
     modifier: Modifier = Modifier,
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
-    onTripClick: (tripId: String) -> Unit = {},
-    onCreateTripClick: () -> Unit = {},
+    onTripClicked: (tripId: String) -> Unit = {},
+    onCreateTripClicked: () -> Unit = {},
     onNameChange: (String) -> Unit = {},
     onConfirmCreateTrip: () -> Unit = {},
     onDismissCreateDialog: () -> Unit = {},
@@ -48,7 +48,7 @@ fun TripListScreen(
         },
         floatingActionButton = {
             ExtendedFloatingActionButton(
-                onClick = onCreateTripClick,
+                onClick = onCreateTripClicked,
                 icon = { Icon(Icons.Default.Add, contentDescription = null) },
                 text = { Text(stringResource(R.string.trip_list_fab_label)) },
             )
@@ -62,7 +62,7 @@ fun TripListScreen(
         ) {
             if (uiState.trips.isEmpty()) {
                 TripEmptyState(
-                    onCreateTripClick = onCreateTripClick,
+                    onCreateTripClicked = onCreateTripClicked,
                 )
             } else {
                 LazyColumn(
@@ -75,7 +75,7 @@ fun TripListScreen(
                             modifier = Modifier.fillMaxWidth(),
                             tripName = trip.name,
                             stopCount = trip.stopCount,
-                            onClick = { onTripClick(trip.id) },
+                            onClick = { onTripClicked(trip.id) },
                         )
                     }
                 }

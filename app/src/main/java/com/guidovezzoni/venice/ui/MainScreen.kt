@@ -61,8 +61,8 @@ fun MainScreen() {
             TripListScreen(
                 uiState = uiState,
                 snackbarHostState = snackbarHostState,
-                onTripClick = { tripId -> viewModel.onIntent(TripListUiIntent.OnTripClicked(tripId)) },
-                onCreateTripClick = { viewModel.onIntent(TripListUiIntent.OnCreateTripClicked) },
+                onTripClicked = { tripId -> viewModel.onIntent(TripListUiIntent.OnTripClicked(tripId)) },
+                onCreateTripClicked = { viewModel.onIntent(TripListUiIntent.OnCreateTripClicked) },
                 onNameChange = { name -> viewModel.onIntent(TripListUiIntent.OnTripNameChanged(name)) },
                 onConfirmCreateTrip = { viewModel.onIntent(TripListUiIntent.ConfirmCreateTrip) },
                 onDismissCreateDialog = { viewModel.onIntent(TripListUiIntent.OnDismissCreateDialog) },

@@ -21,7 +21,7 @@ private const val EMPTY_STATE_PADDING_DP = 16
 @Composable
 fun TripEmptyState(
     modifier: Modifier = Modifier,
-    onCreateTripClick: () -> Unit = {},
+    onCreateTripClicked: () -> Unit = {},
 ) {
     Column(
         modifier = modifier
@@ -35,7 +35,7 @@ fun TripEmptyState(
             style = MaterialTheme.typography.titleMedium,
         )
         Button(
-            onClick = onCreateTripClick,
+            onClick = onCreateTripClicked,
             modifier = Modifier.padding(top = EMPTY_STATE_PADDING_DP.dp),
         ) {
             Text(stringResource(R.string.trip_list_empty_action))
