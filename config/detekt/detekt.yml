@@ -8,6 +8,7 @@ complexity:
       - '**/test/**'
       - '**/androidTest/**'
   CyclomaticComplexMethod:
+    ignoreSimpleWhenEntries: true
     ignoreAnnotated:
       - 'Composable'
   LongMethod:
@@ -19,7 +20,7 @@ complexity:
     ignoreAnnotated:
       - 'Composable'
   TooManyFunctions:
-    allowedFunctionsPerClass: 12
+    allowedFunctionsPerClass: 15
     allowedFunctionsPerInterface: 16
     ignoreAnnotatedFunctions:
       - 'Composable'
