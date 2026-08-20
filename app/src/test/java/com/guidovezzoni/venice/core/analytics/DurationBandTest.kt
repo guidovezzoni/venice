@@ -6,6 +6,13 @@ import org.junit.Test
 class DurationBandTest {
 
     @Test
+    fun `GIVEN negative seconds WHEN fromSeconds is called THEN returns UNDER_1H`() {
+        val expected = DurationBand.UNDER_1H
+        val actual = DurationBand.fromSeconds(-1)
+        assertEquals(expected, actual)
+    }
+
+    @Test
     fun `GIVEN 0 seconds WHEN fromSeconds is called THEN returns UNDER_1H`() {
         val expected = DurationBand.UNDER_1H
         val actual = DurationBand.fromSeconds(0)

@@ -6,6 +6,13 @@ import org.junit.Test
 class DistanceBandTest {
 
     @Test
+    fun `GIVEN negative metres WHEN fromMetres is called THEN returns UNDER_50KM`() {
+        val expected = DistanceBand.UNDER_50KM
+        val actual = DistanceBand.fromMetres(-1)
+        assertEquals(expected, actual)
+    }
+
+    @Test
     fun `GIVEN 0 metres WHEN fromMetres is called THEN returns UNDER_50KM`() {
         val expected = DistanceBand.UNDER_50KM
         val actual = DistanceBand.fromMetres(0)

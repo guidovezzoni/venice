@@ -312,6 +312,121 @@
 
       <div class="outcome outcome-passed">Implementation complete — 80/80 tasks, all gates passed.</div>
     </section>
+    <section class="report-section" data-source="sdlc:sdlc_verify_story" data-timestamp="2026-08-19T10:00:00Z">
+      <header>
+        <h2>Verification and Archive</h2>
+        <time datetime="2026-08-19T10:00:00Z">19 August 2026</time>
+      </header>
+      <p class="section-source">Source: sdlc:sdlc_verify_story</p>
+
+      <h3>Verification Gates</h3>
+      <table>
+        <tr>
+          <th>Gate</th>
+          <th>Result</th>
+          <th>Details</th>
+        </tr>
+        <tr>
+          <td>OpenSpec verify</td>
+          <td><span class="badge badge-pass">PASS</span></td>
+          <td>80/80 tasks complete; all 14 events implemented; one cosmetic suggestion (ScreenViewed Kotlin parameter name <code>screen</code> vs spec's <code>screenName</code>, no behavioural impact)</td>
+        </tr>
+        <tr>
+          <td>TODO scan</td>
+          <td><span class="badge badge-pass">PASS</span></td>
+          <td>5 TODOs found, all acknowledged as unrelated to 9.1.2</td>
+        </tr>
+        <tr>
+          <td>Security review</td>
+          <td><span class="badge badge-pass">PASS</span></td>
+          <td>No critical/high findings; changes improve privacy posture by removing raw IDs and exception messages from event parameters</td>
+        </tr>
+        <tr>
+          <td>Clean build</td>
+          <td><span class="badge badge-pass">PASS</span></td>
+          <td>BUILD SUCCESSFUL in 1m 47s; detekt, lint, unit tests, Kover all green</td>
+        </tr>
+        <tr>
+          <td>Unit tests</td>
+          <td><span class="badge badge-pass">PASS</span></td>
+          <td>All tests UP-TO-DATE from prior check run</td>
+        </tr>
+        <tr>
+          <td>Test file coverage</td>
+          <td><span class="badge badge-pass">PASS</span></td>
+          <td>All 13 behaviour-bearing classes covered; 8 simple enums/interfaces correctly exempt</td>
+        </tr>
+        <tr>
+          <td>Compose preview coverage</td>
+          <td><span class="badge badge-pass">PASS</span></td>
+          <td>No screen composables modified (analytics-only story)</td>
+        </tr>
+        <tr>
+          <td>On-device tests</td>
+          <td><span class="badge badge-pass">PASS</span></td>
+          <td>121 instrumented tests pass; analytics events verified (screen_viewed, DistanceUnit, TripCountBand — all snake_case, no raw IDs)</td>
+        </tr>
+        <tr>
+          <td>Definition of Done</td>
+          <td><span class="badge badge-pass">PASS</span></td>
+          <td>All 25 criteria confirmed; 3 negative-input tests added to DistanceBandTest, DurationBandTest, CountBandTest during verification to close missing test gap</td>
+        </tr>
+      </table>
+
+      <h3>Code Coverage Report</h3>
+      <table>
+        <tr>
+          <th>Category</th>
+          <th>Coverage</th>
+        </tr>
+        <tr>
+          <td>Instructions</td>
+          <td>99.03%</td>
+        </tr>
+        <tr>
+          <td>Branches</td>
+          <td>95.45%</td>
+        </tr>
+        <tr>
+          <td>Lines</td>
+          <td>98.52%</td>
+        </tr>
+        <tr>
+          <td>Methods</td>
+          <td>96.63%</td>
+        </tr>
+        <tr>
+          <td>Classes</td>
+          <td>96.53%</td>
+        </tr>
+      </table>
+
+      <h3>Specification Synchronisation</h3>
+      <p>
+        All OpenSpec artifacts synchronised to the archive. Changes applied:
+      </p>
+      <ul>
+        <li><strong>analytics-abstraction</strong> — 1 requirement updated, 1 removed</li>
+        <li><strong>analytics-taxonomy</strong> — 18 requirements (new)</li>
+        <li><strong>analytics-instrumentation</strong> — 8 requirements (new)</li>
+      </ul>
+      <p>
+        <strong>Archive location:</strong> <code>openspec/changes/archive/2026-08-19-analytics-taxonomy-coverage/</code>
+      </p>
+
+      <h3>Project Documentation</h3>
+      <ul>
+        <li><strong>AGENTS.md</strong> — corrected: enum count 6→7, DistanceUnitParam added</li>
+        <li><strong>README.md</strong> — was in sync, no update needed</li>
+      </ul>
+
+      <h3>Story Closure</h3>
+      <p>
+        User story file renamed to: <code>docs/userstories/9.1.2-analytics-taxonomy-and-coverage-DONE.md</code>
+      </p>
+
+      <div class="outcome outcome-passed">Verification complete — all 9 gates passed. Story archived and closed.</div>
+    </section>
   </main>
 
 </body>

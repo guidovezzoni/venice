@@ -6,6 +6,13 @@ import org.junit.Test
 class CountBandTest {
 
     @Test
+    fun `GIVEN a negative count WHEN fromCount is called THEN returns ZERO`() {
+        val expected = CountBand.ZERO
+        val actual = CountBand.fromCount(-1)
+        assertEquals(expected, actual)
+    }
+
+    @Test
     fun `GIVEN a count of 0 WHEN fromCount is called THEN returns ZERO`() {
         val expected = CountBand.ZERO
         val actual = CountBand.fromCount(0)

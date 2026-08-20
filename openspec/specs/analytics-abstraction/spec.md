@@ -153,28 +153,14 @@ be implemented by `CompositeAnalyticsClient` and `DebugAnalyticsProvider`, but n
 
 ### Requirement: Operation identifiers are a typed, bounded enum
 `AnalyticsOperation` SHALL be a top-level `enum class` in `core/analytics/`, each constant carrying an
-explicit `value: String` in `snake_case`. It SHALL contain exactly the 7 operation values already in
-use as of this change: `create_trip`, `set_stop`, `edit_stop`, `remove_stop`, `move_stop`,
-`mark_departed`, `calculate_route`. The `trackException` member of `AnalyticsTracking` SHALL take an
-`AnalyticsOperation` as its `operation` parameter.
+explicit `value: String` in `snake_case`. It SHALL contain exactly the 10 operation values in use as
+of this change: `create_trip`, `set_stop`, `edit_stop`, `remove_stop`, `move_stop`, `mark_departed`,
+`undo_mark_departed`, `calculate_route`, `search_place`, `resolve_place`. The `trackException` member
+of `AnalyticsTracking` SHALL take an `AnalyticsOperation` as its `operation` parameter.
 
-#### Scenario: AnalyticsOperation carries exactly the existing seven values
+#### Scenario: AnalyticsOperation carries exactly the ten documented values
 - **WHEN** `AnalyticsOperation`'s constants are enumerated
 - **THEN** they are exactly `CREATE_TRIP`, `SET_STOP`, `EDIT_STOP`, `REMOVE_STOP`, `MOVE_STOP`,
-  `MARK_DEPARTED`, and `CALCULATE_ROUTE`, each with a `value` matching its documented snake_case string
+  `MARK_DEPARTED`, `UNDO_MARK_DEPARTED`, `CALCULATE_ROUTE`, `SEARCH_PLACE`, and `RESOLVE_PLACE`, each
+  with a `value` matching its documented snake_case string
 
-### Requirement: The analytics taxonomy is unchanged by this structural upgrade
-`AnalyticsEvent` and its sealed subclasses SHALL be relocated to `core/analytics/` with no change to
-event names, parameter names, parameter types, or parameter values. Call sites in
-`TripListViewModel` and `TripDetailViewModel` SHALL invoke `analyticsClient.logEvent(...)` with the
-same `AnalyticsEvent` construction as before the change.
-
-#### Scenario: AnalyticsEvent subclass count and shape are unchanged
-- **WHEN** `AnalyticsEvent`'s sealed subclasses are enumerated after the change
-- **THEN** the same 10 subclasses exist, with the same constructor parameters and the same `name` and
-  `properties` values as before the change
-
-#### Scenario: ViewModels call the renamed client with unchanged event data
-- **WHEN** `TripListViewModel` or `TripDetailViewModel` triggers an analytics call
-- **THEN** it calls `analyticsClient.logEvent(event)` where `event` is constructed identically to how
-  it was constructed before this change

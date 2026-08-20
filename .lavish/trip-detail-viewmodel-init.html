@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="luxury">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TripDetailViewModel.init</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daisyui@5.5.19/daisyui.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daisyui@5.5.19/themes.css">
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.2.4/dist/index.global.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    :where(.grid, .flex) > * { min-width: 0; }
+    :where(p, h1, h2, h3, h4, h5, h6, li, td, th, .badge) { overflow-wrap: anywhere; }
+  </style>
+  <script type="module">
+    import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.15.0/dist/mermaid.esm.min.mjs";
+    const darkQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    const paint = document.createElement("canvas").getContext("2d");
+    function toRgba(color) {
+      paint.clearRect(0, 0, 1, 1);
+      paint.fillStyle = "#000";
+      paint.fillStyle = color;
+      paint.fillRect(0, 0, 1, 1);
+      return paint.getImageData(0, 0, 1, 1).data;
+    }
+    function compositeRgba(fg, bg) {
+      const fa = fg[3] / 255, ba = bg[3] / 255;
+      const a = fa + ba * (1 - fa);
+      if (a === 0) return [0, 0, 0, 0];
+      return [(fg[0]*fa + bg[0]*ba*(1-fa))/a, (fg[1]*fa + bg[1]*ba*(1-fa))/a, (fg[2]*fa + bg[2]*ba*(1-fa))/a, a*255];
+    }
+    function pageIsDark() {
+      const root = document.documentElement;
+      const rb = toRgba(getComputedStyle(root).backgroundColor);
+      const bb = document.body ? toRgba(getComputedStyle(document.body).backgroundColor) : [0,0,0,0];
+      const [r,g,b,a] = compositeRgba(bb, rb);
+      if (a > 0) return (0.2126*r + 0.7152*g + 0.0722*b)/255 < 0.5;
+      const cs = getComputedStyle(root).colorScheme;
+      if (cs.includes("dark") && !cs.includes("light")) return true;
+      if (cs.includes("light") && !cs.includes("dark")) return false;
+      return darkQuery.matches;
+    }
+    const diagrams = [...document.querySelectorAll(".mermaid")].map(el => ({ el, src: el.textContent }));
+    let applied, rendering = false, queued = false;
+    function queueRender() { queued = true; if (!rendering) void render(); }
+    async function render() {
+      rendering = true;
+      try {
+        while (queued) {
+          queued = false;
+          const theme = pageIsDark() ? "dark" : "default";
+          if (theme === applied) continue;
+          mermaid.initialize({ startOnLoad: false, theme, securityLevel: "strict" });
+          for (const { el, src } of diagrams) { el.removeAttribute("data-processed"); el.textContent = src; }
+          try { await mermaid.run({ nodes: diagrams.map(d => d.el) }); } catch(e) { console.error(e); return; }
+          applied = theme;
+        }
+      } finally { rendering = false; if (queued) queueRender(); }
+    }
+    if (document.readyState === "complete") queueRender();
+    else window.addEventListener("load", queueRender, { once: true });
+    const obs = new MutationObserver(queueRender);
+    for (const el of [document.documentElement, document.body]) {
+      if (!el) continue;
+      obs.observe(el, { attributes: true, attributeFilter: ["data-theme", "class", "style"] });
+    }
+    document.addEventListener("change", queueRender, true);
+    darkQuery.addEventListener("change", queueRender);
+  </script>
+</head>
+<body class="bg-base-100 text-base-content min-h-screen">
+  <main class="mx-auto max-w-5xl p-6 lg:p-10">
+
+    <!-- Header -->
+    <div class="mb-8">
+      <div class="flex items-center gap-3 mb-2">
+        <span class="badge badge-soft badge-accent text-xs font-mono">ViewModel</span>
+        <span class="badge badge-soft badge-neutral text-xs">TripDetailViewModel.kt</span>
+      </div>
+      <h1 class="text-3xl font-bold mb-2">TripDetailViewModel — <code class="text-primary">init</code></h1>
+      <p class="text-base-content/70 max-w-2xl">
+        The <code>init</code> block fires once, immediately after the ViewModel is created.
+        It logs the screen view, then launches <strong>five concurrent Flow subscriptions</strong>
+        in <code>viewModelScope</code> that keep <code>UiState</code> up-to-date for the lifetime
+        of the screen.
+      </p>
+    </div>
+
+    <!-- Summary row -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
+      <div class="stat bg-base-200 rounded-box p-4">
+        <div class="stat-title text-xs">Immediate</div>
+        <div class="stat-value text-lg text-accent">1</div>
+        <div class="stat-desc">analytics call</div>
+      </div>
+      <div class="stat bg-base-200 rounded-box p-4">
+        <div class="stat-title text-xs">Continuous</div>
+        <div class="stat-value text-lg text-primary">4</div>
+        <div class="stat-desc">Flow subscriptions</div>
+      </div>
+      <div class="stat bg-base-200 rounded-box p-4">
+        <div class="stat-title text-xs">One-shot</div>
+        <div class="stat-value text-lg text-secondary">1</div>
+        <div class="stat-desc">combined analytics</div>
+      </div>
+      <div class="stat bg-base-200 rounded-box p-4">
+        <div class="stat-title text-xs">Scope</div>
+        <div class="stat-value text-lg text-warning font-mono text-sm leading-tight pt-2">viewModel<br>Scope</div>
+        <div class="stat-desc">all coroutines</div>
+      </div>
+    </div>
+
+    <!-- Main diagram -->
+    <div class="card card-border bg-base-200 mb-8">
+      <div class="card-body">
+        <h2 class="card-title text-base mb-4">Execution flow</h2>
+        <div class="overflow-x-auto">
+          <pre class="mermaid">
+flowchart TD
+    INIT(["🏗️ init"])
+
+    INIT -->|"immediate"| S0["analyticsClient.logEvent\nScreenViewed(TRIP_DETAIL)"]
+    INIT -->|"launchIn(viewModelScope)"| S1
+    INIT -->|"launchIn(viewModelScope)"| S2
+    INIT -->|"combine · launchIn"| S3
+    INIT -->|"launchIn(viewModelScope)"| S4
+    INIT -->|"combine · take(1) · launchIn"| S5
+
+    S0 --> AC[("AnalyticsClient")]
+
+    subgraph S1_box ["observeStopsUseCase(tripId)  —  continuous"]
+      S1["Emit: List of Stop"] --> S1a["Classify:\n• startingPoint (order = 0)\n• destination (max order > 0)\n• intermediateStops (between)\n• canAddMoreStops (size < 25)\n• formattedStopCoordinates"]
+    end
+    S1a --> US[("UiState")]
+
+    subgraph S2_box ["observeLegsUseCase(tripId)  —  continuous"]
+      S2["Emit: List of Leg"] --> S2a["Format per leg:\n• formattedLegDistances\n• formattedLegDurations"]
+    end
+    S2a --> US
+
+    subgraph S3_box ["combine(stops, legs)  —  continuous"]
+      S3["Emit when either changes"] --> S3d{"legs.size ==\nstops.size − 1\n&& stops ≥ 2?"}
+      S3d -->|"Yes — route complete"| S3y["• formattedTotalDistance\n• formattedTotalDuration\n• recalcPrompt = false"]
+      S3d -->|"No — route missing/stale"| S3n["• totals = null\n• recalcPrompt = stops.size ≥ 2"]
+    end
+    S3y --> US
+    S3n --> US
+
+    subgraph S4_box ["observeTripUseCase(tripId)  —  continuous"]
+      S4["Emit: Trip?"] --> S4a["if trip != null\n→ tripName"]
+    end
+    S4a --> US
+
+    subgraph S5_box ["combine(stops, legs).take(1)  —  fires ONCE on first emission"]
+      S5["First combined emission"] --> S5a["Build routeState:\n'complete' or 'none'\nlogEvent TripOpened\n(stopCount, routeState)"]
+    end
+    S5a --> AC
+
+    style INIT fill:#7c3aed,color:#fff,stroke:#4c1d95
+    style AC fill:#064e3b,color:#d1fae5,stroke:#065f46
+    style US fill:#1e3a5f,color:#bfdbfe,stroke:#1e40af
+    style S3d fill:#78350f,color:#fef3c7,stroke:#92400e
+          </pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- Subscription detail cards -->
+    <h2 class="text-xl font-semibold mb-4">Subscription details</h2>
+    <div class="flex flex-col gap-4 mb-8">
+
+      <!-- Analytics — immediate -->
+      <div class="card card-border bg-base-200">
+        <div class="card-body py-4">
+          <div class="flex items-center gap-2 mb-1">
+            <span class="badge badge-soft badge-accent">Immediate</span>
+            <span class="font-mono text-sm text-primary">analyticsClient.logEvent(ScreenViewed(TRIP_DETAIL))</span>
+          </div>
+          <p class="text-base-content/70 text-sm">
+            Fires synchronously before any coroutine is launched. Records that the Trip Detail
+            screen was opened — not inside a coroutine or <code>init</code> block, so it captures
+            the moment before any data loads.
+          </p>
+        </div>
+      </div>
+
+      <!-- observeStops -->
+      <div class="card card-border bg-base-200">
+        <div class="card-body py-4">
+          <div class="flex items-center gap-2 mb-1">
+            <span class="badge badge-soft badge-primary">Continuous</span>
+            <span class="font-mono text-sm text-primary">observeStopsUseCase(tripId)</span>
+          </div>
+          <p class="text-base-content/70 text-sm mb-3">
+            Re-runs on every stop change. Classifies the flat <code>List&lt;Stop&gt;</code> into the
+            three UI roles based on <code>order</code>:
+          </p>
+          <div class="overflow-x-auto">
+            <table class="table table-sm table-zebra text-sm">
+              <thead>
+                <tr><th>UiState field</th><th>Logic</th></tr>
+              </thead>
+              <tbody>
+                <tr><td class="font-mono">startingPoint</td><td>stop where <code>order == 0</code></td></tr>
+                <tr><td class="font-mono">destination</td><td>stop with the highest order &gt; 0</td></tr>
+                <tr><td class="font-mono">intermediateStops</td><td>stops between 0 and max order, sorted</td></tr>
+                <tr><td class="font-mono">canAddMoreStops</td><td><code>stops.size &lt; 25</code></td></tr>
+                <tr><td class="font-mono">formattedStopCoordinates</td><td>Map&lt;stopId, formatted lat/lon string&gt;</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- observeLegs -->
+      <div class="card card-border bg-base-200">
+        <div class="card-body py-4">
+          <div class="flex items-center gap-2 mb-1">
+            <span class="badge badge-soft badge-primary">Continuous</span>
+            <span class="font-mono text-sm text-primary">observeLegsUseCase(tripId)</span>
+          </div>
+          <p class="text-base-content/70 text-sm mb-3">
+            Re-runs on every route/leg change. Converts raw metres and seconds into
+            locale-aware display strings for each leg.
+          </p>
+          <div class="overflow-x-auto">
+            <table class="table table-sm table-zebra text-sm">
+              <thead>
+                <tr><th>UiState field</th><th>Logic</th></tr>
+              </thead>
+              <tbody>
+                <tr><td class="font-mono">legs</td><td>raw list stored as-is</td></tr>
+                <tr><td class="font-mono">formattedLegDistances</td><td>Map&lt;fromStopId, formatted string&gt; via <code>formatDistance(metres, locale, resources)</code></td></tr>
+                <tr><td class="font-mono">formattedLegDurations</td><td>Map&lt;fromStopId, formatted string&gt; via <code>formatDuration(seconds, resources)</code></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- combine totals -->
+      <div class="card card-border bg-base-200">
+        <div class="card-body py-4">
+          <div class="flex items-center gap-2 mb-2">
+            <span class="badge badge-soft badge-primary">Continuous</span>
+            <span class="font-mono text-sm text-primary">combine(stops, legs)</span>
+            <span class="badge badge-soft badge-warning text-xs">branch</span>
+          </div>
+          <p class="text-base-content/70 text-sm mb-3">
+            Re-runs when either stops or legs change. Drives the trip totals row and the
+            route-recalculation prompt banner.
+          </p>
+          <div class="grid sm:grid-cols-2 gap-3">
+            <div class="bg-success/10 border border-success/30 rounded-lg p-3">
+              <div class="font-semibold text-success text-sm mb-1">Route complete</div>
+              <p class="text-xs text-base-content/70 mb-2">
+                Condition: <code>legs.size == stops.size − 1 &amp;&amp; stops.size ≥ 2</code>
+              </p>
+              <ul class="text-xs text-base-content/80 list-disc list-inside space-y-1">
+                <li><code>formattedTotalDistance</code> — sum of all leg distances</li>
+                <li><code>formattedTotalDuration</code> — sum of all leg durations</li>
+                <li><code>isRouteRecalculationPromptVisible = false</code></li>
+              </ul>
+            </div>
+            <div class="bg-warning/10 border border-warning/30 rounded-lg p-3">
+              <div class="font-semibold text-warning text-sm mb-1">Route missing / stale</div>
+              <p class="text-xs text-base-content/70 mb-2">Everything else</p>
+              <ul class="text-xs text-base-content/80 list-disc list-inside space-y-1">
+                <li><code>formattedTotalDistance = null</code></li>
+                <li><code>formattedTotalDuration = null</code></li>
+                <li><code>isRouteRecalculationPromptVisible = stops.size ≥ 2</code></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- observeTrip -->
+      <div class="card card-border bg-base-200">
+        <div class="card-body py-4">
+          <div class="flex items-center gap-2 mb-1">
+            <span class="badge badge-soft badge-primary">Continuous</span>
+            <span class="font-mono text-sm text-primary">observeTripUseCase(tripId)</span>
+          </div>
+          <p class="text-base-content/70 text-sm">
+            Observes the <code>Trip</code> entity. When <code>trip != null</code>, updates
+            <code>UiState.tripName</code>. Used by the TopAppBar to show the real trip name
+            while the screen loads (falls back to "Trip Detail" until the first emission).
+          </p>
+        </div>
+      </div>
+
+      <!-- one-shot analytics -->
+      <div class="card card-border bg-base-200">
+        <div class="card-body py-4">
+          <div class="flex items-center gap-2 mb-1">
+            <span class="badge badge-soft badge-secondary">One-shot</span>
+            <span class="font-mono text-sm text-primary">combine(stops, legs).take(1)</span>
+          </div>
+          <p class="text-base-content/70 text-sm">
+            Collects the very first combined emission of stops and legs, then cancels itself
+            via <code>.take(1)</code>. Logs <code>TripOpened(stopCount, routeState)</code>
+            to analytics — <em>not</em> in the other <code>combine</code> subscription above,
+            which would re-fire on every change.
+            <code>routeState</code> is <code>"complete"</code> when the route is fully
+            calculated, otherwise <code>"none"</code>.
+          </p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Key design notes -->
+    <div class="alert alert-soft alert-info mb-6">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-info w-5 h-5 shrink-0">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      <div>
+        <div class="font-semibold mb-1">Design notes</div>
+        <ul class="text-sm list-disc list-inside space-y-1">
+          <li>All subscriptions share <code>viewModelScope</code> and are cancelled automatically when the ViewModel is cleared.</li>
+          <li>Stops and legs are subscribed <strong>twice</strong> each: once alone (for their own UiState fields) and once together in a <code>combine</code> (for totals and the analytics one-shot). This is intentional — each subscription is independent and does not interfere with the others.</li>
+          <li>Screen-view analytics is <strong>immediate</strong>, not deferred to a coroutine, consistent with the guideline that screen views come from navigation events, not ViewModel <code>init</code>. Here it approximates navigation because the ViewModel is created by navigation.</li>
+          <li><code>TripOpened</code> analytics uses <code>.take(1)</code> so it only fires once per screen visit, not on every data change.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="text-xs text-base-content/40 text-right">
+      Source: <code>TripDetailViewModel.kt · lines 102–196</code>
+    </div>
+  </main>
+</body>
+</html>
