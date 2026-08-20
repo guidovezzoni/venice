@@ -32,11 +32,11 @@ import com.guidovezzoni.venice.ui.theme.HeadingToVeniceTheme
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TripListScreen(
-    modifier: Modifier = Modifier,
     uiState: TripListUiState,
+    modifier: Modifier = Modifier,
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
-    onTripClicked: (tripId: String) -> Unit = {},
-    onCreateTripClicked: () -> Unit = {},
+    onTripClick: (tripId: String) -> Unit = {},
+    onCreateTripClick: () -> Unit = {},
     onNameChange: (String) -> Unit = {},
     onConfirmCreateTrip: () -> Unit = {},
     onDismissCreateDialog: () -> Unit = {},
@@ -48,7 +48,7 @@ fun TripListScreen(
         },
         floatingActionButton = {
             ExtendedFloatingActionButton(
-                onClick = onCreateTripClicked,
+                onClick = onCreateTripClick,
                 icon = { Icon(Icons.Default.Add, contentDescription = null) },
                 text = { Text(stringResource(R.string.trip_list_fab_label)) },
             )
@@ -62,7 +62,7 @@ fun TripListScreen(
         ) {
             if (uiState.trips.isEmpty()) {
                 TripEmptyState(
-                    onCreateTripClicked = onCreateTripClicked,
+                    onCreateTripClick = onCreateTripClick,
                 )
             } else {
                 LazyColumn(
@@ -75,7 +75,7 @@ fun TripListScreen(
                             modifier = Modifier.fillMaxWidth(),
                             tripName = trip.name,
                             stopCount = trip.stopCount,
-                            onClick = { onTripClicked(trip.id) },
+                            onClick = { onTripClick(trip.id) },
                         )
                     }
                 }

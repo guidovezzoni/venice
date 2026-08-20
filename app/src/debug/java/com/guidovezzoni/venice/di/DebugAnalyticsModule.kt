@@ -10,11 +10,11 @@ import dagger.multibindings.IntoSet
 
 @Module
 @InstallIn(SingletonComponent::class)
-abstract class DebugAnalyticsModule {
+interface DebugAnalyticsModule {
 
     @Binds
     @IntoSet
-    abstract fun bindDebugAnalyticsProvider(
+    fun bindDebugAnalyticsProvider(
         implementation: DebugAnalyticsProvider,
     ): AnalyticsProvider
 }

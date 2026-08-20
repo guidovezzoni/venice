@@ -33,9 +33,9 @@ private val SPINNER_SPACING = 8.dp
 
 @Composable
 fun CreateTripDialog(
+    tripName: String,
     modifier: Modifier = Modifier,
     isLoading: Boolean = false,
-    tripName: String,
     onNameChange: (String) -> Unit = {},
     onConfirm: () -> Unit = {},
     onDismiss: () -> Unit = {},
@@ -80,8 +80,8 @@ fun CreateTripDialog(
 
 @Composable
 private fun CreateTripDialogContent(
-    modifier: Modifier = Modifier,
     tripName: String,
+    modifier: Modifier = Modifier,
     onNameChange: (String) -> Unit = {},
 ) {
     Column(modifier = modifier) {

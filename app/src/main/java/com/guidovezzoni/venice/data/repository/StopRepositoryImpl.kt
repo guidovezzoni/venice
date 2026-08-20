@@ -80,7 +80,7 @@ class StopRepositoryImpl @Inject constructor(
         longitude: Double,
     ): Result<Stop> = runCatching {
         val existing = stopDao.getStopById(stopId)
-            ?: throw IllegalStateException("Stop not found: $stopId")
+            ?: error("Stop not found: $stopId")
         val updated = existing.copy(
             placeName = placeName,
             latitude = latitude,

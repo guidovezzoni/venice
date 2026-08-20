@@ -10,35 +10,30 @@ data class DirectionsResponse(
             val root = JSONObject(json)
 
             if (root.has("error")) {
-                val error = root.getJSONObject("error")
-                val message = error.optString("message", "Unknown API error")
-                val status = error.optString("status", "UNKNOWN")
-                throw IllegalStateException("Routes API error: $status — $message")
+                val apiError = root.getJSONObject("error")
+                val message = apiError.optString("message", "Unknown API error")
+                val status = apiError.optString("status", "UNKNOWN")
+                error("Routes API error: $status — $message")
             }
 
-            val routes = root.optJSONArray("routes")
-            if (routes == null || routes.length() == 0) {
-                return DirectionsResponse(legs = emptyList())
-            }
-            val firstRoute = routes.getJSONObject(0)
-            val legsArray = firstRoute.optJSONArray("legs")
-            if (legsArray == null || legsArray.length() == 0) {
-                return DirectionsResponse(legs = emptyList())
-            }
-            val legs = mutableListOf<DirectionsLeg>()
-            for (index in 0 until legsArray.length()) {
+            val legsArray = root.optJSONArray("routes")
+                ?.takeIf { it.length() > 0 }
+                ?.getJSONObject(0)
+                ?.optJSONArray("legs")
+                ?.takeIf { it.length() > 0 }
+                ?: return DirectionsResponse(legs = emptyList())
+
+            val legs = (0 until legsArray.length()).map { index ->
                 val legObject = legsArray.getJSONObject(index)
                 val distanceMetres = legObject.optInt("distanceMeters")
                 val durationString = legObject.optString("duration")
                 val durationSeconds = parseDurationSeconds(durationString)
                 val encodedPolyline = legObject.optJSONObject("polyline")
                     ?.optString("encodedPolyline")
-                legs.add(
-                    DirectionsLeg(
-                        distanceMetres = distanceMetres,
-                        durationSeconds = durationSeconds,
-                        encodedPolyline = encodedPolyline,
-                    )
+                DirectionsLeg(
+                    distanceMetres = distanceMetres,
+                    durationSeconds = durationSeconds,
+                    encodedPolyline = encodedPolyline,
                 )
             }
             return DirectionsResponse(legs = legs)

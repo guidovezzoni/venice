@@ -19,9 +19,9 @@ private val VERTICAL_PADDING = 8.dp
 
 @Composable
 fun TripProgressSummary(
-    modifier: Modifier = Modifier,
     departedCount: Int,
     totalCount: Int,
+    modifier: Modifier = Modifier,
 ) {
     val progress = if (totalCount > 0) departedCount.toFloat() / totalCount.toFloat() else 0f
     Column(

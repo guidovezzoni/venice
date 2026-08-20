@@ -4,6 +4,8 @@ import com.guidovezzoni.venice.domain.model.Stop
 import com.guidovezzoni.venice.domain.model.StopStatus
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import okhttp3.Call
 import okhttp3.OkHttpClient
@@ -29,6 +31,7 @@ private const val EXPECTED_DURATION_SECONDS = 678
 private const val HTTP_OK = 200
 private const val HTTP_SERVER_ERROR = 500
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class DirectionsApiServiceTest {
 
     private lateinit var okHttpClient: OkHttpClient
@@ -37,7 +40,7 @@ class DirectionsApiServiceTest {
     @Before
     fun setUp() {
         okHttpClient = mockk()
-        sut = DirectionsApiService(okHttpClient)
+        sut = DirectionsApiService(okHttpClient, UnconfinedTestDispatcher())
 
         val mapsApiKeyField: Field = DirectionsApiService::class.java.getDeclaredField("mapsApiKey")
         mapsApiKeyField.isAccessible = true

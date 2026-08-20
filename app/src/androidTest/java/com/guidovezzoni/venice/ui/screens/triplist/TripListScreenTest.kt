@@ -36,8 +36,8 @@ class TripListScreenTest {
 
     private fun setContent(
         uiState: TripListUiState = TripListUiState(),
-        onTripClicked: (String) -> Unit = {},
-        onCreateTripClicked: () -> Unit = {},
+        onTripClick: (String) -> Unit = {},
+        onCreateTripClick: () -> Unit = {},
         onNameChange: (String) -> Unit = {},
         onConfirmCreateTrip: () -> Unit = {},
         onDismissCreateDialog: () -> Unit = {},
@@ -46,8 +46,8 @@ class TripListScreenTest {
             HeadingToVeniceTheme {
                 TripListScreen(
                     uiState = uiState,
-                    onTripClicked = onTripClicked,
-                    onCreateTripClicked = onCreateTripClicked,
+                    onTripClick = onTripClick,
+                    onCreateTripClick = onCreateTripClick,
                     onNameChange = onNameChange,
                     onConfirmCreateTrip = onConfirmCreateTrip,
                     onDismissCreateDialog = onDismissCreateDialog,
@@ -79,7 +79,7 @@ class TripListScreenTest {
     @Test
     fun clickingFab_firesOnCreateTripClicked() {
         var clicked = false
-        setContent(onCreateTripClicked = { clicked = true })
+        setContent(onCreateTripClick = { clicked = true })
 
         composeTestRule
             .onNodeWithText("Create roadtrip", useUnmergedTree = true)
@@ -113,7 +113,7 @@ class TripListScreenTest {
     @Test
     fun emptyState_clickingCreateButton_firesOnCreateTripClicked() {
         var clicked = false
-        setContent(onCreateTripClicked = { clicked = true })
+        setContent(onCreateTripClick = { clicked = true })
 
         composeTestRule
             .onNodeWithText("Create your first trip")
@@ -156,7 +156,7 @@ class TripListScreenTest {
         val clickedIds = mutableListOf<String>()
         setContent(
             uiState = TripListUiState(trips = listOf(TRIP_1, TRIP_2)),
-            onTripClicked = { clickedIds.add(it) },
+            onTripClick = { clickedIds.add(it) },
         )
 
         composeTestRule

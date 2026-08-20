@@ -51,22 +51,22 @@ private const val DEPARTED_ALPHA = 0.6f
 
 @Composable
 fun StopSection(
-    modifier: Modifier = Modifier,
-    isLoading: Boolean = false,
-    stop: Stop? = null,
-    coordinatesText: String? = null,
-    onSetStopClicked: () -> Unit = {},
     icon: ImageVector,
     @StringRes titleRes: Int,
     @StringRes setButtonTextRes: Int,
     @StringRes changeDescriptionRes: Int,
     @StringRes filledLabelRes: Int,
+    modifier: Modifier = Modifier,
+    isLoading: Boolean = false,
+    stop: Stop? = null,
+    coordinatesText: String? = null,
+    onSetStopClick: () -> Unit = {},
     onMoveUp: (() -> Unit)? = null,
     onMoveDown: (() -> Unit)? = null,
     onDelete: (() -> Unit)? = null,
     stopDisplayState: StopDisplayState = StopDisplayState.UPCOMING,
-    onMarkDeparted: (() -> Unit)? = null,
-    onUndoDeparted: (() -> Unit)? = null,
+    onMarkDepart: (() -> Unit)? = null,
+    onUndoDepart: (() -> Unit)? = null,
     onNavigate: (() -> Unit)? = null,
 ) {
     Column(modifier = modifier.fillMaxWidth().padding(horizontal = SECTION_PADDING)) {
@@ -80,7 +80,7 @@ fun StopSection(
             FilledStop(
                 stop = stop,
                 coordinatesText = coordinatesText,
-                onClick = onSetStopClicked,
+                onClick = onSetStopClick,
                 icon = icon,
                 changeDescriptionRes = changeDescriptionRes,
                 filledLabelRes = filledLabelRes,
@@ -89,13 +89,13 @@ fun StopSection(
                 onMoveDown = onMoveDown,
                 onDelete = onDelete,
                 stopDisplayState = stopDisplayState,
-                onMarkDeparted = onMarkDeparted,
-                onUndoDeparted = onUndoDeparted,
+                onMarkDepart = onMarkDepart,
+                onUndoDepart = onUndoDepart,
                 onNavigate = onNavigate,
             )
         } else {
             EmptyStop(
-                onClick = onSetStopClicked,
+                onClick = onSetStopClick,
                 setButtonTextRes = setButtonTextRes,
                 isLoading = isLoading,
             )
@@ -106,18 +106,18 @@ fun StopSection(
 @Composable
 private fun FilledStop(
     stop: Stop,
-    coordinatesText: String? = null,
     onClick: () -> Unit,
     icon: ImageVector,
     @StringRes changeDescriptionRes: Int,
     @StringRes filledLabelRes: Int,
+    coordinatesText: String? = null,
     isLoading: Boolean = false,
     onMoveUp: (() -> Unit)? = null,
     onMoveDown: (() -> Unit)? = null,
     onDelete: (() -> Unit)? = null,
     stopDisplayState: StopDisplayState = StopDisplayState.UPCOMING,
-    onMarkDeparted: (() -> Unit)? = null,
-    onUndoDeparted: (() -> Unit)? = null,
+    onMarkDepart: (() -> Unit)? = null,
+    onUndoDepart: (() -> Unit)? = null,
     onNavigate: (() -> Unit)? = null,
 ) {
     val changeDescription = stringResource(changeDescriptionRes)
@@ -216,9 +216,9 @@ private fun FilledStop(
                 }
             }
         }
-        if (onMarkDeparted != null) {
+        if (onMarkDepart != null) {
             OutlinedButton(
-                onClick = onMarkDeparted,
+                onClick = onMarkDepart,
                 enabled = !isLoading,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -228,9 +228,9 @@ private fun FilledStop(
                 Text(text = stringResource(R.string.trip_detail_mark_departed))
             }
         }
-        if (onUndoDeparted != null) {
+        if (onUndoDepart != null) {
             OutlinedButton(
-                onClick = onUndoDeparted,
+                onClick = onUndoDepart,
                 enabled = !isLoading,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -445,7 +445,7 @@ private fun PreviewStopSectionDeparted() {
             changeDescriptionRes = R.string.trip_detail_change_starting_point,
             filledLabelRes = R.string.trip_detail_starting_point_start_label,
             stopDisplayState = StopDisplayState.DEPARTED,
-            onUndoDeparted = {},
+            onUndoDepart = {},
         )
     }
 }
@@ -471,7 +471,7 @@ private fun PreviewStopSectionCurrent() {
             changeDescriptionRes = R.string.trip_detail_change_intermediate_stop,
             filledLabelRes = R.string.trip_detail_intermediate_stop_label,
             stopDisplayState = StopDisplayState.CURRENT,
-            onMarkDeparted = {},
+            onMarkDepart = {},
             onNavigate = {},
         )
     }
@@ -528,7 +528,7 @@ private fun PreviewStopSectionLoading() {
             onMoveUp = {},
             onMoveDown = {},
             onDelete = {},
-            onMarkDeparted = {},
+            onMarkDepart = {},
         )
     }
 }

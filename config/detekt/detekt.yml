@@ -1,10 +1,12 @@
-build:
-  maxIssues: 0
-
 config:
   validation: true
+  warningsAsErrors: true
 
 complexity:
+  LargeClass:
+    excludes:
+      - '**/test/**'
+      - '**/androidTest/**'
   CyclomaticComplexMethod:
     ignoreAnnotated:
       - 'Composable'
@@ -12,12 +14,13 @@ complexity:
     ignoreAnnotated:
       - 'Composable'
   LongParameterList:
-    functionThreshold: 10
-    constructorThreshold: 10
+    allowedFunctionParameters: 10
+    allowedConstructorParameters: 10
     ignoreAnnotated:
       - 'Composable'
   TooManyFunctions:
-    thresholdInClasses: 12
+    allowedFunctionsPerClass: 12
+    allowedFunctionsPerInterface: 16
     ignoreAnnotatedFunctions:
       - 'Composable'
       - 'Preview'
@@ -50,9 +53,12 @@ style:
     excludes:
       - '**/test/**'
       - '**/androidTest/**'
-  UnusedImports:
+  UnusedImport:
     active: true
-  UnusedPrivateMember:
+  UnusedPrivateFunction:
+    ignoreAnnotated:
+      - 'Preview'
+  UnusedPrivateProperty:
     ignoreAnnotated:
       - 'Preview'
   WildcardImport:

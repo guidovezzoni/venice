@@ -31,7 +31,7 @@ class SetStopDialogTest {
         selectedPlaceDetail: PlaceDetail? = null,
         isResolvingPlace: Boolean = false,
         placeDetailError: String? = null,
-        onSuggestionSelected: (PlaceSuggestion) -> Unit = {},
+        onSuggestionSelect: (PlaceSuggestion) -> Unit = {},
     ) {
         composeTestRule.setContent {
             HeadingToVeniceTheme {
@@ -51,7 +51,7 @@ class SetStopDialogTest {
                     selectedPlaceDetail = selectedPlaceDetail,
                     isResolvingPlace = isResolvingPlace,
                     placeDetailError = placeDetailError,
-                    onSuggestionSelected = onSuggestionSelected,
+                    onSuggestionSelect = onSuggestionSelect,
                 )
             }
         }
@@ -108,9 +108,9 @@ class SetStopDialogTest {
         composeTestRule.onAllNodesWithText("Rome, Italy")[1].assertExists()
     }
 
-    // Task 11.2: GIVEN a suggestion is tapped WHEN user clicks it THEN onSuggestionSelected callback fires
+    // Task 11.2: GIVEN a suggestion is tapped WHEN user clicks it THEN onSuggestionSelect callback fires
     @Test
-    fun GIVEN_a_suggestion_is_tapped_WHEN_user_clicks_it_THEN_onSuggestionSelected_callback_fires() {
+    fun GIVEN_a_suggestion_is_tapped_WHEN_user_clicks_it_THEN_onSuggestionSelect_callback_fires() {
         val suggestion = PlaceSuggestion(
             placeId = "place-1",
             primaryText = "Colosseum",
@@ -120,7 +120,7 @@ class SetStopDialogTest {
 
         setContent(
             suggestions = listOf(suggestion),
-            onSuggestionSelected = { selectedSuggestions.add(it) },
+            onSuggestionSelect = { selectedSuggestions.add(it) },
         )
 
         composeTestRule.onNodeWithText("Colosseum").performClick()

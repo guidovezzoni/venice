@@ -9,6 +9,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -31,7 +32,6 @@ import kotlinx.coroutines.flow.Flow
 
 private const val ROUTE_TRIP_LIST = "tripList"
 private const val ROUTE_TRIP_DETAIL = "tripDetail/{tripId}"
-private const val ARG_TRIP_ID = "tripId"
 
 @Composable
 fun MainScreen() {
@@ -61,9 +61,9 @@ fun MainScreen() {
             TripListScreen(
                 uiState = uiState,
                 snackbarHostState = snackbarHostState,
-                onTripClicked = { tripId -> viewModel.onIntent(TripListUiIntent.OnTripClicked(tripId)) },
-                onCreateTripClicked = { viewModel.onIntent(TripListUiIntent.OnCreateTripClicked) },
-                onNameChange = { viewModel.onIntent(TripListUiIntent.OnTripNameChanged(it)) },
+                onTripClick = { tripId -> viewModel.onIntent(TripListUiIntent.OnTripClicked(tripId)) },
+                onCreateTripClick = { viewModel.onIntent(TripListUiIntent.OnCreateTripClicked) },
+                onNameChange = { name -> viewModel.onIntent(TripListUiIntent.OnTripNameChanged(name)) },
                 onConfirmCreateTrip = { viewModel.onIntent(TripListUiIntent.ConfirmCreateTrip) },
                 onDismissCreateDialog = { viewModel.onIntent(TripListUiIntent.OnDismissCreateDialog) },
             )
@@ -108,11 +108,14 @@ internal fun TripDetailEffectHandler(
     startActivity: ((Intent) -> Unit)? = null,
 ) {
     val context = LocalContext.current
+    val currentGetDialogState by rememberUpdatedState(getDialogState)
+    val currentResolveActivity by rememberUpdatedState(resolveActivity)
+    val currentStartActivity by rememberUpdatedState(startActivity)
     LaunchedEffect(Unit) {
         effects.collect { effect ->
             when (effect) {
                 is TripDetailUiEffect.ShowError -> {
-                    val message = if (getDialogState() is DialogState.SetDestination) {
+                    val message = if (currentGetDialogState() is DialogState.SetDestination) {
                         destinationErrorMessage
                     } else {
                         startingPointErrorMessage
@@ -122,14 +125,15 @@ internal fun TripDetailEffectHandler(
                 is TripDetailUiEffect.LaunchNavigation -> {
                     val uri = buildGeoUri(effect.latitude, effect.longitude, effect.placeName)
                     val intent = Intent(Intent.ACTION_VIEW, Uri.parse(uri))
-                    val canResolve = resolveActivity?.invoke(intent)
+                    val canResolve = currentResolveActivity?.invoke(intent)
                         ?: (context.packageManager.resolveActivity(
                             intent,
                             PackageManager.MATCH_DEFAULT_ONLY,
                         ) != null)
                     if (canResolve) {
-                        if (startActivity != null) {
-                            startActivity(intent)
+                        val activityStarter = currentStartActivity
+                        if (activityStarter != null) {
+                            activityStarter(intent)
                         } else {
                             context.startActivity(intent)
                         }

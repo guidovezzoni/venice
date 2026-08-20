@@ -19,7 +19,7 @@ googlePlaces = "5.3.0"
 coroutinesPlayServices = "1.11.0"
 okhttp = "5.5.0"
 orgJson = "20260814"
-detekt = "1.23.8"
+detekt = "2.0.0-alpha.6"
 composeRules = "0.6.4"
 kover = "0.9.9"
 
@@ -60,5 +60,5 @@ android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlin-ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 hilt-android = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
-detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
+detekt = { id = "dev.detekt", version.ref = "detekt" }
 kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }
