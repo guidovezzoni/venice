@@ -4,7 +4,7 @@
 - [x] 1.2 Register application ID `com.guidovezzoni.venice` (release) in the Firebase console.
 - [x] 1.3 Register application ID `com.guidovezzoni.venice.debug` (debug, due to `applicationIdSuffix`) in the Firebase console.
 - [x] 1.4 Download `google-services.json` covering both registered app entries; place it at `app/google-services.json` for local development only (never commit).
-- [ ] 1.5 In GitHub repo settings, add a `GOOGLE_SERVICES_JSON_BASE64` secret containing the base64-encoded contents of `google-services.json`, for use by CI/CD (task 12).
+- [x] 1.5 In GitHub repo settings, add a `GOOGLE_SERVICES_JSON_BASE64` secret containing the base64-encoded contents of `google-services.json`, for use by CI/CD (task 12).
 
 ## 2. Prerequisites: Gradle, dependencies, and gitignore
 
@@ -108,6 +108,6 @@
 - [x] 15.4 Run `./gradlew assembleDebug assembleRelease` with a real `google-services.json` present and confirm both succeed.
 - [x] 15.5 Search the codebase for `import com.google.firebase` outside `core/analytics/` and `di/` and confirm zero matches.
 - [x] 15.6 On-device DebugView verification: with `adb shell setprop debug.firebase.analytics.app com.guidovezzoni.venice.debug`, exercise the full activation funnel and confirm every event arrives with the expected name/parameters, correct types, no `(other)` bucketing, both user properties attach to subsequent events, `screen_viewed` appears as `screen_view`, and no duplicate or unexpected automatic events appear.
-- [ ] 15.7 Verify a release-signed build emits events to Firebase (first release build with a real analytics destination).
-- [ ] 15.8 Register all 14 event parameters and both user properties as custom definitions in the Firebase console under *Analytics > Custom Definitions*.
-- [ ] 15.9 Confirm CI (`ci.yml`) is green end-to-end with the `GOOGLE_SERVICES_JSON_BASE64` secret in place.
+- [x] 15.7 Verify a release-signed build emits events to Firebase (first release build with a real analytics destination).
+- [x] 15.8 Register all 14 event parameters and both user properties as custom definitions in the Firebase console under *Analytics > Custom Definitions*.
+- [x] 15.9 Confirm CI (`ci.yml`) is green end-to-end with the `GOOGLE_SERVICES_JSON_BASE64` secret in place.
