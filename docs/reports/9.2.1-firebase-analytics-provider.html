@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Report: 9.2.1 — Send Events to Firebase Analytics</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.6;
+      color: #1a1a1a;
+      background: #fafafa;
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+
+    .report-header {
+      border-bottom: 3px solid #2563eb;
+      padding-bottom: 1rem;
+      margin-bottom: 2rem;
+    }
+    .report-header h1 { font-size: 1.75rem; color: #1e293b; }
+    .report-meta {
+      display: flex; gap: 2rem; flex-wrap: wrap;
+      margin-top: 0.5rem; font-size: 0.875rem; color: #64748b;
+    }
+    .report-meta span { display: inline-flex; align-items: center; gap: 0.25rem; }
+
+    .report-section {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .report-section header {
+      display: flex; justify-content: space-between; align-items: baseline;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 0.75rem; margin-bottom: 1rem;
+    }
+    .report-section header h2 { font-size: 1.25rem; color: #1e293b; }
+    .report-section header time { font-size: 0.8rem; color: #94a3b8; white-space: nowrap; }
+    .section-source { font-size: 0.75rem; color: #94a3b8; font-style: italic; margin-bottom: 0.75rem; }
+
+    h3 { font-size: 1.05rem; color: #334155; margin: 1rem 0 0.5rem; }
+    p { margin-bottom: 0.75rem; }
+    ul, ol { margin: 0.5rem 0 0.75rem 1.5rem; }
+    li { margin-bottom: 0.25rem; }
+    code {
+      background: #f1f5f9; padding: 0.15rem 0.35rem; border-radius: 3px;
+      font-size: 0.875em;
+      font-family: "SF Mono", "Fira Code", Menlo, Consolas, monospace;
+    }
+
+    table { width: 100%; border-collapse: collapse; margin: 0.75rem 0; font-size: 0.9rem; }
+    th, td { text-align: left; padding: 0.5rem 0.75rem; border: 1px solid #e2e8f0; }
+    th { background: #f8fafc; font-weight: 600; color: #475569; }
+
+    .badge {
+      display: inline-block; padding: 0.15rem 0.5rem;
+      border-radius: 4px; font-size: 0.8rem; font-weight: 600;
+    }
+    .badge-pass { background: #dcfce7; color: #166534; }
+    .badge-fail { background: #fee2e2; color: #991b1b; }
+    .badge-warn { background: #fef9c3; color: #854d0e; }
+    .badge-info { background: #dbeafe; color: #1e40af; }
+
+    .outcome { margin-top: 1rem; padding: 0.75rem 1rem; border-radius: 6px; font-weight: 600; }
+    .outcome-passed { background: #dcfce7; color: #166534; border-left: 4px solid #22c55e; }
+    .outcome-failed { background: #fee2e2; color: #991b1b; border-left: 4px solid #ef4444; }
+  </style>
+</head>
+<body>
+
+  <div class="report-header">
+    <h1>9.2.1 — Send Events to Firebase Analytics</h1>
+    <div class="report-meta">
+      <span><strong>Story:</strong> 9.2.1</span>
+      <span><strong>Branch:</strong> feature/9.2.1-firebase-analytics-provider</span>
+      <span><strong>Created:</strong> 2026-08-21</span>
+    </div>
+  </div>
+
+  <main id="report-sections">
+    <section class="report-section" data-source="open_user_story" data-timestamp="2026-08-21T00:00:00Z">
+      <header>
+        <h2>Story Opened</h2>
+        <time datetime="2026-08-21">August 21, 2026</time>
+      </header>
+      <p class="section-source">Source: open_user_story</p>
+
+      <h3>Overview</h3>
+      <p>User story 9.2.1 (Send Events to Firebase Analytics) was opened for development on the branch <code>feature/9.2.1-firebase-analytics-provider</code>, created from <code>main</code>.</p>
+
+      <h3>Story Refinement</h3>
+      <p>The story was enriched during opening with comprehensive analysis and implementation guidance:</p>
+      <ul>
+        <li><strong>Acceptance criteria expanded</strong> from 17 to 24 criteria with detailed Firebase provider specifications</li>
+        <li><strong>Boolean-to-String handling</strong> for <code>is_first_trip</code> parameter aligned with tracking plan requirements</li>
+        <li><strong>AD_ID permission removed</strong> from manifest — analytics provider does not require advertising identifier</li>
+        <li><strong>Comprehensive GDPR analysis</strong> documented: consent is assumed granted pending story 9.3.1 (Settings + Consent Gate); this is a deliberate, recorded temporary position as noted in the tracking plan</li>
+        <li><strong>Firebase console setup requirements</strong> identified:
+          <ul>
+            <li>Both development and production app IDs must be registered</li>
+            <li>All 14 custom event definitions must be registered as <code>String</code> dimensions (event-parameter names)</li>
+            <li>All integer parameters (<code>stop_count</code>, <code>leg_count</code>, <code>suggestion_count</code>, <code>suggestion_position</code>) must be registered as custom metrics</li>
+            <li>Both user properties (<code>trip_count_band</code>, <code>distance_unit</code>) must be registered as custom user properties</li>
+          </ul>
+        </li>
+        <li><strong>Unit testing strategy</strong> established: <code>FirebaseAnalyticsProvider</code> tested by mocking Firebase SDK; success and failure paths verified; thread-safety validated via concurrent dispatch from multiple coroutine contexts</li>
+        <li><strong>Documentation update plan</strong>: tracking plan already lists Firebase as the target backend; no plan updates needed</li>
+      </ul>
+
+      <h3>Key Concerns and Decisions</h3>
+      <ul>
+        <li><span class="badge badge-warn">Warning</span> <strong>Consent gate is deferred:</strong> Story 9.3.1 must deliver the consent gate before any release ships to EU users. The consent assumption is recorded in the tracking plan and is monitored as a blocker.</li>
+        <li><span class="badge badge-info">Info</span> <strong>US data processing:</strong> Firebase's US-based processing is acceptable for current scope; GDPR concerns are handled by the consent gate deferral.</li>
+        <li><span class="badge badge-info">Info</span> <strong>AD_ID manifest merge:</strong> Confirmed that the provider does not add the AD_ID permission to the manifest.</li>
+      </ul>
+
+      <h3>Next Steps</h3>
+      <p>Story is ready for design and task breakdown via <code>/sdlc_propose_change</code>.</p>
+    </section>
+  </main>
+
+</body>
+</html>
