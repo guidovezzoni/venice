@@ -13,7 +13,7 @@ The Application collects information when you download and use it. This informat
 
 **Cookies and tracking technologies**
 
-The Application or its third-party SDKs may use cookies, SDKs, pixels, and similar technologies to support functionality, analytics, or service delivery. Where required by applicable law, the Service Provider will obtain consent before using non-essential tracking technologies.
+The Application or its third-party SDKs may use cookies, SDKs, pixels, and similar technologies to support functionality, analytics, or service delivery. Where required by applicable law, the Service Provider will obtain consent before using non-essential tracking technologies. The Application uses Firebase Analytics (Google Analytics for Firebase) to collect analytics data including device information, operating system version, app version, and engagement metrics. Firebase Analytics is operated by Google Ireland Limited and may process data in the United States and other countries outside your country of residence.
 
 **Your Rights**
 
