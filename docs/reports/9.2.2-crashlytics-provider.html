@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Report: 9.2.2 — Report Failures to Crashlytics</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.6;
+      color: #1a1a1a;
+      background: #fafafa;
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+
+    .report-header {
+      border-bottom: 3px solid #2563eb;
+      padding-bottom: 1rem;
+      margin-bottom: 2rem;
+    }
+    .report-header h1 { font-size: 1.75rem; color: #1e293b; }
+    .report-meta {
+      display: flex; gap: 2rem; flex-wrap: wrap;
+      margin-top: 0.5rem; font-size: 0.875rem; color: #64748b;
+    }
+    .report-meta span { display: inline-flex; align-items: center; gap: 0.25rem; }
+
+    .report-section {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .report-section header {
+      display: flex; justify-content: space-between; align-items: baseline;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 0.75rem; margin-bottom: 1rem;
+    }
+    .report-section header h2 { font-size: 1.25rem; color: #1e293b; }
+    .report-section header time { font-size: 0.8rem; color: #94a3b8; white-space: nowrap; }
+    .section-source { font-size: 0.75rem; color: #94a3b8; font-style: italic; margin-bottom: 0.75rem; }
+
+    h3 { font-size: 1.05rem; color: #334155; margin: 1rem 0 0.5rem; }
+    p { margin-bottom: 0.75rem; }
+    ul, ol { margin: 0.5rem 0 0.75rem 1.5rem; }
+    li { margin-bottom: 0.25rem; }
+    code {
+      background: #f1f5f9; padding: 0.15rem 0.35rem; border-radius: 3px;
+      font-size: 0.875em;
+      font-family: "SF Mono", "Fira Code", Menlo, Consolas, monospace;
+    }
+
+    table { width: 100%; border-collapse: collapse; margin: 0.75rem 0; font-size: 0.9rem; }
+    th, td { text-align: left; padding: 0.5rem 0.75rem; border: 1px solid #e2e8f0; }
+    th { background: #f8fafc; font-weight: 600; color: #475569; }
+
+    .badge {
+      display: inline-block; padding: 0.15rem 0.5rem;
+      border-radius: 4px; font-size: 0.8rem; font-weight: 600;
+    }
+    .badge-pass { background: #dcfce7; color: #166534; }
+    .badge-fail { background: #fee2e2; color: #991b1b; }
+    .badge-warn { background: #fef9c3; color: #854d0e; }
+    .badge-info { background: #dbeafe; color: #1e40af; }
+
+    .outcome { margin-top: 1rem; padding: 0.75rem 1rem; border-radius: 6px; font-weight: 600; }
+    .outcome-passed { background: #dcfce7; color: #166534; border-left: 4px solid #22c55e; }
+    .outcome-failed { background: #fee2e2; color: #991b1b; border-left: 4px solid #ef4444; }
+  </style>
+</head>
+<body>
+
+  <div class="report-header">
+    <h1>9.2.2 — Report Failures to Crashlytics</h1>
+    <div class="report-meta">
+      <span><strong>Story:</strong> 9.2.2</span>
+      <span><strong>Branch:</strong> feature/9.2.2-crashlytics-provider</span>
+      <span><strong>Created:</strong> August 21, 2026</span>
+    </div>
+  </div>
+
+  <main id="report-sections">
+  <section class="report-section" data-source="open_user_story" data-timestamp="2026-08-21T00:00:00Z">
+    <header>
+      <h2>Story Opening</h2>
+      <time datetime="2026-08-21T00:00:00Z">August 21, 2026</time>
+    </header>
+    <p class="section-source">Source: open_user_story</p>
+
+    <h3>Story Overview</h3>
+    <p>
+      <strong>Story ID:</strong> 9.2.2<br/>
+      <strong>Story Title:</strong> Report Failures to Crashlytics<br/>
+      <strong>Branch:</strong> <code>feature/9.2.2-crashlytics-provider</code>
+    </p>
+
+    <h3>Story Refinement Summary</h3>
+    <p>The story has been refined with comprehensive implementation-ready detail:</p>
+    <ul>
+      <li><strong>Dependency chain clarified:</strong> Explicit prerequisite stories documented (9.1.1, 9.1.2, 9.2.1)</li>
+      <li><strong>Description expanded:</strong> Explains how the two analytics channels (trackException for crash reporting, logEvent for product analytics) map to Crashlytics SDK, and confirmed user properties are forwarded as custom keys</li>
+      <li><strong>Open question resolved:</strong> Debug collection stays enabled because <code>applicationIdSuffix = ".debug"</code> already separates debug from production data, eliminating the need for a debug-build filter</li>
+      <li><strong>Acceptance criteria expanded:</strong> From 14 to 17 items, adding thread safety, user property forwarding, and native symbol upload (recorded as not needed — pure Kotlin/JVM)</li>
+      <li><strong>Fields and Data section added:</strong> Documented 4 Crashlytics custom keys that map from the tracking plan: operation, error_type, trip_count_band, distance_unit</li>
+      <li><strong>Files to Modify section added:</strong> Identified 2 new files to create and 5 existing files to modify</li>
+      <li><strong>Unit Testing section added:</strong> Defined 8 test areas for CrashlyticsAnalyticsProviderTest</li>
+      <li><strong>Security, Performance, GDPR, and Non-Functional Requirements sections added:</strong> Comprehensive analysis of all cross-cutting concerns</li>
+      <li><strong>Analytics section confirmed:</strong> No new events added; story adds a destination backend only</li>
+      <li><strong>Definition of Done checklist created:</strong> 15-item checklist covering all verification gates</li>
+    </ul>
+
+    <h3>Key Refinement Insights</h3>
+    <ul>
+      <li><strong>Exception vs. Event Separation:</strong> The two-channel model is maintained — exceptions route to Crashlytics crash reporting with full stack traces, while bounded failure events go to product analytics. No freeing of exceptions into event parameters.</li>
+      <li><strong>User Properties Forward Correctly:</strong> Both <code>trip_count_band</code> and <code>distance_unit</code> are forwarded as Crashlytics custom keys, enabling segmentation of crash reports by user state</li>
+      <li><strong>Boolean-to-String Conversion:</strong> The tracking plan specifies <code>is_first_trip</code> as Boolean at the domain level but Firebase requires String — Crashlytics does not have this constraint, so the conversion is provider-specific</li>
+      <li><strong>Provider Registration:</strong> DI wiring via @Binds @IntoSet, consistent with the existing FirebaseAnalyticsProvider pattern</li>
+    </ul>
+  </section>
+  </main>
+
+</body>
+</html>
