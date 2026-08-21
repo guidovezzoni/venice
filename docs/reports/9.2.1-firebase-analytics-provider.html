@@ -134,14 +134,13 @@
       <h3>Exploration Findings</h3>
       <p>Codebase exploration confirmed the analytics abstraction from stories 9.1.1 and 9.1.2 is fully in place: <code>AnalyticsProvider</code> interface, <code>CompositeAnalyticsClient</code> with Hilt multibinding, <code>DebugAnalyticsProvider</code> as the structural template, all 14 events in <code>AnalyticsEvent.kt</code>, and both user properties in <code>AnalyticsUserProperty.kt</code>. No Firebase dependencies exist in the project yet.</p>
       <p>Notable finding: <code>AnalyticsProvider</code> in code has no <code>shouldLog</code> method, contrary to the analytics guidelines document. This is pre-existing drift, not blocking for 9.2.1 since Firebase receives all events.</p>
-      <p>CI already exists (<code>.github/workflows/ci.yml</code>) — contradicting <code>docs/improvements/github-ci-setup.md</code> which claims "no CI/CD".</p>
+      <p>CI already exists (<code>.github/workflows/ci.yml</code> and <code>deploy.yml</code>), providing the pattern for adding a new <code>GOOGLE_SERVICES_JSON_BASE64</code> secret.</p>
 
       <h3>Questions Asked and Answers</h3>
       <table>
         <tr><th>Question</th><th>Answer</th></tr>
         <tr><td>Does a Firebase project already exist with both app IDs registered?</td><td>Partially set up — design includes manual console steps as prerequisites</td></tr>
         <tr><td>Should a build without <code>google-services.json</code> succeed or fail?</td><td>Fail with a clear, actionable error message</td></tr>
-        <tr><td>Should <code>docs/improvements/github-ci-setup.md</code> be updated or removed?</td><td>Remove entirely — stale and unneeded</td></tr>
         <tr><td>Confirm no advertising features — remove AD_ID?</td><td>Keep AD_ID — do not remove (deviates from source story AC 19)</td></tr>
       </table>
 
@@ -159,7 +158,7 @@
         <li><strong>15 sections</strong>, 70 checkboxes total</li>
         <li><strong>Prerequisites (sections 1–2):</strong> Firebase console manual checklist (5 tasks) + Gradle/version-catalog/plugin/gitignore setup (8 tasks)</li>
         <li><strong>BDD pairs (sections 3–9):</strong> 19 test tasks paired with implementation — construction, generic event mapping, ScreenViewed special case, user property forwarding, trackException no-op, platform-limit enforcement (boundary tests), thread safety</li>
-        <li><strong>Integration (sections 10–14):</strong> DI wiring, manifest changes, CI/CD updates + doc deletion, documentation updates, compliance review</li>
+        <li><strong>Integration (sections 10–14):</strong> DI wiring, manifest changes, CI/CD updates, documentation updates, compliance review</li>
         <li><strong>Final verification (section 15):</strong> detekt, tests, Kover, build, Firebase-import containment, on-device DebugView, release build, custom definitions, CI green</li>
       </ul>
 

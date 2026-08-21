@@ -35,8 +35,6 @@ abstraction the app already has in `core/analytics/`.
 - Update `.github/workflows/ci.yml` and `.github/workflows/deploy.yml` directly to decode a new
   `GOOGLE_SERVICES_JSON` secret at build time, following the existing keystore/maps-key secret
   pattern in `deploy.yml`.
-- Delete `docs/improvements/github-ci-setup.md` — stale (claims "no CI/CD" while `ci.yml` already
-  exists); CI documentation now lives directly in the workflow files.
 - Document the manual Firebase console prerequisites (registering both application IDs, registering
   all 14 event parameters and 2 user properties as custom definitions) as a prerequisite checklist,
   since these steps cannot be automated by an agent.
@@ -68,7 +66,6 @@ unchanged; existing call sites are unaffected.
   artifacts).
 - **Manifest**: `app/src/main/AndroidManifest.xml` (autocapture meta-data; `AD_ID` left untouched).
 - **CI/CD**: `.github/workflows/ci.yml`, `.github/workflows/deploy.yml`.
-- **Removed**: `docs/improvements/github-ci-setup.md`.
 - **Docs**: `docs/analytics/tracking-plan.md` (Firebase mapping notes), `CLAUDE.md` (completed-stories
   entry), `docs/publishing/Privacy Policy.md` (review only).
 - **Dependencies**: `com.google.firebase:firebase-bom`, `com.google.firebase:firebase-analytics`,

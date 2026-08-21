@@ -88,7 +88,6 @@
 
 - [ ] 12.1 Add a "Set up Firebase config" step to `.github/workflows/ci.yml` (after "Grant execute permission for gradlew") that decodes the `GOOGLE_SERVICES_JSON_BASE64` secret to `app/google-services.json`.
 - [ ] 12.2 Add the same step to `.github/workflows/deploy.yml`, positioned consistently with the existing keystore/Maps-key/Play-Store-key decode steps.
-- [ ] 12.3 Delete `docs/improvements/github-ci-setup.md` (`git rm`) — stale, per explicit user instruction; CI documentation now lives directly in the workflow YAML files.
 
 ## 13. Documentation updates (integration)
 

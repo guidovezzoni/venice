@@ -30,8 +30,7 @@ Constraints already fixed by prior stories and guidelines and not up for revisit
   rather than surfacing a generic Gradle/plugin stack trace or silently producing a broken build.
 - Give release builds their first real analytics destination via a single `@Binds @IntoSet` addition,
   changing no other wiring.
-- Get CI/CD building successfully with a real Firebase config supplied as a secret, and delete the
-  stale CI-setup doc that no longer matches reality.
+- Get CI/CD building successfully with a real Firebase config supplied as a secret.
 
 **Non-Goals:**
 - Crash reporting (Crashlytics) — `trackException` stays a no-op in this provider; a future story adds
@@ -175,7 +174,7 @@ exhaustive and adding a third user property without updating this function is a 
 - `.gitignore`: add `google-services.json`, positioned next to `local.properties` and
   `keystore.properties` for discoverability.
 
-### 7. CI/CD: decode the config file as a new secret, delete the stale doc
+### 7. CI/CD: decode the config file as a new secret
 
 `.github/workflows/deploy.yml` already decodes three secrets (keystore, Maps key, Play Store key)
 using the exact pattern needed here. `ci.yml` currently builds without any local secrets at all
@@ -188,15 +187,6 @@ Both workflows get a new step, immediately after "Grant execute permission for g
 - name: Set up Firebase config
   run: echo "${{ secrets.GOOGLE_SERVICES_JSON_BASE64 }}" | base64 --decode > app/google-services.json
 ```
-`docs/improvements/github-ci-setup.md` is deleted outright (per clarification #3) rather than updated
-— it already claims "no CI/CD" while `ci.yml` has existed for a while, so it was stale before this
-change and updating it further would only extend a doc that should not exist. Anything future
-maintainers need about the CI secret set now lives directly in the workflow YAML, which cannot drift
-from what actually runs.
-
-**Alternative considered**: keep `github-ci-setup.md` and add a row to its secrets table. Rejected per
-explicit user instruction — the whole document's premise (no CI/CD exists yet) is false, and patching
-one row would leave the rest of the false premise standing.
 
 ### 8. Autocapture: disable `screen_view`, review and keep the rest, record the decision
 
