@@ -107,7 +107,7 @@ back-navigation and does not double-fire on process-death restore.
 | `direction` | String | `up`, `down` | Reorder direction |
 | `distance_band` | String | `under_50km`, `50_200km`, `200_500km`, `500_1000km`, `over_1000km` | Banded total route distance |
 | `duration_band` | String | `under_1h`, `1_3h`, `3_6h`, `6_12h`, `over_12h` | Banded total route duration |
-| `is_first_trip` | Boolean | `true`, `false` | True when the user had no trips before this one |
+| `is_first_trip` | Boolean | `true`, `false` | True when the user had no trips before this one. Sent to Firebase as String `"true"`/`"false"` at the provider level (Firebase GA4 custom definitions support only String and Numeric types). Domain `AnalyticsEvent.TripCreated` type remains `Boolean`; the conversion happens in `FirebaseAnalyticsProvider`. |
 | `suggestion_count` | Int | 0–n | Places results returned |
 | `suggestion_position` | Int | 0-based ordinal | Which suggestion was chosen |
 | `operation` | String | `create_trip`, `set_stop`, `edit_stop`, `remove_stop`, `move_stop`, `mark_departed`, `undo_mark_departed`, `calculate_route`, `search_place`, `resolve_place` | From `AnalyticsOperation.value` |
@@ -180,6 +180,24 @@ consent control to live. Story 9.3.1 either creates one or waits for a Settings 
 
 **Owner of the assumption:** whoever schedules 9.3.1. It should not survive past the first release that
 ships a real analytics backend to EU users.
+
+## Autocapture
+
+Firebase Analytics collects a set of automatic events and properties without explicit logging calls.
+Per the guidelines' rule ("anything deliberately left on gets an entry here"), this section records the
+stance on each.
+
+| Event/Property | Status | Reason |
+|---|---|---|
+| `screen_view` | Disabled | Autocapture is disabled via `google_analytics_automatic_screen_reporting_enabled=false` in `AndroidManifest.xml`. Screen navigation is tracked explicitly via the `screen_viewed` event and mapped to Firebase's `SCREEN_VIEW` event name at the provider level. |
+| `first_open` | Enabled (automatic) | Session lifecycle event. No manual equivalent in the 14-event taxonomy; no individual toggle available. Left enabled. |
+| `session_start` | Enabled (automatic) | Session lifecycle event. No manual equivalent in the 14-event taxonomy; no individual toggle available. Left enabled. |
+| `user_engagement` | Enabled (automatic) | Engagement metric. No manual equivalent in the 14-event taxonomy; no individual toggle available. Left enabled. |
+| `app_update` | Enabled (automatic) | Lifecycle event on app upgrade. No manual equivalent in the 14-event taxonomy; no individual toggle available. Left enabled. |
+| `app_remove` | Enabled (automatic) | Lifecycle event on app uninstall. No manual equivalent in the 14-event taxonomy; no individual toggle available. Left enabled. |
+| `os_update` | Enabled (automatic) | Lifecycle event on OS upgrade. No manual equivalent in the 14-event taxonomy; no individual toggle available. Left enabled. |
+
+All automatically-collected events reach Firebase and cannot be individually disabled via manifest or runtime configuration beyond the `screen_view` switch. None duplicates a declared event in the 14-event taxonomy, so no double-counting occurs.
 
 ## Migration from the Legacy Taxonomy
 

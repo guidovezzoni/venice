@@ -174,6 +174,96 @@
       <h3>Next Steps</h3>
       <p>Change is ready for implementation via <code>/sdlc_implement_change</code>.</p>
     </section>
+
+  <section class="report-section" data-source="apply_changes" data-timestamp="2026-08-21T12:00:00Z">
+    <header>
+      <h2>Apply Changes</h2>
+      <time datetime="2026-08-21T12:00:00Z">August 21, 2026</time>
+    </header>
+    <p class="section-source">Source: apply_changes</p>
+
+    <h3>Implementation Summary</h3>
+    <p>All 69 tasks completed across 15 sections using sub-agent orchestration (5 Sonnet, 3 Haiku agents). One iteration cycle was required for the BDD sections due to Detekt rule violations encountered and resolved within the same sub-agent run.</p>
+
+    <h3>What Was Applied</h3>
+
+    <h4>Section 1: Firebase Console Setup</h4>
+    <p>Tasks 1.1–1.4 confirmed complete (Firebase project exists, both app IDs registered, <code>google-services.json</code> placed at <code>app/google-services.json</code>). Task 1.5 (GitHub secret <code>GOOGLE_SERVICES_JSON_BASE64</code>) requires user action in GitHub repo settings.</p>
+
+    <h4>Section 2: Gradle &amp; Dependencies</h4>
+    <ul>
+      <li>Firebase BOM <code>33.7.0</code> and <code>firebase-analytics</code> added to <code>gradle/libs.versions.toml</code></li>
+      <li>Google Services plugin <code>4.4.2</code> added to version catalog and root <code>build.gradle.kts</code></li>
+      <li>Plugin applied in <code>app/build.gradle.kts</code> with BOM platform + analytics implementation</li>
+      <li><code>google-services.json</code> added to <code>.gitignore</code></li>
+      <li>Missing-file guard (<code>doFirst</code>) added — fails with a clear, actionable error when <code>google-services.json</code> is absent (verified manually)</li>
+      <li>Dependency resolution confirmed: <code>firebase-bom:33.7.0</code> and <code>firebase-analytics:22.1.2</code> resolve via existing <code>google()</code> filter</li>
+    </ul>
+
+    <h4>Sections 3–9: FirebaseAnalyticsProvider (BDD)</h4>
+    <p>19 unit tests written and passing in <code>FirebaseAnalyticsProviderTest</code>. Key implementation decisions:</p>
+    <ul>
+      <li>Constructor-injected <code>FirebaseAnalytics</code> (via <code>FirebaseModule</code>) — fully unit-testable without Robolectric</li>
+      <li>Generic <code>Bundle</code> mapping: <code>String→putString</code>, <code>Int/Long→putLong</code>, <code>Double→putDouble</code>, <code>Boolean→putString("true"/"false")</code></li>
+      <li><code>ScreenViewed</code> special-cased to <code>FirebaseAnalytics.Event.SCREEN_VIEW</code> + <code>SCREEN_NAME</code> param</li>
+      <li>User properties mapped exhaustively via <code>when</code> on sealed interface</li>
+      <li><code>trackException</code> is a documented no-op (Crashlytics is a future provider)</li>
+      <li>Platform-limit enforcement: event/param name ≤40 chars, String value ≤100 chars, ≤25 params, user property name ≤24 chars, reserved-prefix rejection; debug builds throw <code>IllegalStateException</code>, release builds log and drop</li>
+      <li>Thread-safe: no mutable instance state; documented in class KDoc</li>
+    </ul>
+    <p>Notable issue resolved: <code>internal fun validateAndSetUserProperty(name, value)</code> exposed for testability, because the current taxonomy's mapped user property names are all well under 24 chars, making the validation unreachable via the public API. The KDoc explains the rationale.</p>
+
+    <h4>Section 10: DI Wiring</h4>
+    <p><code>@Binds @IntoSet</code> added to <code>AnalyticsModule</code> binding <code>FirebaseAnalyticsProvider</code> as <code>AnalyticsProvider</code>. <code>FirebaseModule</code> provides <code>FirebaseAnalytics.getInstance(context)</code> and <code>isDebugBuild: Boolean</code>. <code>DebugAnalyticsModule</code> (debug source set) unchanged.</p>
+
+    <h4>Section 11: Manifest</h4>
+    <p><code>google_analytics_automatic_screen_reporting_enabled=false</code> added to <code>AndroidManifest.xml</code>. <code>AD_ID</code> permission left as Firebase merge adds it (per design deviation from AC 19). All other Firebase automatic events reviewed and knowingly left enabled.</p>
+
+    <h4>Section 12: CI/CD</h4>
+    <p>"Set up Firebase config" step added to both <code>ci.yml</code> (after gradlew chmod) and <code>deploy.yml</code> (after local.properties setup), decoding <code>GOOGLE_SERVICES_JSON_BASE64</code> secret to <code>app/google-services.json</code>.</p>
+
+    <h4>Section 13: Documentation</h4>
+    <p>Tracking plan updated with Autocapture section (screen_view disabled, other automatic events recorded as intentionally enabled). <code>is_first_trip</code> Boolean→String conversion noted in parameter reference. <code>AGENTS.md</code> completed stories list updated to include 9.2.1.</p>
+
+    <h4>Section 14: Compliance</h4>
+    <p>Privacy Policy reviewed and updated to explicitly name Firebase Analytics and US data processing. Play Data Safety form requirements noted: Analytics data sharing with Firebase/Google, device information collection, and AD_ID permission need to be declared in the Play Console.</p>
+
+    <h3>Automated Verification Results</h3>
+    <table>
+      <tr><th>Check</th><th>Result</th><th>Details</th></tr>
+      <tr><td>detektDebug</td><td><span class="badge badge-pass">PASS</span></td><td>No findings</td></tr>
+      <tr><td>Unit tests</td><td><span class="badge badge-pass">PASS</span></td><td>399 tests (19 new in <code>FirebaseAnalyticsProviderTest</code>), all green</td></tr>
+      <tr><td>Kover coverage</td><td><span class="badge badge-pass">PASS</span></td><td>97.3% (721/741 lines) — above 95% bound</td></tr>
+      <tr><td>assembleDebug + assembleRelease</td><td><span class="badge badge-pass">PASS</span></td><td>Both variants build successfully</td></tr>
+      <tr><td>Firebase import scope</td><td><span class="badge badge-pass">PASS</span></td><td>Zero imports of <code>com.google.firebase</code> outside <code>core/analytics/</code> and <code>di/</code></td></tr>
+      <tr><td>Instrumented UI tests (121)</td><td><span class="badge badge-pass">PASS</span></td><td>Pre-existing typo fixed in <code>StopSectionTest.kt</code> (onMarkDepart→onMarkDeparted)</td></tr>
+      <tr><td>On-device (15.6)</td><td><span class="badge badge-pass">PASS</span></td><td>Firebase initializes; <code>trip_created {is_first_trip=true}</code>, <code>trip_opened</code>, <code>screen_viewed</code>, <code>TripCountBand</code> property all confirmed in Logcat; no crashes or validation violations</td></tr>
+      <tr><td>Security review</td><td><span class="badge badge-pass">PASS</span></td><td>No findings; secret handling, CI injection pattern, and provider scope all clean</td></tr>
+    </table>
+
+    <h3>Acknowledged TODOs (not related to this story)</h3>
+    <ul>
+      <li><code>DirectionsApiService.kt</code>: replace OkHttp with Retrofit when more endpoints added</li>
+      <li><code>NetworkModule.kt</code>: same Retrofit note</li>
+      <li><code>TripDetailUiIntent.kt</code>: PlaceDetail domain type question</li>
+      <li><code>TripDetailViewModel.kt</code>: Android reference abstraction</li>
+    </ul>
+
+    <h3>Pending Manual Tasks (user action required)</h3>
+    <ul>
+      <li><strong>Task 1.5</strong>: Add <code>GOOGLE_SERVICES_JSON_BASE64</code> secret in GitHub repo settings</li>
+      <li><strong>Task 15.7</strong>: Verify a release-signed build emits events to Firebase DebugView</li>
+      <li><strong>Task 15.8</strong>: Register all 14 event parameters and 2 user properties as custom definitions in the Firebase console under <em>Analytics &gt; Custom Definitions</em></li>
+      <li><strong>Task 15.9</strong>: Confirm CI is green end-to-end with the secret in place</li>
+    </ul>
+
+    <h3>README and AGENTS.md</h3>
+    <p><strong>README.md</strong>: Updated — added "Analytics" row to the Architecture &amp; Tech Stack table (Firebase Analytics, GA4, provider-agnostic abstraction in <code>core/analytics/</code>).</p>
+    <p><strong>AGENTS.md</strong>: Updated — story 9.2.1 added to Completed Stories list by the Section 13 sub-agent.</p>
+
+    <div class="outcome outcome-passed">Implementation complete. All automated gates passed. Four manual tasks remain for the user (GitHub secret, release build verification, Firebase console custom definitions, CI green confirmation).</div>
+  </section>
+
   </main>
 
 </body>

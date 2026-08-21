@@ -9,6 +9,7 @@ plugins {
     alias(libs.plugins.hilt.android)
     alias(libs.plugins.detekt)
     alias(libs.plugins.kover)
+    alias(libs.plugins.google.services)
 }
 
 val localProperties = Properties()
@@ -21,6 +22,21 @@ val keystoreProperties = Properties()
 val keystorePropertiesFile = rootProject.file("keystore.properties")
 if (keystorePropertiesFile.exists()) {
     keystorePropertiesFile.inputStream().use { keystoreProperties.load(it) }
+}
+
+tasks.configureEach {
+    if (name.startsWith("process") && name.endsWith("GoogleServices")) {
+        doFirst {
+            val googleServicesFile = project.file("google-services.json")
+            if (!googleServicesFile.exists()) {
+                throw GradleException(
+                    "Missing app/google-services.json. " +
+                    "For local development: download it from the Firebase console and place it at app/google-services.json (never commit it). " +
+                    "For CI: decode the GOOGLE_SERVICES_JSON_BASE64 secret to app/google-services.json before running this task."
+                )
+            }
+        }
+    }
 }
 
 val versionMajor = 0
@@ -112,6 +128,8 @@ dependencies {
     }
     implementation(libs.kotlinx.coroutines.play.services)
     implementation(libs.okhttp)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.analytics)
     testImplementation(libs.junit)
     testImplementation(libs.mockk)
     testImplementation(libs.kotlinx.coroutines.test)
