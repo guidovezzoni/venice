@@ -124,6 +124,57 @@
       <h3>Next Steps</h3>
       <p>Story is ready for design and task breakdown via <code>/sdlc_propose_change</code>.</p>
     </section>
+    <section class="report-section" data-source="propose_change" data-timestamp="2026-08-21T10:00:00Z">
+      <header>
+        <h2>Change Proposed</h2>
+        <time datetime="2026-08-21">August 21, 2026</time>
+      </header>
+      <p class="section-source">Source: propose_change</p>
+
+      <h3>Exploration Findings</h3>
+      <p>Codebase exploration confirmed the analytics abstraction from stories 9.1.1 and 9.1.2 is fully in place: <code>AnalyticsProvider</code> interface, <code>CompositeAnalyticsClient</code> with Hilt multibinding, <code>DebugAnalyticsProvider</code> as the structural template, all 14 events in <code>AnalyticsEvent.kt</code>, and both user properties in <code>AnalyticsUserProperty.kt</code>. No Firebase dependencies exist in the project yet.</p>
+      <p>Notable finding: <code>AnalyticsProvider</code> in code has no <code>shouldLog</code> method, contrary to the analytics guidelines document. This is pre-existing drift, not blocking for 9.2.1 since Firebase receives all events.</p>
+      <p>CI already exists (<code>.github/workflows/ci.yml</code>) — contradicting <code>docs/improvements/github-ci-setup.md</code> which claims "no CI/CD".</p>
+
+      <h3>Questions Asked and Answers</h3>
+      <table>
+        <tr><th>Question</th><th>Answer</th></tr>
+        <tr><td>Does a Firebase project already exist with both app IDs registered?</td><td>Partially set up — design includes manual console steps as prerequisites</td></tr>
+        <tr><td>Should a build without <code>google-services.json</code> succeed or fail?</td><td>Fail with a clear, actionable error message</td></tr>
+        <tr><td>Should <code>docs/improvements/github-ci-setup.md</code> be updated or removed?</td><td>Remove entirely — stale and unneeded</td></tr>
+        <tr><td>Confirm no advertising features — remove AD_ID?</td><td>Keep AD_ID — do not remove (deviates from source story AC 19)</td></tr>
+      </table>
+
+      <h3>Artifacts Created</h3>
+      <table>
+        <tr><th>Artifact</th><th>Path</th></tr>
+        <tr><td>Proposal</td><td><code>openspec/changes/add-firebase-analytics-provider/proposal.md</code></td></tr>
+        <tr><td>Design</td><td><code>openspec/changes/add-firebase-analytics-provider/design.md</code></td></tr>
+        <tr><td>Spec</td><td><code>openspec/changes/add-firebase-analytics-provider/specs/analytics-firebase-provider/spec.md</code></td></tr>
+        <tr><td>Tasks</td><td><code>openspec/changes/add-firebase-analytics-provider/tasks.md</code></td></tr>
+      </table>
+
+      <h3>Task Structure</h3>
+      <ul>
+        <li><strong>15 sections</strong>, 70 checkboxes total</li>
+        <li><strong>Prerequisites (sections 1–2):</strong> Firebase console manual checklist (5 tasks) + Gradle/version-catalog/plugin/gitignore setup (8 tasks)</li>
+        <li><strong>BDD pairs (sections 3–9):</strong> 19 test tasks paired with implementation — construction, generic event mapping, ScreenViewed special case, user property forwarding, trackException no-op, platform-limit enforcement (boundary tests), thread safety</li>
+        <li><strong>Integration (sections 10–14):</strong> DI wiring, manifest changes, CI/CD updates + doc deletion, documentation updates, compliance review</li>
+        <li><strong>Final verification (section 15):</strong> detekt, tests, Kover, build, Firebase-import containment, on-device DebugView, release build, custom definitions, CI green</li>
+      </ul>
+
+      <h3>Key Design Decisions</h3>
+      <ul>
+        <li>Provider mirrors <code>DebugAnalyticsProvider</code> pattern with constructor-injected <code>FirebaseAnalytics</code></li>
+        <li>Generic <code>Bundle</code> mapping from <code>event.properties</code> map, with <code>ScreenViewed</code> as the sole special case</li>
+        <li>Boolean values generically converted to <code>"true"</code>/<code>"false"</code> Strings (not <code>TripCreated</code>-specific)</li>
+        <li>Platform-limit validation gated by injectable <code>isDebugBuild</code> flag — throws in debug, logs in release</li>
+        <li>AD_ID kept (explicit deviation from source story AC 19, recorded in proposal, design, and tasks)</li>
+      </ul>
+
+      <h3>Next Steps</h3>
+      <p>Change is ready for implementation via <code>/sdlc_implement_change</code>.</p>
+    </section>
   </main>
 
 </body>
