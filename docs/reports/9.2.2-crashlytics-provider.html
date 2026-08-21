@@ -122,6 +122,59 @@
       <li><strong>Provider Registration:</strong> DI wiring via @Binds @IntoSet, consistent with the existing FirebaseAnalyticsProvider pattern</li>
     </ul>
   </section>
+  <section class="report-section" data-source="propose_change" data-timestamp="2026-08-21T00:00:00Z">
+    <header>
+      <h2>Change Proposal</h2>
+      <time datetime="2026-08-21T00:00:00Z">August 21, 2026</time>
+    </header>
+    <p class="section-source">Source: propose_change</p>
+
+    <h3>Exploration Findings</h3>
+    <p>Sub-agent explored the analytics architecture, DI setup, build configuration, and test patterns:</p>
+    <ul>
+      <li><strong>Analytics architecture:</strong> <code>AnalyticsTracking</code> interface with <code>logEvent</code>, <code>setUserProperty</code>, <code>trackException</code>, and default <code>trackFailure</code>. <code>CompositeAnalyticsClient</code> fans out to all providers via multibound set.</li>
+      <li><strong>Pattern to follow:</strong> <code>FirebaseAnalyticsProvider</code> — constructor-injected SDK, private companion object for constants, thread-safe by delegation, no mutable state.</li>
+      <li><strong>No <code>shouldLog</code> method:</strong> Per-event filtering is done inside each provider's <code>logEvent</code> as an early-return guard clause, not via an interface gate.</li>
+      <li><strong><code>trackException</code> no-op:</strong> <code>FirebaseAnalyticsProvider.trackException</code> is an explicit no-op with a comment pointing at "story 9.2.2" — this story gives that channel its first real implementation.</li>
+      <li><strong>DI ready:</strong> <code>@Multibinds</code> already exists in <code>AnalyticsModule.kt</code>; adding a second <code>@IntoSet</code> binding is mechanical.</li>
+      <li><strong>Build infrastructure:</strong> <code>google-services.json</code> already handled, CI decodes from secret, no new secrets needed. <code>settings.gradle.kts</code> repo filter already covers <code>com.google.firebase</code>.</li>
+    </ul>
+
+    <h3>Questions and Resolutions</h3>
+    <table>
+      <tr><th>Question</th><th>Resolution</th></tr>
+      <tr><td>Crashlytics Gradle plugin version</td><td><code>3.0.7</code> (from Firebase docs via Context7; requires AGP 8.1+ and google-services 4.4.1+, both satisfied)</td></tr>
+      <tr><td>Native symbol upload (AC 16)</td><td>Record as accepted limitation — pure Kotlin/JVM, no NDK code</td></tr>
+      <tr><td><code>setCustomKey</code> overload</td><td><code>setCustomKey(String, String)</code> uniformly — all values are <code>.value</code> strings from bounded enums</td></tr>
+      <tr><td><code>setCrashlyticsCollectionEnabled</code></td><td>Not called; reserved for consent story 9.3.1</td></tr>
+    </table>
+
+    <h3>Artifacts Created</h3>
+    <table>
+      <tr><th>Artifact</th><th>Path</th></tr>
+      <tr><td>Proposal</td><td><code>openspec/changes/report-failures-to-crashlytics/proposal.md</code></td></tr>
+      <tr><td>Design</td><td><code>openspec/changes/report-failures-to-crashlytics/design.md</code></td></tr>
+      <tr><td>Spec: analytics-crashlytics-provider</td><td><code>openspec/changes/report-failures-to-crashlytics/specs/analytics-crashlytics-provider/spec.md</code></td></tr>
+      <tr><td>Tasks</td><td><code>openspec/changes/report-failures-to-crashlytics/tasks.md</code></td></tr>
+    </table>
+
+    <h3>Task Structure</h3>
+    <p>24 tasks across 7 sections:</p>
+    <ul>
+      <li><strong>Section 1 — Prerequisites:</strong> 4 mechanical tasks (version catalog, Gradle plugins, DI provider)</li>
+      <li><strong>Sections 2–5 — BDD pairs:</strong> 5 test/implement pairs (10 tasks) covering trackException ordering, OperationFailed handling, logEvent guard, user property forwarding, thread safety</li>
+      <li><strong>Section 6 — Integration:</strong> 3 mechanical tasks (DI wiring, proguard verification, containment check)</li>
+      <li><strong>Section 7 — Final verification:</strong> 5 tasks (debug/release build, unit tests, detekt, kover, tracking-plan cross-check)</li>
+    </ul>
+
+    <h3>Key Design Decisions</h3>
+    <ul>
+      <li><strong>Independent provider:</strong> Separate class from <code>FirebaseAnalyticsProvider</code>, not an extension — different SDKs, different failure semantics, independent consent lifecycle.</li>
+      <li><strong><code>logEvent</code> never calls <code>recordException</code>:</strong> Non-fatals only from <code>trackException</code>; <code>OperationFailed</code> only sets <code>error_type</code> custom key. Specced scenario guards this invariant.</li>
+      <li><strong><code>operation</code> key before <code>recordException</code>:</strong> Ensures the operation context is attached to the correct non-fatal report. Verified by ordered mock assertion.</li>
+      <li><strong>All custom keys are <code>String</code>:</strong> Uniform <code>setCustomKey(String, String)</code> — no type branching needed.</li>
+    </ul>
+  </section>
   </main>
 
 </body>
