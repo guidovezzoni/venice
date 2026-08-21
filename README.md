@@ -45,7 +45,7 @@ Venice helps users plan multi-stop road trips. The current version supports crea
 | **Async**                | Kotlin Coroutines, Flow                         |
 | **Places**               | Google Places SDK (autocomplete)                |
 | **Routes**               | Google Routes API (OkHttp)                      |
-| **Analytics**            | Firebase Analytics (GA4), provider-agnostic abstraction in `core/analytics/` |
+| **Analytics**            | Firebase Analytics (GA4) + Firebase Crashlytics, provider-agnostic abstraction in `core/analytics/` |
 | **Testing**              | JUnit 4, MockK, Compose UI Test                 |
 
 

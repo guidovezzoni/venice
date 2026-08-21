@@ -175,6 +175,63 @@
       <li><strong>All custom keys are <code>String</code>:</strong> Uniform <code>setCustomKey(String, String)</code> — no type branching needed.</li>
     </ul>
   </section>
+  <section class="report-section" data-source="sdlc_implement_change" data-timestamp="2026-08-21T00:00:00Z">
+    <header>
+      <h2>Implementation</h2>
+      <time datetime="2026-08-21T00:00:00Z">21 August 2026</time>
+    </header>
+    <p class="section-source">Source: sdlc_implement_change</p>
+
+    <h3>What Was Applied</h3>
+    <p>Implemented <code>CrashlyticsAnalyticsProvider</code> — a new <code>AnalyticsProvider</code> that routes the crash-reporting channel to Firebase Crashlytics. The change covers:</p>
+    <ul>
+      <li><strong>Dependencies</strong>: added <code>firebase-crashlytics</code> library and <code>com.google.firebase.crashlytics</code> plugin to <code>libs.versions.toml</code>, root <code>build.gradle.kts</code>, and <code>app/build.gradle.kts</code></li>
+      <li><strong>DI plumbing</strong>: <code>provideFirebaseCrashlytics()</code> in <code>FirebaseModule</code>; <code>bindCrashlyticsAnalyticsProvider()</code> in <code>AnalyticsModule</code></li>
+      <li><strong><code>trackException</code></strong>: calls <code>setCustomKey("operation", operation.value)</code> then <code>recordException(throwable)</code></li>
+      <li><strong><code>logEvent</code></strong>: forwards only <code>OperationFailed</code> events (sets <code>"error_type"</code> custom key); all other events are no-ops on the Crashlytics instance</li>
+      <li><strong><code>setUserProperty</code></strong>: maps <code>TripCountBand</code> → <code>"trip_count_band"</code> and <code>DistanceUnit</code> → <code>"distance_unit"</code> via <code>setCustomKey</code></li>
+      <li><strong>Thread safety</strong>: provider holds no mutable instance state; safe to call from any thread or coroutine context</li>
+    </ul>
+
+    <h3>Iteration Cycles</h3>
+    <p>1 pass — no rework needed. All 7 sections completed in a single sequential run with 7 sub-agents (4 Sonnet, 3 Haiku).</p>
+
+    <h3>BDD Red/Green Summary</h3>
+    <table>
+      <tr><th>Section</th><th>Tests</th><th>RED</th><th>GREEN</th></tr>
+      <tr><td>2 — trackException</td><td>2</td><td>Compilation error (class missing)</td><td>After creating provider</td></tr>
+      <tr><td>3 — logEvent</td><td>3</td><td>Assertion failure (3.1); immediate pass (3.3, 3.5)</td><td>After logEvent implementation</td></tr>
+      <tr><td>4 — setUserProperty</td><td>2</td><td>Assertion failure (no-op impl)</td><td>After exhaustive when branch</td></tr>
+      <tr><td>5 — Thread safety</td><td>1</td><td>Immediate pass (stateless by construction)</td><td>—</td></tr>
+    </table>
+
+    <h3>Acknowledged TODOs (not related to this story)</h3>
+    <ul>
+      <li><code>DirectionsApiService.kt:25</code> — Replace with Retrofit when additional API endpoints are added</li>
+      <li><code>NetworkModule.kt:18</code> — Replace with Retrofit module when additional API endpoints are added</li>
+      <li><code>TripDetailUiIntent.kt:9</code> — PlaceDetail model design question</li>
+      <li><code>TripDetailViewModel.kt:76</code> — Remove Android references that could be abstracted out</li>
+    </ul>
+
+    <h3>Security Review</h3>
+    <div class="outcome outcome-passed">PASS — no findings. All custom key values are bounded by sealed enum types; no free text, user input, or exception messages reach any custom key. Exception messages reach <code>recordException</code> only, which is the intended Crashlytics diagnostic behavior.</div>
+
+    <h3>Instrumented Tests</h3>
+    <p>121 tests run on Pixel 6a (Android 17), 0 failures, 0 skipped. A pre-existing Hilt test-runner exception caused Gradle to report BUILD FAILED despite zero test failures; this is unrelated to the Crashlytics change.</p>
+
+    <h3>Unit Tests &amp; Coverage</h3>
+    <p>All unit tests pass. <code>CrashlyticsAnalyticsProvider</code> coverage: <strong>100%</strong> (58/58 instructions, 12/12 lines, 4/4 methods). Kover verify passed (95% threshold).</p>
+
+    <h3>Static Analysis</h3>
+    <p><span class="badge badge-pass">PASS</span> detektDebug — zero findings.</p>
+
+    <h3>Documentation Updates</h3>
+    <ul>
+      <li><strong>README.md</strong>: Analytics row updated to include Firebase Crashlytics alongside Firebase Analytics (GA4)</li>
+      <li><strong>AGENTS.md</strong>: Current Status updated with story 9.2.2 summary</li>
+      <li><strong>Tracking plan</strong>: no changes needed — <code>trackException</code> is already documented as a non-analytics channel with no event name or parameters</li>
+    </ul>
+  </section>
   </main>
 
 </body>
