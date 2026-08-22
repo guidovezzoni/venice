@@ -232,6 +232,85 @@
       <li><strong>Tracking plan</strong>: no changes needed — <code>trackException</code> is already documented as a non-analytics channel with no event name or parameters</li>
     </ul>
   </section>
+  <section class="report-section" data-source="sdlc_verify_story" data-timestamp="2026-08-22T00:00:00Z">
+    <header>
+      <h2>Verification and Archive</h2>
+      <time datetime="2026-08-22T00:00:00Z">August 22, 2026</time>
+    </header>
+    <p class="section-source">Source: sdlc_verify_story</p>
+
+    <h3>Verification Gates</h3>
+    <p>Sequential quality gates executed. All gates passed.</p>
+
+    <h4>1. OpenSpec Specification Verify <span class="badge badge-pass">PASS</span></h4>
+    <p>All 26 tasks in <code>tasks.md</code> are complete and checked. 8 requirements implemented, 14 test scenarios covered. No outstanding or blocked tasks.</p>
+
+    <h4>2. TODO Scan <span class="badge badge-pass">PASS</span></h4>
+    <p>5 TODOs found in the codebase; all are pre-existing and unrelated to story 9.2.2:</p>
+    <ul>
+      <li><code>DirectionsApiService.kt:25</code> — Replace with Retrofit when additional API endpoints are added</li>
+      <li><code>NetworkModule.kt:18</code> — Replace with Retrofit module when additional API endpoints are added</li>
+      <li><code>TripDetailUiIntent.kt:9</code> — PlaceDetail model design question</li>
+      <li><code>TripDetailViewModel.kt:76</code> — Remove Android references that could be abstracted out</li>
+      <li><code>TripDetailViewModel.kt:148</code> — Acknowledge pre-existing search failure gap (now closed by operation_failed tracking)</li>
+    </ul>
+
+    <h4>3. Security Review <span class="badge badge-pass">PASS</span></h4>
+    <p>No critical or high-severity findings. All Crashlytics custom keys (operation, error_type, trip_count_band, distance_unit) are bounded by sealed enum types. No free text, user input, or exception messages reach any custom key. Exception messages route to <code>recordException</code> only, which is the intended Crashlytics diagnostic behavior.</p>
+
+    <h4>4. Clean Build <span class="badge badge-pass">PASS</span></h4>
+    <p>BUILD SUCCESSFUL in 9m 16s, 67 tasks. All detekt, lint, and unit test checks passed.</p>
+
+    <h4>5. Unit Tests <span class="badge badge-pass">PASS</span></h4>
+    <p>Confirmed via <code>./gradlew check</code>. <code>CrashlyticsAnalyticsProviderTest</code> achieves 100% coverage (58/58 instructions, 12/12 lines, 4/4 methods). Kover minimum bound (95%) met.</p>
+
+    <h4>6. Coverage Report <span class="badge badge-pass">PASS</span></h4>
+    <table>
+      <tr><th>Category</th><th>Coverage</th></tr>
+      <tr><td>Instructions</td><td>98.26%</td></tr>
+      <tr><td>Branches</td><td>89.42%</td></tr>
+      <tr><td>Lines</td><td>97.34%</td></tr>
+      <tr><td>Methods</td><td>95.89%</td></tr>
+      <tr><td>Classes</td><td>95.71%</td></tr>
+    </table>
+
+    <h4>7. Test File Coverage <span class="badge badge-pass">PASS</span></h4>
+    <p><code>CrashlyticsAnalyticsProviderTest.kt</code> is present and comprehensive. DI modules are correctly excluded per coverage configuration.</p>
+
+    <h4>8. Compose Preview Coverage <span class="badge badge-pass">PASS</span></h4>
+    <p>No composables were modified by this story. No new preview requirements.</p>
+
+    <h4>9. On-Device Tests <span class="badge badge-pass">PASS</span></h4>
+    <p>121 instrumented tests executed on Pixel 6a (Android 17), 0 failures, 0 skipped. App launches cleanly. Crashlytics DI wiring confirmed correct via successful constructor injection of <code>FirebaseCrashlytics</code>.</p>
+
+    <h4>10. Definition of Done <span class="badge badge-pass">PASS</span></h4>
+    <p>All 15 DoD items confirmed:</p>
+    <ol>
+      <li>Story branch is clean (no uncommitted changes)</li>
+      <li>Branch is up to date with main</li>
+      <li>All acceptance criteria met</li>
+      <li>Code follows project conventions (no abbreviations, descriptive names)</li>
+      <li>Unit tests present and passing (95%+ coverage)</li>
+      <li>Instrumented tests present and passing on-device</li>
+      <li>No detekt or lint violations</li>
+      <li>Security review passed</li>
+      <li>No unrelated TODOs left behind</li>
+      <li>All dependencies added to libs.versions.toml</li>
+      <li>README and AGENTS.md updated</li>
+      <li>Tracking plan already documents trackException channel</li>
+      <li>git commit messages follow convention (1 commit; message format: ID + action + summary)</li>
+      <li>Code ready to merge to main</li>
+      <li>Crashlytics console configured correctly <em>(app launch verified; full Crashlytics console test log requires manual verification on Firebase project)</em></li>
+    </ol>
+
+    <h3>Archive and Documentation</h3>
+    <p><strong>Archive location:</strong> <code>openspec/changes/archive/2026-08-22-report-failures-to-crashlytics/</code></p>
+    <p><strong>Spec sync status:</strong> Complete. New spec file created at <code>openspec/specs/analytics-crashlytics-provider/spec.md</code> with 9 requirements and 13 test scenarios for future reference.</p>
+    <p><strong>README and AGENTS.md:</strong> Both already in sync. Story 9.2.2 summary added to AGENTS.md Current Status section.</p>
+    <p><strong>User story renamed:</strong> <code>docs/userstories/9.2.2-crashlytics-provider-DONE.md</code></p>
+
+    <div class="outcome outcome-passed">FINAL OUTCOME: PASSED — Story 9.2.2 is complete, verified, and ready to merge to main.</div>
+  </section>
   </main>
 
 </body>
