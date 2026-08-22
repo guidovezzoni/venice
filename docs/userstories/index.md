@@ -179,7 +179,7 @@ dictionary is the [tracking plan](../analytics/tracking-plan.md).
 | ID | User Story | Details |
 |----|------------|---------|
 | 9.2.1 | As a product owner, I want events delivered to Firebase Analytics | [9.2.1-firebase-analytics-provider](9.2.1-firebase-analytics-provider-WIP.md) |
-| 9.2.2 | As a developer, I want handled failures and crashes reported to Crashlytics | [9.2.2-crashlytics-provider](9.2.2-crashlytics-provider.md) |
+| 9.2.2 | As a developer, I want handled failures and crashes reported to Crashlytics | [9.2.2-crashlytics-provider](9.2.2-crashlytics-provider-DONE.md) |
 
 ### Feature 9.3: Analytics Privacy
 

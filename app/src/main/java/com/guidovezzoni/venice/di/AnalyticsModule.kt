@@ -4,6 +4,7 @@ import com.guidovezzoni.venice.BuildConfig
 import com.guidovezzoni.venice.core.analytics.AnalyticsClient
 import com.guidovezzoni.venice.core.analytics.AnalyticsProvider
 import com.guidovezzoni.venice.core.analytics.CompositeAnalyticsClient
+import com.guidovezzoni.venice.core.analytics.CrashlyticsAnalyticsProvider
 import com.guidovezzoni.venice.core.analytics.FirebaseAnalyticsProvider
 import dagger.Binds
 import dagger.Module
@@ -28,6 +29,12 @@ interface AnalyticsModule {
     @IntoSet
     fun bindFirebaseAnalyticsProvider(
         implementation: FirebaseAnalyticsProvider,
+    ): AnalyticsProvider
+
+    @Binds
+    @IntoSet
+    fun bindCrashlyticsAnalyticsProvider(
+        implementation: CrashlyticsAnalyticsProvider,
     ): AnalyticsProvider
 
     @Multibinds

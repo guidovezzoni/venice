@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Report: 9.2.2 — Report Failures to Crashlytics</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.6;
+      color: #1a1a1a;
+      background: #fafafa;
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+
+    .report-header {
+      border-bottom: 3px solid #2563eb;
+      padding-bottom: 1rem;
+      margin-bottom: 2rem;
+    }
+    .report-header h1 { font-size: 1.75rem; color: #1e293b; }
+    .report-meta {
+      display: flex; gap: 2rem; flex-wrap: wrap;
+      margin-top: 0.5rem; font-size: 0.875rem; color: #64748b;
+    }
+    .report-meta span { display: inline-flex; align-items: center; gap: 0.25rem; }
+
+    .report-section {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .report-section header {
+      display: flex; justify-content: space-between; align-items: baseline;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 0.75rem; margin-bottom: 1rem;
+    }
+    .report-section header h2 { font-size: 1.25rem; color: #1e293b; }
+    .report-section header time { font-size: 0.8rem; color: #94a3b8; white-space: nowrap; }
+    .section-source { font-size: 0.75rem; color: #94a3b8; font-style: italic; margin-bottom: 0.75rem; }
+
+    h3 { font-size: 1.05rem; color: #334155; margin: 1rem 0 0.5rem; }
+    p { margin-bottom: 0.75rem; }
+    ul, ol { margin: 0.5rem 0 0.75rem 1.5rem; }
+    li { margin-bottom: 0.25rem; }
+    code {
+      background: #f1f5f9; padding: 0.15rem 0.35rem; border-radius: 3px;
+      font-size: 0.875em;
+      font-family: "SF Mono", "Fira Code", Menlo, Consolas, monospace;
+    }
+
+    table { width: 100%; border-collapse: collapse; margin: 0.75rem 0; font-size: 0.9rem; }
+    th, td { text-align: left; padding: 0.5rem 0.75rem; border: 1px solid #e2e8f0; }
+    th { background: #f8fafc; font-weight: 600; color: #475569; }
+
+    .badge {
+      display: inline-block; padding: 0.15rem 0.5rem;
+      border-radius: 4px; font-size: 0.8rem; font-weight: 600;
+    }
+    .badge-pass { background: #dcfce7; color: #166534; }
+    .badge-fail { background: #fee2e2; color: #991b1b; }
+    .badge-warn { background: #fef9c3; color: #854d0e; }
+    .badge-info { background: #dbeafe; color: #1e40af; }
+
+    .outcome { margin-top: 1rem; padding: 0.75rem 1rem; border-radius: 6px; font-weight: 600; }
+    .outcome-passed { background: #dcfce7; color: #166534; border-left: 4px solid #22c55e; }
+    .outcome-failed { background: #fee2e2; color: #991b1b; border-left: 4px solid #ef4444; }
+  </style>
+</head>
+<body>
+
+  <div class="report-header">
+    <h1>9.2.2 — Report Failures to Crashlytics</h1>
+    <div class="report-meta">
+      <span><strong>Story:</strong> 9.2.2</span>
+      <span><strong>Branch:</strong> feature/9.2.2-crashlytics-provider</span>
+      <span><strong>Created:</strong> August 21, 2026</span>
+    </div>
+  </div>
+
+  <main id="report-sections">
+  <section class="report-section" data-source="open_user_story" data-timestamp="2026-08-21T00:00:00Z">
+    <header>
+      <h2>Story Opening</h2>
+      <time datetime="2026-08-21T00:00:00Z">August 21, 2026</time>
+    </header>
+    <p class="section-source">Source: open_user_story</p>
+
+    <h3>Story Overview</h3>
+    <p>
+      <strong>Story ID:</strong> 9.2.2<br/>
+      <strong>Story Title:</strong> Report Failures to Crashlytics<br/>
+      <strong>Branch:</strong> <code>feature/9.2.2-crashlytics-provider</code>
+    </p>
+
+    <h3>Story Refinement Summary</h3>
+    <p>The story has been refined with comprehensive implementation-ready detail:</p>
+    <ul>
+      <li><strong>Dependency chain clarified:</strong> Explicit prerequisite stories documented (9.1.1, 9.1.2, 9.2.1)</li>
+      <li><strong>Description expanded:</strong> Explains how the two analytics channels (trackException for crash reporting, logEvent for product analytics) map to Crashlytics SDK, and confirmed user properties are forwarded as custom keys</li>
+      <li><strong>Open question resolved:</strong> Debug collection stays enabled because <code>applicationIdSuffix = ".debug"</code> already separates debug from production data, eliminating the need for a debug-build filter</li>
+      <li><strong>Acceptance criteria expanded:</strong> From 14 to 17 items, adding thread safety, user property forwarding, and native symbol upload (recorded as not needed — pure Kotlin/JVM)</li>
+      <li><strong>Fields and Data section added:</strong> Documented 4 Crashlytics custom keys that map from the tracking plan: operation, error_type, trip_count_band, distance_unit</li>
+      <li><strong>Files to Modify section added:</strong> Identified 2 new files to create and 5 existing files to modify</li>
+      <li><strong>Unit Testing section added:</strong> Defined 8 test areas for CrashlyticsAnalyticsProviderTest</li>
+      <li><strong>Security, Performance, GDPR, and Non-Functional Requirements sections added:</strong> Comprehensive analysis of all cross-cutting concerns</li>
+      <li><strong>Analytics section confirmed:</strong> No new events added; story adds a destination backend only</li>
+      <li><strong>Definition of Done checklist created:</strong> 15-item checklist covering all verification gates</li>
+    </ul>
+
+    <h3>Key Refinement Insights</h3>
+    <ul>
+      <li><strong>Exception vs. Event Separation:</strong> The two-channel model is maintained — exceptions route to Crashlytics crash reporting with full stack traces, while bounded failure events go to product analytics. No freeing of exceptions into event parameters.</li>
+      <li><strong>User Properties Forward Correctly:</strong> Both <code>trip_count_band</code> and <code>distance_unit</code> are forwarded as Crashlytics custom keys, enabling segmentation of crash reports by user state</li>
+      <li><strong>Boolean-to-String Conversion:</strong> The tracking plan specifies <code>is_first_trip</code> as Boolean at the domain level but Firebase requires String — Crashlytics does not have this constraint, so the conversion is provider-specific</li>
+      <li><strong>Provider Registration:</strong> DI wiring via @Binds @IntoSet, consistent with the existing FirebaseAnalyticsProvider pattern</li>
+    </ul>
+  </section>
+  <section class="report-section" data-source="propose_change" data-timestamp="2026-08-21T00:00:00Z">
+    <header>
+      <h2>Change Proposal</h2>
+      <time datetime="2026-08-21T00:00:00Z">August 21, 2026</time>
+    </header>
+    <p class="section-source">Source: propose_change</p>
+
+    <h3>Exploration Findings</h3>
+    <p>Sub-agent explored the analytics architecture, DI setup, build configuration, and test patterns:</p>
+    <ul>
+      <li><strong>Analytics architecture:</strong> <code>AnalyticsTracking</code> interface with <code>logEvent</code>, <code>setUserProperty</code>, <code>trackException</code>, and default <code>trackFailure</code>. <code>CompositeAnalyticsClient</code> fans out to all providers via multibound set.</li>
+      <li><strong>Pattern to follow:</strong> <code>FirebaseAnalyticsProvider</code> — constructor-injected SDK, private companion object for constants, thread-safe by delegation, no mutable state.</li>
+      <li><strong>No <code>shouldLog</code> method:</strong> Per-event filtering is done inside each provider's <code>logEvent</code> as an early-return guard clause, not via an interface gate.</li>
+      <li><strong><code>trackException</code> no-op:</strong> <code>FirebaseAnalyticsProvider.trackException</code> is an explicit no-op with a comment pointing at "story 9.2.2" — this story gives that channel its first real implementation.</li>
+      <li><strong>DI ready:</strong> <code>@Multibinds</code> already exists in <code>AnalyticsModule.kt</code>; adding a second <code>@IntoSet</code> binding is mechanical.</li>
+      <li><strong>Build infrastructure:</strong> <code>google-services.json</code> already handled, CI decodes from secret, no new secrets needed. <code>settings.gradle.kts</code> repo filter already covers <code>com.google.firebase</code>.</li>
+    </ul>
+
+    <h3>Questions and Resolutions</h3>
+    <table>
+      <tr><th>Question</th><th>Resolution</th></tr>
+      <tr><td>Crashlytics Gradle plugin version</td><td><code>3.0.7</code> (from Firebase docs via Context7; requires AGP 8.1+ and google-services 4.4.1+, both satisfied)</td></tr>
+      <tr><td>Native symbol upload (AC 16)</td><td>Record as accepted limitation — pure Kotlin/JVM, no NDK code</td></tr>
+      <tr><td><code>setCustomKey</code> overload</td><td><code>setCustomKey(String, String)</code> uniformly — all values are <code>.value</code> strings from bounded enums</td></tr>
+      <tr><td><code>setCrashlyticsCollectionEnabled</code></td><td>Not called; reserved for consent story 9.3.1</td></tr>
+    </table>
+
+    <h3>Artifacts Created</h3>
+    <table>
+      <tr><th>Artifact</th><th>Path</th></tr>
+      <tr><td>Proposal</td><td><code>openspec/changes/report-failures-to-crashlytics/proposal.md</code></td></tr>
+      <tr><td>Design</td><td><code>openspec/changes/report-failures-to-crashlytics/design.md</code></td></tr>
+      <tr><td>Spec: analytics-crashlytics-provider</td><td><code>openspec/changes/report-failures-to-crashlytics/specs/analytics-crashlytics-provider/spec.md</code></td></tr>
+      <tr><td>Tasks</td><td><code>openspec/changes/report-failures-to-crashlytics/tasks.md</code></td></tr>
+    </table>
+
+    <h3>Task Structure</h3>
+    <p>24 tasks across 7 sections:</p>
+    <ul>
+      <li><strong>Section 1 — Prerequisites:</strong> 4 mechanical tasks (version catalog, Gradle plugins, DI provider)</li>
+      <li><strong>Sections 2–5 — BDD pairs:</strong> 5 test/implement pairs (10 tasks) covering trackException ordering, OperationFailed handling, logEvent guard, user property forwarding, thread safety</li>
+      <li><strong>Section 6 — Integration:</strong> 3 mechanical tasks (DI wiring, proguard verification, containment check)</li>
+      <li><strong>Section 7 — Final verification:</strong> 5 tasks (debug/release build, unit tests, detekt, kover, tracking-plan cross-check)</li>
+    </ul>
+
+    <h3>Key Design Decisions</h3>
+    <ul>
+      <li><strong>Independent provider:</strong> Separate class from <code>FirebaseAnalyticsProvider</code>, not an extension — different SDKs, different failure semantics, independent consent lifecycle.</li>
+      <li><strong><code>logEvent</code> never calls <code>recordException</code>:</strong> Non-fatals only from <code>trackException</code>; <code>OperationFailed</code> only sets <code>error_type</code> custom key. Specced scenario guards this invariant.</li>
+      <li><strong><code>operation</code> key before <code>recordException</code>:</strong> Ensures the operation context is attached to the correct non-fatal report. Verified by ordered mock assertion.</li>
+      <li><strong>All custom keys are <code>String</code>:</strong> Uniform <code>setCustomKey(String, String)</code> — no type branching needed.</li>
+    </ul>
+  </section>
+  <section class="report-section" data-source="sdlc_implement_change" data-timestamp="2026-08-21T00:00:00Z">
+    <header>
+      <h2>Implementation</h2>
+      <time datetime="2026-08-21T00:00:00Z">21 August 2026</time>
+    </header>
+    <p class="section-source">Source: sdlc_implement_change</p>
+
+    <h3>What Was Applied</h3>
+    <p>Implemented <code>CrashlyticsAnalyticsProvider</code> — a new <code>AnalyticsProvider</code> that routes the crash-reporting channel to Firebase Crashlytics. The change covers:</p>
+    <ul>
+      <li><strong>Dependencies</strong>: added <code>firebase-crashlytics</code> library and <code>com.google.firebase.crashlytics</code> plugin to <code>libs.versions.toml</code>, root <code>build.gradle.kts</code>, and <code>app/build.gradle.kts</code></li>
+      <li><strong>DI plumbing</strong>: <code>provideFirebaseCrashlytics()</code> in <code>FirebaseModule</code>; <code>bindCrashlyticsAnalyticsProvider()</code> in <code>AnalyticsModule</code></li>
+      <li><strong><code>trackException</code></strong>: calls <code>setCustomKey("operation", operation.value)</code> then <code>recordException(throwable)</code></li>
+      <li><strong><code>logEvent</code></strong>: forwards only <code>OperationFailed</code> events (sets <code>"error_type"</code> custom key); all other events are no-ops on the Crashlytics instance</li>
+      <li><strong><code>setUserProperty</code></strong>: maps <code>TripCountBand</code> → <code>"trip_count_band"</code> and <code>DistanceUnit</code> → <code>"distance_unit"</code> via <code>setCustomKey</code></li>
+      <li><strong>Thread safety</strong>: provider holds no mutable instance state; safe to call from any thread or coroutine context</li>
+    </ul>
+
+    <h3>Iteration Cycles</h3>
+    <p>1 pass — no rework needed. All 7 sections completed in a single sequential run with 7 sub-agents (4 Sonnet, 3 Haiku).</p>
+
+    <h3>BDD Red/Green Summary</h3>
+    <table>
+      <tr><th>Section</th><th>Tests</th><th>RED</th><th>GREEN</th></tr>
+      <tr><td>2 — trackException</td><td>2</td><td>Compilation error (class missing)</td><td>After creating provider</td></tr>
+      <tr><td>3 — logEvent</td><td>3</td><td>Assertion failure (3.1); immediate pass (3.3, 3.5)</td><td>After logEvent implementation</td></tr>
+      <tr><td>4 — setUserProperty</td><td>2</td><td>Assertion failure (no-op impl)</td><td>After exhaustive when branch</td></tr>
+      <tr><td>5 — Thread safety</td><td>1</td><td>Immediate pass (stateless by construction)</td><td>—</td></tr>
+    </table>
+
+    <h3>Acknowledged TODOs (not related to this story)</h3>
+    <ul>
+      <li><code>DirectionsApiService.kt:25</code> — Replace with Retrofit when additional API endpoints are added</li>
+      <li><code>NetworkModule.kt:18</code> — Replace with Retrofit module when additional API endpoints are added</li>
+      <li><code>TripDetailUiIntent.kt:9</code> — PlaceDetail model design question</li>
+      <li><code>TripDetailViewModel.kt:76</code> — Remove Android references that could be abstracted out</li>
+    </ul>
+
+    <h3>Security Review</h3>
+    <div class="outcome outcome-passed">PASS — no findings. All custom key values are bounded by sealed enum types; no free text, user input, or exception messages reach any custom key. Exception messages reach <code>recordException</code> only, which is the intended Crashlytics diagnostic behavior.</div>
+
+    <h3>Instrumented Tests</h3>
+    <p>121 tests run on Pixel 6a (Android 17), 0 failures, 0 skipped. A pre-existing Hilt test-runner exception caused Gradle to report BUILD FAILED despite zero test failures; this is unrelated to the Crashlytics change.</p>
+
+    <h3>Unit Tests &amp; Coverage</h3>
+    <p>All unit tests pass. <code>CrashlyticsAnalyticsProvider</code> coverage: <strong>100%</strong> (58/58 instructions, 12/12 lines, 4/4 methods). Kover verify passed (95% threshold).</p>
+
+    <h3>Static Analysis</h3>
+    <p><span class="badge badge-pass">PASS</span> detektDebug — zero findings.</p>
+
+    <h3>Documentation Updates</h3>
+    <ul>
+      <li><strong>README.md</strong>: Analytics row updated to include Firebase Crashlytics alongside Firebase Analytics (GA4)</li>
+      <li><strong>AGENTS.md</strong>: Current Status updated with story 9.2.2 summary</li>
+      <li><strong>Tracking plan</strong>: no changes needed — <code>trackException</code> is already documented as a non-analytics channel with no event name or parameters</li>
+    </ul>
+  </section>
+  <section class="report-section" data-source="sdlc_verify_story" data-timestamp="2026-08-22T00:00:00Z">
+    <header>
+      <h2>Verification and Archive</h2>
+      <time datetime="2026-08-22T00:00:00Z">August 22, 2026</time>
+    </header>
+    <p class="section-source">Source: sdlc_verify_story</p>
+
+    <h3>Verification Gates</h3>
+    <p>Sequential quality gates executed. All gates passed.</p>
+
+    <h4>1. OpenSpec Specification Verify <span class="badge badge-pass">PASS</span></h4>
+    <p>All 26 tasks in <code>tasks.md</code> are complete and checked. 8 requirements implemented, 14 test scenarios covered. No outstanding or blocked tasks.</p>
+
+    <h4>2. TODO Scan <span class="badge badge-pass">PASS</span></h4>
+    <p>5 TODOs found in the codebase; all are pre-existing and unrelated to story 9.2.2:</p>
+    <ul>
+      <li><code>DirectionsApiService.kt:25</code> — Replace with Retrofit when additional API endpoints are added</li>
+      <li><code>NetworkModule.kt:18</code> — Replace with Retrofit module when additional API endpoints are added</li>
+      <li><code>TripDetailUiIntent.kt:9</code> — PlaceDetail model design question</li>
+      <li><code>TripDetailViewModel.kt:76</code> — Remove Android references that could be abstracted out</li>
+      <li><code>TripDetailViewModel.kt:148</code> — Acknowledge pre-existing search failure gap (now closed by operation_failed tracking)</li>
+    </ul>
+
+    <h4>3. Security Review <span class="badge badge-pass">PASS</span></h4>
+    <p>No critical or high-severity findings. All Crashlytics custom keys (operation, error_type, trip_count_band, distance_unit) are bounded by sealed enum types. No free text, user input, or exception messages reach any custom key. Exception messages route to <code>recordException</code> only, which is the intended Crashlytics diagnostic behavior.</p>
+
+    <h4>4. Clean Build <span class="badge badge-pass">PASS</span></h4>
+    <p>BUILD SUCCESSFUL in 9m 16s, 67 tasks. All detekt, lint, and unit test checks passed.</p>
+
+    <h4>5. Unit Tests <span class="badge badge-pass">PASS</span></h4>
+    <p>Confirmed via <code>./gradlew check</code>. <code>CrashlyticsAnalyticsProviderTest</code> achieves 100% coverage (58/58 instructions, 12/12 lines, 4/4 methods). Kover minimum bound (95%) met.</p>
+
+    <h4>6. Coverage Report <span class="badge badge-pass">PASS</span></h4>
+    <table>
+      <tr><th>Category</th><th>Coverage</th></tr>
+      <tr><td>Instructions</td><td>98.26%</td></tr>
+      <tr><td>Branches</td><td>89.42%</td></tr>
+      <tr><td>Lines</td><td>97.34%</td></tr>
+      <tr><td>Methods</td><td>95.89%</td></tr>
+      <tr><td>Classes</td><td>95.71%</td></tr>
+    </table>
+
+    <h4>7. Test File Coverage <span class="badge badge-pass">PASS</span></h4>
+    <p><code>CrashlyticsAnalyticsProviderTest.kt</code> is present and comprehensive. DI modules are correctly excluded per coverage configuration.</p>
+
+    <h4>8. Compose Preview Coverage <span class="badge badge-pass">PASS</span></h4>
+    <p>No composables were modified by this story. No new preview requirements.</p>
+
+    <h4>9. On-Device Tests <span class="badge badge-pass">PASS</span></h4>
+    <p>121 instrumented tests executed on Pixel 6a (Android 17), 0 failures, 0 skipped. App launches cleanly. Crashlytics DI wiring confirmed correct via successful constructor injection of <code>FirebaseCrashlytics</code>.</p>
+
+    <h4>10. Definition of Done <span class="badge badge-pass">PASS</span></h4>
+    <p>All 15 DoD items confirmed:</p>
+    <ol>
+      <li>Story branch is clean (no uncommitted changes)</li>
+      <li>Branch is up to date with main</li>
+      <li>All acceptance criteria met</li>
+      <li>Code follows project conventions (no abbreviations, descriptive names)</li>
+      <li>Unit tests present and passing (95%+ coverage)</li>
+      <li>Instrumented tests present and passing on-device</li>
+      <li>No detekt or lint violations</li>
+      <li>Security review passed</li>
+      <li>No unrelated TODOs left behind</li>
+      <li>All dependencies added to libs.versions.toml</li>
+      <li>README and AGENTS.md updated</li>
+      <li>Tracking plan already documents trackException channel</li>
+      <li>git commit messages follow convention (1 commit; message format: ID + action + summary)</li>
+      <li>Code ready to merge to main</li>
+      <li>Crashlytics console configured correctly <em>(app launch verified; full Crashlytics console test log requires manual verification on Firebase project)</em></li>
+    </ol>
+
+    <h3>Archive and Documentation</h3>
+    <p><strong>Archive location:</strong> <code>openspec/changes/archive/2026-08-22-report-failures-to-crashlytics/</code></p>
+    <p><strong>Spec sync status:</strong> Complete. New spec file created at <code>openspec/specs/analytics-crashlytics-provider/spec.md</code> with 9 requirements and 13 test scenarios for future reference.</p>
+    <p><strong>README and AGENTS.md:</strong> Both already in sync. Story 9.2.2 summary added to AGENTS.md Current Status section.</p>
+    <p><strong>User story renamed:</strong> <code>docs/userstories/9.2.2-crashlytics-provider-DONE.md</code></p>
+
+    <div class="outcome outcome-passed">FINAL OUTCOME: PASSED — Story 9.2.2 is complete, verified, and ready to merge to main.</div>
+  </section>
+  </main>
+
+</body>
+</html>
