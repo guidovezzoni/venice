@@ -120,6 +120,30 @@ Tasks are structured with test-first ordering, configured via `openspec/config.y
 
 Prerequisites (setup, models) come first, BDD pairs in the middle ordered by dependency, and integration tasks (DI wiring, navigation, composables) at the end.
 
+## Deployment
+
+The app uses **Fastlane** for build automation and **GitHub Actions** for CI/CD.
+
+### Automated Releases
+
+Releases are triggered by pushing a version tag (e.g., `v1.2.3`) to a `release/*` branch. The CI/CD pipeline automatically:
+1.  **Validates the branch**: Ensures production tags are only processed from dedicated release branches.
+2.  **Selects the Track**:
+    *   `vX.Y.Z` -> **Google Play Production** (`deploy` lane).
+    *   `vX.Y.Z-rcN` -> **Google Play Open Testing** (`beta` lane).
+    *   `vX.Y.Z-alphaN` -> **Google Play Closed Testing** (`alpha` lane).
+3.  **Generates GitHub Release**: Creates a new release on GitHub, attaches the `.aab` and `.apk` artifacts, and generates release notes. Tags with `-rc` or `-alpha` are marked as **Pre-release**.
+4.  **Uploads to Google Play**: Submits the App Bundle to the mapped track in the Google Play Console.
+
+### Fastlane Lanes
+
+| Lane | Command | Purpose |
+| :--- | :--- | :--- |
+| `test` | `fastlane test` | Runs unit tests, Detekt, and Lint. |
+| `beta` | `fastlane beta` | Builds and uploads to Google Play **Internal** track. |
+| `alpha` | `fastlane alpha` | Builds and uploads to Google Play **Alpha** track. |
+| `deploy` | `fastlane deploy` | Builds and uploads to Google Play **Production** track. |
+
 ## Build &amp; Run
 
 ```bash
