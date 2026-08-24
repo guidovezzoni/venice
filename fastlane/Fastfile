@@ -17,10 +17,10 @@ platform :android do
     )
   end
 
-  desc "Build release AAB and upload to Play Store internal track"
+  desc "Build release artifacts and upload to Play Store internal track"
   lane :beta do
     gradle(
-      task: "bundleRelease",
+      tasks: ["bundleRelease", "assembleRelease"],
       flags: "--console=plain --stacktrace"
     )
     upload_to_play_store(
@@ -33,10 +33,26 @@ platform :android do
     )
   end
 
-  desc "Build release AAB and upload to Play Store production track"
+  desc "Build release artifacts and upload to Play Store alpha track"
+  lane :alpha do
+    gradle(
+      tasks: ["bundleRelease", "assembleRelease"],
+      flags: "--console=plain --stacktrace"
+    )
+    upload_to_play_store(
+      track: "alpha",
+      aab: "app/build/outputs/bundle/release/app-release.aab",
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+      skip_upload_apk: true
+    )
+  end
+
+  desc "Build release artifacts and upload to Play Store production track"
   lane :deploy do
     gradle(
-      task: "bundleRelease",
+      tasks: ["bundleRelease", "assembleRelease"],
       flags: "--console=plain --stacktrace"
     )
     upload_to_play_store(
