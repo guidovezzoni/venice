@@ -12,6 +12,14 @@
 -keep @androidx.room.Entity class * { *; }
 -keep @androidx.room.Dao class * { *; }
 
+# Firebase Crashlytics — keep component registrar classes referenced by name in the merged manifest.
+# Firebase's ComponentDiscoveryService instantiates registrars by the class names listed in manifest
+# meta-data. R8 renames these classes, causing instantiation to silently fail and the Crashlytics
+# component to never register. The Crashlytics Gradle plugin is supposed to generate these keep
+# rules, but has a compatibility gap with AGP 9.x.
+-keep class com.google.firebase.crashlytics.CrashlyticsRegistrar { *; }
+-keep class com.google.firebase.crashlytics.FirebaseCrashlyticsKtxRegistrar { *; }
+
 # OkHttp
 -dontwarn okhttp3.internal.platform.**
 -dontwarn org.conscrypt.**
