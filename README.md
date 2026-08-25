@@ -1,4 +1,4 @@
-# SDLC — Agentic AI Software Development Lifecycle
+# Intro on SDLC — Agentic AI Software Development Lifecycle
 
 SDLC is a set of commands that let an AI coding agent autonomously drive the full lifecycle of a user story — from opening to verified delivery — while keeping the human developer in control of key decisions.
 
@@ -19,21 +19,17 @@ Built on top of [OpenSpec](https://github.com/Fission-AI/OpenSpec/) (Spec-Driven
 
 **Please note**: full description and repo available at [https://github.com/guidovezzoni/SDLC](https://github.com/guidovezzoni/SDLC)
 
-# Venice
+# The App - Venice
 
 A road trip planning app for Android, built with a modern architecture stack and developed through a specification-driven process (SDD).
 
 The app is built entirely in Kotlin with Jetpack Compose and Material 3, following Clean Architecture to separate domain logic, data access, and UI into independent layers. Each feature uses the MVI (Model-View-Intent) pattern, enforcing unidirectional data flow through immutable state, explicit user intents, and one-shot effects. Dependency injection is handled by Hilt, persistence by Room, and all asynchronous work runs on Kotlin Coroutines and Flow.
 
-Development is driven by a Specification-Driven Development (SDD) workflow powered by OpenSpec, where every change moves through a structured lifecycle: explore, propose, apply, verify, sync, and archive. Tasks within each change follow a BDD (Behaviour-Driven Development) structure with test-first ordering, so the test is always written before the production code that makes it pass. Custom commands (`/sdlc_open_story`, `/sdlc_propose_change`, `/sdlc_implement_change`, `/sdlc_verify_story`, `/sdlc_archive`, `/opsx:*`) automate the repetitive steps, from opening and refining user stories to implementing changes, verifying acceptance criteria, and driving the full OpenSpec lifecycle.
+Development follows a Specification-Driven Development (SDD) workflow powered by OpenSpec, where every change moves through a structured lifecycle: explore, propose, apply, verify, sync, and archive. Tasks within each change follow a BDD (Behaviour-Driven Development) structure with test-first ordering, so the test is always written before the production code that makes it pass. Custom commands (`/sdlc_open_story`, `/sdlc_propose_change`, `/sdlc_implement_change`, `/sdlc_verify_story`, `/sdlc_archive`, `/opsx:*`) automate the repetitive steps, from opening and refining user stories to implementing changes, verifying acceptance criteria, and driving the full OpenSpec lifecycle.
 
 See [`docs/sdlc/README.md`](docs/sdlc/README.md) for full details on each command.
 
-## The App
-
-Venice helps users plan multi-stop road trips. The current version supports creating trips, viewing them in a list, navigating to trip details, and managing stops: setting a starting point and destination, adding up to 25 intermediate stops, reordering stops, editing any stop's location, removing stops, and tracking trip progress by marking stops as departed (with undo support). Stop states are visually distinct — departed stops show a checkmark icon with reduced opacity, the current stop has a highlighted border, and a progress summary at the top of the trip detail screen shows how many stops have been completed. When adding or editing a stop, users can search for a place by name using Google Places autocomplete — selecting a suggestion auto-fills the coordinates and locks the latitude/longitude fields. While the place details are being resolved a progress indicator is shown inside the dialog and the confirm button is disabled; if resolution fails, an inline error message is displayed so the user can tap another suggestion to retry. Once at least two stops are set, users can calculate the route between all consecutive stops via the Google Routes API — distance and duration are displayed inline between each pair of stops. Distance is formatted according to the device locale: imperial-unit locales (US, UK, Liberia, Myanmar) show miles with one decimal place, while metric locales show metres (under 1000m) or kilometres (one decimal place) otherwise. Route data is persisted locally and automatically invalidated when stops are added, removed, reordered, or edited. Duration is formatted as hours and minutes for legs of an hour or longer (e.g. "1h 30min"), or as minutes only for shorter legs (e.g. "45min"). The trip detail screen also shows trip totals: total distance (sum of all leg distances, formatted in the same locale-aware units as the individual legs) and estimated driving time (sum of all leg durations, labelled "Est. driving time"), displayed side by side and updated automatically whenever the route is (re)calculated. When no complete route is available, both totals are replaced by a single "Trip totals unavailable" message; if only one metric is missing, its own unavailable text is shown independently. The trip detail screen also shows the real trip name in the header — observed live from the database and falling back to a neutral "Trip Detail" title while still loading. When at least two stops are present and the route has not been calculated or has been invalidated by a stop change, a tappable recalculation prompt appears immediately above the totals, explaining why they are unavailable and offering a one-tap shortcut to trigger route calculation; the prompt disappears automatically once a complete route is available. On each pending stop card, a Navigate button launches any installed navigation app (Google Maps, Waze, etc.) pre-filled with the stop's coordinates and name, using the standard `geo:` URI scheme and the system app picker; a snackbar error is shown if no navigation app is available. The roadmap includes live GPS-based ETA and Android Auto integration.
-
-### Architecture &amp; Tech Stack
+## Architecture &amp; Tech Stack
 
 
 | Layer                    | Technology                                      |
@@ -120,6 +116,45 @@ Tasks are structured with test-first ordering, configured via `openspec/config.y
 
 Prerequisites (setup, models) come first, BDD pairs in the middle ordered by dependency, and integration tasks (DI wiring, navigation, composables) at the end.
 
+## Analytics
+
+Product analytics is delivered through a provider-agnostic abstraction in `core/analytics/`. The design separates the event taxonomy from the backends that consume it, so providers can be added or replaced without touching call sites.
+
+### Product Questions
+
+Every event exists to answer one of these four.
+
+| # | Question | Why it matters |
+|---|----------|----------------|
+| **Q1** | Do people who create a trip actually finish planning it, and where do they drop out? | Identifies the biggest leak in the core flow — the highest-leverage thing to fix |
+| **Q2** | Which features actually get used? | Tells us what to invest in and what to cut |
+| **Q3** | How often do Places lookups, route calculations, and persistence fail in the wild? | Failures invisible in development; the difference between "works" and "works for users" |
+| **Q4** | What shape are real trips? | Informs performance work and future features (Android Auto, live position) |
+
+### Implementation
+
+**Architecture:**
+
+- `AnalyticsTracking` defines the shared surface: `logEvent`, `setUserProperty`, and `trackException`. Both `AnalyticsClient` (consumed by call sites) and `AnalyticsProvider` (implemented by each backend) extend it.
+- `CompositeAnalyticsClient` fans out every operation to all registered providers via Hilt `@IntoSet` multibinding. When no providers are bound, every operation is a silent no-op.
+- The full event taxonomy is a single `AnalyticsEvent` sealed class (14 events), with typed constructors enforcing parameter shapes at compile time. Parameter values use enums with explicit `snake_case` `value` properties — never `.name`.
+
+**Providers:**
+
+| Provider | Build variant | Purpose |
+|----------|---------------|---------|
+| `FirebaseAnalyticsProvider` | Release + Debug | Forwards events and user properties to Firebase Analytics (GA4). Validates platform limits (name length, parameter count, reserved prefixes), maps `ScreenViewed` to Firebase's `SCREEN_VIEW`, and converts `Boolean` parameters to `String` for GA4 compatibility. |
+| `CrashlyticsAnalyticsProvider` | Release + Debug | Forwards exceptions to Firebase Crashlytics with operation context as custom keys. Receives `OperationFailed` error type as a "last known error" breadcrumb for fatal crashes. |
+| `DebugAnalyticsProvider` | Debug only | Logs all events, user properties, and exceptions to Logcat. Bound via a debug-source-set DI module to prevent analytics stream leakage in release builds. |
+
+**Privacy floor:** no identifiers, no free text, no coordinates, no place names are sent. Continuous values are banded (distance, duration); failures are classified into bounded enums rather than forwarding exception messages.
+
+**Dual-channel failure reporting:** every failure path emits both an `OperationFailed` event (bounded enums to product analytics, answering "how often") and a `trackException` call (full throwable to crash reporting, answering "where and why"). The two channels are kept strictly separate — the throwable never becomes an event parameter.
+
+**Tracking calls** live in ViewModels alongside intent handling. Screen views are fired from navigation destination changes, not ViewModel `init`, to correctly handle back-navigation and process-death restore. Firebase `screen_view` autocapture is disabled in the manifest; the app's `screen_viewed` event is mapped to Firebase's reserved `SCREEN_VIEW` name at the provider level.
+
+The tracking plan at `docs/analytics/tracking-plan.md` is the single source of truth for which events exist, their parameters, and the product questions they answer.
+
 ## Deployment
 
 The app uses **Fastlane** for build automation and **GitHub Actions** for CI/CD.
@@ -132,8 +167,8 @@ Releases are triggered by pushing a version tag (e.g., `v1.2.3`) to a `release/*
     *   `vX.Y.Z` -> **Google Play Production** (`deploy` lane).
     *   `vX.Y.Z-rcN` -> **Google Play Open Testing** (`beta` lane).
     *   `vX.Y.Z-alphaN` -> **Google Play Closed Testing** (`alpha` lane).
-3.  **Generates GitHub Release**: Creates a new release on GitHub, attaches the `.aab` and `.apk` artifacts, and generates release notes. Tags with `-rc` or `-alpha` are marked as **Pre-release**.
-4.  **Uploads to Google Play**: Submits the App Bundle to the mapped track in the Google Play Console.
+3.  **Generates GitHub Release**: Creates a new release on GitHub, attaches the `.aab` and `.apk` artifacts, and generates release notes. Tags with `-rc` or `-alpha` are marked as **Pre-release** - [GitHub Release](https://github.com/guidovezzoni/venice/releases)
+4.  **Uploads to Google Play**: Submits the App Bundle to the mapped track in the Google Play Console: [Google Play](https://play.google.com/store/apps/details?id=com.guidovezzoni.venice)
 
 ### Fastlane Lanes
 
@@ -154,11 +189,3 @@ Releases are triggered by pushing a version tag (e.g., `v1.2.3`) to a `release/*
 ./gradlew check                        # Full checks
 ./gradlew build                        # Complete verification
 ```
-
-## TODO
-
-- Location biased search
-
-
-
-# TODO In This session:
