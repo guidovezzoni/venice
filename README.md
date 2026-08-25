@@ -167,8 +167,8 @@ Releases are triggered by pushing a version tag (e.g., `v1.2.3`) to a `release/*
     *   `vX.Y.Z` -> **Google Play Production** (`deploy` lane).
     *   `vX.Y.Z-rcN` -> **Google Play Open Testing** (`beta` lane).
     *   `vX.Y.Z-alphaN` -> **Google Play Closed Testing** (`alpha` lane).
-3.  **Generates GitHub Release**: Creates a new release on GitHub, attaches the `.aab` and `.apk` artifacts, and generates release notes. Tags with `-rc` or `-alpha` are marked as **Pre-release**.
-4.  **Uploads to Google Play**: Submits the App Bundle to the mapped track in the Google Play Console.
+3.  **Generates GitHub Release**: Creates a new release on GitHub, attaches the `.aab` and `.apk` artifacts, and generates release notes. Tags with `-rc` or `-alpha` are marked as **Pre-release** - [GitHub Release](https://github.com/guidovezzoni/venice/releases)
+4.  **Uploads to Google Play**: Submits the App Bundle to the mapped track in the Google Play Console: [Google Play](https://play.google.com/store/apps/details?id=com.guidovezzoni.venice)
 
 ### Fastlane Lanes
 
