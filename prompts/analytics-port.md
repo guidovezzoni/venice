@@ -63,6 +63,50 @@ and do not proceed to *Plan & confirm* with open questions.
 Two gates. **Do not write production code until both are approved.** They are separate because they
 answer different questions: the first is a product decision, the second an engineering one.
 
+### When this guidance and the project disagree
+
+This prompt was written from one project's implementation. It **will** disagree with this project
+somewhere — a naming style, an available library, a layering assumption, a build mechanism that does
+not exist here.
+
+**Non-trivial discrepancies are discussed with the user, not resolved unilaterally.** Neither side
+automatically wins: this guidance is not authoritative over a project it has never seen, and a local
+convention is not automatically right either — the point of raising it is that a human decides.
+
+**Trivial — decide yourself, proceed, and record it in the *Summary*:**
+
+- Renaming a type or file to match this project's vocabulary and casing.
+- File placement within the analytics module, and how it is split across files.
+- Which assertion library, test helper, or mocking approach to use, given what is already here.
+- Formatting, import ordering, comment and documentation style.
+- Substituting an exact language equivalent — a discriminated union for a sealed type, a protocol for
+  an interface, a trait for either.
+
+**Non-trivial — stop and discuss:**
+
+- Adding a **new dependency**, or using a library other than one the project already relies on for
+  that job.
+- A **structural rule that cannot hold** here: no compile-time wiring, no build variants, no closed
+  type system, no distinct presentation layer.
+- A **layering conflict** — the project already places logic where this guidance forbids tracking
+  calls, or has no layer matching the one nominated.
+- An **existing analytics, telemetry, or logging abstraction** that overlaps with what this prompt
+  asks you to build. Do not build a parallel one; ask whether to extend, replace, or wrap it.
+- Anything requiring **changes outside the analytics module** — refactoring call sites' surrounding
+  code, altering a shared base class, moving existing logic between layers.
+- Anything touching **privacy, consent, data retention, or what leaves the device**. Never resolve
+  these by inference from the code.
+- Anything that would make you **deviate from the approved tracking plan**.
+
+**The test:** would a maintainer be surprised to find this decided without them? If it changes
+dependencies, architecture, a public surface, or the privacy posture, the answer is yes.
+
+**Timing.** Surface discrepancies at **Gate 2**, batched into one round rather than a stream of
+questions. If one only becomes apparent during implementation, **stop and raise it then** — do not
+press on and mention it in the *Summary*, and do not quietly pick whichever side is easier. When
+raising one, state what the guidance is trying to achieve, what this project does instead, the options
+you see, and your recommendation.
+
 ### Gate 1 — the tracking plan
 
 #### Step 1: Identify product questions
@@ -188,7 +232,8 @@ plan covering:
 - The **wiring mechanism** for provider registration, and the **build-time mechanism** gating the
   development-only provider.
 - The **test strategy**, and what will be verified manually because it cannot be automated.
-- Any point where a guideline below cannot be followed as written, with your proposed equivalent.
+- **Every non-trivial discrepancy** between the guidance below and this project — per the rules above
+  — each with the options you see and your recommendation.
 
 **Wait for confirmation. Do not write production code before you have it.**
 
@@ -205,12 +250,13 @@ The approved tracking plan is the source of truth for every implementation decis
 >
 > If a guideline cannot be followed — the language has no interfaces, no compile-time DI, no
 > discriminated unions, no build variants — **do not force it and do not silently drop it.** Raise it
-> at Gate 2, explain what the guideline is trying to achieve, describe what is possible here, and
-> agree the closest equivalent.
+> under *When this guidance and the project disagree*, above.
 
 **Follow this project's existing conventions throughout** — naming style, file and module
 organisation, error-handling idiom, test structure. Where a convention here conflicts with one below,
-this project's convention wins; say so in the *Summary*.
+apply the triviality test in *When this guidance and the project disagree*: settle the small ones
+yourself and record them in the *Summary*; **raise the rest with the user rather than deciding which
+side wins.**
 
 ### Architecture
 
@@ -406,8 +452,9 @@ Finish by reporting, in prose:
 **Ported as-is** — which parts of the design transferred unchanged.
 
 **Adapted** — what changed for this stack and why: the language mechanism substituted for a sealed
-type or interface, the wiring mechanism used, how the development-only gate was achieved, and any
-place this project's conventions overrode a guideline above.
+type or interface, the wiring mechanism used, and how the development-only gate was achieved. Split
+this into **decided by you** (the trivial discrepancies you settled alone, listed so the user can
+object to any of them now) and **agreed with the user** (what was raised and how it was resolved).
 
 **Unresolved decisions** — flag every one of these that this project has not settled, rather than
 letting it pass as decided:

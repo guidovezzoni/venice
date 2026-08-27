@@ -16,7 +16,55 @@ the abstraction). Do not write any production code before the tracking plan is a
 Before doing anything, read:
 - The existing codebase to understand: the app's purpose, its main user flows, the language and
   framework in use, any existing analytics code, and the DI/wiring setup.
+- The project's own conventions: naming style, file and module organisation, error-handling idiom,
+  test framework and layout, and how it already expresses bounded vocabularies.
 - Apply idiomatic patterns for the points below that say "use your language's equivalent".
+
+### When this guidance and the project disagree
+
+This prompt was written from one project's implementation. It **will** disagree with this project
+somewhere — a naming style, an available library, a layering assumption, a build mechanism that does
+not exist here.
+
+**Non-trivial discrepancies are discussed with the user, not resolved unilaterally.** Neither side
+automatically wins: this guidance is not authoritative over a project it has never seen, and a local
+convention is not automatically right either — the point of raising it is that a human decides.
+
+**Trivial — decide yourself, proceed, and say so when you report:**
+
+- Renaming a type or file to match this project's vocabulary and casing. The component names below
+  express roles, not required identifiers — if the project's vocabulary is `Telemetry` or `Tracker`,
+  use that.
+- File placement within the analytics module, and how it is split across files.
+- Which assertion library, test helper, or mocking approach to use, given what is already here.
+- Formatting, import ordering, comment and documentation style.
+- Substituting an exact language equivalent — a discriminated union for a sealed class, a protocol for
+  an interface, a trait for either.
+
+**Non-trivial — stop and discuss:**
+
+- Adding a **new dependency**, or using a library other than one the project already relies on for
+  that job.
+- A **structural rule that cannot hold** here: no compile-time DI, no build variants, no closed type
+  system, no distinct presentation layer.
+- A **layering conflict** — the project already places logic where this guidance forbids tracking
+  calls, or has no layer matching the one nominated.
+- An **existing analytics, telemetry, or logging abstraction** that overlaps with what this prompt
+  asks you to build. Do not build a parallel one; ask whether to extend, replace, or wrap it.
+- Anything requiring **changes outside the analytics module** — refactoring call sites' surrounding
+  code, altering a shared base class, moving existing logic between layers.
+- Anything touching **privacy, consent, data retention, or what leaves the device**. Never resolve
+  these by inference from the code.
+- Anything that would make you **deviate from the approved tracking plan**.
+
+**The test:** would a maintainer be surprised to find this decided without them? If it changes
+dependencies, architecture, a public surface, or the privacy posture, the answer is yes.
+
+**Timing.** Batch discrepancies into one round at the Phase 1 approval gate rather than a stream of
+questions. If one only becomes apparent during Phase 2, **stop and raise it then** — do not press on
+and mention it afterwards, and do not quietly pick whichever side is easier. When raising one, state
+what the guidance is trying to achieve, what this project does instead, the options you see, and your
+recommendation.
 
 ---
 
@@ -131,6 +179,11 @@ Use the approved tracking plan as the source of truth for all implementation dec
 > Instead, **stop and discuss the constraint with the user**: explain what the guideline is trying
 > to achieve, describe what is possible in this stack, and agree on the closest equivalent before
 > writing code.
+>
+> The same applies where a guideline merely *conflicts* with this project's existing style, libraries,
+> or structure rather than being impossible. Apply the triviality test in **When this guidance and the
+> project disagree** above: settle the small ones yourself and report them, and **raise the rest with
+> the user rather than deciding which side wins.**
 
 ---
 
@@ -294,5 +347,8 @@ that no identifier, free text, or sensitive value appears in any payload.
 7. Call sites in the relevant controllers/ViewModels/stores for every event in the tracking plan
 8. User-property set calls at the correct moments (app start, after relevant mutations)
 9. Autocapture disabled for every backend being wired, confirmed in code
+10. A closing report of the discrepancies between this guidance and the project, split into those you
+    **decided alone** (the trivial ones, listed so the user can still object) and those **agreed with
+    the user**, with how each was resolved
 
 Do not add events not in the tracking plan. Do not remove events that are in the tracking plan.
