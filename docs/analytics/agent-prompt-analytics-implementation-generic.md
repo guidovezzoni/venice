@@ -66,10 +66,19 @@ every subsequent event for segmentation.
 
 ### Step 4: Document autocapture decisions
 
-List every event the analytics SDK(s) would collect automatically. For each, record whether it is
-disabled (preferred) or deliberately left enabled with a stated reason. Where an automatic event
-duplicates a declared one, the declared event is the sole source — map it to the backend's reserved
-name and disable automatic collection.
+List every event the analytics SDK(s) would collect automatically. For each, make an explicit
+decision: enable or disable, with a stated reason either way. There is no universal default —
+the right call depends on the provider, the event, and the project's privacy posture.
+
+Two situations always require a decision:
+- **Double-counting**: if an automatic event duplicates a declared one, one of them must be the
+  sole source. Either disable the automatic collection and map the declared event onto the
+  backend's reserved name, or remove the declared event and rely on autocapture — pick one.
+- **Privacy floor**: if an automatic event captures free text, URLs with query parameters,
+  user-entered content, or coordinates, assess whether that violates the project's privacy posture.
+  If it does, disable it. If it does not, record why.
+
+Any event left enabled without a recorded reason is a gap, not a default.
 
 ### Step 5: Record the consent posture
 
@@ -221,10 +230,17 @@ and can double-fire on process restore.
 
 ## AUTOCAPTURE
 
-Every analytics SDK backend must have autocapture explicitly disabled at initialisation.
-Document any autocapture event deliberately left enabled in the tracking plan with a reason.
-Where a backend's automatic event duplicates a declared event, map the declared event onto the
-backend's reserved name and disable the automatic collection — one source of truth per event.
+For each backend being wired, enumerate its automatic events and make an explicit decision for each
+— enable or disable — with a stated reason recorded in the tracking plan. There is no default
+stance; the right call is per-provider and per-event.
+
+Two situations always require action:
+- **Double-counting**: resolve to a single source — either disable autocapture and map the declared
+  event onto the backend's reserved name, or drop the declared event and rely on autocapture.
+- **Privacy floor**: if an automatic event captures free text, query parameters, coordinates, or
+  other values the project's privacy posture excludes, disable it.
+
+Any autocapture event left at its SDK default without a recorded decision is a gap.
 
 ---
 
