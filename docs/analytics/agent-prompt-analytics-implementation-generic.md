@@ -121,6 +121,17 @@ Confirm the plan is approved before proceeding to Phase 2.
 
 Use the approved tracking plan as the source of truth for all implementation decisions.
 
+> **Implementation guidelines, not prescriptions.** The architecture below is expressed in terms
+> of modules, interfaces, and design patterns — not syntax. The intent (separation of concerns,
+> typed taxonomy, provider fan-out, debug-only logging) is what matters; the exact mechanism
+> depends on what the language and framework make idiomatic and possible.
+>
+> If a guideline cannot be followed as written — for example, the language has no interfaces, no
+> compile-time DI, no discriminated unions, or no concept of build variants — do not force it.
+> Instead, **stop and discuss the constraint with the user**: explain what the guideline is trying
+> to achieve, describe what is possible in this stack, and agree on the closest equivalent before
+> writing code.
+
 ---
 
 ## ARCHITECTURE TO IMPLEMENT
