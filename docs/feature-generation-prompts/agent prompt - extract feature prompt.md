@@ -24,4 +24,4 @@ Output a new prompt, written to be sent standalone to an agent in a different pr
 5. Summarise what was ported as-is vs adapted for the new stack, and flag any portable-but-unresolved decisions from Phase 1.
 
 ## Output
-Write the generated prompt to `./prompts/[feature-name]-port.md`, using this structure: Goal, Context to gather, Plan & confirm, Implementation, Verification, Summary.
+Write the generated prompt to `./docs/feature-generation-prompts/agent prompt - [feature name].md`, using this structure: Goal, Context to gather, Plan & confirm, Implementation, Verification, Summary.
