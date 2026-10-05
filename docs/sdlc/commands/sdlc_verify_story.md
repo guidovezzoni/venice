@@ -11,6 +11,15 @@ Most steps in this command are **blocking gates**. After each gate sub-agent ret
 - **FAIL** → STOP immediately, present findings to user, do NOT proceed to subsequent gates
 - **NOT_FEASIBLE** → handle per step-specific instructions (usually ask user)
 
+## Execution Metrics
+
+At the very start of this command, before any other work:
+
+1. **Record start time.** Run `date +%s` and store the result as `{START_EPOCH}`.
+2. **Initialise interaction counter.** Set `{INTERACTION_COUNT}` to 0. Each time you pause execution to ask the user a question or wait for user input (e.g. gate failures, device gate, manual verification request), increment `{INTERACTION_COUNT}` by 1 before resuming.
+
+These values are used in the report step to produce the Command Metrics subsection.
+
 ## Device connectivity
 
 ### Early reminder (non-blocking)
@@ -669,7 +678,7 @@ Follow these steps:
 
     **Failure handling:** Retry once with Sonnet.
 
-16. **Add a report (sub-agent).**
+16. **Add a report (sub-agent).** Run `date +%s` and store the result as `{END_EPOCH}`.
 
     ```
     Agent(
@@ -704,6 +713,9 @@ Follow these steps:
     - README/AGENTS sync: {RESULT_FROM_STEP_15}
     - Final outcome: PASSED
     - Renamed filename: {NEW_STORY_FILENAME}
+    - Command start time (epoch): {START_EPOCH}
+    - Command end time (epoch): {END_EPOCH}
+    - User interaction count: {INTERACTION_COUNT}
 
     ## Guidelines
     Read the report guidelines at: docs/guidelines/guidelines-reports.md
@@ -716,6 +728,21 @@ Follow these steps:
     section, using the existing `table`/`th`/`td` styles from the report skeleton —
     columns: Category, Coverage. Do this even if some gates failed, as long as the
     coverage data is available.
+
+    Additionally, include a **Command Metrics** subsection at the end of the section with
+    this HTML structure:
+
+    ```html
+    <h3>Command Metrics</h3>
+    <table>
+      <tr><th>Metric</th><th>Value</th></tr>
+      <tr><td>Duration</td><td>{computed from END_EPOCH - START_EPOCH, formatted as Xm Ys}</td></tr>
+      <tr><td>User interactions</td><td>{INTERACTION_COUNT}</td></tr>
+    </table>
+    <p><em>Metrics are tracked by the LLM during execution. Duration includes time
+    waiting for user responses. Interaction count relies on in-context tracking and
+    may be approximate.</em></p>
+    ```
 
     ## When Done
     Report:

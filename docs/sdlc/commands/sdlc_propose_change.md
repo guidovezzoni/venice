@@ -4,6 +4,15 @@ This command uses sub-agent orchestration: the codebase exploration, artifact ge
 
 Sub-agent orchestration is the default execution strategy for this command.
 
+## Execution Metrics
+
+At the very start of this command, before any other work:
+
+1. **Record start time.** Run `date +%s` and store the result as `{START_EPOCH}`.
+2. **Initialise interaction counter.** Set `{INTERACTION_COUNT}` to 0. Each time you pause execution to ask the user a question or wait for user input (e.g. story clarification, answering doubts from exploration), increment `{INTERACTION_COUNT}` by 1 before resuming.
+
+These values are used in the report step to produce the Command Metrics subsection.
+
 ## Steps
 
 Follow these steps:
@@ -161,7 +170,7 @@ Follow these steps:
 
    **Failure handling:** If artifact generation fails (missing artifacts, CLI errors), retry once with Sonnet. If still failing, the orchestrator performs the proposal generation itself (escalation to Opus).
 
-5. **Add a report (sub-agent).** Spawn a sub-agent to append the report section.
+5. **Add a report (sub-agent).** Run `date +%s` and store the result as `{END_EPOCH}`. Then spawn a sub-agent to append the report section.
 
    ```
    Agent(
@@ -188,6 +197,9 @@ Follow these steps:
    - Questions asked: {LIST_OF_QUESTIONS}
    - Answers received: {LIST_OF_ANSWERS}
    - Artifacts created: {LIST_OF_ARTIFACTS_FROM_STEP_4}
+   - Command start time (epoch): {START_EPOCH}
+   - Command end time (epoch): {END_EPOCH}
+   - User interaction count: {INTERACTION_COUNT}
 
    ## Guidelines
    Read the report guidelines at: docs/guidelines/guidelines-reports.md
@@ -195,6 +207,21 @@ Follow these steps:
    ## Instructions
    The section should summarise: the exploration findings, questions asked and answers
    received, and the artefacts created by the proposal.
+
+   Additionally, include a **Command Metrics** subsection at the end of the section with
+   this HTML structure:
+
+   ```html
+   <h3>Command Metrics</h3>
+   <table>
+     <tr><th>Metric</th><th>Value</th></tr>
+     <tr><td>Duration</td><td>{computed from END_EPOCH - START_EPOCH, formatted as Xm Ys}</td></tr>
+     <tr><td>User interactions</td><td>{INTERACTION_COUNT}</td></tr>
+   </table>
+   <p><em>Metrics are tracked by the LLM during execution. Duration includes time
+   waiting for user responses. Interaction count relies on in-context tracking and
+   may be approximate.</em></p>
+   ```
 
    ## When Done
    Report:
