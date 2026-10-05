@@ -736,6 +736,8 @@ Follow these steps:
     <h3>Command Metrics</h3>
     <table>
       <tr><th>Metric</th><th>Value</th></tr>
+      <tr><td>Start time</td><td>{START_EPOCH converted to human-readable local time, formatted as YYYY-MM-DD HH:MM:SS}</td></tr>
+      <tr><td>End time</td><td>{END_EPOCH converted to human-readable local time, formatted as YYYY-MM-DD HH:MM:SS}</td></tr>
       <tr><td>Duration</td><td>{computed from END_EPOCH - START_EPOCH, formatted as Xm Ys}</td></tr>
       <tr><td>User interactions</td><td>{INTERACTION_COUNT}</td></tr>
     </table>
