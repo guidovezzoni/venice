@@ -169,7 +169,7 @@ have nothing to do with the change under review.
 | Pipeline | Runs | Secrets | Purpose |
 |---|---|---|---|
 | **Validation** | Every push to the trunk and every PR targeting it | Ideally none | Compile, test, static analysis, coverage gate, produce both debug-equivalent and production-equivalent builds |
-| **Release** | Manual dispatch, and tag pushes matching the release grammar | All of them | Build the signed/production artefact, publish it, record the release |
+| **Release** | Manual dispatch, and tag pushes matching the release grammar | All of them | Build the signed/production artefact, submit it to the channel the tag selects, record the release |
 
 **Concurrency differs deliberately.** Validation cancels superseded runs on the same ref — only the
 latest commit's result matters, and cancelling saves runner time. Release **never** cancels in
@@ -230,13 +230,19 @@ must be raised at Gate 2.
 
 ### Release logic in a tool, not in the pipeline
 
-Put the build-and-publish sequence in a **release-automation tool with named, self-contained
-tasks** — one per channel. The pipeline's job shrinks to: set up the environment, materialise the
-secrets, invoke one named task.
+Put the build-and-submit sequence in a **release-automation tool** that can be invoked from both CI
+and a developer's laptop. The pipeline's job shrinks to: set up the environment, materialise the
+secrets, invoke the tool.
 
-Three reasons this is worth the extra dependency:
+**The build produces a single artefact regardless of channel.** The tag suffix determines only which
+store channel (track) the artefact is submitted to — it does not affect the build itself. This is
+important because the store supports **promoting an artefact across channels** (internal → beta →
+production) without rebuilding. A channel-specific build would defeat that: the promoted artefact must
+be bit-identical to the one that was tested.
 
-1. **A developer can run the exact same task locally** to debug a publishing failure, which is
+Three reasons the tool is worth the extra dependency:
+
+1. **A developer can run the exact same command locally** to debug a publishing failure, which is
    otherwise the hardest class of CI failure to diagnose — it only reproduces in the environment you
    cannot attach to.
 2. **Publishing to a real store or registry is fiddly** — resumable uploads, metadata handling,
@@ -247,23 +253,20 @@ Three reasons this is worth the extra dependency:
 release plugin, a task-runner target, a publishing CLI. What matters is that it is invocable by name
 from both CI and a laptop.
 
-**Keep each channel's task explicit rather than parameterising one task by track.** The duplication is
-a handful of lines, and it makes "what exactly happens for a production release?" answerable by
-reading one block.
-
 ### The tag grammar selects the channel
 
 Define a tag grammar where the **suffix identifies the channel**:
 
 ```
 v1.2.3            → production / stable
-v1.2.3-rc1        → open beta / pre-release
-v1.2.3-alpha1     → closed alpha / internal
+v1.2.3-rc1        → open beta / pre-release   (number is optional: v1.2.3-rc also valid)
+v1.2.3-alpha1     → closed alpha / internal    (number is optional: v1.2.3-alpha also valid)
 ```
 
-Push the tag; the pipeline reads it and selects the corresponding task. Keep a **manual dispatch
-trigger with an explicit channel input** alongside it, for the first run and for recovery — but treat
-tags as the normal path.
+Push the tag; the pipeline reads it and submits the built artefact to the corresponding channel. Keep
+a **manual dispatch trigger with an explicit channel input** alongside it, for the first run and for
+recovery — but treat tags as the normal path. The artefact itself is identical regardless of which
+channel receives it — the store's promotion path (internal → beta → production) relies on this.
 
 **Guard the guard.** In the reference implementation the tag path is protected by a check that the tag
 is reachable from a `release/*` branch, so a tag pushed on a feature branch cannot reach production.
@@ -327,7 +330,8 @@ manual, so be honest about which items you executed and which you could not.
 7. **Run each release task locally**, against a test or internal channel if the target has one, before
    letting CI do it.
 8. **Trigger the release pipeline manually into the least-consequential channel first.** Confirm the
-   artefact arrives at the target, and that the version it reports is the one you expected.
+   artefact arrives at the target, that the version it reports is the one you expected, and that the
+   same artefact can be promoted to the next channel without a rebuild.
 9. **Test the tag grammar** end to end for each channel, and confirm a **tag that must be rejected is
    rejected** — a release tag on a non-release branch. Verifying the happy paths without verifying the
    guard means the guard is untested.
