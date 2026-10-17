@@ -168,7 +168,7 @@ have nothing to do with the change under review.
 
 | Pipeline | Runs | Secrets | Purpose |
 |---|---|---|---|
-| **Validation** | Every push to the trunk and every PR targeting it | Ideally none | Compile, test, static analysis, coverage gate, produce both debug-equivalent and production-equivalent builds |
+| **Validation** | Every push to the trunk and every PR | Ideally none | Compile, test, static analysis, coverage gate, produce both debug-equivalent and production-equivalent builds |
 | **Release** | Manual dispatch, and tag pushes matching the release grammar | All of them | Build the signed/production artefact, submit it to the channel the tag selects, record the release |
 
 **Concurrency differs deliberately.** Validation cancels superseded runs on the same ref — only the
